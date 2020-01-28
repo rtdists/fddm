@@ -14,3 +14,6 @@ usethis::use_package("RWiener", type = "Suggests")
 ### random stuff
 usethis::use_build_ignore("development.R")
 usethis::use_build_ignore("examples/")
+
+usethis::use_travis()
+usethis::use_readme_rmd()
