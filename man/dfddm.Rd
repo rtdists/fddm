@@ -60,9 +60,22 @@ of the small time approximation of the DDM.}
 
 \item{eps}{\code{numerical} scalar value. Precision of calculation.}
 }
+\value{
+Density of the DDM with precision \code{eps} of length \code{rt}.
+}
 \description{
-Density function for the Ratcliff diffusion decision model (DDM) with following
-parameters: \code{a} (threshold separation), \code{w} (relative starting
-point), \code{v} (drift rate), \code{t0} (non-decision time/response time
-constant), and \code{sv} (inter-trial-variability of drift).
+Density function for the Ratcliff diffusion decision model (DDM) with
+following parameters: \code{a} (threshold separation), \code{w} (relative
+starting point), \code{v} (drift rate), \code{t0} (non-decision time/response
+time constant), and \code{sv} (inter-trial-variability of drift).
+}
+\details{
+The different methods implemented
+}
+\examples{
+
+dfddm(c(1, 2, 3), 1, a = 1, v = 2, t0 = 0.3)
+}
+\references{
+all the papers go here
 }
