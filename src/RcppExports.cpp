@@ -5,6 +5,361 @@
 
 using namespace Rcpp;
 
+// max_error
+double max_error(Rcpp::NumericVector a, Rcpp::NumericVector b, int n);
+RcppExport SEXP _fddm_max_error(SEXP aSEXP, SEXP bSEXP, SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type a(aSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type b(bSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(max_error(a, b, n));
+    return rcpp_result_gen;
+END_RCPP
+}
+// almost_equal
+bool almost_equal(Rcpp::NumericVector a, Rcpp::NumericVector b, double thresh);
+RcppExport SEXP _fddm_almost_equal(SEXP aSEXP, SEXP bSEXP, SEXP threshSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type a(aSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type b(bSEXP);
+    Rcpp::traits::input_parameter< double >::type thresh(threshSEXP);
+    rcpp_result_gen = Rcpp::wrap(almost_equal(a, b, thresh));
+    return rcpp_result_gen;
+END_RCPP
+}
+// nearly_equal
+Rcpp::NumericVector nearly_equal(Rcpp::NumericVector a, double thresh);
+RcppExport SEXP _fddm_nearly_equal(SEXP aSEXP, SEXP threshSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type thresh(threshSEXP);
+    rcpp_result_gen = Rcpp::wrap(nearly_equal(a, thresh));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ks_BGK
+int ks_BGK(double t, double a, double w, double eps);
+RcppExport SEXP _fddm_ks_BGK(SEXP tSEXP, SEXP aSEXP, SEXP wSEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type t(tSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(ks_BGK(t, a, w, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ks_Nav
+int ks_Nav(double t, double a, double eps);
+RcppExport SEXP _fddm_ks_Nav(SEXP tSEXP, SEXP aSEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type t(tSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(ks_Nav(t, a, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// kl_Nav
+int kl_Nav(double t, double a, double eps);
+RcppExport SEXP _fddm_kl_Nav(SEXP tSEXP, SEXP aSEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type t(tSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(kl_Nav(t, a, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// small_sum_2014
+double small_sum_2014(double t, double a, double w, int ks);
+RcppExport SEXP _fddm_small_sum_2014(SEXP tSEXP, SEXP aSEXP, SEXP wSEXP, SEXP ksSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type t(tSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< int >::type ks(ksSEXP);
+    rcpp_result_gen = Rcpp::wrap(small_sum_2014(t, a, w, ks));
+    return rcpp_result_gen;
+END_RCPP
+}
+// small_sum_2017
+double small_sum_2017(double t, double a, double w, int ks);
+RcppExport SEXP _fddm_small_sum_2017(SEXP tSEXP, SEXP aSEXP, SEXP wSEXP, SEXP ksSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type t(tSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< int >::type ks(ksSEXP);
+    rcpp_result_gen = Rcpp::wrap(small_sum_2017(t, a, w, ks));
+    return rcpp_result_gen;
+END_RCPP
+}
+// small_sum_eps_14
+double small_sum_eps_14(double t, double a, double w, double mult, double eps);
+RcppExport SEXP _fddm_small_sum_eps_14(SEXP tSEXP, SEXP aSEXP, SEXP wSEXP, SEXP multSEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type t(tSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type mult(multSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(small_sum_eps_14(t, a, w, mult, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// small_sum_eps_17
+double small_sum_eps_17(double t, double a, double w, double mult, double eps);
+RcppExport SEXP _fddm_small_sum_eps_17(SEXP tSEXP, SEXP aSEXP, SEXP wSEXP, SEXP multSEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type t(tSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type mult(multSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(small_sum_eps_17(t, a, w, mult, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// large_sum_Nav
+double large_sum_Nav(double t, double a, double w, int kl);
+RcppExport SEXP _fddm_large_sum_Nav(SEXP tSEXP, SEXP aSEXP, SEXP wSEXP, SEXP klSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type t(tSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< int >::type kl(klSEXP);
+    rcpp_result_gen = Rcpp::wrap(large_sum_Nav(t, a, w, kl));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fs_eps_2014
+Rcpp::NumericVector fs_eps_2014(Rcpp::NumericVector rt, Rcpp::LogicalVector resp, double v, double a, double w, double t0, double eps);
+RcppExport SEXP _fddm_fs_eps_2014(SEXP rtSEXP, SEXP respSEXP, SEXP vSEXP, SEXP aSEXP, SEXP wSEXP, SEXP t0SEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type resp(respSEXP);
+    Rcpp::traits::input_parameter< double >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(fs_eps_2014(rt, resp, v, a, w, t0, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fs_eps_2017
+Rcpp::NumericVector fs_eps_2017(Rcpp::NumericVector rt, Rcpp::LogicalVector resp, double v, double a, double w, double t0, double eps);
+RcppExport SEXP _fddm_fs_eps_2017(SEXP rtSEXP, SEXP respSEXP, SEXP vSEXP, SEXP aSEXP, SEXP wSEXP, SEXP t0SEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type resp(respSEXP);
+    Rcpp::traits::input_parameter< double >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(fs_eps_2017(rt, resp, v, a, w, t0, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fs_Nav_2014
+Rcpp::NumericVector fs_Nav_2014(Rcpp::NumericVector rt, Rcpp::LogicalVector resp, double v, double a, double w, double t0, double eps);
+RcppExport SEXP _fddm_fs_Nav_2014(SEXP rtSEXP, SEXP respSEXP, SEXP vSEXP, SEXP aSEXP, SEXP wSEXP, SEXP t0SEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type resp(respSEXP);
+    Rcpp::traits::input_parameter< double >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(fs_Nav_2014(rt, resp, v, a, w, t0, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fs_Nav_2017
+Rcpp::NumericVector fs_Nav_2017(Rcpp::NumericVector rt, Rcpp::LogicalVector resp, double v, double a, double w, double t0, double eps);
+RcppExport SEXP _fddm_fs_Nav_2017(SEXP rtSEXP, SEXP respSEXP, SEXP vSEXP, SEXP aSEXP, SEXP wSEXP, SEXP t0SEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type resp(respSEXP);
+    Rcpp::traits::input_parameter< double >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(fs_Nav_2017(rt, resp, v, a, w, t0, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fs_BGK_2014
+Rcpp::NumericVector fs_BGK_2014(Rcpp::NumericVector rt, Rcpp::LogicalVector resp, double v, double a, double w, double t0, double eps);
+RcppExport SEXP _fddm_fs_BGK_2014(SEXP rtSEXP, SEXP respSEXP, SEXP vSEXP, SEXP aSEXP, SEXP wSEXP, SEXP t0SEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type resp(respSEXP);
+    Rcpp::traits::input_parameter< double >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(fs_BGK_2014(rt, resp, v, a, w, t0, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fs_BGK_2017
+Rcpp::NumericVector fs_BGK_2017(Rcpp::NumericVector rt, Rcpp::LogicalVector resp, double v, double a, double w, double t0, double eps);
+RcppExport SEXP _fddm_fs_BGK_2017(SEXP rtSEXP, SEXP respSEXP, SEXP vSEXP, SEXP aSEXP, SEXP wSEXP, SEXP t0SEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type resp(respSEXP);
+    Rcpp::traits::input_parameter< double >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(fs_BGK_2017(rt, resp, v, a, w, t0, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fl_Nav
+Rcpp::NumericVector fl_Nav(Rcpp::NumericVector rt, Rcpp::LogicalVector resp, double v, double a, double w, double t0, double eps);
+RcppExport SEXP _fddm_fl_Nav(SEXP rtSEXP, SEXP respSEXP, SEXP vSEXP, SEXP aSEXP, SEXP wSEXP, SEXP t0SEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type resp(respSEXP);
+    Rcpp::traits::input_parameter< double >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(fl_Nav(rt, resp, v, a, w, t0, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fb_Nav_Nav_14
+Rcpp::NumericVector fb_Nav_Nav_14(Rcpp::NumericVector rt, Rcpp::LogicalVector resp, double v, double a, double w, double t0, double eps);
+RcppExport SEXP _fddm_fb_Nav_Nav_14(SEXP rtSEXP, SEXP respSEXP, SEXP vSEXP, SEXP aSEXP, SEXP wSEXP, SEXP t0SEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type resp(respSEXP);
+    Rcpp::traits::input_parameter< double >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(fb_Nav_Nav_14(rt, resp, v, a, w, t0, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fb_Nav_Nav_17
+Rcpp::NumericVector fb_Nav_Nav_17(Rcpp::NumericVector rt, Rcpp::LogicalVector resp, double v, double a, double w, double t0, double eps);
+RcppExport SEXP _fddm_fb_Nav_Nav_17(SEXP rtSEXP, SEXP respSEXP, SEXP vSEXP, SEXP aSEXP, SEXP wSEXP, SEXP t0SEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type resp(respSEXP);
+    Rcpp::traits::input_parameter< double >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(fb_Nav_Nav_17(rt, resp, v, a, w, t0, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fb_BGK_Nav_14
+Rcpp::NumericVector fb_BGK_Nav_14(Rcpp::NumericVector rt, Rcpp::LogicalVector resp, double v, double a, double w, double t0, double eps);
+RcppExport SEXP _fddm_fb_BGK_Nav_14(SEXP rtSEXP, SEXP respSEXP, SEXP vSEXP, SEXP aSEXP, SEXP wSEXP, SEXP t0SEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type resp(respSEXP);
+    Rcpp::traits::input_parameter< double >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(fb_BGK_Nav_14(rt, resp, v, a, w, t0, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fb_BGK_Nav_17
+Rcpp::NumericVector fb_BGK_Nav_17(Rcpp::NumericVector rt, Rcpp::LogicalVector resp, double v, double a, double w, double t0, double eps);
+RcppExport SEXP _fddm_fb_BGK_Nav_17(SEXP rtSEXP, SEXP respSEXP, SEXP vSEXP, SEXP aSEXP, SEXP wSEXP, SEXP t0SEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type resp(respSEXP);
+    Rcpp::traits::input_parameter< double >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(fb_BGK_Nav_17(rt, resp, v, a, w, t0, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fs_vary
+Rcpp::NumericVector fs_vary(Rcpp::NumericVector rt, Rcpp::LogicalVector resp, double v, double a, double w, double sv, double t0, double eps);
+RcppExport SEXP _fddm_fs_vary(SEXP rtSEXP, SEXP respSEXP, SEXP vSEXP, SEXP aSEXP, SEXP wSEXP, SEXP svSEXP, SEXP t0SEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< Rcpp::LogicalVector >::type resp(respSEXP);
+    Rcpp::traits::input_parameter< double >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type sv(svSEXP);
+    Rcpp::traits::input_parameter< double >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(fs_vary(rt, resp, v, a, w, sv, t0, eps));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_hello_world
 List rcpp_hello_world();
 RcppExport SEXP _fddm_rcpp_hello_world() {
@@ -17,6 +372,29 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_fddm_max_error", (DL_FUNC) &_fddm_max_error, 3},
+    {"_fddm_almost_equal", (DL_FUNC) &_fddm_almost_equal, 3},
+    {"_fddm_nearly_equal", (DL_FUNC) &_fddm_nearly_equal, 2},
+    {"_fddm_ks_BGK", (DL_FUNC) &_fddm_ks_BGK, 4},
+    {"_fddm_ks_Nav", (DL_FUNC) &_fddm_ks_Nav, 3},
+    {"_fddm_kl_Nav", (DL_FUNC) &_fddm_kl_Nav, 3},
+    {"_fddm_small_sum_2014", (DL_FUNC) &_fddm_small_sum_2014, 4},
+    {"_fddm_small_sum_2017", (DL_FUNC) &_fddm_small_sum_2017, 4},
+    {"_fddm_small_sum_eps_14", (DL_FUNC) &_fddm_small_sum_eps_14, 5},
+    {"_fddm_small_sum_eps_17", (DL_FUNC) &_fddm_small_sum_eps_17, 5},
+    {"_fddm_large_sum_Nav", (DL_FUNC) &_fddm_large_sum_Nav, 4},
+    {"_fddm_fs_eps_2014", (DL_FUNC) &_fddm_fs_eps_2014, 7},
+    {"_fddm_fs_eps_2017", (DL_FUNC) &_fddm_fs_eps_2017, 7},
+    {"_fddm_fs_Nav_2014", (DL_FUNC) &_fddm_fs_Nav_2014, 7},
+    {"_fddm_fs_Nav_2017", (DL_FUNC) &_fddm_fs_Nav_2017, 7},
+    {"_fddm_fs_BGK_2014", (DL_FUNC) &_fddm_fs_BGK_2014, 7},
+    {"_fddm_fs_BGK_2017", (DL_FUNC) &_fddm_fs_BGK_2017, 7},
+    {"_fddm_fl_Nav", (DL_FUNC) &_fddm_fl_Nav, 7},
+    {"_fddm_fb_Nav_Nav_14", (DL_FUNC) &_fddm_fb_Nav_Nav_14, 7},
+    {"_fddm_fb_Nav_Nav_17", (DL_FUNC) &_fddm_fb_Nav_Nav_17, 7},
+    {"_fddm_fb_BGK_Nav_14", (DL_FUNC) &_fddm_fb_BGK_Nav_14, 7},
+    {"_fddm_fb_BGK_Nav_17", (DL_FUNC) &_fddm_fb_BGK_Nav_17, 7},
+    {"_fddm_fs_vary", (DL_FUNC) &_fddm_fs_vary, 8},
     {"_fddm_rcpp_hello_world", (DL_FUNC) &_fddm_rcpp_hello_world, 0},
     {NULL, NULL, 0}
 };
