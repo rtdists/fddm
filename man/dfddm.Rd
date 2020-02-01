@@ -4,20 +4,10 @@
 \alias{dfddm}
 \title{Density of Ratcliff Diffusion Decision Model}
 \usage{
-dfddm(
-  rt,
-  response,
-  a,
-  v,
-  t0,
-  w = 0.5,
-  sv = 0,
-  log = FALSE,
+dfddm(rt, response, a, v, t0, w = 0.5, sv = 0, log = FALSE,
   n_terms_small = c("Foster", "Navarro", "Kesselmeier"),
-  summation_small = c("2017", "2014"),
-  scale = c("small", "large", "both"),
-  eps = 1e-06
-)
+  summation_small = c("2017", "2014"), scale = c("small", "large",
+  "both"), eps = 1e-06)
 }
 \arguments{
 \item{rt}{a vector of RTs.}

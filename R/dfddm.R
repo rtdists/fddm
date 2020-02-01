@@ -48,7 +48,7 @@
 dfddm <- function(rt, response, 
                   a, v, t0, w = 0.5, 
                   sv = 0,
-                  log = FALSE, 
+                  log_prob = FALSE, 
                   n_terms_small = c("Foster", "Navarro", "Kesselmeier"),
                   summation_small = c("2017", "2014"),
                   scale = c("small", "large", "both"), 
@@ -57,5 +57,8 @@ dfddm <- function(rt, response,
   n_terms_small <- match.arg(n_terms_small)
   summation_small <- match.arg(summation_small)
   scale <- match.arg(scale)
+  
   ## important bit here, maybe switch()
+  return(cpp_dfddm(rt, response, a, v, t0, w, sv, log_prob,
+                   n_terms_small, summation_small, scale, eps))
 }
