@@ -14,10 +14,12 @@
 //////////                                                           //////////
 
 // Use term < eps BGK2017 style sum approximation, with minimum terms
-Rcpp::NumericVector fs_eps_2017(Rcpp::NumericVector rt,
+Rcpp::NumericVector fs_eps_2017(const Rcpp::NumericVector& rt,
                                 Rcpp::LogicalVector response,
-                                double a, double v, double t0, double w,
-                                double sv, bool log_prob, double eps)
+                                double a, double v,
+                                double t0, double w,
+                                double sv, bool log_prob,
+                                double eps)
 {
   int n = rt.length(); // get number of response times
 
@@ -810,3 +812,23 @@ Rcpp::NumericVector fb_BGK_Nav_2014(Rcpp::NumericVector rt,
     return out;
   }
 }
+                                                                                                                                                                                                                                                                                                                                                                                                                    // iterate through all values in rt and out
+      t = rt[i] - t0; // subtract non-decisison time from the response time
+      if (t <= 0) {
+        out[i] = 0; // if t=0, return 0 instead of NaN
+        continue;
+      }
+
+      if (response[i] == 1) { // if response is "upper" use alternate parameters
+        ks = ks_BGK(t, a, wprime, eps); // number of terms in small time appx
+        mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
+             / sqrt(2 * M_PI * t * t * t);
+        out[i] = mult * small_sum_2014(t, a, wprime, ks);
+      } else { // else response is "lower"
+        ks = ks_BGK(t, a, w, eps); // number of terms in small time appx
+        mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
+        out[i] = mult * small_sum_2014(t, a, w, ks);
+      }
+    }
+  }
+  if (log_prob) {

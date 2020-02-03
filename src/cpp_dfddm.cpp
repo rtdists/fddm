@@ -11,14 +11,15 @@
 
 // General density function
 // [[Rcpp::export]]
-Rcpp::NumericVector cpp_dfddm(Rcpp::NumericVector rt,
-                              Rcpp::LogicalVector response,
-                              double a, double v, double t0, double w,
-                              double sv, bool log_prob,
+Rcpp::NumericVector cpp_dfddm(const Rcpp::NumericVector& rt,
+                              const Rcpp::LogicalVector& response,
+                              const double& a, const double& v,
+                              const double& t0, const double& w,
+                              const double& sv, const bool& log_prob,
                               const std::string& n_terms_small,
                               const std::string& summation_small,
                               const std::string& scale,
-                              double eps)
+                              const double& eps)
 {
   // switch-case through all of the options, maybe have a flag for the default?
   if (scale == "small") {

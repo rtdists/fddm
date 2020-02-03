@@ -16,7 +16,7 @@
 
 
 // BGK2014
-int ks_BGK(double t, double a, double w, double eps)
+int ks_BGK(double t, const double& a, const double& w, const double& eps)
 {
   double u_eps, arg, k1;
   int k;
@@ -36,7 +36,7 @@ int ks_BGK(double t, double a, double w, double eps)
 
 
 // Navarro2009
-int ks_Nav(double t, double a, double eps)
+int ks_Nav(double t, const double& a, const double& eps)
 {
   t /= a*a; // rescale t for one-parameter form
   if (eps < 1/(2 * sqrt(2*M_PI*t))) { // if error threshold is set low enough
@@ -55,7 +55,7 @@ int ks_Nav(double t, double a, double eps)
 
 
 // Navarro2009
-int kl_Nav(double t, double a, double eps)
+int kl_Nav(double t, const double& a, const double& eps)
 {
   t /= a*a; // rescale t for one-parameter form
   if (eps < 1/(M_PI*t)) { // error threshold is low enough
