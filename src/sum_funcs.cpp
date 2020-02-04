@@ -16,9 +16,8 @@
 
 // term < eps BGK2017 style truncated sum, with minimum terms
 double small_sum_eps_17(const double& t, const double& a, const double& w,
-                        const double& mult, double eps)
+                        const double& eps)
 {
-  eps /= mult;
   double gamma = -a*a/(2*t);
   double sum = w * exp(gamma * w * w); // start at j=0 term
   double minterms = sqrt(t)/(2*a) - w/2; // minimum number of terms
@@ -52,9 +51,8 @@ double small_sum_eps_17(const double& t, const double& a, const double& w,
 
 // term < eps BGK2014 style truncated sum, with minimum terms
 double small_sum_eps_14(const double& t, const double& a, const double& w,
-                        const double& mult, double eps)
+                        const double& eps)
 {
-  eps /= mult;
   double gamma = -a*a/(2*t);
   double sum = w * exp(gamma * w * w); // start at j=0 term
   double minterms = sqrt(t)/(2*a) - w/2; // minimum number of terms

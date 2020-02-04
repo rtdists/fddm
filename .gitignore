@@ -1,3 +1,4 @@
 
 *.ini
 .Rproj.user
+.Rhistory
