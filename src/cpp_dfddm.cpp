@@ -21,7 +21,6 @@ Rcpp::NumericVector cpp_dfddm(const Rcpp::NumericVector& rt,
                               const std::string& scale,
                               const double& eps)
 {
-  // switch-case through all of the options, maybe have a flag for the default?
   if (!log_prob) { // non-log version
     if (scale == "small") {
       if (summation_small == "2017") {

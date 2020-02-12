@@ -3,14 +3,13 @@
 # Utility packages and related local code
 library("Rcpp")
 library("microbenchmark")
-sourceCpp("Code/Benchmark/Almost_Equal.cpp")
+sourceCpp("nearly_equal.cpp")
+source("loglikelihood.r")
 
 # Distribution packages and local code
 library("rtdists")
 library("RWiener")
-source("Code/PDF Approximations/BGK2014.r")
-sourceCpp("Code/PDF Approximations/pdf_appx.cpp")
-source("Code/Benchmark/loglikelihood.r")
+source("BGK2014.r")
 
 
 

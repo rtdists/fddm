@@ -35,7 +35,6 @@ Rcpp::NumericVector fs_eps_2017_log(const Rcpp::NumericVector& rt,
   double log_a = log(a);
 
   if (sv < SV_THRESH) { // set sv=0 and use constant drift rate method
-    double log_2pi = 0.5 * log(2*M_PI);
     for (int i = 0; i < n; i++) { // iterate through all values in rt and out
       t = rt[i] - t0; // subtract non-decisison time from the response time
       if (t <= 0) {
@@ -45,11 +44,11 @@ Rcpp::NumericVector fs_eps_2017_log(const Rcpp::NumericVector& rt,
 
       double log_t3 = 1.5 * log(t);
       if (response[i] == 1) { // if response is "upper" use alternate parameters
-        mult = log_a + log_2pi + log_t3 - vprime * a * wprime
+        mult = log_a - LOG_2PI_2 - log_t3 - vprime * a * wprime
              - vprime * vprime * t / 2;
         out[i] = mult + log(small_sum_eps_17(t, a, wprime, eps/exp(mult)));
       } else { // else response is "lower"
-        mult = log_a - log_2pi - log_t3 -v * a * w - v * v * t / 2;
+        mult = log_a - LOG_2PI_2 - log_t3 -v * a * w - v * v * t / 2;
         out[i] = mult + log(small_sum_eps_17(t, a, w, eps/exp(mult)));
       }
     }
@@ -100,7 +99,6 @@ Rcpp::NumericVector fs_eps_2014_log(const Rcpp::NumericVector& rt,
   double log_a = log(a);
 
   if (sv < SV_THRESH) { // set sv=0 and use constant drift rate method
-    double log_2pi = 0.5 * log(2*M_PI);
     for (int i = 0; i < n; i++) { // iterate through all values in rt and out
       t = rt[i] - t0; // subtract non-decisison time from the response time
       if (t <= 0) {
@@ -110,11 +108,11 @@ Rcpp::NumericVector fs_eps_2014_log(const Rcpp::NumericVector& rt,
 
       double log_t3 = 1.5 * log(t);
       if (response[i] == 1) { // if response is "upper" use alternate parameters
-        mult = log_a + log_2pi + log_t3 - vprime * a * wprime
+        mult = log_a - LOG_2PI_2 - log_t3 - vprime * a * wprime
              - vprime * vprime * t / 2;
         out[i] = mult + log(small_sum_eps_14(t, a, wprime, eps/exp(mult)));
       } else { // else response is "lower"
-        mult = log_a - log_2pi - log_t3 -v * a * w - v * v * t / 2;
+        mult = log_a - LOG_2PI_2 - log_t3 -v * a * w - v * v * t / 2;
         out[i] = mult + log(small_sum_eps_14(t, a, w, eps/exp(mult)));
       }
     }
@@ -166,7 +164,6 @@ Rcpp::NumericVector fs_Nav_2017_log(const Rcpp::NumericVector& rt,
   double log_a = log(a);
 
   if (sv < SV_THRESH) { // set sv=0 and use constant drift rate method
-    double log_2pi = 0.5 * log(2*M_PI);
     for (int i = 0; i < n; i++) { // iterate through all values in rt and out
       t = rt[i] - t0; // subtract non-decisison time from the response time
       if (t <= 0) {
@@ -177,11 +174,11 @@ Rcpp::NumericVector fs_Nav_2017_log(const Rcpp::NumericVector& rt,
       ks = ks_Nav(t, a, eps); // number of terms in sum approximation
       double log_t3 = 1.5 * log(t);
       if (response[i] == 1) { // if response is "upper" use alternate parameters
-        mult = log_a + log_2pi + log_t3 - vprime * a * wprime
+        mult = log_a - LOG_2PI_2 - log_t3 - vprime * a * wprime
              - vprime * vprime * t / 2;
         out[i] = mult + log(small_sum_2017(t, a, wprime, ks));
       } else { // else response is "lower"
-        mult = log_a - log_2pi - log_t3 -v * a * w - v * v * t / 2;
+        mult = log_a - LOG_2PI_2 - log_t3 -v * a * w - v * v * t / 2;
         out[i] = mult + log(small_sum_2017(t, a, w, ks));
       }
     }
@@ -234,7 +231,6 @@ Rcpp::NumericVector fs_Nav_2014_log(const Rcpp::NumericVector& rt,
   double log_a = log(a);
 
   if (sv < SV_THRESH) { // set sv=0 and use constant drift rate method
-    double log_2pi = 0.5 * log(2*M_PI);
     for (int i = 0; i < n; i++) { // iterate through all values in rt and out
       t = rt[i] - t0; // subtract non-decisison time from the response time
       if (t <= 0) {
@@ -245,11 +241,11 @@ Rcpp::NumericVector fs_Nav_2014_log(const Rcpp::NumericVector& rt,
       ks = ks_Nav(t, a, eps); // number of terms in sum approximation
       double log_t3 = 1.5 * log(t);
       if (response[i] == 1) { // if response is "upper" use alternate parameters
-        mult = log_a + log_2pi + log_t3 - vprime * a * wprime
+        mult = log_a - LOG_2PI_2 - log_t3 - vprime * a * wprime
              - vprime * vprime * t / 2;
         out[i] = mult + log(small_sum_2014(t, a, wprime, ks));
       } else { // else response is "lower"
-        mult = log_a - log_2pi - log_t3 -v * a * w - v * v * t / 2;
+        mult = log_a - LOG_2PI_2 - log_t3 -v * a * w - v * v * t / 2;
         out[i] = mult + log(small_sum_2014(t, a, w, ks));
       }
     }
@@ -302,7 +298,6 @@ Rcpp::NumericVector fs_BGK_2017_log(const Rcpp::NumericVector& rt,
   double log_a = log(a);
 
   if (sv < SV_THRESH) { // set sv=0 and use constant drift rate method
-    double log_2pi = 0.5 * log(2*M_PI);
     for (int i = 0; i < n; i++) { // iterate through all values in rt and out
       t = rt[i] - t0; // subtract non-decisison time from the response time
       if (t <= 0) {
@@ -313,12 +308,12 @@ Rcpp::NumericVector fs_BGK_2017_log(const Rcpp::NumericVector& rt,
       double log_t3 = 1.5 * log(t);
       if (response[i] == 1) { // if response is "upper" use alternate parameters
         ks = ks_BGK(t, a, wprime, eps); // number of terms in sum approximation
-        mult = log_a + log_2pi + log_t3 - vprime * a * wprime
+        mult = log_a - LOG_2PI_2 - log_t3 - vprime * a * wprime
              - vprime * vprime * t / 2;
         out[i] = mult + log(small_sum_2017(t, a, wprime, ks));
       } else { // else response is "lower"
         ks = ks_BGK(t, a, w, eps); // number of terms in sum approximation
-        mult = log_a - log_2pi - log_t3 -v * a * w - v * v * t / 2;
+        mult = log_a - LOG_2PI_2 - log_t3 -v * a * w - v * v * t / 2;
         out[i] = mult + log(small_sum_2017(t, a, w, ks));
       }
     }
@@ -372,7 +367,6 @@ Rcpp::NumericVector fs_BGK_2014_log(const Rcpp::NumericVector& rt,
   double log_a = log(a);
 
   if (sv < SV_THRESH) { // set sv=0 and use constant drift rate method
-    double log_2pi = 0.5 * log(2*M_PI);
     for (int i = 0; i < n; i++) { // iterate through all values in rt and out
       t = rt[i] - t0; // subtract non-decisison time from the response time
       if (t <= 0) {
@@ -383,12 +377,12 @@ Rcpp::NumericVector fs_BGK_2014_log(const Rcpp::NumericVector& rt,
       double log_t3 = 1.5 * log(t);
       if (response[i] == 1) { // if response is "upper" use alternate parameters
         ks = ks_BGK(t, a, wprime, eps); // number of terms in sum approximation
-        mult = log_a + log_2pi + log_t3 - vprime * a * wprime
+        mult = log_a - LOG_2PI_2 - log_t3 - vprime * a * wprime
              - vprime * vprime * t / 2;
         out[i] = mult + log(small_sum_2014(t, a, wprime, ks));
       } else { // else response is "lower"
         ks = ks_BGK(t, a, w, eps); // number of terms in sum approximation
-        mult = log_a - log_2pi - log_t3 -v * a * w - v * v * t / 2;
+        mult = log_a - LOG_2PI_2 - log_t3 -v * a * w - v * v * t / 2;
         out[i] = mult + log(small_sum_2014(t, a, w, ks));
       }
     }
@@ -444,7 +438,6 @@ Rcpp::NumericVector fl_Nav_2009_log(const Rcpp::NumericVector& rt,
   int kl;
   double vprime = -v;
   double wprime = 1 - w;
-  double log_pi = log(M_PI);
   double log_a2 = 2 * log(a);
 
   for (int i = 0; i < n; i++) { // iterate through all values in rt and out
@@ -456,10 +449,10 @@ Rcpp::NumericVector fl_Nav_2009_log(const Rcpp::NumericVector& rt,
 
     kl = kl_Nav(t, a, eps); // number of terms in sum approximation
     if (response[i] == 1) { // if response is "upper" use alternate parameters
-      mult = log_pi - log_a2 - vprime * a * wprime - vprime * vprime * t / 2;
+      mult = LOG_PI - log_a2 - vprime * a * wprime - vprime * vprime * t / 2;
       out[i] = mult + log(large_sum_Nav(t, a, wprime, kl));
     } else { // else response is "lower"
-      mult =  log_pi - log_a2 - v * a * w - v * v * t / 2;
+      mult =  LOG_PI - log_a2 - v * a * w - v * v * t / 2;
       out[i] = mult + log(large_sum_Nav(t, a, w, kl));
     }
   }
@@ -494,8 +487,6 @@ Rcpp::NumericVector fb_Nav_Nav_2017_log(const Rcpp::NumericVector& rt,
 
   if (sv < SV_THRESH) { // set sv=0 and use constant drift rate methods
     double log_a = log(a);
-    double log_pi = log(M_PI);
-    double log_2pi = log(2) / 2 + log_pi / 2;
     double log_a2 = 2 * log_a;
     int ks, kl;
     for (int i = 0; i < n; i++) { // iterate through all values in rt and out
@@ -510,19 +501,19 @@ Rcpp::NumericVector fb_Nav_Nav_2017_log(const Rcpp::NumericVector& rt,
       double log_t3 = 1.5 * log(t);
       if (response[i] == 1) { // if response is "upper" use alternate parameters
         if (ks < kl) { // small time needs fewer terms than lorge time
-          mult = log_a + log_2pi + log_t3 - vprime * a * wprime
+          mult = log_a - LOG_2PI_2 - log_t3 - vprime * a * wprime
                - vprime * vprime * t / 2;
           out[i] = mult + log(small_sum_2017(t, a, wprime, ks));
         } else { // large time needs fewer terms
-          mult = log_pi - log_a2 - vprime * a * wprime - vprime * vprime * t / 2;
+          mult = LOG_PI - log_a2 - vprime * a * wprime - vprime * vprime * t / 2;
           out[i] = mult + log(large_sum_Nav(t, a, wprime, kl));
         }
       } else { // else response is "lower"
         if (ks < kl) { // small time needs fewer terms than lorge time
-          mult = log_a - log_2pi - log_t3 -v * a * w - v * v * t / 2;
+          mult = log_a - LOG_2PI_2 - log_t3 -v * a * w - v * v * t / 2;
           out[i] = mult + log(small_sum_2017(t, a, w, ks));
         } else { // large time needs fewer terms
-          mult =  log_pi - log_a2 - v * a * w - v * v * t / 2;
+          mult =  LOG_PI - log_a2 - v * a * w - v * v * t / 2;
           out[i] = mult + log(large_sum_Nav(t, a, w, kl));
         }
       }
@@ -578,8 +569,6 @@ Rcpp::NumericVector fb_Nav_Nav_2014_log(const Rcpp::NumericVector& rt,
 
   if (sv < SV_THRESH) { // set sv=0 and use constant drift rate methods
     double log_a = log(a);
-    double log_pi = log(M_PI);
-    double log_2pi = log(2) / 2 + log_pi / 2;
     double log_a2 = 2 * log_a;
     int ks, kl;
     for (int i = 0; i < n; i++) { // iterate through all values in rt and out
@@ -594,19 +583,19 @@ Rcpp::NumericVector fb_Nav_Nav_2014_log(const Rcpp::NumericVector& rt,
       double log_t3 = 1.5 * log(t);
       if (response[i] == 1) { // if response is "upper" use alternate parameters
         if (ks < kl) { // small time needs fewer terms than lorge time
-          mult = log_a + log_2pi + log_t3 - vprime * a * wprime
+          mult = log_a - LOG_2PI_2 - log_t3 - vprime * a * wprime
                - vprime * vprime * t / 2;
           out[i] = mult + log(small_sum_2014(t, a, wprime, ks));
         } else { // large time needs fewer terms
-          mult = log_pi - log_a2 - vprime * a * wprime - vprime * vprime * t / 2;
+          mult = LOG_PI - log_a2 - vprime * a * wprime - vprime * vprime * t / 2;
           out[i] = mult + log(large_sum_Nav(t, a, wprime, kl));
         }
       } else { // else response is "lower"
         if (ks < kl) { // small time needs fewer terms than lorge time
-          mult = log_a - log_2pi - log_t3 -v * a * w - v * v * t / 2;
+          mult = log_a - LOG_2PI_2 - log_t3 -v * a * w - v * v * t / 2;
           out[i] = mult + log(small_sum_2014(t, a, w, ks));
         } else { // large time needs fewer terms
-          mult =  log_pi - log_a2 - v * a * w - v * v * t / 2;
+          mult =  LOG_PI - log_a2 - v * a * w - v * v * t / 2;
           out[i] = mult + log(large_sum_Nav(t, a, w, kl));
         }
       }
@@ -662,8 +651,6 @@ Rcpp::NumericVector fb_BGK_Nav_2017_log(const Rcpp::NumericVector& rt,
 
   if (sv < SV_THRESH) { // set sv=0 and use constant drift rate methods
     double log_a = log(a);
-    double log_pi = log(M_PI);
-    double log_2pi = log(2) / 2 + log_pi / 2;
     double log_a2 = 2 * log_a;
     int ks, kl;
     for (int i = 0; i < n; i++) { // iterate through all values in rt and out
@@ -678,20 +665,20 @@ Rcpp::NumericVector fb_BGK_Nav_2017_log(const Rcpp::NumericVector& rt,
       if (response[i] == 1) { // if response is "upper" use alternate parameters
         ks = ks_BGK(t, a, wprime, eps); // number of terms in small time appx
         if (ks < kl) { // small time needs fewer terms than lorge time
-          mult = log_a + log_2pi + log_t3 - vprime * a * wprime
+          mult = log_a - LOG_2PI_2 - log_t3 - vprime * a * wprime
                - vprime * vprime * t / 2;
           out[i] = mult + log(small_sum_2017(t, a, wprime, ks));
         } else { // large time needs fewer terms
-          mult = log_pi - log_a2 - vprime * a * wprime - vprime * vprime * t / 2;
+          mult = LOG_PI - log_a2 - vprime * a * wprime - vprime * vprime * t / 2;
           out[i] = mult + log(large_sum_Nav(t, a, wprime, kl));
         }
       } else { // else response is "lower"
         ks = ks_BGK(t, a, w, eps); // number of terms in small time appx
         if (ks < kl) { // small time needs fewer terms than lorge time
-          mult = log_a - log_2pi - log_t3 -v * a * w - v * v * t / 2;
+          mult = log_a - LOG_2PI_2 - log_t3 -v * a * w - v * v * t / 2;
           out[i] = mult + log(small_sum_2017(t, a, w, ks));
         } else { // large time needs fewer terms
-          mult =  log_pi - log_a2 - v * a * w - v * v * t / 2;
+          mult =  LOG_PI - log_a2 - v * a * w - v * v * t / 2;
           out[i] = mult + log(large_sum_Nav(t, a, w, kl));
         }
       }
@@ -748,8 +735,6 @@ Rcpp::NumericVector fb_BGK_Nav_2014_log(const Rcpp::NumericVector& rt,
 
   if (sv < SV_THRESH) { // set sv=0 and use constant drift rate methods
     double log_a = log(a);
-    double log_pi = log(M_PI);
-    double log_2pi = log(2) / 2 + log_pi / 2;
     double log_a2 = 2 * log_a;
     int ks, kl;
     for (int i = 0; i < n; i++) { // iterate through all values in rt and out
@@ -764,20 +749,20 @@ Rcpp::NumericVector fb_BGK_Nav_2014_log(const Rcpp::NumericVector& rt,
       if (response[i] == 1) { // if response is "upper" use alternate parameters
         ks = ks_BGK(t, a, wprime, eps); // number of terms in small time appx
         if (ks < kl) { // small time needs fewer terms than lorge time
-          mult = log_a + log_2pi + log_t3 - vprime * a * wprime
+          mult = log_a - LOG_2PI_2 - log_t3 - vprime * a * wprime
                - vprime * vprime * t / 2;
           out[i] = mult + log(small_sum_2014(t, a, wprime, ks));
         } else { // large time needs fewer terms
-          mult = log_pi - log_a2 - vprime * a * wprime - vprime * vprime * t / 2;
+          mult = LOG_PI - log_a2 - vprime * a * wprime - vprime * vprime * t / 2;
           out[i] = mult + log(large_sum_Nav(t, a, wprime, kl));
         }
       } else { // else response is "lower"
         ks = ks_BGK(t, a, w, eps); // number of terms in small time appx
         if (ks < kl) { // small time needs fewer terms than lorge time
-          mult = log_a - log_2pi - log_t3 -v * a * w - v * v * t / 2;
+          mult = log_a - LOG_2PI_2 - log_t3 -v * a * w - v * v * t / 2;
           out[i] = mult + log(small_sum_2014(t, a, w, ks));
         } else { // large time needs fewer terms
-          mult =  log_pi - log_a2 - v * a * w - v * v * t / 2;
+          mult =  LOG_PI - log_a2 - v * a * w - v * v * t / 2;
           out[i] = mult + log(large_sum_Nav(t, a, w, kl));
         }
       }
