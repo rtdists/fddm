@@ -1,25 +1,24 @@
 // Density function for the Ratcliff Diffusion Decision Model (DDM) PDF
 
-#include <Rcpp.h>
-// [[Rcpp::plugins(cpp11)]]
-#define _USE_MATH_DEFINES
-#include <math.h>
 #include "funcs.h"
+
+using std::endl;
+using Rcpp::Rcerr;
 
 
 
 
 // General density function
 // [[Rcpp::export]]
-Rcpp::NumericVector cpp_dfddm(const Rcpp::NumericVector& rt,
-                              const Rcpp::LogicalVector& response,
-                              const double& a, const double& v,
-                              const double& t0, const double& w,
-                              const double& sv, const bool& log_prob,
-                              const std::string& n_terms_small,
-                              const std::string& summation_small,
-                              const std::string& scale,
-                              const double& eps)
+NumericVector cpp_dfddm(const NumericVector& rt,
+                        const LogicalVector& response,
+                        const double& a, const double& v,
+                        const double& t0, const double& w,
+                        const double& sv, const bool& log_prob,
+                        const std::string& n_terms_small,
+                        const std::string& summation_small,
+                        const std::string& scale,
+                        const double& eps)
 {
   if (!log_prob) { // non-log version
     if (scale == "small") {
@@ -31,7 +30,7 @@ Rcpp::NumericVector cpp_dfddm(const Rcpp::NumericVector& rt,
         } else if (n_terms_small == "Kesselmeier") {
           return fs_BGK_2017(rt, response, a, v, t0, w, sv, eps);
         } else {
-          Rcpp::Rcerr << "error: invalid n_terms_small" << std::endl;
+          Rcerr << "error: invalid n_terms_small" << endl;
           return NAN;
         }
       } else if (summation_small == "2014") {
@@ -42,11 +41,11 @@ Rcpp::NumericVector cpp_dfddm(const Rcpp::NumericVector& rt,
         } else if (n_terms_small == "Kesselmeier") {
           return fs_BGK_2014(rt, response, a, v, t0, w, sv, eps);
         } else {
-          Rcpp::Rcerr << "error: invalid n_terms_small" << std::endl;
+          Rcerr << "error: invalid n_terms_small" << endl;
           return NAN;
         }
       } else {
-        Rcpp::Rcerr << "error: invalid summation_small" << std::endl;
+        Rcerr << "error: invalid summation_small" << endl;
         return NAN;
       }
     } else if (scale == "large") {
@@ -58,7 +57,7 @@ Rcpp::NumericVector cpp_dfddm(const Rcpp::NumericVector& rt,
         } else if (n_terms_small == "Kesselmeier") {
           return fb_BGK_Nav_2017(rt, response, a, v, t0, w, sv, eps);
         } else {
-          Rcpp::Rcerr << "error: invalid n_terms_small" << std::endl;
+          Rcerr << "error: invalid n_terms_small" << endl;
           return NAN;
         }
       } else if (summation_small == "2014") {
@@ -67,15 +66,15 @@ Rcpp::NumericVector cpp_dfddm(const Rcpp::NumericVector& rt,
         } else if (n_terms_small == "Kesselmeier") {
           return fb_BGK_Nav_2014(rt, response, a, v, t0, w, sv, eps);
         } else {
-          Rcpp::Rcerr << "error: invalid n_terms_small" << std::endl;
+          Rcerr << "error: invalid n_terms_small" << endl;
           return NAN;
         }
       } else {
-        Rcpp::Rcerr << "error: invalid summation_small" << std::endl;
+        Rcerr << "error: invalid summation_small" << endl;
         return NAN;
       }
     } else {
-      Rcpp::Rcerr << "error: invalid scale" << std::endl;
+      Rcerr << "error: invalid scale" << endl;
       return NAN;
     }
   } else { // log version
@@ -88,7 +87,7 @@ Rcpp::NumericVector cpp_dfddm(const Rcpp::NumericVector& rt,
         } else if (n_terms_small == "Kesselmeier") {
           return fs_BGK_2017_log(rt, response, a, v, t0, w, sv, eps);
         } else {
-          Rcpp::Rcerr << "error: invalid n_terms_small" << std::endl;
+          Rcerr << "error: invalid n_terms_small" << endl;
           return NAN;
         }
       } else if (summation_small == "2014") {
@@ -99,11 +98,11 @@ Rcpp::NumericVector cpp_dfddm(const Rcpp::NumericVector& rt,
         } else if (n_terms_small == "Kesselmeier") {
           return fs_BGK_2014_log(rt, response, a, v, t0, w, sv, eps);
         } else {
-          Rcpp::Rcerr << "error: invalid n_terms_small" << std::endl;
+          Rcerr << "error: invalid n_terms_small" << endl;
           return NAN;
         }
       } else {
-        Rcpp::Rcerr << "error: invalid summation_small" << std::endl;
+        Rcerr << "error: invalid summation_small" << endl;
         return NAN;
       }
     } else if (scale == "large") {
@@ -115,7 +114,7 @@ Rcpp::NumericVector cpp_dfddm(const Rcpp::NumericVector& rt,
         } else if (n_terms_small == "Kesselmeier") {
           return fb_BGK_Nav_2017_log(rt, response, a, v, t0, w, sv, eps);
         } else {
-          Rcpp::Rcerr << "error: invalid n_terms_small" << std::endl;
+          Rcerr << "error: invalid n_terms_small" << endl;
           return NAN;
         }
       } else if (summation_small == "2014") {
@@ -124,15 +123,15 @@ Rcpp::NumericVector cpp_dfddm(const Rcpp::NumericVector& rt,
         } else if (n_terms_small == "Kesselmeier") {
           return fb_BGK_Nav_2014_log(rt, response, a, v, t0, w, sv, eps);
         } else {
-          Rcpp::Rcerr << "error: invalid n_terms_small" << std::endl;
+          Rcerr << "error: invalid n_terms_small" << endl;
           return NAN;
         }
       } else {
-        Rcpp::Rcerr << "error: invalid summation_small" << std::endl;
+        Rcerr << "error: invalid summation_small" << endl;
         return NAN;
       }
     } else {
-      Rcpp::Rcerr << "error: invalid scale" << std::endl;
+      Rcerr << "error: invalid scale" << endl;
       return NAN;
     }
   }

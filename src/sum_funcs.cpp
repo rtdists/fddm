@@ -1,9 +1,5 @@
 // Functions to approximate the infinite sum in the density function
 
-#include <Rcpp.h>
-// [[Rcpp::plugins(cpp11)]]
-#define _USE_MATH_DEFINES
-#include <math.h>
 #include "funcs.h"
 
 

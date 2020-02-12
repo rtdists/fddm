@@ -3,7 +3,16 @@
 #include <Rcpp.h>
 // [[Rcpp::plugins(cpp11)]]
 #define _USE_MATH_DEFINES
-#include <math.h>
+#include <cmath>
+
+using std::log;
+using std::exp;
+using std::sqrt;
+using std::min;
+using std::max;
+using std::ceil;
+using Rcpp::NumericVector;
+using Rcpp::LogicalVector;
 
 // Constants
 
@@ -36,116 +45,116 @@ double large_sum_Nav(const double& t, const double& a, const double& w,
 
 // Density Functions
 
-Rcpp::NumericVector fs_eps_2017(const Rcpp::NumericVector& rt,
-                                Rcpp::LogicalVector response,
-                                const double& a, const double& v,
-                                const double& t0, const double& w,
-                                const double& sv, const double& eps);
-Rcpp::NumericVector fs_eps_2014(const Rcpp::NumericVector& rt,
-                                Rcpp::LogicalVector response,
-                                const double& a, const double& v,
-                                const double& t0, const double& w,
-                                const double& sv, const double& eps);
-Rcpp::NumericVector fs_Nav_2017(const Rcpp::NumericVector& rt,
-                                Rcpp::LogicalVector response,
-                                const double& a, const double& v,
-                                const double& t0, const double& w,
-                                const double& sv, const double& eps);
-Rcpp::NumericVector fs_Nav_2014(const Rcpp::NumericVector& rt,
-                                Rcpp::LogicalVector response,
-                                const double& a, const double& v,
-                                const double& t0, const double& w,
-                                const double& sv, const double& eps);
-Rcpp::NumericVector fs_BGK_2017(const Rcpp::NumericVector& rt,
-                                Rcpp::LogicalVector response,
-                                const double& a, const double& v,
-                                const double& t0, const double& w,
-                                const double& sv, const double& eps);
-Rcpp::NumericVector fs_BGK_2014(const Rcpp::NumericVector& rt,
-                                Rcpp::LogicalVector response,
-                                const double& a, const double& v,
-                                const double& t0, const double& w,
-                                const double& sv, const double& eps);
-Rcpp::NumericVector fl_Nav_2009(const Rcpp::NumericVector& rt,
-                                Rcpp::LogicalVector response,
-                                const double& a, const double& v,
-                                const double& t0, const double& w,
-                                const double& eps);
-Rcpp::NumericVector fb_Nav_Nav_2017(const Rcpp::NumericVector& rt,
-                                    Rcpp::LogicalVector response,
-                                    const double& a, const double& v,
-                                    const double& t0, const double& w,
-                                    const double& sv, const double& eps);
-Rcpp::NumericVector fb_Nav_Nav_2014(const Rcpp::NumericVector& rt,
-                                    Rcpp::LogicalVector response,
-                                    const double& a, const double& v,
-                                    const double& t0, const double& w,
-                                    const double& sv, const double& eps);
-Rcpp::NumericVector fb_BGK_Nav_2017(const Rcpp::NumericVector& rt,
-                                    Rcpp::LogicalVector response,
-                                    const double& a, const double& v,
-                                    const double& t0, const double& w,
-                                    const double& sv, const double& eps);
-Rcpp::NumericVector fb_BGK_Nav_2014(const Rcpp::NumericVector& rt,
-                                    Rcpp::LogicalVector response,
-                                    const double& a, const double& v,
-                                    const double& t0, const double& w,
-                                    const double& sv, const double& eps);
+NumericVector fs_eps_2017(const NumericVector& rt,
+                          LogicalVector response,
+                          const double& a, const double& v,
+                          const double& t0, const double& w,
+                          const double& sv, const double& eps);
+NumericVector fs_eps_2014(const NumericVector& rt,
+                          LogicalVector response,
+                          const double& a, const double& v,
+                          const double& t0, const double& w,
+                          const double& sv, const double& eps);
+NumericVector fs_Nav_2017(const NumericVector& rt,
+                          LogicalVector response,
+                          const double& a, const double& v,
+                          const double& t0, const double& w,
+                          const double& sv, const double& eps);
+NumericVector fs_Nav_2014(const NumericVector& rt,
+                          LogicalVector response,
+                          const double& a, const double& v,
+                          const double& t0, const double& w,
+                          const double& sv, const double& eps);
+NumericVector fs_BGK_2017(const NumericVector& rt,
+                          LogicalVector response,
+                          const double& a, const double& v,
+                          const double& t0, const double& w,
+                          const double& sv, const double& eps);
+NumericVector fs_BGK_2014(const NumericVector& rt,
+                          LogicalVector response,
+                          const double& a, const double& v,
+                          const double& t0, const double& w,
+                          const double& sv, const double& eps);
+NumericVector fl_Nav_2009(const NumericVector& rt,
+                          LogicalVector response,
+                          const double& a, const double& v,
+                          const double& t0, const double& w,
+                          const double& eps);
+NumericVector fb_Nav_Nav_2017(const NumericVector& rt,
+                              LogicalVector response,
+                              const double& a, const double& v,
+                              const double& t0, const double& w,
+                              const double& sv, const double& eps);
+NumericVector fb_Nav_Nav_2014(const NumericVector& rt,
+                              LogicalVector response,
+                              const double& a, const double& v,
+                              const double& t0, const double& w,
+                              const double& sv, const double& eps);
+NumericVector fb_BGK_Nav_2017(const NumericVector& rt,
+                              LogicalVector response,
+                              const double& a, const double& v,
+                              const double& t0, const double& w,
+                              const double& sv, const double& eps);
+NumericVector fb_BGK_Nav_2014(const NumericVector& rt,
+                              LogicalVector response,
+                              const double& a, const double& v,
+                              const double& t0, const double& w,
+                              const double& sv, const double& eps);
 
 // Density Functions (log)
 
-Rcpp::NumericVector fs_eps_2017_log(const Rcpp::NumericVector& rt,
-                                    Rcpp::LogicalVector response,
-                                    const double& a, const double& v,
-                                    const double& t0, const double& w,
-                                    const double& sv, const double& eps);
-Rcpp::NumericVector fs_eps_2014_log(const Rcpp::NumericVector& rt,
-                                    Rcpp::LogicalVector response,
-                                    const double& a, const double& v,
-                                    const double& t0, const double& w,
-                                    const double& sv, const double& eps);
-Rcpp::NumericVector fs_Nav_2017_log(const Rcpp::NumericVector& rt,
-                                    Rcpp::LogicalVector response,
-                                    const double& a, const double& v,
-                                    const double& t0, const double& w,
-                                    const double& sv, const double& eps);
-Rcpp::NumericVector fs_Nav_2014_log(const Rcpp::NumericVector& rt,
-                                    Rcpp::LogicalVector response,
-                                    const double& a, const double& v,
-                                    const double& t0, const double& w,
-                                    const double& sv, const double& eps);
-Rcpp::NumericVector fs_BGK_2017_log(const Rcpp::NumericVector& rt,
-                                    Rcpp::LogicalVector response,
-                                    const double& a, const double& v,
-                                    const double& t0, const double& w,
-                                    const double& sv, const double& eps);
-Rcpp::NumericVector fs_BGK_2014_log(const Rcpp::NumericVector& rt,
-                                    Rcpp::LogicalVector response,
-                                    const double& a, const double& v,
-                                    const double& t0, const double& w,
-                                    const double& sv, const double& eps);
-Rcpp::NumericVector fl_Nav_2009_log(const Rcpp::NumericVector& rt,
-                                    Rcpp::LogicalVector response,
-                                    const double& a, const double& v,
-                                    const double& t0, const double& w,
-                                    const double& eps);
-Rcpp::NumericVector fb_Nav_Nav_2017_log(const Rcpp::NumericVector& rt,
-                                        Rcpp::LogicalVector response,
-                                        const double& a, const double& v,
-                                        const double& t0, const double& w,
-                                        const double& sv, const double& eps);
-Rcpp::NumericVector fb_Nav_Nav_2014_log(const Rcpp::NumericVector& rt,
-                                        Rcpp::LogicalVector response,
-                                        const double& a, const double& v,
-                                        const double& t0, const double& w,
-                                        const double& sv, const double& eps);
-Rcpp::NumericVector fb_BGK_Nav_2017_log(const Rcpp::NumericVector& rt,
-                                        Rcpp::LogicalVector response,
-                                        const double& a, const double& v,
-                                        const double& t0, const double& w,
-                                        const double& sv, const double& eps);
-Rcpp::NumericVector fb_BGK_Nav_2014_log(const Rcpp::NumericVector& rt,
-                                        Rcpp::LogicalVector response,
-                                        const double& a, const double& v,
-                                        const double& t0, const double& w,
-                                        const double& sv, const double& eps);
+NumericVector fs_eps_2017_log(const NumericVector& rt,
+                              LogicalVector response,
+                              const double& a, const double& v,
+                              const double& t0, const double& w,
+                              const double& sv, const double& eps);
+NumericVector fs_eps_2014_log(const NumericVector& rt,
+                              LogicalVector response,
+                              const double& a, const double& v,
+                              const double& t0, const double& w,
+                              const double& sv, const double& eps);
+NumericVector fs_Nav_2017_log(const NumericVector& rt,
+                              LogicalVector response,
+                              const double& a, const double& v,
+                              const double& t0, const double& w,
+                              const double& sv, const double& eps);
+NumericVector fs_Nav_2014_log(const NumericVector& rt,
+                              LogicalVector response,
+                              const double& a, const double& v,
+                              const double& t0, const double& w,
+                              const double& sv, const double& eps);
+NumericVector fs_BGK_2017_log(const NumericVector& rt,
+                              LogicalVector response,
+                              const double& a, const double& v,
+                              const double& t0, const double& w,
+                              const double& sv, const double& eps);
+NumericVector fs_BGK_2014_log(const NumericVector& rt,
+                              LogicalVector response,
+                              const double& a, const double& v,
+                              const double& t0, const double& w,
+                              const double& sv, const double& eps);
+NumericVector fl_Nav_2009_log(const NumericVector& rt,
+                              LogicalVector response,
+                              const double& a, const double& v,
+                              const double& t0, const double& w,
+                              const double& eps);
+NumericVector fb_Nav_Nav_2017_log(const NumericVector& rt,
+                                  LogicalVector response,
+                                  const double& a, const double& v,
+                                  const double& t0, const double& w,
+                                  const double& sv, const double& eps);
+NumericVector fb_Nav_Nav_2014_log(const NumericVector& rt,
+                                  LogicalVector response,
+                                  const double& a, const double& v,
+                                  const double& t0, const double& w,
+                                  const double& sv, const double& eps);
+NumericVector fb_BGK_Nav_2017_log(const NumericVector& rt,
+                                  LogicalVector response,
+                                  const double& a, const double& v,
+                                  const double& t0, const double& w,
+                                  const double& sv, const double& eps);
+NumericVector fb_BGK_Nav_2014_log(const NumericVector& rt,
+                                  LogicalVector response,
+                                  const double& a, const double& v,
+                                  const double& t0, const double& w,
+                                  const double& sv, const double& eps);

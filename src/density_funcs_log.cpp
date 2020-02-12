@@ -780,18 +780,4 @@ Rcpp::NumericVector fb_BGK_Nav_2014_log(const Rcpp::NumericVector& rt,
 
       double log_t3 = 1.5 * log(t);
       double log_svt = 0.5 * log(1 + sv * t);
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        ks = ks_BGK(t / (a * a), wprime, eps); // number of terms in small time appx
-        mult = log_a - log_t3 - log_svt + (sv * a * a * wprime * wprime
-             - 2 * vprime * a * wprime - vprime * vprime * t) / (2 + 2 * sv * t);
-        out[i] = mult + log(small_sum_2014(t, a, wprime, ks));
-      } else { // else response is "lower"
-        ks = ks_BGK(t / (a * a), w, eps); // number of terms in small time appx
-        mult = log_a - log_t3 - log_svt + (sv * a * a * w * w
-             - 2 * v * a * w - v * v * t) / (2 + 2 * sv * t);
-        out[i] = mult + log(small_sum_2014(t, a, w, ks));
-      }
-    }
-  }
-  return out;
-}
+      if (response[i] == 1) { // if response is "

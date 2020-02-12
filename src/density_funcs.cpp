@@ -1,9 +1,5 @@
 // Functions to evaluate the DDM PDF for specific criteria
 
-#include <Rcpp.h>
-// [[Rcpp::plugins(cpp11)]]
-#define _USE_MATH_DEFINES
-#include <math.h>
 #include "funcs.h"
 
 
@@ -14,21 +10,21 @@
 //////////                                                           //////////
 
 // Use term < eps BGK2017 style sum approximation, with minimum terms
-Rcpp::NumericVector fs_eps_2017(const Rcpp::NumericVector& rt,
-                                Rcpp::LogicalVector response,
-                                const double& a, const double& v,
-                                const double& t0, const double& w,
-                                const double& sv, const double& eps)
+NumericVector fs_eps_2017(const NumericVector& rt,
+                          LogicalVector response,
+                          const double& a, const double& v,
+                          const double& t0, const double& w,
+                          const double& sv, const double& eps)
 {
   int n = rt.length(); // get number of response times
 
   if (response.length() != n) { // create valid binary response vector
     bool first_resp = response[0];
-    Rcpp::LogicalVector resp(n, first_resp);
+    LogicalVector resp(n, first_resp);
     response = resp;
   }
 
-  Rcpp::NumericVector out(n);
+  NumericVector out(n);
   double t, mult;
   double vprime = -v;
   double wprime = 1 - w;
@@ -76,21 +72,21 @@ Rcpp::NumericVector fs_eps_2017(const Rcpp::NumericVector& rt,
 
 
 // Use term < eps BGK2014 style sum approximation, with minimum terms
-Rcpp::NumericVector fs_eps_2014(const Rcpp::NumericVector& rt,
-                                Rcpp::LogicalVector response,
-                                const double& a, const double& v,
-                                const double& t0, const double& w,
-                                const double& sv, const double& eps)
+NumericVector fs_eps_2014(const NumericVector& rt,
+                          LogicalVector response,
+                          const double& a, const double& v,
+                          const double& t0, const double& w,
+                          const double& sv, const double& eps)
 {
   int n = rt.length(); // get number of response times
 
   if (response.length() != n) { // create valid binary response vector
     bool first_resp = response[0];
-    Rcpp::LogicalVector resp(n, first_resp);
+    LogicalVector resp(n, first_resp);
     response = resp;
   }
 
-  Rcpp::NumericVector out(n);
+  NumericVector out(n);
   double t, mult;
   double vprime = -v;
   double wprime = 1 - w;
@@ -138,21 +134,21 @@ Rcpp::NumericVector fs_eps_2014(const Rcpp::NumericVector& rt,
 
 
 // Use Navarro2009 number of terms for 2017 style sum approximation
-Rcpp::NumericVector fs_Nav_2017(const Rcpp::NumericVector& rt,
-                                Rcpp::LogicalVector response,
-                                const double& a, const double& v,
-                                const double& t0, const double& w,
-                                const double& sv, const double& eps)
+NumericVector fs_Nav_2017(const NumericVector& rt,
+                          LogicalVector response,
+                          const double& a, const double& v,
+                          const double& t0, const double& w,
+                          const double& sv, const double& eps)
 {
   int n = rt.length(); // get number of response times
 
   if (response.length() != n) { // create valid binary response vector
     bool first_resp = response[0];
-    Rcpp::LogicalVector resp(n, first_resp);
+    LogicalVector resp(n, first_resp);
     response = resp;
   }
 
-  Rcpp::NumericVector out(n);
+  NumericVector out(n);
   double t, mult;
   int ks;
   double vprime = -v;
@@ -203,21 +199,21 @@ Rcpp::NumericVector fs_Nav_2017(const Rcpp::NumericVector& rt,
 
 
 // Use Navarro2009 number of terms for 2014 style sum approximation
-Rcpp::NumericVector fs_Nav_2014(const Rcpp::NumericVector& rt,
-                                Rcpp::LogicalVector response,
-                                const double& a, const double& v,
-                                const double& t0, const double& w,
-                                const double& sv, const double& eps)
+NumericVector fs_Nav_2014(const NumericVector& rt,
+                          LogicalVector response,
+                          const double& a, const double& v,
+                          const double& t0, const double& w,
+                          const double& sv, const double& eps)
 {
   int n = rt.length(); // get number of response times
 
   if (response.length() != n) { // create valid binary response vector
     bool first_resp = response[0];
-    Rcpp::LogicalVector resp(n, first_resp);
+    LogicalVector resp(n, first_resp);
     response = resp;
   }
 
-  Rcpp::NumericVector out(n);
+  NumericVector out(n);
   double t, mult;
   int ks;
   double vprime = -v;
@@ -268,21 +264,21 @@ Rcpp::NumericVector fs_Nav_2014(const Rcpp::NumericVector& rt,
 
 
 // Use BGK2014 number of terms for 2017 style sum approximation
-Rcpp::NumericVector fs_BGK_2017(const Rcpp::NumericVector& rt,
-                                Rcpp::LogicalVector response,
-                                const double& a, const double& v,
-                                const double& t0, const double& w,
-                                const double& sv, const double& eps)
+NumericVector fs_BGK_2017(const NumericVector& rt,
+                          LogicalVector response,
+                          const double& a, const double& v,
+                          const double& t0, const double& w,
+                          const double& sv, const double& eps)
 {
   int n = rt.length(); // get number of response times
 
   if (response.length() != n) { // create valid binary response vector
     bool first_resp = response[0];
-    Rcpp::LogicalVector resp(n, first_resp);
+    LogicalVector resp(n, first_resp);
     response = resp;
   }
 
-  Rcpp::NumericVector out(n);
+  NumericVector out(n);
   double t, mult;
   int ks;
   double vprime = -v;
@@ -335,21 +331,21 @@ Rcpp::NumericVector fs_BGK_2017(const Rcpp::NumericVector& rt,
 
 
 // Use BGK2014 number of terms for 2014 style sum approximation
-Rcpp::NumericVector fs_BGK_2014(const Rcpp::NumericVector& rt,
-                                Rcpp::LogicalVector response,
-                                const double& a, const double& v,
-                                const double& t0, const double& w,
-                                const double& sv, const double& eps)
+NumericVector fs_BGK_2014(const NumericVector& rt,
+                          LogicalVector response,
+                          const double& a, const double& v,
+                          const double& t0, const double& w,
+                          const double& sv, const double& eps)
 {
   int n = rt.length(); // get number of response times
 
   if (response.length() != n) { // create valid binary response vector
     bool first_resp = response[0];
-    Rcpp::LogicalVector resp(n, first_resp);
+    LogicalVector resp(n, first_resp);
     response = resp;
   }
 
-  Rcpp::NumericVector out(n);
+  NumericVector out(n);
   double t, mult;
   int ks;
   double vprime = -v;
@@ -407,21 +403,21 @@ Rcpp::NumericVector fs_BGK_2014(const Rcpp::NumericVector& rt,
 //////////                                                           //////////
 
 // Use Navarro2009 number of terms for sum approximation
-Rcpp::NumericVector fl_Nav_2009(const Rcpp::NumericVector& rt,
-                                Rcpp::LogicalVector response,
-                                const double& a, const double& v,
-                                const double& t0, const double& w,
-                                const double& eps)
+NumericVector fl_Nav_2009(const NumericVector& rt,
+                          LogicalVector response,
+                          const double& a, const double& v,
+                          const double& t0, const double& w,
+                          const double& eps)
 {
   int n = rt.length(); // get number of response times
 
   if (response.length() != n) { // create valid binary response vector
     bool first_resp = response[0];
-    Rcpp::LogicalVector resp(n, first_resp);
+    LogicalVector resp(n, first_resp);
     response = resp;
   }
 
-  Rcpp::NumericVector out(n);
+  NumericVector out(n);
   double t, mult;
   int kl;
   double vprime = -v;
@@ -454,21 +450,21 @@ Rcpp::NumericVector fl_Nav_2009(const Rcpp::NumericVector& rt,
 //////////                                                           //////////
 
 // ks = Navarro2009, 2017 style sum approximation, kl = Navarro2009
-Rcpp::NumericVector fb_Nav_Nav_2017(const Rcpp::NumericVector& rt,
-                                    Rcpp::LogicalVector response,
-                                    const double& a, const double& v,
-                                    const double& t0, const double& w,
-                                    const double& sv, const double& eps)
+NumericVector fb_Nav_Nav_2017(const NumericVector& rt,
+                              LogicalVector response,
+                              const double& a, const double& v,
+                              const double& t0, const double& w,
+                              const double& sv, const double& eps)
 {
   int n = rt.length(); // get number of response times
 
   if (response.length() != n) { // create valid binary response vector
     bool first_resp = response[0];
-    Rcpp::LogicalVector resp(n, first_resp);
+    LogicalVector resp(n, first_resp);
     response = resp;
   }
 
-  Rcpp::NumericVector out(n);
+  NumericVector out(n);
   double t, mult;
   double vprime = -v;
   double wprime = 1 - w;
@@ -532,21 +528,21 @@ Rcpp::NumericVector fb_Nav_Nav_2017(const Rcpp::NumericVector& rt,
 
 
 // ks = Navarro2009, 2014 style sum approximation, kl = Navarro2009
-Rcpp::NumericVector fb_Nav_Nav_2014(const Rcpp::NumericVector& rt,
-                                    Rcpp::LogicalVector response,
-                                    const double& a, const double& v,
-                                    const double& t0, const double& w,
-                                    const double& sv, const double& eps)
+NumericVector fb_Nav_Nav_2014(const NumericVector& rt,
+                              LogicalVector response,
+                              const double& a, const double& v,
+                              const double& t0, const double& w,
+                              const double& sv, const double& eps)
 {
   int n = rt.length(); // get number of response times
 
   if (response.length() != n) { // create valid binary response vector
     bool first_resp = response[0];
-    Rcpp::LogicalVector resp(n, first_resp);
+    LogicalVector resp(n, first_resp);
     response = resp;
   }
 
-  Rcpp::NumericVector out(n);
+  NumericVector out(n);
   double t, mult;
   double vprime = -v;
   double wprime = 1 - w;
@@ -610,21 +606,21 @@ Rcpp::NumericVector fb_Nav_Nav_2014(const Rcpp::NumericVector& rt,
 
 
 // ks = BGK2014, 2017 style sum approximation, kl = Navarro2009
-Rcpp::NumericVector fb_BGK_Nav_2017(const Rcpp::NumericVector& rt,
-                                    Rcpp::LogicalVector response,
-                                    const double& a, const double& v,
-                                    const double& t0, const double& w,
-                                    const double& sv, const double& eps)
+NumericVector fb_BGK_Nav_2017(const NumericVector& rt,
+                              LogicalVector response,
+                              const double& a, const double& v,
+                              const double& t0, const double& w,
+                              const double& sv, const double& eps)
 {
   int n = rt.length(); // get number of response times
 
   if (response.length() != n) { // create valid binary response vector
     bool first_resp = response[0];
-    Rcpp::LogicalVector resp(n, first_resp);
+    LogicalVector resp(n, first_resp);
     response = resp;
   }
 
-  Rcpp::NumericVector out(n);
+  NumericVector out(n);
   double t, mult;
   double vprime = -v;
   double wprime = 1 - w;
@@ -690,21 +686,21 @@ Rcpp::NumericVector fb_BGK_Nav_2017(const Rcpp::NumericVector& rt,
 
 
 // ks = BGK2014, 2014 style sum approximation, kl = Navarro2009
-Rcpp::NumericVector fb_BGK_Nav_2014(const Rcpp::NumericVector& rt,
-                                    Rcpp::LogicalVector response,
-                                    const double& a, const double& v,
-                                    const double& t0, const double& w,
-                                    const double& sv, const double& eps)
+NumericVector fb_BGK_Nav_2014(const NumericVector& rt,
+                              LogicalVector response,
+                              const double& a, const double& v,
+                              const double& t0, const double& w,
+                              const double& sv, const double& eps)
 {
   int n = rt.length(); // get number of response times
 
   if (response.length() != n) { // create valid binary response vector
     bool first_resp = response[0];
-    Rcpp::LogicalVector resp(n, first_resp);
+    LogicalVector resp(n, first_resp);
     response = resp;
   }
 
-  Rcpp::NumericVector out(n);
+  NumericVector out(n);
   double t, mult;
   double vprime = -v;
   double wprime = 1 - w;
