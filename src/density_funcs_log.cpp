@@ -1,5 +1,5 @@
 // Functions to evaluate the log of the DDM PDF for specific criteria
-// nonsense
+
 #include "funcs.h"
 
 
