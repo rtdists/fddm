@@ -17,9 +17,9 @@ static const double LOG_2PI_2 = 0.5 * log(2 * M_PI);
 
 // Number of Terms
 
-int ks_BGK(double t, const double& a, const double& w, const double& eps);
-int ks_Nav(double t, const double& a, const double& eps);
-int kl_Nav(double t, const double& a, const double& eps);
+int ks_BGK(const double& t, const double& w, const double& eps);
+int ks_Nav(const double& t, const double& eps);
+int kl_Nav(const double& t, const double& eps);
 
 // Infinite Summation Approximations
 

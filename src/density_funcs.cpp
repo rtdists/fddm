@@ -166,7 +166,7 @@ Rcpp::NumericVector fs_Nav_2017(const Rcpp::NumericVector& rt,
         continue;
       }
 
-      ks = ks_Nav(t, a, eps); // number of terms in sum approximation
+      ks = ks_Nav(t / (a * a), eps); // number of terms in sum approximation
       if (response[i] == 1) { // if response is "upper" use alternate parameters
         mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
              / sqrt(2 * M_PI * t * t * t);
@@ -184,7 +184,7 @@ Rcpp::NumericVector fs_Nav_2017(const Rcpp::NumericVector& rt,
         continue;
       }
 
-      ks = ks_Nav(t, a, eps); // number of terms in sum approximation
+      ks = ks_Nav(t / (a * a), eps); // number of terms in sum approximation
       if (response[i] == 1) { // if response is "upper" use alternate parameters
         mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
                         + sv * a * a * wprime * wprime) / (2 + 2 * sv * t))
@@ -231,7 +231,7 @@ Rcpp::NumericVector fs_Nav_2014(const Rcpp::NumericVector& rt,
         continue;
       }
 
-      ks = ks_Nav(t, a, eps); // number of terms in sum approximation
+      ks = ks_Nav(t / (a * a), eps); // number of terms in sum approximation
       if (response[i] == 1) { // if response is "upper" use alternate parameters
         mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
              / sqrt(2 * M_PI * t * t * t);
@@ -249,7 +249,7 @@ Rcpp::NumericVector fs_Nav_2014(const Rcpp::NumericVector& rt,
         continue;
       }
 
-      ks = ks_Nav(t, a, eps); // number of terms in sum approximation
+      ks = ks_Nav(t / (a * a), eps); // number of terms in sum approximation
       if (response[i] == 1) { // if response is "upper" use alternate parameters
         mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
                         + sv * a * a * wprime * wprime) / (2 + 2 * sv * t))
@@ -297,12 +297,12 @@ Rcpp::NumericVector fs_BGK_2017(const Rcpp::NumericVector& rt,
       }
 
       if (response[i] == 1) { // if response is "upper" use alternate parameters
-        ks = ks_BGK(t, a, wprime, eps); // number of terms in sum approximation
+        ks = ks_BGK(t / (a * a), wprime, eps); // number of terms in sum approximation
         mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
              / sqrt(2 * M_PI * t * t * t);
         out[i] = mult * small_sum_2017(t, a, wprime, ks);
       } else { // else response is "lower"
-        ks = ks_BGK(t, a, w, eps); // number of terms in sum approximation
+        ks = ks_BGK(t / (a * a), w, eps); // number of terms in sum approximation
         mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
         out[i] = mult * small_sum_2017(t, a, w, ks);
       }
@@ -316,13 +316,13 @@ Rcpp::NumericVector fs_BGK_2017(const Rcpp::NumericVector& rt,
       }
 
       if (response[i] == 1) { // if response is "upper" use alternate parameters
-        ks = ks_BGK(t, a, wprime, eps); // number of terms in sum approximation
+        ks = ks_BGK(t / (a * a), wprime, eps); // number of terms in sum approximation
         mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
                         + sv * a * a * wprime * wprime) / (2 + 2 * sv * t))
              / sqrt(t * t * t + sv * t * t * t * t);
         out[i] = mult * small_sum_2017(t, a, wprime, ks);
       } else { // else response is "lower"
-        ks = ks_BGK(t, a, w, eps); // number of terms in sum approximation
+        ks = ks_BGK(t / (a * a), w, eps); // number of terms in sum approximation
         mult = a * exp((-v * v * t - 2 * v * a * w
                         + sv * a * a * w * w) / (2 + 2 * sv * t))
              / sqrt(t * t * t + sv * t * t * t * t);
@@ -364,12 +364,12 @@ Rcpp::NumericVector fs_BGK_2014(const Rcpp::NumericVector& rt,
       }
 
       if (response[i] == 1) { // if response is "upper" use alternate parameters
-        ks = ks_BGK(t, a, wprime, eps); // number of terms in sum approximation
+        ks = ks_BGK(t / (a * a), wprime, eps); // number of terms in sum approximation
         mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
              / sqrt(2 * M_PI * t * t * t);
         out[i] = mult * small_sum_2014(t, a, wprime, ks);
       } else { // else response is "lower"
-        ks = ks_BGK(t, a, w, eps); // number of terms in sum approximation
+        ks = ks_BGK(t / (a * a), w, eps); // number of terms in sum approximation
         mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
         out[i] = mult * small_sum_2014(t, a, w, ks);
       }
@@ -383,13 +383,13 @@ Rcpp::NumericVector fs_BGK_2014(const Rcpp::NumericVector& rt,
       }
 
       if (response[i] == 1) { // if response is "upper" use alternate parameters
-        ks = ks_BGK(t, a, wprime, eps); // number of terms in sum approximation
+        ks = ks_BGK(t / (a * a), wprime, eps); // number of terms in sum approximation
         mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
                         + sv * a * a * wprime * wprime) / (2 + 2 * sv * t))
              / sqrt(t * t * t + sv * t * t * t * t);
         out[i] = mult * small_sum_2014(t, a, wprime, ks);
       } else { // else response is "lower"
-        ks = ks_BGK(t, a, w, eps); // number of terms in sum approximation
+        ks = ks_BGK(t / (a * a), w, eps); // number of terms in sum approximation
         mult = a * exp((-v * v * t - 2 * v * a * w
                         + sv * a * a * w * w) / (2 + 2 * sv * t))
              / sqrt(t * t * t + sv * t * t * t * t);
@@ -434,7 +434,7 @@ Rcpp::NumericVector fl_Nav_2009(const Rcpp::NumericVector& rt,
       continue;
     }
 
-    kl = kl_Nav(t, a, eps); // number of terms in sum approximation
+    kl = kl_Nav(t / (a * a), eps); // number of terms in sum approximation
     if (response[i] == 1) { // if response is "upper" use alternate parameters
       mult = M_PI * exp(-vprime * a * wprime - vprime * vprime * t / 2)
            / (a * a);
@@ -482,8 +482,8 @@ Rcpp::NumericVector fb_Nav_Nav_2017(const Rcpp::NumericVector& rt,
         continue;
       }
 
-      ks = ks_Nav(t, a, eps); // number of terms in small time sum approximation
-      kl = kl_Nav(t, a, eps); // number of terms in large time sum approximation
+      ks = ks_Nav(t / (a * a), eps); // number of terms in small time sum approximation
+      kl = kl_Nav(t / (a * a), eps); // number of terms in sum approximation
       if (response[i] == 1) { // if response is "upper" use alternate parameters
         if (ks < kl) { // small time needs fewer terms than lorge time
           mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
@@ -516,7 +516,7 @@ Rcpp::NumericVector fb_Nav_Nav_2017(const Rcpp::NumericVector& rt,
         continue;
       }
 
-      ks = ks_Nav(t, a, eps); // number of terms in sum approximation
+      ks = ks_Nav(t / (a * a), eps); // number of terms in sum approximation
       if (response[i] == 1) { // if response is "upper" use alternate parameters
         mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
              / sqrt(2 * M_PI * t * t * t);
@@ -560,8 +560,8 @@ Rcpp::NumericVector fb_Nav_Nav_2014(const Rcpp::NumericVector& rt,
         continue;
       }
 
-      ks = ks_Nav(t, a, eps); // number of terms in small time sum approximation
-      kl = kl_Nav(t, a, eps); // number of terms in large time sum approximation
+      ks = ks_Nav(t / (a * a), eps); // number of terms in small time sum approximation
+      kl = kl_Nav(t / (a * a), eps); // number of terms in sum approximation
       if (response[i] == 1) { // if response is "upper" use alternate parameters
         if (ks < kl) { // small time needs fewer terms than lorge time
           mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
@@ -594,7 +594,7 @@ Rcpp::NumericVector fb_Nav_Nav_2014(const Rcpp::NumericVector& rt,
         continue;
       }
 
-      ks = ks_Nav(t, a, eps); // number of terms in sum approximation
+      ks = ks_Nav(t / (a * a), eps); // number of terms in sum approximation
       if (response[i] == 1) { // if response is "upper" use alternate parameters
         mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
              / sqrt(2 * M_PI * t * t * t);
@@ -638,9 +638,9 @@ Rcpp::NumericVector fb_BGK_Nav_2017(const Rcpp::NumericVector& rt,
         continue;
       }
 
-      kl = kl_Nav(t, a, eps); // number of terms in large time sum approximation
+      kl = kl_Nav(t / (a * a), eps); // number of terms in sum approximation
       if (response[i] == 1) { // if response is "upper" use alternate parameters
-        ks = ks_BGK(t, a, wprime, eps); // number of terms in small time appx
+        ks = ks_BGK(t / (a * a), wprime, eps); // number of terms in small time appx
         if (ks < kl) { // small time needs fewer terms than lorge time
           mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
                           + sv * a * a * wprime * wprime) / (2 + 2 * sv * t))
@@ -652,7 +652,7 @@ Rcpp::NumericVector fb_BGK_Nav_2017(const Rcpp::NumericVector& rt,
           out[i] = mult * large_sum_Nav(t, a, wprime, kl);
         }
       } else { // else response is "lower"
-        ks = ks_BGK(t, a, w, eps); // number of terms in small time appx
+        ks = ks_BGK(t / (a * a), w, eps); // number of terms in small time appx
         if (ks < kl) { // small time needs fewer terms than lorge time
           mult = a * exp((-v * v * t - 2 * v * a * w
                           + sv * a * a * w * w) / (2 + 2 * sv * t))
@@ -674,12 +674,12 @@ Rcpp::NumericVector fb_BGK_Nav_2017(const Rcpp::NumericVector& rt,
       }
 
       if (response[i] == 1) { // if response is "upper" use alternate parameters
-        ks = ks_BGK(t, a, wprime, eps); // number of terms in small time appx
+        ks = ks_BGK(t / (a * a), wprime, eps); // number of terms in small time appx
         mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
              / sqrt(2 * M_PI * t * t * t);
         out[i] = mult * small_sum_2017(t, a, wprime, ks);
       } else { // else response is "lower"
-        ks = ks_BGK(t, a, w, eps); // number of terms in small time appx
+        ks = ks_BGK(t / (a * a), w, eps); // number of terms in small time appx
         mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
         out[i] = mult * small_sum_2017(t, a, w, ks);
       }
@@ -718,9 +718,9 @@ Rcpp::NumericVector fb_BGK_Nav_2014(const Rcpp::NumericVector& rt,
         continue;
       }
 
-      kl = kl_Nav(t, a, eps); // number of terms in large time sum approximation
+      kl = kl_Nav(t / (a * a), eps); // number of terms in sum approximation
       if (response[i] == 1) { // if response is "upper" use alternate parameters
-        ks = ks_BGK(t, a, wprime, eps); // number of terms in small time appx
+        ks = ks_BGK(t / (a * a), wprime, eps); // number of terms in small time appx
         if (ks < kl) { // small time needs fewer terms than lorge time
           mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
                           + sv * a * a * wprime * wprime) / (2 + 2 * sv * t))
@@ -732,7 +732,7 @@ Rcpp::NumericVector fb_BGK_Nav_2014(const Rcpp::NumericVector& rt,
           out[i] = mult * large_sum_Nav(t, a, wprime, kl);
         }
       } else { // else response is "lower"
-        ks = ks_BGK(t, a, w, eps); // number of terms in small time appx
+        ks = ks_BGK(t / (a * a), w, eps); // number of terms in small time appx
         if (ks < kl) { // small time needs fewer terms than lorge time
           mult = a * exp((-v * v * t - 2 * v * a * w
                           + sv * a * a * w * w) / (2 + 2 * sv * t))
@@ -754,12 +754,12 @@ Rcpp::NumericVector fb_BGK_Nav_2014(const Rcpp::NumericVector& rt,
       }
 
       if (response[i] == 1) { // if response is "upper" use alternate parameters
-        ks = ks_BGK(t, a, wprime, eps); // number of terms in small time appx
+        ks = ks_BGK(t / (a * a), wprime, eps); // number of terms in small time appx
         mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
              / sqrt(2 * M_PI * t * t * t);
         out[i] = mult * small_sum_2014(t, a, wprime, ks);
       } else { // else response is "lower"
-        ks = ks_BGK(t, a, w, eps); // number of terms in small time appx
+        ks = ks_BGK(t / (a * a), w, eps); // number of terms in small time appx
         mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
         out[i] = mult * small_sum_2014(t, a, w, ks);
       }

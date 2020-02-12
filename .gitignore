@@ -2,3 +2,4 @@
 *.ini
 .Rproj.user
 .Rhistory
+src/*.o

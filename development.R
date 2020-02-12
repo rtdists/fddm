@@ -15,14 +15,11 @@ dfddm(rt, resp, 1, 0.4, 0, 0.5, 0, TRUE, "Foster", "2017", "small", eps)
 resp
 eps
 
-library("microbenchmark")
-summary(microbenchmark(no_log = dfddm(rt, resp, 1, 0.4, 0, 0.5, 0, FALSE, "Foster", "2017", "small", eps),
-                       ya_log = dfddm(rt, resp, 1, 0.4, 0, 0.5, 0, TRUE,  "Foster", "2017", "small", eps),
-                       times = 10000, unit = "us"))
 
-usethis::use_package("RWiener", type = "Suggests")
 
 ### random stuff
+usethis::use_package("RWiener", type = "Suggests")
+
 usethis::use_build_ignore("development.R")
 usethis::use_build_ignore("examples/")
 usethis::use_build_ignore("docs/")

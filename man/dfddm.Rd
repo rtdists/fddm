@@ -139,7 +139,7 @@ dfddm(rt = rt, response = response, a = 1, v = 2, t0 = 0.3, w = 0.5, sv = 0.5,
       scale = "small", err_tol = 0.000001)
 
 rt <- seq(0.1, 3, by = 0.1)
-response <- c(0, 1, 0, 1) # the first entry will be used for every rt
+response <- 0
 dfddm(rt = rt, response = response, a = 1, v = 2, t0 = 0.3, w = 0.5, sv = 0.5,
       log = FALSE, n_terms_small = "Foster", summation_small = "2017",
       scale = "small", err_tol = 0.000001)
