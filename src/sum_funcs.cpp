@@ -12,8 +12,9 @@
 
 // term < eps BGK2017 style truncated sum, with minimum terms
 double small_sum_eps_17(const double& t, const double& a, const double& w,
-                        const double& eps)
+                        const int& ks, const double& eps)
 {
+  // note: ks is not used
   double gamma = -a*a/(2*t);
   double sum = w * exp(gamma * w * w); // start at j=0 term
   double minterms = sqrt(t)/(2*a) - w/2; // minimum number of terms
@@ -31,7 +32,7 @@ double small_sum_eps_17(const double& t, const double& a, const double& w,
     eterm = rj * exp(gamma*rj*rj);
     sum += eterm;
   }
-  while (fabs(oterm) > eps) { // at this point, the odd (negative) term is greater
+  while (fabs(oterm) > eps) { // at this point, odd (negative) term is greater
     j++;
     rj = j + 1 - w; // j is odd
     oterm = rj * exp(gamma*rj*rj);
@@ -47,8 +48,9 @@ double small_sum_eps_17(const double& t, const double& a, const double& w,
 
 // term < eps BGK2014 style truncated sum, with minimum terms
 double small_sum_eps_14(const double& t, const double& a, const double& w,
-                        const double& eps)
+                        const int& ks, const double& eps)
 {
+  // note: ks is not used
   double gamma = -a*a/(2*t);
   double sum = w * exp(gamma * w * w); // start at j=0 term
   double minterms = sqrt(t)/(2*a) - w/2; // minimum number of terms
@@ -73,8 +75,9 @@ double small_sum_eps_14(const double& t, const double& a, const double& w,
 
 // BGK2017 style truncated sum
 double small_sum_2017(const double& t, const double& a, const double& w,
-                      const int& ks)
+                      const int& ks, const double& eps)
 {
+  // note: eps is not used
   double gamma = -a*a/(2*t);
   double sum = w * exp(gamma*w*w); // start at j=0
   double rj;
@@ -93,8 +96,9 @@ double small_sum_2017(const double& t, const double& a, const double& w,
 
 // BGK2014 style truncated sum
 double small_sum_2014(const double& t, const double& a, const double& w,
-                      const int& ks)
+                      const int& ks, const double& eps)
 {
+  // note: eps is not used
   double gamma = -a*a/(2*t);
   double sum = w * exp(gamma*w*w); // start at j=0
   for (int j = ks; j > 0; j--) { // iterate through all ks
@@ -113,8 +117,9 @@ double small_sum_2014(const double& t, const double& a, const double& w,
 
 // Navarro2009 style truncated sum
 double large_sum_Nav(const double& t, const double& a, const double& w,
-                     const int& kl)
+                     const int& kl, const double& eps)
 {
+  // note: eps is not used
   double gamma = -M_PI*M_PI*t/(2*a*a);
   double sum = 0.0;
   for (int j = 1; j <= kl; j++) {

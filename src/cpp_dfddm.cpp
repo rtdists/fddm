@@ -33,55 +33,57 @@ NumericVector cpp_dfddm(const NumericVector& rt,
   
   // determine which method to use
   DensFunc dens;
-  
+  SummFunc summ;
+  NummFunc numm;
+
   if (scale == "small") {
-    if (summation_small == "2017") {
-      if (n_terms_small == "Foster") {
-        dens = fs_Fos_17;
-      } else if (n_terms_small == "Kesselmeier") {
-        dens = fs_Kes_17;
-      } else if (n_terms_small == "Navarro") {
-        dens = fs_Nav_17;
+    dens = &fs;
+    if (n_terms_small == "Foster") {
+      numm = NULL;
+      if (summation_small == "2017") {
+        summ = &small_sum_eps_17;
+      } else if (summation_small == "2014") {
+        summ = &small_sum_eps_14;
       } else {
-        Rcerr << "error: invalid n_terms_small" << endl;
-        return NAN;
-      }
-    } else if (summation_small == "2014") {
-      if (n_terms_small == "Foster") {
-        dens = fs_Fos_14;
-      } else if (n_terms_small == "Kesselmeier") {
-        dens = fs_Kes_14;
-      } else if (n_terms_small == "Navarro") {
-        dens = fs_Nav_14;
-      } else {
-        Rcerr << "error: invalid n_terms_small" << endl;
+        Rcerr << "error: invalid summation_small" << endl;
         return NAN;
       }
     } else {
-      Rcerr << "error: invalid summation_small" << endl;
-      return NAN;
+      if (n_terms_small == "Kesselmeier") {
+        numm = &ks_Kes;
+      } else if (n_terms_small == "Navarro") {
+        numm = &ks_Nav;
+      } else {
+        Rcerr << "error: invalid n_terms_small" << endl;
+        return NAN;
+      }
+      if (summation_small == "2017") {
+        summ = &small_sum_2017;
+      } else if (summation_small == "2014") {
+        summ = &small_sum_2014;
+      } else {
+        Rcerr << "error: invalid summation_small" << endl;
+        return NAN;
+      }
     }
   } else if (scale == "large") {
-    dens = fl_Nav_09;
+    dens = &fl;
+    numm = NULL;
+    summ = NULL;
   } else if (scale == "both") {
+    dens = &fb;
+    if (n_terms_small == "Kesselmeier") {
+      numm = &ks_Kes;
+    } else if (n_terms_small == "Navarro") {
+      numm = &ks_Nav;
+    } else {
+      Rcerr << "error: invalid n_terms_small" << endl;
+      return NAN;
+    }
     if (summation_small == "2017") {
-      if (n_terms_small == "Kesselmeier") {
-        dens = fb_Kes_17;
-      } else if (n_terms_small == "Navarro") {
-        dens = fb_Nav_17;
-      } else {
-        Rcerr << "error: invalid n_terms_small" << endl;
-        return NAN;
-      }
+      summ = &small_sum_2017;
     } else if (summation_small == "2014") {
-      if (n_terms_small == "Kesselmeier") {
-        dens = fb_Kes_14;
-      } else if (n_terms_small == "Navarro") {
-        dens = fb_Nav_14;
-      } else {
-        Rcerr << "error: invalid n_terms_small" << endl;
-        return NAN;
-      }
+      summ = &small_sum_2014;
     } else {
       Rcerr << "error: invalid summation_small" << endl;
       return NAN;
@@ -91,6 +93,7 @@ NumericVector cpp_dfddm(const NumericVector& rt,
     return NAN;
   }
 
+  
   NumericVector out(Nmax);
   double t;
   
@@ -102,11 +105,11 @@ NumericVector cpp_dfddm(const NumericVector& rt,
     }
     
     if (response[i % Nres]) { // response is "upper" so use alternate parameters
-      out[i] = dens(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw],
-                    sv[i % Nsv], log_prob[i % Nlog], eps[i % Neps]);
+      out[i] = dens(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw], sv[i % Nsv],
+                    log_prob[i % Nlog], eps[i % Neps], numm, summ);
     } else { // response is "lower" so use unchanged parameters
-      out[i] = dens(t, a[i % Na], v[i % Nv], w[i % Nw],
-                    sv[i % Nsv], log_prob[i % Nlog], eps[i % Neps]);
+      out[i] = dens(t, a[i % Na], v[i % Nv], w[i % Nw], sv[i % Nsv],
+                    log_prob[i % Nlog], eps[i % Neps], numm, summ);
     }
     
   }

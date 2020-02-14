@@ -34,7 +34,8 @@
 #'   actual drift rates from specific trials. Values different from \eqn{0} can
 #'   predict slow errors. Allowed range: \eqn{0 <} \code{sv}. Typical range:
 #'   \eqn{0 <} \code{sv} \eqn{< 2}. See Details for more information. Default is
-#'   \eqn{0} (i.e., no drift).
+#'   \eqn{0} (i.e., no drift), and any value less than \eqn{0.05} will be
+#'   treated as \eqn{0}.
 #' @param log Logical; if \code{TRUE}, probabilities \eqn{p} are given as
 #'   \eqn{log(p)}. Default is \code{FALSE}.
 #' @param n_terms_small Which method for calculating number of terms used in the
@@ -54,11 +55,10 @@
 #' @param err_tol allowed error tolerance of the density function. Since the
 #'   density function contains an infinite sum, this parameter defines the
 #'   precision of the approximation to that infinite sum. Default is \eqn{1e-6}.
-#' 
-#' @details
-#' The default settings of \code{n_terms_small = "Foster"}, code{summation_small
-#' = "2017"}, \code{scale = "small"} produce the fastest and most accurate
-#' results, as shown in our associated paper.
+#'
+#' @details The default settings of \code{n_terms_small = "Foster"},
+#' code{summation_small = "2017"}, \code{scale = "small"} produce the fastest
+#' and most accurate results, as shown in our associated paper.
 #'
 #' \code{scale} - The density function for the DDM has traditionally been
 #' written in two forms: a "large-time" variant, and a "small-time" variant. The
@@ -94,11 +94,10 @@
 #' infinite sum. The \code{"Foster"} method is recommended because it is the
 #' fastest and guarantees the most accurate approximation to the density
 #' function of the DDM.
-#' 
-#' @references
-#' Navarro, D. J., & Fuss, I. G. (2009). Fast and accurate calculations for
-#' first-passage times in Wiener diffusion models. Journal of Mathematical
-#' Psychology, 53(4), 222-230.
+#'
+#' @references Navarro, D. J., & Fuss, I. G. (2009). Fast and accurate
+#' calculations for first-passage times in Wiener diffusion models. Journal of
+#' Mathematical Psychology, 53(4), 222-230.
 #'
 #' Gondan, M., Blurton, S. P., & Kesselmeier, M. (2014). Even faster and even
 #' more accurate first-passage time densities and distributions for the Wiener
@@ -107,14 +106,14 @@
 #' Blurton, S. P., Kesselmeier, M., & Gondan, M. (2017). The first-passage time
 #' distribution for the diffusion model with variable drift. Journal of
 #' Mathematical Psychology, 76, 7-12.
-#' 
-#' 
+#'
+#'
 #' @example examples/examples.diffusion.R
-#' 
+#'
 #' @return A vector containing the densities of the DDM with precision
 #'   \code{err_tol} whose length matches that of the longest input parameter
 #'   (usually \code{rt}).
-#' 
+#'
 #' @useDynLib fddm, .registration = TRUE
 #' @importFrom Rcpp evalCpp
 #' @export

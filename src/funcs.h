@@ -24,68 +24,46 @@ static const double LOG_2PI_2 = 0.5 * log(2 * M_PI);
 
 
 
-// define type for density function in if-else in cpp_dfddm.cpp
+// define types for functions in if-else in cpp_dfddm.cpp
+typedef int    (*NummFunc)(const double&, const double&, const double&);
+typedef double (*SummFunc)(const double&, const double&, const double&,
+                           const int&, const double&);
 typedef double (*DensFunc)(const double&, const double&, const double&,
                            const double&, const double&, const bool&,
-                           const double&);
+                           const double&, NummFunc, SummFunc);
 
 
 
 // Number of Terms
 
 int ks_Kes(const double& t, const double& w, const double& eps);
-int ks_Nav(const double& t, const double& eps);
-int kl_Nav(const double& t, const double& eps);
+int ks_Nav(const double& t, const double& w, const double& eps);
+int kl_Nav(const double& t, const double& w, const double& eps);
 
 
 
 // Infinite Summation Approximations
 
 double small_sum_eps_17(const double& t, const double& a, const double& w,
-                        const double& eps);
+                        const int& ks, const double& eps);
 double small_sum_eps_14(const double& t, const double& a, const double& w,
-                        const double&  eps);
+                        const int& ks, const double&  eps);
 double small_sum_2017(const double& t, const double& a, const double& w,
-                      const int& ks);
+                      const int& ks, const double& eps);
 double small_sum_2014(const double& t, const double& a, const double& w,
-                      const int& ks);
+                      const int& ks, const double& eps);
 double large_sum_Nav(const double& t, const double& a, const double& w,
-                     const int& kl);
+                     const int& kl, const double& eps);
 
 
 
 // Density Functions
-
-double fs_Fos_17(const double& t, const double& a,  const double& v,
-                 const double& w, const double& sv, const bool& log_prob,
-                 const double& eps);
-double fs_Fos_14(const double& t, const double& a,  const double& v,
-                 const double& w, const double& sv, const bool& log_prob,
-                 const double& eps);
-double fs_Kes_17(const double& t, const double& a,  const double& v,
-                 const double& w, const double& sv, const bool& log_prob,
-                 const double& eps);
-double fs_Kes_14(const double& t, const double& a,  const double& v,
-                 const double& w, const double& sv, const bool& log_prob,
-                 const double& eps);
-double fs_Nav_17(const double& t, const double& a,  const double& v,
-                 const double& w, const double& sv, const bool& log_prob,
-                 const double& eps);
-double fs_Nav_14(const double& t, const double& a,  const double& v,
-                 const double& w, const double& sv, const bool& log_prob,
-                 const double& eps);
-double fl_Nav_09(const double& t, const double& a,  const double& v,
-                 const double& w, const double& sv, const bool& log_prob,
-                 const double& eps);
-double fb_Kes_17(const double& t, const double& a,  const double& v,
-                 const double& w, const double& sv, const bool& log_prob,
-                 const double& eps);
-double fb_Kes_14(const double& t, const double& a,  const double& v,
-                 const double& w, const double& sv, const bool& log_prob,
-                 const double& eps);
-double fb_Nav_17(const double& t, const double& a,  const double& v,
-                 const double& w, const double& sv, const bool& log_prob,
-                 const double& eps);
-double fb_Nav_14(const double& t, const double& a,  const double& v,
-                 const double& w, const double& sv, const bool& log_prob,
-                 const double& eps);
+double fs(const double& t, const double& a, const double& v, const double& w,
+          const double& sv, const bool& log_prob, const double& eps,
+          NummFunc numm, SummFunc summ);
+double fl(const double& t, const double& a, const double& v, const double& w,
+          const double& sv, const bool& log_prob, const double& eps,
+          NummFunc numm, SummFunc summ);
+double fb(const double& t, const double& a, const double& v, const double& w,
+          const double& sv, const bool& log_prob, const double& eps,
+          NummFunc numm, SummFunc summ);

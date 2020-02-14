@@ -1,7 +1,7 @@
 // Functions to determine the number of terms required for approximating the
 // infinite sum in the density function. Note that these functions require the
 // scaled time t := t / (a * a), which is input in the function calls in the
-// density functions in src/density_funcs.cpp and src/density_funcs_log.cpp.
+// density functions in src/density_funcs.cpp.
 
 #include "funcs.h"
 
@@ -33,8 +33,9 @@ int ks_Kes(const double& t, const double& w, const double& eps)
 
 
 // Navarro2009
-int ks_Nav(const double& t, const double& eps)
+int ks_Nav(const double& t, const double& w, const double& eps)
 {
+  // note: w is not used
   if (eps < 1 / (2 * sqrt(2 * M_PI * t))) { // if error threshold is set low enough
     double ks = 2 + sqrt(-2 * t * log(2 * eps * sqrt(2 * M_PI * t)));
     return ceil(max(ks, sqrt(t)+1)); // ensure boundary conditions are met
@@ -51,8 +52,9 @@ int ks_Nav(const double& t, const double& eps)
 
 
 // Navarro2009
-int kl_Nav(const double& t, const double& eps)
+int kl_Nav(const double& t, const double& w, const double& eps)
 {
+  // note: w is not used
   if (eps < 1 / (M_PI * t)) { // error threshold is low enough
     double kl = sqrt(-2 * log(M_PI * t * eps) / (M_PI * M_PI *t));
     return ceil(max(kl, 1 / (M_PI * sqrt(t))));
