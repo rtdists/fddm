@@ -5,761 +5,400 @@
 
 
 
-//////////                                                           //////////
-///////////////////////////////// Small Time //////////////////////////////////
-//////////                                                           //////////
+//////////                                                            //////////
+///////////////////////////////// Small Time ///////////////////////////////////
+//////////                                                            //////////
 
-// Use term < eps BGK2017 style sum approximation, with minimum terms
-NumericVector fs_eps_2017(const NumericVector& rt,
-                          LogicalVector response,
-                          const double& a, const double& v,
-                          const double& t0, const double& w,
-                          const double& sv, const double& eps)
+// Foster style with 2017 sum
+double fs_Fos_17(const double& t, const double& a, const double& v,
+                 const double& w, const double& sv, const bool& log_prob,
+                 const double& eps)
 {
-  int n = rt.length(); // get number of response times
-
-  if (response.length() != n) { // create valid binary response vector
-    bool first_resp = response[0];
-    LogicalVector resp(n, first_resp);
-    response = resp;
-  }
-
-  NumericVector out(n);
-  double t, mult;
-  double vprime = -v;
-  double wprime = 1 - w;
-
-  if (sv < SV_THRESH) { // set sv=0 and use constant drift rate method
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
-      }
-
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
-             / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_eps_17(t, a, wprime, eps/mult);
-      } else { // else response is "lower"
-        mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_eps_17(t, a, w, eps/mult);
-      }
+  double mult;
+  if (log_prob) { // log
+    double log_a = log(a);
+    double log_t3 = 1.5 * log(t);
+    if (sv < SV_THRESH) { // no sv
+      mult = log_a - LOG_2PI_2 - log_t3 - v * a * w - v * v * t / 2;
+      return mult + log(small_sum_eps_17(t, a, w, eps / exp(mult)));
+    } else { // sv
+      double log_svt = 0.5 * log(1 + sv * t);
+      mult = log_a - log_t3 - log_svt + (sv * a * a * w * w
+            - 2 * v * a * w - v * v * t) / (2 + 2 * sv * t);
+      return mult + log(small_sum_eps_17(t, a, w, eps / exp(mult)));
     }
-  } else { // use variable drift rate (changes mult)
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
-      }
-
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
-                        + sv * a * a * wprime * wprime) / (2 + 2 * sv * t))
-             / sqrt(t * t * t + sv * t * t * t * t);
-        out[i] = mult * small_sum_eps_17(t, a, wprime, eps/mult);
-      } else { // else response is "lower"
-        mult = a * exp((-v * v * t - 2 * v * a * w
-                        + sv * a * a * w * w) / (2 + 2 * sv * t))
-             / sqrt(t * t * t + sv * t * t * t * t);
-        out[i] = mult * small_sum_eps_17(t, a, w, eps/mult);
-      }
+  } else { // no log
+    if (sv < SV_THRESH) { // no sv
+      mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
+      return mult * small_sum_eps_17(t, a, w, eps / mult);
+    } else { // sv
+      mult = a * exp((-v * v * t - 2 * v * a * w + sv * a * a * w * w)
+            / (2 + 2 * sv * t)) / sqrt(t * t * t + sv * t * t * t * t);
+      return mult * small_sum_eps_17(t, a, w, eps / mult);
     }
   }
-  return out;
 }
 
 
-// Use term < eps BGK2014 style sum approximation, with minimum terms
-NumericVector fs_eps_2014(const NumericVector& rt,
-                          LogicalVector response,
-                          const double& a, const double& v,
-                          const double& t0, const double& w,
-                          const double& sv, const double& eps)
+// Foster style with 2014 sum
+double fs_Fos_14(const double& t, const double& a, const double& v,
+                 const double& w, const double& sv, const bool& log_prob,
+                 const double& eps)
 {
-  int n = rt.length(); // get number of response times
-
-  if (response.length() != n) { // create valid binary response vector
-    bool first_resp = response[0];
-    LogicalVector resp(n, first_resp);
-    response = resp;
-  }
-
-  NumericVector out(n);
-  double t, mult;
-  double vprime = -v;
-  double wprime = 1 - w;
-
-  if (sv < SV_THRESH) { // set sv=0 and use constant drift rate method
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
-      }
-
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
-             / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_eps_14(t, a, wprime, eps/mult);
-      } else { // else response is "lower"
-        mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_eps_14(t, a, w, eps/mult);
-      }
+  double mult;
+  if (log_prob) { // log
+    double log_a = log(a);
+    double log_t3 = 1.5 * log(t);
+    if (sv < SV_THRESH) { // no sv
+      mult = log_a - LOG_2PI_2 - log_t3 - v * a * w - v * v * t / 2;
+      return mult + log(small_sum_eps_14(t, a, w, eps / exp(mult)));
+    } else { // sv
+      double log_svt = 0.5 * log(1 + sv * t);
+      mult = log_a - log_t3 - log_svt + (sv * a * a * w * w
+            - 2 * v * a * w - v * v * t) / (2 + 2 * sv * t);
+      return mult + log(small_sum_eps_14(t, a, w, eps / exp(mult)));
     }
-  } else { // use variable drift rate (changes mult)
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
-      }
-
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
-                        + sv * a * a * wprime * wprime) / (2 + 2 * sv * t))
-             / sqrt(t * t * t + sv * t * t * t * t);
-        out[i] = mult * small_sum_eps_14(t, a, wprime, eps/mult);
-      } else { // else response is "lower"
-        mult = a * exp((-v * v * t - 2 * v * a * w
-                        + sv * a * a * w * w) / (2 + 2 * sv * t))
-             / sqrt(t * t * t + sv * t * t * t * t);
-        out[i] = mult * small_sum_eps_14(t, a, w, eps/mult);
-      }
+  } else { // no log
+    if (sv < SV_THRESH) { // no sv
+      mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
+      return mult * small_sum_eps_14(t, a, w, eps / mult);
+    } else { // sv
+      mult = a * exp((-v * v * t - 2 * v * a * w + sv * a * a * w * w)
+            / (2 + 2 * sv * t)) / sqrt(t * t * t + sv * t * t * t * t);
+      return mult * small_sum_eps_14(t, a, w, eps / mult);
     }
   }
-  return out;
 }
 
 
-// Use Navarro2009 number of terms for 2017 style sum approximation
-NumericVector fs_Nav_2017(const NumericVector& rt,
-                          LogicalVector response,
-                          const double& a, const double& v,
-                          const double& t0, const double& w,
-                          const double& sv, const double& eps)
+// Kesselmeier and co style with 2017 sum
+double fs_Kes_17(const double& t, const double& a, const double& v,
+                 const double& w, const double& sv, const bool& log_prob,
+                 const double& eps)
 {
-  int n = rt.length(); // get number of response times
-
-  if (response.length() != n) { // create valid binary response vector
-    bool first_resp = response[0];
-    LogicalVector resp(n, first_resp);
-    response = resp;
-  }
-
-  NumericVector out(n);
-  double t, mult;
-  int ks;
-  double vprime = -v;
-  double wprime = 1 - w;
-
-  if (sv < SV_THRESH) { // set sv=0 and use constant drift rate method
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
-      }
-
-      ks = ks_Nav(t / (a * a), eps); // number of terms in sum approximation
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
-             / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_2017(t, a, wprime, ks);
-      } else { // else response is "lower"
-        mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_2017(t, a, w, ks);
-      }
+  int ks = ks_Kes(t / (a * a), w, eps);
+  double mult;
+  if (log_prob) { // log
+    double log_a = log(a);
+    double log_t3 = 1.5 * log(t);
+    if (sv < SV_THRESH) { // no sv
+      mult = log_a - LOG_2PI_2 - log_t3 - v * a * w - v * v * t / 2;
+      return mult + log(small_sum_2017(t, a, w, ks));
+    } else { // sv
+      double log_svt = 0.5 * log(1 + sv * t);
+      mult = log_a - log_t3 - log_svt + (sv * a * a * w * w
+            - 2 * v * a * w - v * v * t) / (2 + 2 * sv * t);
+      return mult + log(small_sum_2017(t, a, w, ks));
     }
-  } else { // use variable drift rate (changes mult)
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
-      }
-
-      ks = ks_Nav(t / (a * a), eps); // number of terms in sum approximation
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
-                        + sv * a * a * wprime * wprime) / (2 + 2 * sv * t))
-             / sqrt(t * t * t + sv * t * t * t * t);
-        out[i] = mult * small_sum_2017(t, a, wprime, ks);
-      } else { // else response is "lower"
-        mult = a * exp((-v * v * t - 2 * v * a * w
-                        + sv * a * a * w * w) / (2 + 2 * sv * t))
-             / sqrt(t * t * t + sv * t * t * t * t);
-        out[i] = mult * small_sum_2017(t, a, w, ks);
-      }
+  } else { // no log
+    if (sv < SV_THRESH) { // no sv
+      mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
+      return mult * small_sum_2017(t, a, w, ks);
+    } else { // sv
+      mult = a * exp((-v * v * t - 2 * v * a * w + sv * a * a * w * w)
+            / (2 + 2 * sv * t)) / sqrt(t * t * t + sv * t * t * t * t);
+      return mult * small_sum_2017(t, a, w, ks);
     }
   }
-  return out;
 }
 
 
-// Use Navarro2009 number of terms for 2014 style sum approximation
-NumericVector fs_Nav_2014(const NumericVector& rt,
-                          LogicalVector response,
-                          const double& a, const double& v,
-                          const double& t0, const double& w,
-                          const double& sv, const double& eps)
+// Kesselmeier and co style with 2014 sum
+double fs_Kes_14(const double& t, const double& a, const double& v,
+                 const double& w, const double& sv, const bool& log_prob,
+                 const double& eps)
 {
-  int n = rt.length(); // get number of response times
-
-  if (response.length() != n) { // create valid binary response vector
-    bool first_resp = response[0];
-    LogicalVector resp(n, first_resp);
-    response = resp;
-  }
-
-  NumericVector out(n);
-  double t, mult;
-  int ks;
-  double vprime = -v;
-  double wprime = 1 - w;
-
-  if (sv < SV_THRESH) { // set sv=0 and use constant drift rate method
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
-      }
-
-      ks = ks_Nav(t / (a * a), eps); // number of terms in sum approximation
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
-             / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_2014(t, a, wprime, ks);
-      } else { // else response is "lower"
-        mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_2014(t, a, w, ks);
-      }
+  int ks = ks_Kes(t / (a * a), w, eps);
+  double mult;
+  if (log_prob) { // log
+    double log_a = log(a);
+    double log_t3 = 1.5 * log(t);
+    if (sv < SV_THRESH) { // no sv
+      mult = log_a - LOG_2PI_2 - log_t3 - v * a * w - v * v * t / 2;
+      return mult + log(small_sum_2014(t, a, w, ks));
+    } else { // sv
+      double log_svt = 0.5 * log(1 + sv * t);
+      mult = log_a - log_t3 - log_svt + (sv * a * a * w * w
+            - 2 * v * a * w - v * v * t) / (2 + 2 * sv * t);
+      return mult + log(small_sum_2014(t, a, w, ks));
     }
-  } else { // use variable drift rate (changes mult)
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
-      }
-
-      ks = ks_Nav(t / (a * a), eps); // number of terms in sum approximation
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
-                        + sv * a * a * wprime * wprime) / (2 + 2 * sv * t))
-             / sqrt(t * t * t + sv * t * t * t * t);
-        out[i] = mult * small_sum_2014(t, a, wprime, ks);
-      } else { // else response is "lower"
-        mult = a * exp((-v * v * t - 2 * v * a * w
-                        + sv * a * a * w * w) / (2 + 2 * sv * t))
-             / sqrt(t * t * t + sv * t * t * t * t);
-        out[i] = mult * small_sum_2014(t, a, w, ks);
-      }
+  } else { // no log
+    if (sv < SV_THRESH) { // no sv
+      mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
+      return mult * small_sum_2014(t, a, w, ks);
+    } else { // sv
+      mult = a * exp((-v * v * t - 2 * v * a * w + sv * a * a * w * w)
+            / (2 + 2 * sv * t)) / sqrt(t * t * t + sv * t * t * t * t);
+      return mult * small_sum_2014(t, a, w, ks);
     }
   }
-  return out;
 }
 
 
-// Use BGK2014 number of terms for 2017 style sum approximation
-NumericVector fs_BGK_2017(const NumericVector& rt,
-                          LogicalVector response,
-                          const double& a, const double& v,
-                          const double& t0, const double& w,
-                          const double& sv, const double& eps)
+// Navarro style with 2017 sum
+double fs_Nav_17(const double& t, const double& a, const double& v,
+                 const double& w, const double& sv, const bool& log_prob,
+                 const double& eps)
 {
-  int n = rt.length(); // get number of response times
-
-  if (response.length() != n) { // create valid binary response vector
-    bool first_resp = response[0];
-    LogicalVector resp(n, first_resp);
-    response = resp;
-  }
-
-  NumericVector out(n);
-  double t, mult;
-  int ks;
-  double vprime = -v;
-  double wprime = 1 - w;
-
-  if (sv < SV_THRESH) { // set sv=0 and use constant drift rate method
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
-      }
-
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        ks = ks_BGK(t / (a * a), wprime, eps); // number of terms in sum approximation
-        mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
-             / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_2017(t, a, wprime, ks);
-      } else { // else response is "lower"
-        ks = ks_BGK(t / (a * a), w, eps); // number of terms in sum approximation
-        mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_2017(t, a, w, ks);
-      }
+  int ks = ks_Nav(t / (a * a), eps);
+  double mult;
+  if (log_prob) { // log
+    double log_a = log(a);
+    double log_t3 = 1.5 * log(t);
+    if (sv < SV_THRESH) { // no sv
+      mult = log_a - LOG_2PI_2 - log_t3 - v * a * w - v * v * t / 2;
+      return mult + log(small_sum_2017(t, a, w, ks));
+    } else { // sv
+      double log_svt = 0.5 * log(1 + sv * t);
+      mult = log_a - log_t3 - log_svt + (sv * a * a * w * w
+            - 2 * v * a * w - v * v * t) / (2 + 2 * sv * t);
+      return mult + log(small_sum_2017(t, a, w, ks));
     }
-  } else { // use variable drift rate (changes mult)
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
-      }
-
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        ks = ks_BGK(t / (a * a), wprime, eps); // number of terms in sum approximation
-        mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
-                        + sv * a * a * wprime * wprime) / (2 + 2 * sv * t))
-             / sqrt(t * t * t + sv * t * t * t * t);
-        out[i] = mult * small_sum_2017(t, a, wprime, ks);
-      } else { // else response is "lower"
-        ks = ks_BGK(t / (a * a), w, eps); // number of terms in sum approximation
-        mult = a * exp((-v * v * t - 2 * v * a * w
-                        + sv * a * a * w * w) / (2 + 2 * sv * t))
-             / sqrt(t * t * t + sv * t * t * t * t);
-        out[i] = mult * small_sum_2017(t, a, w, ks);
-      }
+  } else { // no log
+    if (sv < SV_THRESH) { // no sv
+      mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
+      return mult * small_sum_2017(t, a, w, ks);
+    } else { // sv
+      mult = a * exp((-v * v * t - 2 * v * a * w + sv * a * a * w * w)
+            / (2 + 2 * sv * t)) / sqrt(t * t * t + sv * t * t * t * t);
+      return mult * small_sum_2017(t, a, w, ks);
     }
   }
-  return out;
 }
 
 
-// Use BGK2014 number of terms for 2014 style sum approximation
-NumericVector fs_BGK_2014(const NumericVector& rt,
-                          LogicalVector response,
-                          const double& a, const double& v,
-                          const double& t0, const double& w,
-                          const double& sv, const double& eps)
+// Navarro style with 2014 sum
+double fs_Nav_14(const double& t, const double& a, const double& v,
+                 const double& w, const double& sv, const bool& log_prob,
+                 const double& eps)
 {
-  int n = rt.length(); // get number of response times
-
-  if (response.length() != n) { // create valid binary response vector
-    bool first_resp = response[0];
-    LogicalVector resp(n, first_resp);
-    response = resp;
-  }
-
-  NumericVector out(n);
-  double t, mult;
-  int ks;
-  double vprime = -v;
-  double wprime = 1 - w;
-
-  if (sv < SV_THRESH) { // set sv=0 and use constant drift rate method
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
-      }
-
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        ks = ks_BGK(t / (a * a), wprime, eps); // number of terms in sum approximation
-        mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
-             / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_2014(t, a, wprime, ks);
-      } else { // else response is "lower"
-        ks = ks_BGK(t / (a * a), w, eps); // number of terms in sum approximation
-        mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_2014(t, a, w, ks);
-      }
+  int ks = ks_Nav(t / (a * a), eps);
+  double mult;
+  if (log_prob) { // log
+    double log_a = log(a);
+    double log_t3 = 1.5 * log(t);
+    if (sv < SV_THRESH) { // no sv
+      mult = log_a - LOG_2PI_2 - log_t3 - v * a * w - v * v * t / 2;
+      return mult + log(small_sum_2014(t, a, w, ks));
+    } else { // sv
+      double log_svt = 0.5 * log(1 + sv * t);
+      mult = log_a - log_t3 - log_svt + (sv * a * a * w * w
+            - 2 * v * a * w - v * v * t) / (2 + 2 * sv * t);
+      return mult + log(small_sum_2014(t, a, w, ks));
     }
-  } else { // use variable drift rate (changes mult)
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
-      }
-
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        ks = ks_BGK(t / (a * a), wprime, eps); // number of terms in sum approximation
-        mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
-                        + sv * a * a * wprime * wprime) / (2 + 2 * sv * t))
-             / sqrt(t * t * t + sv * t * t * t * t);
-        out[i] = mult * small_sum_2014(t, a, wprime, ks);
-      } else { // else response is "lower"
-        ks = ks_BGK(t / (a * a), w, eps); // number of terms in sum approximation
-        mult = a * exp((-v * v * t - 2 * v * a * w
-                        + sv * a * a * w * w) / (2 + 2 * sv * t))
-             / sqrt(t * t * t + sv * t * t * t * t);
-        out[i] = mult * small_sum_2014(t, a, w, ks);
-      }
+  } else { // no log
+    if (sv < SV_THRESH) { // no sv
+      mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
+      return mult * small_sum_2014(t, a, w, ks);
+    } else { // sv
+      mult = a * exp((-v * v * t - 2 * v * a * w + sv * a * a * w * w)
+            / (2 + 2 * sv * t)) / sqrt(t * t * t + sv * t * t * t * t);
+      return mult * small_sum_2014(t, a, w, ks);
     }
   }
-  return out;
 }
 
 
 
-//////////                                                           //////////
-///////////////////////////////// Large Time //////////////////////////////////
-//////////                                                           //////////
+//////////                                                            //////////
+///////////////////////////////// Large Time ///////////////////////////////////
+//////////                                                            //////////
 
-// Use Navarro2009 number of terms for sum approximation
-NumericVector fl_Nav_2009(const NumericVector& rt,
-                          LogicalVector response,
-                          const double& a, const double& v,
-                          const double& t0, const double& w,
-                          const double& eps)
+// Navarro style with large sum
+double fl_Nav_09(const double& t, const double& a, const double& v,
+                 const double& w, const double& sv, const bool& log_prob,
+                 const double& eps)
 {
-  int n = rt.length(); // get number of response times
-
-  if (response.length() != n) { // create valid binary response vector
-    bool first_resp = response[0];
-    LogicalVector resp(n, first_resp);
-    response = resp;
+  // note: sv is not used because there is only a constant drift rate variant
+  int kl = kl_Nav(t / (a * a), eps);
+  double mult;
+  if (log_prob) { // log
+    double log_a2 = 2 * log(a);
+    mult =  LOG_PI - log_a2 - v * a * w - v * v * t / 2;
+    return mult + log(large_sum_Nav(t, a, w, kl));
+  } else { // no log
+    mult = M_PI * exp(-v * a * w - v * v * t / 2) / (a * a);
+    return mult * large_sum_Nav(t, a, w, kl);
   }
+}
 
-  NumericVector out(n);
-  double t, mult;
-  int kl;
-  double vprime = -v;
-  double wprime = 1 - w;
 
-  for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-    t = rt[i] - t0; // subtract non-decisison time from the response time
-    if (t <= 0) {
-      out[i] = 0; // if t=0, return 0 instead of NaN
-      continue;
+
+//////////                                                            //////////
+///////////////////////////////// Both Times ///////////////////////////////////
+//////////                                                            //////////
+
+// ks = Kesselmeier and co, 2017 style sum approximation, kl = Navarro
+double fb_Kes_17(const double& t, const double& a, const double& v,
+                 const double& w, const double& sv, const bool& log_prob,
+                 const double& eps)
+{
+  int ks = ks_Kes(t / (a * a), w, eps);
+  int kl = kl_Nav(t / (a * a), eps);
+  double mult;
+  if (ks < kl) { // small time appx is more efficient
+    if (log_prob) { // log
+      double log_a = log(a);
+      double log_t3 = 1.5 * log(t);
+      if (sv < SV_THRESH) { // no sv
+        mult = log_a - LOG_2PI_2 - log_t3 - v * a * w - v * v * t / 2;
+        return mult + log(small_sum_2017(t, a, w, ks));
+      } else { // sv
+        double log_svt = 0.5 * log(1 + sv * t);
+        mult = log_a - log_t3 - log_svt + (sv * a * a * w * w
+              - 2 * v * a * w - v * v * t) / (2 + 2 * sv * t);
+        return mult + log(small_sum_2017(t, a, w, ks));
+      }
+    } else { // no log
+      if (sv < SV_THRESH) { // no sv
+        mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
+        return mult * small_sum_2017(t, a, w, ks);
+      } else { // sv
+        mult = a * exp((-v * v * t - 2 * v * a * w + sv * a * a * w * w)
+              / (2 + 2 * sv * t)) / sqrt(t * t * t + sv * t * t * t * t);
+        return mult * small_sum_2017(t, a, w, ks);
+      }
     }
-
-    kl = kl_Nav(t / (a * a), eps); // number of terms in sum approximation
-    if (response[i] == 1) { // if response is "upper" use alternate parameters
-      mult = M_PI * exp(-vprime * a * wprime - vprime * vprime * t / 2)
-           / (a * a);
-      out[i] = mult * large_sum_Nav(t, a, wprime, kl);
-    } else { // else response is "lower"
+  } else { // large time appx is more efficient
+    if (log_prob) { // log
+      double log_a2 = 2 * log(a);
+      mult =  LOG_PI - log_a2 - v * a * w - v * v * t / 2;
+      return mult + log(large_sum_Nav(t, a, w, kl));
+    } else { // no log
       mult = M_PI * exp(-v * a * w - v * v * t / 2) / (a * a);
-      out[i] = mult * large_sum_Nav(t, a, w, kl);
+      return mult * large_sum_Nav(t, a, w, kl);
     }
   }
-  return out;
 }
 
 
-
-//////////                                                           //////////
-///////////////////////////////// Both Times //////////////////////////////////
-//////////                                                           //////////
-
-// ks = Navarro2009, 2017 style sum approximation, kl = Navarro2009
-NumericVector fb_Nav_Nav_2017(const NumericVector& rt,
-                              LogicalVector response,
-                              const double& a, const double& v,
-                              const double& t0, const double& w,
-                              const double& sv, const double& eps)
+// ks = Kesselmeier and co, 2014 style sum approximation, kl = Navarro
+double fb_Kes_14(const double& t, const double& a, const double& v,
+                 const double& w, const double& sv, const bool& log_prob,
+                 const double& eps)
 {
-  int n = rt.length(); // get number of response times
-
-  if (response.length() != n) { // create valid binary response vector
-    bool first_resp = response[0];
-    LogicalVector resp(n, first_resp);
-    response = resp;
-  }
-
-  NumericVector out(n);
-  double t, mult;
-  double vprime = -v;
-  double wprime = 1 - w;
-
-  if (sv < SV_THRESH) { // set sv=0 and use constant drift rate methods
-    int ks, kl;
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
+  int ks = ks_Kes(t / (a * a), w, eps);
+  int kl = kl_Nav(t / (a * a), eps);
+  double mult;
+  if (ks < kl) { // small time appx is more efficient
+    if (log_prob) { // log
+      double log_a = log(a);
+      double log_t3 = 1.5 * log(t);
+      if (sv < SV_THRESH) { // no sv
+        mult = log_a - LOG_2PI_2 - log_t3 - v * a * w - v * v * t / 2;
+        return mult + log(small_sum_2014(t, a, w, ks));
+      } else { // sv
+        double log_svt = 0.5 * log(1 + sv * t);
+        mult = log_a - log_t3 - log_svt + (sv * a * a * w * w
+              - 2 * v * a * w - v * v * t) / (2 + 2 * sv * t);
+        return mult + log(small_sum_2014(t, a, w, ks));
       }
-
-      ks = ks_Nav(t / (a * a), eps); // number of terms in small time sum approximation
-      kl = kl_Nav(t / (a * a), eps); // number of terms in sum approximation
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        if (ks < kl) { // small time needs fewer terms than lorge time
-          mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
-                          + sv * a * a * wprime * wprime) / (2 + 2 * sv * t))
-               / sqrt(t * t * t + sv * t * t * t * t);
-          out[i] = mult * small_sum_2017(t, a, wprime, ks);
-        } else { // large time needs fewer terms
-          mult = M_PI * exp(-vprime * a * wprime - vprime * vprime * t / 2)
-               / (a * a);
-          out[i] = mult * large_sum_Nav(t, a, wprime, kl);
-        }
-      } else { // else response is "lower"
-        if (ks < kl) { // small time needs fewer terms than lorge time
-          mult = a * exp((-v * v * t - 2 * v * a * w
-                          + sv * a * a * w * w) / (2 + 2 * sv * t))
-               / sqrt(t * t * t + sv * t * t * t * t);
-          out[i] = mult * small_sum_2017(t, a, w, ks);
-        } else { // large time needs fewer terms
-          mult = M_PI * exp(-v * a * w - v * v * t / 2) / (a * a);
-          out[i] = mult * large_sum_Nav(t, a, w, kl);
-        }
-      }
-    }
-  } else { // use variable drift rate (changes mult) and only use small time
-    int ks;
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
-      }
-
-      ks = ks_Nav(t / (a * a), eps); // number of terms in sum approximation
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
-             / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_2017(t, a, wprime, ks);
-      } else { // else response is "lower"
+    } else { // no log
+      if (sv < SV_THRESH) { // no sv
         mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_2017(t, a, w, ks);
+        return mult * small_sum_2014(t, a, w, ks);
+      } else { // sv
+        mult = a * exp((-v * v * t - 2 * v * a * w + sv * a * a * w * w)
+              / (2 + 2 * sv * t)) / sqrt(t * t * t + sv * t * t * t * t);
+        return mult * small_sum_2014(t, a, w, ks);
       }
     }
+  } else { // large time appx is more efficient
+    if (log_prob) { // log
+      double log_a2 = 2 * log(a);
+      mult =  LOG_PI - log_a2 - v * a * w - v * v * t / 2;
+      return mult + log(large_sum_Nav(t, a, w, kl));
+    } else { // no log
+      mult = M_PI * exp(-v * a * w - v * v * t / 2) / (a * a);
+      return mult * large_sum_Nav(t, a, w, kl);
+    }
   }
-  return out;
 }
 
 
-// ks = Navarro2009, 2014 style sum approximation, kl = Navarro2009
-NumericVector fb_Nav_Nav_2014(const NumericVector& rt,
-                              LogicalVector response,
-                              const double& a, const double& v,
-                              const double& t0, const double& w,
-                              const double& sv, const double& eps)
+// ks = Navarro, 2017 style sum approximation, kl = Navarro
+double fb_Nav_17(const double& t, const double& a, const double& v,
+                 const double& w, const double& sv, const bool& log_prob,
+                 const double& eps)
 {
-  int n = rt.length(); // get number of response times
-
-  if (response.length() != n) { // create valid binary response vector
-    bool first_resp = response[0];
-    LogicalVector resp(n, first_resp);
-    response = resp;
-  }
-
-  NumericVector out(n);
-  double t, mult;
-  double vprime = -v;
-  double wprime = 1 - w;
-
-  if (sv < SV_THRESH) { // set sv=0 and use constant drift rate methods
-    int ks, kl;
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
+  int ks = ks_Nav(t / (a * a), eps);
+  int kl = kl_Nav(t / (a * a), eps);
+  double mult;
+  if (ks < kl) { // small time appx is more efficient
+    if (log_prob) { // log
+      double log_a = log(a);
+      double log_t3 = 1.5 * log(t);
+      if (sv < SV_THRESH) { // no sv
+        mult = log_a - LOG_2PI_2 - log_t3 - v * a * w - v * v * t / 2;
+        return mult + log(small_sum_2017(t, a, w, ks));
+      } else { // sv
+        double log_svt = 0.5 * log(1 + sv * t);
+        mult = log_a - log_t3 - log_svt + (sv * a * a * w * w
+              - 2 * v * a * w - v * v * t) / (2 + 2 * sv * t);
+        return mult + log(small_sum_2017(t, a, w, ks));
       }
-
-      ks = ks_Nav(t / (a * a), eps); // number of terms in small time sum approximation
-      kl = kl_Nav(t / (a * a), eps); // number of terms in sum approximation
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        if (ks < kl) { // small time needs fewer terms than lorge time
-          mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
-                          + sv * a * a * wprime * wprime) / (2 + 2 * sv * t))
-               / sqrt(t * t * t + sv * t * t * t * t);
-          out[i] = mult * small_sum_2014(t, a, wprime, ks);
-        } else { // large time needs fewer terms
-          mult = M_PI * exp(-vprime * a * wprime - vprime * vprime * t / 2)
-               / (a * a);
-          out[i] = mult * large_sum_Nav(t, a, wprime, kl);
-        }
-      } else { // else response is "lower"
-        if (ks < kl) { // small time needs fewer terms than lorge time
-          mult = a * exp((-v * v * t - 2 * v * a * w
-                          + sv * a * a * w * w) / (2 + 2 * sv * t))
-               / sqrt(t * t * t + sv * t * t * t * t);
-          out[i] = mult * small_sum_2014(t, a, w, ks);
-        } else { // large time needs fewer terms
-          mult = M_PI * exp(-v * a * w - v * v * t / 2) / (a * a);
-          out[i] = mult * large_sum_Nav(t, a, w, kl);
-        }
-      }
-    }
-  } else { // use variable drift rate (changes mult) and only use small time
-    int ks;
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
-      }
-
-      ks = ks_Nav(t / (a * a), eps); // number of terms in sum approximation
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
-             / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_2014(t, a, wprime, ks);
-      } else { // else response is "lower"
+    } else { // no log
+      if (sv < SV_THRESH) { // no sv
         mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_2014(t, a, w, ks);
+        return mult * small_sum_2017(t, a, w, ks);
+      } else { // sv
+        mult = a * exp((-v * v * t - 2 * v * a * w + sv * a * a * w * w)
+              / (2 + 2 * sv * t)) / sqrt(t * t * t + sv * t * t * t * t);
+        return mult * small_sum_2017(t, a, w, ks);
       }
     }
+  } else { // large time appx is more efficient
+    if (log_prob) { // log
+      double log_a2 = 2 * log(a);
+      mult =  LOG_PI - log_a2 - v * a * w - v * v * t / 2;
+      return mult + log(large_sum_Nav(t, a, w, kl));
+    } else { // no log
+      mult = M_PI * exp(-v * a * w - v * v * t / 2) / (a * a);
+      return mult * large_sum_Nav(t, a, w, kl);
+    }
   }
-  return out;
 }
 
 
-// ks = BGK2014, 2017 style sum approximation, kl = Navarro2009
-NumericVector fb_BGK_Nav_2017(const NumericVector& rt,
-                              LogicalVector response,
-                              const double& a, const double& v,
-                              const double& t0, const double& w,
-                              const double& sv, const double& eps)
+// ks = Navarro, 2014 style sum approximation, kl = Navarro
+double fb_Nav_14(const double& t, const double& a, const double& v,
+                 const double& w, const double& sv, const bool& log_prob,
+                 const double& eps)
 {
-  int n = rt.length(); // get number of response times
-
-  if (response.length() != n) { // create valid binary response vector
-    bool first_resp = response[0];
-    LogicalVector resp(n, first_resp);
-    response = resp;
-  }
-
-  NumericVector out(n);
-  double t, mult;
-  double vprime = -v;
-  double wprime = 1 - w;
-
-  if (sv < SV_THRESH) { // set sv=0 and use constant drift rate methods
-    int ks, kl;
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
+  int ks = ks_Nav(t / (a * a), eps);
+  int kl = kl_Nav(t / (a * a), eps);
+  double mult;
+  if (ks < kl) { // small time appx is more efficient
+    if (log_prob) { // log
+      double log_a = log(a);
+      double log_t3 = 1.5 * log(t);
+      if (sv < SV_THRESH) { // no sv
+        mult = log_a - LOG_2PI_2 - log_t3 - v * a * w - v * v * t / 2;
+        return mult + log(small_sum_2014(t, a, w, ks));
+      } else { // sv
+        double log_svt = 0.5 * log(1 + sv * t);
+        mult = log_a - log_t3 - log_svt + (sv * a * a * w * w
+              - 2 * v * a * w - v * v * t) / (2 + 2 * sv * t);
+        return mult + log(small_sum_2014(t, a, w, ks));
       }
-
-      kl = kl_Nav(t / (a * a), eps); // number of terms in sum approximation
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        ks = ks_BGK(t / (a * a), wprime, eps); // number of terms in small time appx
-        if (ks < kl) { // small time needs fewer terms than lorge time
-          mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
-                          + sv * a * a * wprime * wprime) / (2 + 2 * sv * t))
-               / sqrt(t * t * t + sv * t * t * t * t);
-          out[i] = mult * small_sum_2017(t, a, wprime, ks);
-        } else { // large time needs fewer terms
-          mult = M_PI * exp(-vprime * a * wprime - vprime * vprime * t / 2)
-               / (a * a);
-          out[i] = mult * large_sum_Nav(t, a, wprime, kl);
-        }
-      } else { // else response is "lower"
-        ks = ks_BGK(t / (a * a), w, eps); // number of terms in small time appx
-        if (ks < kl) { // small time needs fewer terms than lorge time
-          mult = a * exp((-v * v * t - 2 * v * a * w
-                          + sv * a * a * w * w) / (2 + 2 * sv * t))
-               / sqrt(t * t * t + sv * t * t * t * t);
-          out[i] = mult * small_sum_2017(t, a, w, ks);
-        } else { // large time needs fewer terms
-          mult = M_PI * exp(-v * a * w - v * v * t / 2) / (a * a);
-          out[i] = mult * large_sum_Nav(t, a, w, kl);
-        }
-      }
-    }
-  } else { // use variable drift rate (changes mult) and only use small time
-    int ks;
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
-      }
-
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        ks = ks_BGK(t / (a * a), wprime, eps); // number of terms in small time appx
-        mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
-             / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_2017(t, a, wprime, ks);
-      } else { // else response is "lower"
-        ks = ks_BGK(t / (a * a), w, eps); // number of terms in small time appx
+    } else { // no log
+      if (sv < SV_THRESH) { // no sv
         mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_2017(t, a, w, ks);
+        return mult * small_sum_2014(t, a, w, ks);
+      } else { // sv
+        mult = a * exp((-v * v * t - 2 * v * a * w + sv * a * a * w * w)
+              / (2 + 2 * sv * t)) / sqrt(t * t * t + sv * t * t * t * t);
+        return mult * small_sum_2014(t, a, w, ks);
       }
     }
-  }
-  return out;
-}
-
-
-// ks = BGK2014, 2014 style sum approximation, kl = Navarro2009
-NumericVector fb_BGK_Nav_2014(const NumericVector& rt,
-                              LogicalVector response,
-                              const double& a, const double& v,
-                              const double& t0, const double& w,
-                              const double& sv, const double& eps)
-{
-  int n = rt.length(); // get number of response times
-
-  if (response.length() != n) { // create valid binary response vector
-    bool first_resp = response[0];
-    LogicalVector resp(n, first_resp);
-    response = resp;
-  }
-
-  NumericVector out(n);
-  double t, mult;
-  double vprime = -v;
-  double wprime = 1 - w;
-
-  if (sv < SV_THRESH) { // set sv=0 and use constant drift rate methods
-    int ks, kl;
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
-      }
-
-      kl = kl_Nav(t / (a * a), eps); // number of terms in sum approximation
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        ks = ks_BGK(t / (a * a), wprime, eps); // number of terms in small time appx
-        if (ks < kl) { // small time needs fewer terms than lorge time
-          mult = a * exp((-vprime * vprime * t - 2 * vprime * a * wprime
-                          + sv * a * a * wprime * wprime) / (2 + 2 * sv * t))
-               / sqrt(t * t * t + sv * t * t * t * t);
-          out[i] = mult * small_sum_2014(t, a, wprime, ks);
-        } else { // large time needs fewer terms
-          mult = M_PI * exp(-vprime * a * wprime - vprime * vprime * t / 2)
-               / (a * a);
-          out[i] = mult * large_sum_Nav(t, a, wprime, kl);
-        }
-      } else { // else response is "lower"
-        ks = ks_BGK(t / (a * a), w, eps); // number of terms in small time appx
-        if (ks < kl) { // small time needs fewer terms than lorge time
-          mult = a * exp((-v * v * t - 2 * v * a * w
-                          + sv * a * a * w * w) / (2 + 2 * sv * t))
-               / sqrt(t * t * t + sv * t * t * t * t);
-          out[i] = mult * small_sum_2014(t, a, w, ks);
-        } else { // large time needs fewer terms
-          mult = M_PI * exp(-v * a * w - v * v * t / 2) / (a * a);
-          out[i] = mult * large_sum_Nav(t, a, w, kl);
-        }
-      }
-    }
-  } else { // use variable drift rate (changes mult) and only use small time
-    int ks;
-    for (int i = 0; i < n; i++) { // iterate through all values in rt and out
-      t = rt[i] - t0; // subtract non-decisison time from the response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of NaN
-        continue;
-      }
-
-      if (response[i] == 1) { // if response is "upper" use alternate parameters
-        ks = ks_BGK(t / (a * a), wprime, eps); // number of terms in small time appx
-        mult = a * exp(-vprime * a * wprime - vprime * vprime * t / 2)
-             / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_2014(t, a, wprime, ks);
-      } else { // else response is "lower"
-        ks = ks_BGK(t / (a * a), w, eps); // number of terms in small time appx
-        mult = a * exp(-v * a * w - v * v * t / 2) / sqrt(2 * M_PI * t * t * t);
-        out[i] = mult * small_sum_2014(t, a, w, ks);
-      }
+  } else { // large time appx is more efficient
+    if (log_prob) { // log
+      double log_a2 = 2 * log(a);
+      mult =  LOG_PI - log_a2 - v * a * w - v * v * t / 2;
+      return mult + log(large_sum_Nav(t, a, w, kl));
+    } else { // no log
+      mult = M_PI * exp(-v * a * w - v * v * t / 2) / (a * a);
+      return mult * large_sum_Nav(t, a, w, kl);
     }
   }
-  return out;
 }

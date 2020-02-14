@@ -13,8 +13,8 @@
 //////////                                                           //////////
 
 
-// BGK2014
-int ks_BGK(const double& t, const double& w, const double& eps)
+// Kesselmeier and co 2014
+int ks_Kes(const double& t, const double& w, const double& eps)
 {
   double u_eps, arg, k1;
   int k;

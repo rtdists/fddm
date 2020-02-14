@@ -9,11 +9,8 @@ sqrt(.Machine$double.eps)
 
 ### preliminary testing
 rt <- seq(1,3,by=0.5)
-resp <- rep(0,3)
 eps <- 0.000001
-dfddm(rt, resp, 1, 0.4, 0, 0.5, 0, TRUE, "Foster", "2017", "small", eps)
-resp
-eps
+dfddm(rt, 0, 1, 0.4, 0, 0.5, 0, TRUE, "Foster", "2017", "small", eps)
 
 
 
