@@ -22,8 +22,9 @@
 #'   range: \eqn{-5 <} \code{v} \eqn{< 5}.
 #' @param t0 Non-decision time or response time constant (in seconds). Lower
 #'   bound for the duration of all non-decisional processes (encoding and
-#'   response execution). Allowed range: \eqn{0 <} \code{t0}. Typical range:
-#'   \eqn{0.1 <} \code{t0} \eqn{< 0.5}.
+#'   response execution). If this value is greater than \code{rt}, then the
+#'   resulting density is \eqn{0}.Allowed range: \eqn{0 <} \code{t0}. Typical
+#'   range: \eqn{0.1 <} \code{t0} \eqn{< 0.5}.
 #' @param w Relative starting point. Indicator of an a priori bias in decision
 #'   making. When the relative starting point \code{w} deviates from \eqn{0.5},
 #'   the amount of information necessary for a decision differs between response
@@ -71,14 +72,14 @@
 #' "small-time" density function; hence, it is recommended to use the
 #' \code{"small"} option.
 #'
-#' \code{sv} - The "small-time" variant of the density function has two further
-#' variants: one with a constant drift rate \code{v} (i.e., \code{sv} \eqn{=
-#' 0}), and one with a variable drift rate \code{v} (i.e., \code{sv} \eqn{> 0}).
-#' The details of the differences between these two density functions can be
-#' found in our associated paper. To use the density function with a constant
-#' drift rate, leave the parameter \code{sv} to its default value of \eqn{0}. To
-#' use the density function with a variable drift rate, set the parameter
-#' \code{sv} to some positive value.
+#' \code{sv} - Both the "small-time" and "large-time" variants of the density
+#' function have two further variants: one with a constant drift rate \code{v}
+#' (i.e., \code{sv} \eqn{= 0}), and one with a variable drift rate \code{v}
+#' (i.e., \code{sv} \eqn{> 0}). The details of the differences between these two
+#' density functions can be found in our associated paper. To use the density
+#' function with a constant drift rate, leave the parameter \code{sv} to its
+#' default value of \eqn{0}. To use the density function with a variable drift
+#' rate, set the parameter \code{sv} to some positive value.
 #'
 #' \code{summation_small} - The "large-time" variant of the density function
 #' does not have any further variants, but the "small-time" has more options
@@ -124,8 +125,8 @@ dfddm <- function(rt, response,
                   n_terms_small = c("Foster", "Kesselmeier", "Navarro"),
                   summation_small = c("2017", "2014"),
                   scale = c("small", "large", "both"), 
-                  err_tol = 0.000001
-) {
+                  err_tol = 0.000001)
+{
   n_terms_small <- match.arg(n_terms_small)
   summation_small <- match.arg(summation_small)
   scale <- match.arg(scale)

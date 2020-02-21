@@ -11,6 +11,7 @@ Imports: Rcpp (>= 1.0.1)
 LinkingTo: Rcpp
 Suggests: 
     rtdists,
-    RWiener
+    RWiener,
+    testthat
 RoxygenNote: 7.0.2
 Encoding: UTF-8

@@ -18,7 +18,7 @@ using Rcpp::LogicalVector;
 
 // Constants
 
-static const double SV_THRESH = 0.05; // threshold for using variable drift rate
+static const double SV_THRESH = 0.0; // threshold for using variable drift rate
 static const double LOG_PI = log(M_PI);
 static const double LOG_2PI_2 = 0.5 * log(2 * M_PI);
 

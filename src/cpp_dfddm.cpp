@@ -116,5 +116,3 @@ NumericVector cpp_dfddm(const NumericVector& rt,
 
   return out;
 }
-
-
