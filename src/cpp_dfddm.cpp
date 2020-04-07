@@ -106,10 +106,10 @@ NumericVector cpp_dfddm(const NumericVector& rt,
     
     if (response[i % Nres]) { // response is "upper" so use alternate parameters
       out[i] = dens(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw], sv[i % Nsv],
-                    log_prob[i % Nlog], eps[i % Neps], numm, summ);
+                    log_prob[i % Nlog], eps[i % Neps], numm, summ, -1);
     } else { // response is "lower" so use unchanged parameters
       out[i] = dens(t, a[i % Na], v[i % Nv], w[i % Nw], sv[i % Nsv],
-                    log_prob[i % Nlog], eps[i % Neps], numm, summ);
+                    log_prob[i % Nlog], eps[i % Neps], numm, summ, -1);
     }
     
   }

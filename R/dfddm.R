@@ -53,7 +53,7 @@
 #' @param scale Which density function to use. Can be one of \{\code{"small"},
 #'   \code{"large"}, \code{"both"}\}. See Details for more information. Default
 #'   is \code{"small"}.
-#' @param err_tol allowed error tolerance of the density function. Since the
+#' @param err_tol Allowed error tolerance of the density function. Since the
 #'   density function contains an infinite sum, this parameter defines the
 #'   precision of the approximation to that infinite sum. Default is \eqn{1e-6}.
 #'
@@ -79,7 +79,9 @@
 #' density functions can be found in our associated paper. To use the density
 #' function with a constant drift rate, leave the parameter \code{sv} to its
 #' default value of \eqn{0}. To use the density function with a variable drift
-#' rate, set the parameter \code{sv} to some positive value.
+#' rate, set the parameter \code{sv} to some positive value. Note that any value
+#' less than 0.05 will be treated as 0, and thus the constant drift rate density
+#' function will be used.
 #'
 #' \code{summation_small} - The "large-time" variant of the density function
 #' does not have any further variants, but the "small-time" has more options

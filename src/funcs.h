@@ -18,9 +18,10 @@ using Rcpp::LogicalVector;
 
 // Constants
 
-static const double SV_THRESH = 0.0; // threshold for using variable drift rate
+static const double SV_THRESH = 1e-6; // threshold for using variable drift rate
 static const double LOG_PI = log(M_PI);
 static const double LOG_2PI_2 = 0.5 * log(2 * M_PI);
+static const double SQRT_2PI = sqrt(2 * M_PI);
 
 
 
@@ -30,7 +31,7 @@ typedef double (*SummFunc)(const double&, const double&, const double&,
                            const int&, const double&);
 typedef double (*DensFunc)(const double&, const double&, const double&,
                            const double&, const double&, const bool&,
-                           const double&, NummFunc, SummFunc);
+                           const double&, NummFunc, SummFunc, int);
 
 
 
@@ -60,10 +61,10 @@ double large_sum_Nav(const double& t, const double& a, const double& w,
 // Density Functions
 double fs(const double& t, const double& a, const double& v, const double& w,
           const double& sv, const bool& log_prob, const double& eps,
-          NummFunc numm, SummFunc summ);
+          NummFunc numm, SummFunc summ, int ks);
 double fl(const double& t, const double& a, const double& v, const double& w,
           const double& sv, const bool& log_prob, const double& eps,
-          NummFunc numm, SummFunc summ);
+          NummFunc numm, SummFunc summ, int kl);
 double fb(const double& t, const double& a, const double& v, const double& w,
           const double& sv, const bool& log_prob, const double& eps,
-          NummFunc numm, SummFunc summ);
+          NummFunc numm, SummFunc summ, int k);

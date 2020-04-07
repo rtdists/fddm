@@ -18,7 +18,7 @@ int ks_Kes(const double& t, const double& w, const double& eps)
 {
   double u_eps, arg, k1;
   int k;
-  u_eps = min(-1.0, log(2 * M_PI * t * t * eps * eps)); // Safe bound for sqrt
+  u_eps = min(-1.0, log(2 * M_PI * t*t * eps*eps)); // Safe bound for sqrt
   arg = -t * (u_eps - sqrt(-2 * u_eps - 2)); // sqrt(x) with x > 0
   k1 = (sqrt(2 * t) - w)/2;
   if (arg > 0) { // If arg > 0, set k2 and calculate k
@@ -56,7 +56,7 @@ int kl_Nav(const double& t, const double& w, const double& eps)
 {
   // note: w is not used
   if (eps < 1 / (M_PI * t)) { // error threshold is low enough
-    double kl = sqrt(-2 * log(M_PI * t * eps) / (M_PI * M_PI *t));
+    double kl = sqrt(-2 * log(M_PI * t * eps) / (M_PI*M_PI *t));
     return ceil(max(kl, 1 / (M_PI * sqrt(t))));
   }
   return ceil(1 / (M_PI * sqrt(t))); // else set to boundary condition

@@ -13,7 +13,7 @@ dfddm(
   w = 0.5,
   sv = 0,
   log = FALSE,
-  n_terms_small = c("Foster", "Navarro", "Kesselmeier"),
+  n_terms_small = c("Foster", "Kesselmeier", "Navarro"),
   summation_small = c("2017", "2014"),
   scale = c("small", "large", "both"),
   err_tol = 1e-06
@@ -36,34 +36,36 @@ accumulation of information. Large (absolute) values of drift indicate a
 good performance. If received information supports the response linked to
 the upper threshold, then the sign will be positive; similarly a negative
 value indicates that the received information supports the response linked
-to the lower threshold. Allowed range: \code{v} is a real number.
-Typical range: \eqn{-5 <} \code{v} \eqn{< 5}.}
+to the lower threshold. Allowed range: \code{v} is a real number. Typical
+range: \eqn{-5 <} \code{v} \eqn{< 5}.}
 
 \item{t0}{Non-decision time or response time constant (in seconds). Lower
 bound for the duration of all non-decisional processes (encoding and
-response execution). Allowed range: \eqn{0 <} \code{t0}. Typical range:
-\eqn{0.1 <} \code{t0} \eqn{< 0.5}.}
+response execution). If this value is greater than \code{rt}, then the
+resulting density is \eqn{0}.Allowed range: \eqn{0 <} \code{t0}. Typical
+range: \eqn{0.1 <} \code{t0} \eqn{< 0.5}.}
 
 \item{w}{Relative starting point. Indicator of an a priori bias in decision
-making. When the relative starting point \code{w} deviates from
-\eqn{0.5}, the amount of information necessary for a decision differs
-between response alternatives. Allowed range: \eqn{0 <} \code{w} \eqn{< 1}.
-Default is \eqn{0.5} (i.e., no bias).}
+making. When the relative starting point \code{w} deviates from \eqn{0.5},
+the amount of information necessary for a decision differs between response
+alternatives. Allowed range: \eqn{0 <} \code{w} \eqn{< 1}. Default is
+\eqn{0.5} (i.e., no bias).}
 
 \item{sv}{Inter-trial-variability of drift rate. Standard deviation of a
 normal distribution with mean \code{v} describing the distribution of
 actual drift rates from specific trials. Values different from \eqn{0} can
 predict slow errors. Allowed range: \eqn{0 <} \code{sv}. Typical range:
 \eqn{0 <} \code{sv} \eqn{< 2}. See Details for more information. Default is
-\eqn{0} (i.e., no drift).}
+\eqn{0} (i.e., no drift), and any value less than \eqn{0.05} will be
+treated as \eqn{0}.}
 
 \item{log}{Logical; if \code{TRUE}, probabilities \eqn{p} are given as
 \eqn{log(p)}. Default is \code{FALSE}.}
 
 \item{n_terms_small}{Which method for calculating number of terms used in the
 approximation of the infinite sum in the small-time approximation of the
-density function. Can be one of \{\code{"Foster"}, \code{"Navarro"},
-\code{"Kesselmeier"}\}. Only applicable if \code{scale} is one of
+density function. Can be one of \{\code{"Foster"}, \code{"Kesselmeier"},
+\code{"Navarro"}\}. Only applicable if \code{scale} is one of
 \{\code{"small"}, \code{"both"}\}. See Details for more information.
 Default is \code{"Foster"}.}
 
@@ -73,17 +75,18 @@ approximation to the infinite sum. Can be one of \{\code{"2017"},
 \{\code{"small"}, \code{"both"}\}. See Details for more information.
 Default is \code{"2017"}.}
 
-\item{scale}{Which density function to use. Can be one of
-\{\code{"small"}, \code{"large"}, \code{"both"}\}. See Details for more
-information. Default is \code{"small"}.}
+\item{scale}{Which density function to use. Can be one of \{\code{"small"},
+\code{"large"}, \code{"both"}\}. See Details for more information. Default
+is \code{"small"}.}
 
-\item{err_tol}{allowed error tolerance of the density function. Since the
+\item{err_tol}{Allowed error tolerance of the density function. Since the
 density function contains an infinite sum, this parameter defines the
 precision of the approximation to that infinite sum. Default is \eqn{1e-6}.}
 }
 \value{
 A vector containing the densities of the DDM with precision
-  \code{err_tol} of length \code{rt}.
+  \code{err_tol} whose length matches that of the longest input parameter
+  (usually \code{rt}).
 }
 \description{
 Density function for the Ratcliff diffusion decision model (DDM) with
@@ -92,9 +95,9 @@ starting point), \code{v} (drift rate), \code{t0} (non-decision time/response
 time constant), and \code{sv} (inter-trial-variability of drift).
 }
 \details{
-The default settings of \code{n_terms_small = "Foster"}, code{summation_small
-= "2017"}, \code{scale = "small"} produce the fastest and most accurate
-results, as shown in our associated paper.
+The default settings of \code{n_terms_small = "Foster"},
+code{summation_small = "2017"}, \code{scale = "small"} produce the fastest
+and most accurate results, as shown in our associated paper.
 
 \code{scale} - The density function for the DDM has traditionally been
 written in two forms: a "large-time" variant, and a "small-time" variant. The
@@ -107,14 +110,16 @@ efficient, the "large-time" density function is nearly always slower than the
 "small-time" density function; hence, it is recommended to use the
 \code{"small"} option.
 
-\code{sv} - The "small-time" variant of the density function has two further
-variants: one with a constant drift rate \code{v} (i.e., \code{sv}
-\eqn{= 0}), and one with a variable drift rate \code{v} (i.e., \code{sv}
-\eqn{> 0}). The details of the differences between these two density
-functions can be found in our associated paper. To use the density function
-with a constant drift rate, leave the parameter \code{sv} to its default
-value of \eqn{0}. To use the density function with a variable drift rate, set
-the parameter \code{sv} to some positive value.
+\code{sv} - Both the "small-time" and "large-time" variants of the density
+function have two further variants: one with a constant drift rate \code{v}
+(i.e., \code{sv} \eqn{= 0}), and one with a variable drift rate \code{v}
+(i.e., \code{sv} \eqn{> 0}). The details of the differences between these two
+density functions can be found in our associated paper. To use the density
+function with a constant drift rate, leave the parameter \code{sv} to its
+default value of \eqn{0}. To use the density function with a variable drift
+rate, set the parameter \code{sv} to some positive value. Note that any value
+less than 0.05 will be treated as 0, and thus the constant drift rate density
+function will be used.
 
 \code{summation_small} - The "large-time" variant of the density function
 does not have any further variants, but the "small-time" has more options
@@ -155,9 +160,15 @@ response <- rep(0, length(rt))
 dfddm(rt = rt, response = response, a = 1.5, v = -0.4, t0 = 0.3)
 }
 \references{
-Navarro, D. J., & Fuss, I. G. (2009). Fast and accurate calculations for first-passage times in Wiener diffusion models. Journal of Mathematical Psychology, 53(4), 222-230.
+Navarro, D. J., & Fuss, I. G. (2009). Fast and accurate
+calculations for first-passage times in Wiener diffusion models. Journal of
+Mathematical Psychology, 53(4), 222-230.
 
-Gondan, M., Blurton, S. P., & Kesselmeier, M. (2014). Even faster and even more accurate first-passage time densities and distributions for the Wiener diffusion model. Journal of Mathematical Psychology, 60, 20-22.
+Gondan, M., Blurton, S. P., & Kesselmeier, M. (2014). Even faster and even
+more accurate first-passage time densities and distributions for the Wiener
+diffusion model. Journal of Mathematical Psychology, 60, 20-22.
 
-Blurton, S. P., Kesselmeier, M., & Gondan, M. (2017). The first-passage time distribution for the diffusion model with variable drift. Journal of Mathematical Psychology, 76, 7-12.
+Blurton, S. P., Kesselmeier, M., & Gondan, M. (2017). The first-passage time
+distribution for the diffusion model with variable drift. Journal of
+Mathematical Psychology, 76, 7-12.
 }
