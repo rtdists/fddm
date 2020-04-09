@@ -6,6 +6,61 @@ library("tidyverse")
 
 
 ############## Simulated Data ##############
+
+### Mean benchmark times (violin plots) for each method
+bm <- readRDS("benchmark_testing/Results/vec_10000.Rds")
+t_idx <- match("W", colnames(bm))
+bm[,-seq_len(t_idx)] <- bm[, -seq_len(t_idx)]/1000
+mbm <- melt(bm, measure.vars = -seq_len(t_idx),
+            variable.name = "FuncName", value.name = "time")
+
+
+Names <- c("fddm_fast", "fs_Fos_17", "fs_Fos_14",
+           "fs_Kes_17", "fs_Kes_14", "fs_Nav_17", "fs_Nav_14",
+           "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
+           "fl_Nav_09", "RWiener", "Kesselmeier", "rtdists")
+Color <- c("#ff00cc", "#9900cc", "#cc99ff",
+           "#006699", "#66ccff", "#336600", "#33cc33",
+           "#c2a500", "#d7db42", "#e68a00", "#ffb366",
+           "#996633", "#ff9999", "#ff5050", "#990000")
+
+violin <- ggplot(mbm, aes(x = FuncName, y = time,
+                              color = factor(FuncName, levels = Names),
+                              fill = factor(FuncName, levels = Names))) +
+                  geom_violin(trim = TRUE, alpha = 0.5) +
+                  scale_color_manual(values = Color) +
+                  scale_fill_manual(values = Color) +
+                  geom_boxplot(width = 0.15, fill = "white", alpha = 0.5) +
+                  stat_summary(fun.y = mean, geom = "errorbar",
+                               aes(ymax = ..y.., ymin = ..y..),
+                               width = .35, linetype = "dashed") +
+                  # coord_cartesian(ylim = c(0,50)) +
+                  labs(title = "Distribution of median benchmark times",
+                       subtitle = "Dashed lines represent mean benchmark times",
+                       x = "Method", y = "Time (ms)",
+                       color = "Method") +
+                  theme_bw() +
+                  theme(#panel.grid.minor = element_blank(),
+                        panel.border = element_blank(),
+                        plot.title = element_text(size = 23),
+                        plot.subtitle = element_text(size = 16),
+                        axis.text.x = element_text(size = 16, angle = 30),
+                        axis.text.y = element_text(size = 16),
+                        axis.title.x = element_text(size = 20),
+                        axis.title.y = element_text(size = 20),
+                        legend.position = "none")
+ggsave("benchmark_testing/Results/Images/violin.png", plot = violin,
+       width = 16, height = 9)
+
+
+
+
+
+
+
+
+
+
 ### Complementary ECDF Plots
 bm <- readRDS("benchmark_testing/Results/vec_10000.Rds")
 t_idx <- match("W", colnames(bm))
@@ -43,7 +98,8 @@ ecdf_RCp <- ggplot(mbm_RCp, aes(x = time,
         legend.justification = c(1,1),
         legend.direction = "vertical",
         legend.title = element_text(size = 18),
-        legend.text = element_text(size = 16, angle = 0))
+        legend.text = element_text(size = 16, angle = 0)) +
+  guides(color = guide_legend(override.aes = list(size = 2)))
 ggsave("benchmark_testing/Results/Images/ecdf_RCp_10000.png",
        plot = ecdf_RCp, width = 16, height = 9)
 
@@ -75,7 +131,8 @@ ecdf_sum <- ggplot(mbm_sum, aes(x = time,
         legend.justification = c(1,1),
         legend.direction = "vertical",
         legend.title = element_text(size = 18),
-        legend.text = element_text(size = 16, angle = 0))
+        legend.text = element_text(size = 16, angle = 0)) +
+  guides(color = guide_legend(override.aes = list(size = 2)))
 ggsave("benchmark_testing/Results/Images/ecdf_sum_10000.png",
        plot = ecdf_sum, width = 16, height = 9)
 
@@ -105,15 +162,16 @@ ecdf_slt <- ggplot(mbm_slt, aes(x = time,
         legend.justification = c(1,1),
         legend.direction = "vertical",
         legend.title = element_text(size = 18),
-        legend.text = element_text(size = 16, angle = 0))
+        legend.text = element_text(size = 16, angle = 0)) +
+  guides(color = guide_legend(override.aes = list(size = 2)))
 ggsave("benchmark_testing/Results/Images/ecdf_slt_10000.png",
        plot = ecdf_slt, width = 16, height = 9)
 
 
-Names_bRC <- c("fs_Fos_17", "fb_Kes_17", "fb_Nav_17",
-               "RWiener")
-Color_bRC <- c("#9900cc", "#c2a500", "#e68a00",
-               "#ff9999")
+Names_bRC <- c("fddm_fast", "fs_Fos_17", "fs_Kes_17", "fs_Nav_17",
+               "fb_Kes_17", "fb_Nav_17", "RWiener", "Kesselmeier")
+Color_bRC <- c("#ff00cc", "#9900cc", "#006699", "#336600",
+               "#c2a500", "#e68a00", "#ff9999", "#ff5050")
 mbm_bRC <- subset(mbm, FuncName %in% Names_bRC)
 ecdf_bRC <- ggplot(mbm_bRC, aes(x = time,
                                 color = factor(FuncName, levels = Names_bRC))) +
@@ -135,64 +193,10 @@ ecdf_bRC <- ggplot(mbm_bRC, aes(x = time,
         legend.justification = c(1,1),
         legend.direction = "vertical",
         legend.title = element_text(size = 18),
-        legend.text = element_text(size = 16, angle = 0))
+        legend.text = element_text(size = 16, angle = 0)) +
+  guides(color = guide_legend(override.aes = list(size = 2)))
 ggsave("benchmark_testing/Results/Images/ecdf_bRC_10000.png",
        plot = ecdf_bRC, width = 16, height = 9)
-
-
-
-
-
-
-
-
-
-
-
-
-
-### Mean benchmark times (violin plots) for each method
-bm <- readRDS("benchmark_testing/Results/vec_10000.Rds")
-t_idx <- match("W", colnames(bm))
-bm[,-seq_len(t_idx)] <- bm[, -seq_len(t_idx)]/1000
-mbm <- melt(bm, measure.vars = -seq_len(t_idx),
-            variable.name = "FuncName", value.name = "time")
-
-
-Names <- c("fddm_fast", "fs_Fos_17", "fs_Fos_14",
-           "fs_Kes_17", "fs_Kes_14", "fs_Nav_17", "fs_Nav_14",
-           "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
-           "fl_Nav_09", "RWiener", "Kesselmeier", "rtdists")
-Color <- c("#ff00cc", "#9900cc", "#cc99ff",
-           "#006699", "#66ccff", "#336600", "#33cc33",
-           "#c2a500", "#d7db42", "#e68a00", "#ffb366",
-           "#996633", "#ff9999", "#ff5050", "#990000")
-
-violin <- ggplot(mbm, aes(x = FuncName, y = time,
-                              color = factor(FuncName, levels = Names),
-                              fill = factor(FuncName, levels = Names))) +
-                  geom_violin(trim = TRUE) +
-                  scale_color_manual(values = Color) +
-                  scale_fill_manual(values = Color) +
-                  geom_boxplot(width = 0.15, fill = "white") +
-                  # coord_cartesian(ylim = c(0,25)) +
-                  labs(title = "Distribution of median benchmark times",
-                       x = "Method", y = "Time (ms)",
-                       color = "Method") +
-                  theme_bw() +
-                  theme(panel.grid.minor = element_blank(),
-                        panel.border = element_blank(),
-                        plot.title = element_text(size = 23),
-                        axis.text.x = element_text(size = 16, angle = 30),
-                        axis.text.y = element_text(size = 16),
-                        axis.title.x = element_text(size = 20),
-                        axis.title.y = element_text(size = 20),
-                        legend.position = "none")
-ggsave("benchmark_testing/Results/Images/violin.png", plot = viol,
-       width = 16, height = 9)
-
-
-
 
 
 
@@ -210,15 +214,17 @@ bm[,-seq_len(t_idx)] <- bm[, -seq_len(t_idx)]/1000
 mbm <- melt(bm, measure.vars = -seq_len(t_idx),
             variable.name = "FuncName", value.name = "time")
 
-Names_bRC <- c("fs_Fos_17", "fb_Kes_17", "fb_Nav_17",
-               "RWiener", "Kesselmeier", "rtdists")
-Color_bRC <- c("#9900cc", "#c2a500", "#e68a00",
-               "#ff9999", "#ff5050", "#990000")
-mbm_bRC <- subset(mbm, FuncName %in% Names_bRC)
+Names_meq <- c("fs_Fos_17", "fs_Kes_17", "fs_Nav_17",
+               "fddm_fast", "fb_Kes_17", "fb_Nav_17",
+               "RWiener", "Kesselmeier", "fl_Nav_09")
+Color_meq <- c("#9900cc", "#006699", "#336600",
+               "#ff00cc", "#c2a500", "#e68a00",
+               "#ff9999", "#ff5050", "#996633")
+mbm_meq <- subset(mbm, FuncName %in% Names_meq)
 
 # RT
-mbm_bRC %>%
-  mutate(FuncName = factor(FuncName, levels = Names_bRC)) %>%
+mbm_meq %>%
+  mutate(FuncName = factor(FuncName, levels = Names_meq)) %>%
   group_by(FuncName, RT) %>%
   summarise(means = mean(time),
             upper = quantile(time, prob = 0.9),
@@ -227,10 +233,10 @@ mbm_bRC %>%
   geom_ribbon(aes(ymin = lower, ymax = upper, fill = FuncName),
               alpha = 0.2, color = NA) +
   geom_line(aes(group = 1)) +
-  scale_color_manual(values = Color_bRC) +
-  scale_fill_manual(values = Color_bRC) +
-  labs(title = "Means with 10% and 90% Quantiles of Microbenchmark Results",
-       x = "RT, Response Time", y = "Time (ms)") +
+  scale_color_manual(values = Color_meq) +
+  scale_fill_manual(values = Color_meq) +
+  labs(title = "Means with 10% and 90% quantiles of median microbenchmark results",
+       x = "rt, response time", y = "Time (ms)") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
@@ -240,8 +246,8 @@ mbm_bRC %>%
 ggsave("benchmark_testing/Results/Images/meq_RT.png", width = 16, height = 9)
 
 # A
-mbm_bRC %>%
-  mutate(FuncName = factor(FuncName, levels = Names_bRC)) %>%
+mbm_meq %>%
+  mutate(FuncName = factor(FuncName, levels = Names_meq)) %>%
   group_by(FuncName, A) %>%
   summarise(means = mean(time),
             upper = quantile(time, prob = 0.9),
@@ -252,11 +258,11 @@ mbm_bRC %>%
   geom_ribbon(aes(ymin = lower, ymax = upper, fill = FuncName),
               alpha = 0.2, color = NA) +
   geom_line(aes(group = 1)) +
-  scale_color_manual(values = Color_bRC) +
-  scale_fill_manual(values = Color_bRC) +
-  labs(title = "Means with 10% and 90% Quantiles of Microbenchmark Results",
+  scale_color_manual(values = Color_meq) +
+  scale_fill_manual(values = Color_meq) +
+  labs(title = "Means with 10% and 90% quantiles of median microbenchmark results",
        subtitle = "Grey shaded region is typical range of the parameter",
-       x = "A, Threshold Separation", y = "Time (ms)") +
+       x = "a, threshold separation", y = "Time (ms)") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
@@ -266,8 +272,8 @@ mbm_bRC %>%
 ggsave("benchmark_testing/Results/Images/meq_A.png", width = 16, height = 9)
 
 # V
-mbm_bRC %>%
-  mutate(FuncName = factor(FuncName, levels = Names_bRC)) %>%
+mbm_meq %>%
+  mutate(FuncName = factor(FuncName, levels = Names_meq)) %>%
   group_by(FuncName, V) %>%
   summarise(means = mean(time),
             upper = quantile(time, prob = 0.9),
@@ -278,11 +284,11 @@ mbm_bRC %>%
   geom_ribbon(aes(ymin = lower, ymax = upper, fill = FuncName),
               alpha = 0.2, color = NA) +
   geom_line(aes(group = 1)) +
-  scale_color_manual(values = Color_bRC) +
-  scale_fill_manual(values = Color_bRC) +
-  labs(title = "Means with 10% and 90% Quantiles of Microbenchmark Results",
+  scale_color_manual(values = Color_meq) +
+  scale_fill_manual(values = Color_meq) +
+  labs(title = "Means with 10% and 90% quantiles of median microbenchmark results",
        subtitle = "Grey shaded region is typical range of the parameter",
-       x = "V, Drift Rate", y = "Time (ms)") +
+       x = "v, drift rate", y = "Time (ms)") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
@@ -292,8 +298,8 @@ mbm_bRC %>%
 ggsave("benchmark_testing/Results/Images/meq_V.png", width = 16, height = 9)
 
 # W
-mbm_bRC %>%
-  mutate(FuncName = factor(FuncName, levels = Names_bRC)) %>%
+mbm_meq %>%
+  mutate(FuncName = factor(FuncName, levels = Names_meq)) %>%
   group_by(FuncName, W) %>%
   summarise(means = mean(time),
             upper = quantile(time, prob = 0.9),
@@ -302,10 +308,10 @@ mbm_bRC %>%
   geom_ribbon(aes(ymin = lower, ymax = upper, fill = FuncName),
               alpha = 0.2, color = NA) +
   geom_line(aes(group = 1)) +
-  scale_color_manual(values = Color_bRC) +
-  scale_fill_manual(values = Color_bRC) +
-  labs(title = "Means with 10% and 90% Quantiles of Microbenchmark Results",
-       x = "W, Relative Starting Point (A Priori Bias)", y = "Time (ms)") +
+  scale_color_manual(values = Color_meq) +
+  scale_fill_manual(values = Color_meq) +
+  labs(title = "Means with 10% and 90% quantiles of median microbenchmark results",
+       x = "w, relative starting point (a priori bias)", y = "Time (ms)") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
