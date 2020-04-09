@@ -1,6 +1,6 @@
 // Functions to evaluate the DDM PDF for specific criteria
 
-#include "funcs.h"
+#include "funcs.hpp"
 
 
 
@@ -56,7 +56,7 @@ double fl(const double& t, const double& a, const double& v, const double& w,
     kl = kl_Nav(t / (a*a), w, eps);
   }
   double mult;
-  
+
   if (log_prob) { // log
     if (sv < SV_THRESH) { // no sv
       mult =  LOG_PI - 2 * log(a) - v * a * w - v * v * t / 2;

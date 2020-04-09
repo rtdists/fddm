@@ -15,23 +15,20 @@ bm <- function(RT, resp, V, A, W, t0 = 1e-4, err_tol = 1e-6,
     rresp <- "upper"
   }
 
-  nf <- 14 # number of functions being benchmarked
+  fnames <- c("fddm_fast", "fs_Fos_17", "fs_Fos_14",
+              "fs_Kes_17", "fs_Kes_14", "fs_Nav_17", "fs_Nav_14",
+              "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
+              "fl_Nav_09", "RWiener", "Kesselmeier", "rtdists")
+  nf <- length(fnames) # number of functions being benchmarked
   nRT <- length(RT) # number of response times
   nV <- length(V) # number of drift rates
   nA <- length(A) # number of boundary separations
   nW <- length(W) # number of starting points
-  fnames <- c("fs_Fos_17", "fs_Fos_14", "fs_Kes_17", "fs_Kes_14",
-              "fs_Nav_17", "fs_Nav_14", "fl_Nav_09",
-              "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
-              "rtdists", "RWiener", "Kesselmeier")
 
   # Initialize the dataframe to contain the microbenchmark results
-  mbm_res <- data.frame(matrix(ncol=times+5, nrow=nf*nRT*nV*nA*nW))
-  colnames(mbm_res) <- c('RT', 'V', 'A', 'W', 'FuncName',
-                         paste0("bm", seq_len(times)))
-  start <- 1
-  stop <- nf
-  sl_time <- seq_len(times)+5
+  mbm_res <- data.frame(matrix(ncol = 4+nf, nrow=nRT*nV*nA*nW))
+  colnames(mbm_res) <- c('RT', 'V', 'A', 'W', fnames)
+  row_idx <- 1
 
   # Loop through each combination of parameters and record microbenchmark results
   for (rt in 1:nRT) {
@@ -39,6 +36,8 @@ bm <- function(RT, resp, V, A, W, t0 = 1e-4, err_tol = 1e-6,
       for (a in 1:nA) {
         for (w in 1:nW) {
           mbm <- microbenchmark(
+            fddm_fast = dfddm_fast(rt = RT[rt], a = A[a], v = V[v], t0 = t0,
+                                   w = W[w], err_tol = err_tol),
             fs_Fos_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
                               v = V[v], t0 = t0, w = W[w],
                               log = FALSE, n_terms_small = "Foster",
@@ -69,11 +68,6 @@ bm <- function(RT, resp, V, A, W, t0 = 1e-4, err_tol = 1e-6,
                               log = FALSE, n_terms_small = "Navarro",
                               summation_small = "2014", scale = "small",
                               err_tol = err_tol),
-            fl_Nav_09 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = NULL,
-                              summation_small = NULL, scale = "large",
-                              err_tol = err_tol),
             fb_Kes_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
                               v = V[v], t0 = t0, w = W[w],
                               log = FALSE, n_terms_small = "Kesselmeier",
@@ -94,28 +88,30 @@ bm <- function(RT, resp, V, A, W, t0 = 1e-4, err_tol = 1e-6,
                               log = FALSE, n_terms_small = "Navarro",
                               summation_small = "2014", scale = "both",
                               err_tol = err_tol),
-            rtdists = ddiffusion(RT[rt], rresp, a = A[a], v = V[v],
-                                 t0 = t0, z = W[w]*A[a]),
+            fl_Nav_09 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                              v = V[v], t0 = t0, w = W[w],
+                              log = FALSE, n_terms_small = "",
+                              summation_small = "", scale = "large",
+                              err_tol = err_tol),
             RWiener = dwiener(RT[rt], resp = rresp, alpha = A[a],
                               delta = V[v], tau = t0, beta = W[w],
                               give_log = FALSE),
             Kesselmeier = fs14_R(t = RT[rt]-t0, a = A[a], v = V[v],
                                  w = W[w], eps = err_tol), # only "lower" resp
+            rtdists = ddiffusion(RT[rt], rresp, a = A[a], v = V[v],
+                                 t0 = t0, z = W[w]*A[a]),
             times = times, unit = unit)
-          # add the rt, v, a, w values and function names to the dataframe
-          mbm_res[start:stop, 1] <- rep(RT[rt], nf)
-          mbm_res[start:stop, 2] <- rep(V[v]  , nf)
-          mbm_res[start:stop, 3] <- rep(A[a]  , nf)
-          mbm_res[start:stop, 4] <- rep(W[w]  , nf)
-          mbm_res[start:stop, 5] <- fnames
-          # add the microbenchmark results to the dataframe
+          # add the rt, v, a, and w values to the dataframe
+          mbm_res[row_idx, 1] <- RT[rt]
+          mbm_res[row_idx, 2] <- V[v]
+          mbm_res[row_idx, 3] <- A[a]
+          mbm_res[row_idx, 4] <- W[w]
+          # add the median microbenchmark results to the dataframe
           for (i in 1:nf) {
-            bm <- subset(mbm, expr==fnames[i])
-            mbm_res[start+i-1, sl_time] <- bm$time
+            mbm_res[row_idx, 4+i] <- median(subset(mbm, expr==fnames[i])$time)
           }
-          # iterate start and stop values
-          start = start + nf
-          stop = stop + nf
+          # iterate start value
+          row_idx = row_idx + 1
         }
       }
     }
@@ -133,29 +129,28 @@ bm_vec <- function(RT, resp, V, A, W, t0 = 1e-4, err_tol = 1e-6,
     rresp <- "upper"
   }
 
-  nf <- 14 # number of functions being benchmarked
+  fnames <- c("fddm_fast", "fs_Fos_17", "fs_Fos_14",
+              "fs_Kes_17", "fs_Kes_14", "fs_Nav_17", "fs_Nav_14",
+              "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
+              "fl_Nav_09", "RWiener", "Kesselmeier", "rtdists")
+  nf <- length(fnames) # number of functions being benchmarked
   nV <- length(V) # number of drift rates
   nA <- length(A) # number of boundary separations
   nW <- length(W) # number of starting points
   rresp <- rep(rresp, length(RT)) # for RWiener
-  fnames <- c("fs_Fos_17", "fs_Fos_14", "fs_Kes_17", "fs_Kes_14",
-              "fs_Nav_17", "fs_Nav_14", "fl_Nav_09",
-              "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
-              "rtdists", "RWiener", "Kesselmeier")
 
   # Initialize the dataframe to contain the microbenchmark results
-  mbm_res <- data.frame(matrix(ncol=times+4, nrow=nf*nV*nA*nW))
-  colnames(mbm_res) <- c('V', 'A', 'W', 'FuncName',
-                         paste0("bm", seq_len(times)))
-  start <- 1
-  stop <- nf
-  sl_time <- seq_len(times)+4
+  mbm_res <- data.frame(matrix(ncol = 3+nf, nrow = nV*nA*nW))
+  colnames(mbm_res) <- c('V', 'A', 'W', fnames)
+  row_idx <- 1
 
   # Loop through each combination of parameters and record microbenchmark results
   for (v in 1:nV) {
     for (a in 1:nA) {
       for (w in 1:nW) {
         mbm <- microbenchmark(
+          fddm_fast = dfddm_fast(rt = RT, a = A[a], v = V[v], t0 = t0,
+                                 w = W[w], err_tol = err_tol),
           fs_Fos_17 = dfddm(rt = RT, response = resp, a = A[a],
                             v = V[v], t0 = t0, w = W[w],
                             log = FALSE, n_terms_small = "Foster",
@@ -186,11 +181,6 @@ bm_vec <- function(RT, resp, V, A, W, t0 = 1e-4, err_tol = 1e-6,
                             log = FALSE, n_terms_small = "Navarro",
                             summation_small = "2014", scale = "small",
                             err_tol = err_tol),
-          fl_Nav_09 = dfddm(rt = RT, response = resp, a = A[a],
-                            v = V[v], t0 = t0, w = W[w],
-                            log = FALSE, n_terms_small = NULL,
-                            summation_small = NULL, scale = "large",
-                            err_tol = err_tol),
           fb_Kes_17 = dfddm(rt = RT, response = resp, a = A[a],
                             v = V[v], t0 = t0, w = W[w],
                             log = FALSE, n_terms_small = "Kesselmeier",
@@ -211,27 +201,29 @@ bm_vec <- function(RT, resp, V, A, W, t0 = 1e-4, err_tol = 1e-6,
                             log = FALSE, n_terms_small = "Navarro",
                             summation_small = "2014", scale = "both",
                             err_tol = err_tol),
-          rtdists = ddiffusion(RT, rresp, a = A[a], v = V[v],
-                               t0 = t0, z = W[w]*A[a]),
+          fl_Nav_09 = dfddm(rt = RT, response = resp, a = A[a],
+                            v = V[v], t0 = t0, w = W[w],
+                            log = FALSE, n_terms_small = "",
+                            summation_small = "", scale = "large",
+                            err_tol = err_tol),
           RWiener = dwiener(RT, resp = rresp, alpha = A[a],
                             delta = V[v], tau = t0, beta = W[w],
                             give_log = FALSE),
           Kesselmeier = fs14_R(t = RT-t0, a = A[a], v = V[v],
                                w = W[w], eps = err_tol), # only "lower" resp
+          rtdists = ddiffusion(RT, rresp, a = A[a], v = V[v],
+                               t0 = t0, z = W[w]*A[a]),
           times = times, unit = unit)
-        # add the v, a, w values and function names to the dataframe
-        mbm_res[start:stop, 1] <- rep(V[v]  , nf)
-        mbm_res[start:stop, 2] <- rep(A[a]  , nf)
-        mbm_res[start:stop, 3] <- rep(W[w]  , nf)
-        mbm_res[start:stop, 4] <- fnames
-        # add the microbenchmark results to the dataframe
+        # add the v, a, and w values to the dataframe
+        mbm_res[row_idx, 1] <- V[v]
+        mbm_res[row_idx, 2] <- A[a]
+        mbm_res[row_idx, 3] <- W[w]
+        # add the median microbenchmark results to the dataframe
         for (i in 1:nf) {
-          bm <- subset(mbm, expr==fnames[i])
-          mbm_res[start+i-1, sl_time] <- bm$time
+          mbm_res[row_idx, 3+i] <- median(subset(mbm, expr==fnames[i])$time)
         }
-        # iterate start and stop values
-        start = start + nf
-        stop = stop + nf
+        # iterate start value
+        row_idx = row_idx + 1
       }
     }
   }
@@ -249,9 +241,9 @@ bm_vec <- function(RT, resp, V, A, W, t0 = 1e-4, err_tol = 1e-6,
 
 ####################### Wrapper for Benchmarks #################################
 rt_benchmark <- function(RT, resp, V, A, W, t0 = 1e-4, err_tol = 1e-6,
-                         as_vec = FALSE, times = 1000, unit = "us")
+                         rt_as_vec = FALSE, times = 1000, unit = "us")
 {
-  if (as_vec) { # benchmark all rt's as a vector
+  if (rt_as_vec) { # benchmark all rt's as a vector
     return(bm_vec(RT = RT, resp = resp, V = V, A = A, W = W, t0 = t0,
                   err_tol = err_tol, times = times, unit = unit))
   } else { # benchmark each rt individually

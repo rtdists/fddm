@@ -4,4 +4,3 @@
 .Rhistory
 src/*.o
 src/*.dll
-*.Rds

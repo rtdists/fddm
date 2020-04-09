@@ -1,4 +1,4 @@
-// Header file to declare constants and functions used in general_density.cpp
+// Header file to declare constants and functions
 
 #include <Rcpp.h>
 // [[Rcpp::plugins(cpp11)]]

@@ -120,19 +120,21 @@
 #' @useDynLib fddm, .registration = TRUE
 #' @importFrom Rcpp evalCpp
 #' @export
-dfddm <- function(rt, response, 
-                  a, v, t0, w = 0.5, 
+dfddm <- function(rt, response,
+                  a, v, t0, w = 0.5,
                   sv = 0,
-                  log = FALSE, 
-                  n_terms_small = c("Foster", "Kesselmeier", "Navarro"),
-                  summation_small = c("2017", "2014"),
-                  scale = c("small", "large", "both"), 
+                  log = FALSE,
+                  n_terms_small = "Foster",
+                  summation_small = "2017",
+                  scale = "small",
                   err_tol = 0.000001)
 {
-  n_terms_small <- match.arg(n_terms_small)
-  summation_small <- match.arg(summation_small)
-  scale <- match.arg(scale)
-  
   return(cpp_dfddm(rt, response, a, v, t0, w, sv, log,
                    n_terms_small, summation_small, scale, err_tol))
+}
+
+
+dfddm_fast <- function(rt, a, v, t0, w = 0.5, err_tol = 0.000001)
+{
+  return(cpp_dfddm_fast(rt, a, v, t0, w, err_tol))
 }
