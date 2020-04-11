@@ -1,6 +1,6 @@
 library("devtools")
 load_all(recompile = TRUE)
-
+library("fddm")
 source("benchmark_testing/fitting_functions.r")
 
 

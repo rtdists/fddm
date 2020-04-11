@@ -1,5 +1,8 @@
 context("Accuracy of fitting results across methods and established packages")
 source("benchmark_testing/fitting_functions.r")
+library("devtools")
+load_all(recompile = TRUE)
+library("fddm")
 
 
 # Import data
@@ -42,35 +45,47 @@ for (i in 1:ninds) {
 
 
 # Subset
+fddm_fast <- subset(fit, Algorithm == "fddm_fast")
 Foster <- subset(fit, Algorithm == "fs_Fos_17")
-Kesselmeier <- subset(fit, Algorithm == "fb_Kes_17")
-Navarro <- subset(fit, Algorithm == "fb_Nav_17")
-rtdists <- subset(fit, Algorithm == "rtdists")
+Kesselmeier_s <- subset(fit, Algorithm == "fs_Kes_17")
+Navarro_s <- subset(fit, Algorithm == "fs_Nav_17")
+Kesselmeier_b <- subset(fit, Algorithm == "fb_Kes_17")
+Navarro_b <- subset(fit, Algorithm == "fb_Nav_17")
 RWiener <- subset(fit, Algorithm == "RWiener")
 Kesselmeier_R <- subset(fit, Algorithm == "Kesselmeier")
+rtdists <- subset(fit, Algorithm == "rtdists")
 
+fddm_fast_avg <- subset(avg_df, Algorithm == "fddm_fast")
 Foster_avg <- subset(avg_df, Algorithm == "fs_Fos_17")
-Kesselmeier_avg <- subset(avg_df, Algorithm == "fb_Kes_17")
-Navarro_avg <- subset(avg_df, Algorithm == "fb_Nav_17")
-rtdists_avg <- subset(avg_df, Algorithm == "rtdists")
+Kesselmeier_s_avg <- subset(avg_df, Algorithm == "fs_Kes_17")
+Navarro_s_avg <- subset(avg_df, Algorithm == "fs_Nav_17")
+Kesselmeier_b_avg <- subset(avg_df, Algorithm == "fb_Kes_17")
+Navarro_b_avg <- subset(avg_df, Algorithm == "fb_Nav_17")
 RWiener_avg <- subset(avg_df, Algorithm == "RWiener")
 Kesselmeier_R_avg <- subset(avg_df, Algorithm == "Kesselmeier")
+rtdists_avg <- subset(avg_df, Algorithm == "rtdists")
 
 
 # Test accuracy for fitted parameters: v_upper, v_lower, a, w
 test_that("Accuracy within each method, using different starting values", {
+  expect_true(all(fddm_fast[,12:15] < eps))
   expect_true(all(Foster[,12:15] < eps))
-  expect_true(all(Kesselmeier[,12:15] < eps))
-  expect_true(all(Navarro[,12:15] < eps))
-  expect_true(all(rtdists[,12:15] < eps))
+  expect_true(all(Kesselmeier_s[,12:15] < eps))
+  expect_true(all(Navarro_s[,12:15] < eps))
+  expect_true(all(Kesselmeier_b[,12:15] < eps))
+  expect_true(all(Navarro_b[,12:15] < eps))
   expect_true(all(RWiener[,12:15] < eps))
-  # expect_true(all(Kesselmeier_R[,12:15] < eps))
+  expect_true(all(Kesselmeier_R[,12:15] < eps))
+  expect_true(all(rtdists[,12:15] < eps))
 })
 
 test_that("Accuracy across different methods", {
-  expect_true(all(abs(Foster_avg[,-(1:2)] - Kesselmeier_avg[,-(1:2)]) < eps))
-  expect_true(all(abs(Foster_avg[,-(1:2)] - Navarro_avg[,-(1:2)]) < eps))
-  expect_true(all(abs(Foster_avg[,-(1:2)] - rtdists_avg[,-(1:2)]) < eps))
+  expect_true(all(abs(Foster_avg[,-(1:2)] - fddm_fast_avg[,-(1:2)]) < eps))
+  expect_true(all(abs(Foster_avg[,-(1:2)] - Kesselmeier_s_avg[,-(1:2)]) < eps))
+  expect_true(all(abs(Foster_avg[,-(1:2)] - Navarro_s_avg[,-(1:2)]) < eps))
+  expect_true(all(abs(Foster_avg[,-(1:2)] - Kesselmeier_b_avg[,-(1:2)]) < eps))
+  expect_true(all(abs(Foster_avg[,-(1:2)] - Navarro_b_avg[,-(1:2)]) < eps))
   expect_true(all(abs(Foster_avg[,-(1:2)] - RWiener_avg[,-(1:2)]) < eps))
-  # expect_true(all(abs(Foster_avg[,-(1:2)] - Kesselmeier_R_avg[,-(1:2)]) < eps))
+  expect_true(all(abs(Foster_avg[,-(1:2)] - Kesselmeier_R_avg[,-(1:2)]) < eps))
+  expect_true(all(abs(Foster_avg[,-(1:2)] - rtdists_avg[,-(1:2)]) < eps))
 })

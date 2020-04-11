@@ -8,7 +8,7 @@ library("tidyverse")
 ############## Simulated Data ##############
 
 ### Mean benchmark times (violin plots) for each method
-bm <- readRDS("benchmark_testing/Results/vec_10000.Rds")
+bm <- readRDS("benchmark_testing/Results/vec_0-3_1000.Rds")
 t_idx <- match("W", colnames(bm))
 bm[,-seq_len(t_idx)] <- bm[, -seq_len(t_idx)]/1000
 mbm <- melt(bm, measure.vars = -seq_len(t_idx),
@@ -34,7 +34,7 @@ violin <- ggplot(mbm, aes(x = FuncName, y = time,
                   stat_summary(fun.y = mean, geom = "errorbar",
                                aes(ymax = ..y.., ymin = ..y..),
                                width = .35, linetype = "dashed") +
-                  # coord_cartesian(ylim = c(0,50)) +
+                  coord_cartesian(ylim = c(0,50)) +
                   labs(title = "Distribution of median benchmark times",
                        subtitle = "Dashed lines represent mean benchmark times",
                        x = "Method", y = "Time (ms)",
@@ -49,7 +49,7 @@ violin <- ggplot(mbm, aes(x = FuncName, y = time,
                         axis.title.x = element_text(size = 20),
                         axis.title.y = element_text(size = 20),
                         legend.position = "none")
-ggsave("benchmark_testing/Results/Images/violin.png", plot = violin,
+ggsave("benchmark_testing/Results/Images/violin_0-3.png", plot = violin,
        width = 16, height = 9)
 
 
@@ -62,7 +62,7 @@ ggsave("benchmark_testing/Results/Images/violin.png", plot = violin,
 
 
 ### Complementary ECDF Plots
-bm <- readRDS("benchmark_testing/Results/vec_10000.Rds")
+bm <- readRDS("benchmark_testing/Results/vec_0-3_1000.Rds")
 t_idx <- match("W", colnames(bm))
 bm[,-seq_len(t_idx)] <- bm[, -seq_len(t_idx)]/1000
 mbm <- melt(bm, measure.vars = -seq_len(t_idx),
@@ -100,7 +100,7 @@ ecdf_RCp <- ggplot(mbm_RCp, aes(x = time,
         legend.title = element_text(size = 18),
         legend.text = element_text(size = 16, angle = 0)) +
   guides(color = guide_legend(override.aes = list(size = 2)))
-ggsave("benchmark_testing/Results/Images/ecdf_RCp_10000.png",
+ggsave("benchmark_testing/Results/Images/ecdf_plots/ecdf_RCp_0-3.png",
        plot = ecdf_RCp, width = 16, height = 9)
 
 
@@ -133,7 +133,7 @@ ecdf_sum <- ggplot(mbm_sum, aes(x = time,
         legend.title = element_text(size = 18),
         legend.text = element_text(size = 16, angle = 0)) +
   guides(color = guide_legend(override.aes = list(size = 2)))
-ggsave("benchmark_testing/Results/Images/ecdf_sum_10000.png",
+ggsave("benchmark_testing/Results/Images/ecdf_plots/ecdf_sum_0-3.png",
        plot = ecdf_sum, width = 16, height = 9)
 
 
@@ -164,7 +164,7 @@ ecdf_slt <- ggplot(mbm_slt, aes(x = time,
         legend.title = element_text(size = 18),
         legend.text = element_text(size = 16, angle = 0)) +
   guides(color = guide_legend(override.aes = list(size = 2)))
-ggsave("benchmark_testing/Results/Images/ecdf_slt_10000.png",
+ggsave("benchmark_testing/Results/Images/ecdf_plots/ecdf_slt_0-3.png",
        plot = ecdf_slt, width = 16, height = 9)
 
 
@@ -195,7 +195,7 @@ ecdf_bRC <- ggplot(mbm_bRC, aes(x = time,
         legend.title = element_text(size = 18),
         legend.text = element_text(size = 16, angle = 0)) +
   guides(color = guide_legend(override.aes = list(size = 2)))
-ggsave("benchmark_testing/Results/Images/ecdf_bRC_10000.png",
+ggsave("benchmark_testing/Results/Images/ecdf_plots/ecdf_bRC_0-3.png",
        plot = ecdf_bRC, width = 16, height = 9)
 
 
@@ -208,7 +208,7 @@ ggsave("benchmark_testing/Results/Images/ecdf_bRC_10000.png",
 
 
 ### Each parameter vs benchmark time
-bm <- readRDS("benchmark_testing/Results/sim_10000.Rds")
+bm <- readRDS("benchmark_testing/Results/sim_0-3_10000.Rds")
 t_idx <- match("W", colnames(bm))
 bm[,-seq_len(t_idx)] <- bm[, -seq_len(t_idx)]/1000
 mbm <- melt(bm, measure.vars = -seq_len(t_idx),
@@ -243,7 +243,8 @@ mbm_meq %>%
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
   facet_wrap("FuncName")
-ggsave("benchmark_testing/Results/Images/meq_RT.png", width = 16, height = 9)
+ggsave("benchmark_testing/Results/Images/meq_plots/meq_RT_0-3.png",
+       width = 16, height = 9)
 
 # A
 mbm_meq %>%
@@ -269,7 +270,8 @@ mbm_meq %>%
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
   facet_wrap("FuncName")
-ggsave("benchmark_testing/Results/Images/meq_A.png", width = 16, height = 9)
+ggsave("benchmark_testing/Results/Images/meq_plots/meq_A_0-3.png",
+       width = 16, height = 9)
 
 # V
 mbm_meq %>%
@@ -295,7 +297,8 @@ mbm_meq %>%
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
   facet_wrap("FuncName")
-ggsave("benchmark_testing/Results/Images/meq_V.png", width = 16, height = 9)
+ggsave("benchmark_testing/Results/Images/meq_plots/meq_V_0-3.png",
+       width = 16, height = 9)
 
 # W
 mbm_meq %>%
@@ -318,4 +321,5 @@ mbm_meq %>%
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
   facet_wrap("FuncName")
-ggsave("benchmark_testing/Results/Images/meq_W.png", width = 16, height = 9)
+ggsave("benchmark_testing/Results/Images/meq_plots/meq_W_0-3.png",
+       width = 16, height = 9)

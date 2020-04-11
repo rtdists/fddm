@@ -22,6 +22,35 @@ get_start_values <- function() {
 
 
 # Loglikelihood functions
+ll_fddm_fast <- function(pars, rt, resp, truth, t0, err_tol) {
+  rt1 <- rt[truth == 1]
+  rt0 <- rt[truth == 0]
+  resp1 <- resp[truth == 1]
+  resp0 <- resp[truth == 0]
+
+  rt11 <- rt1[resp1 == 1]
+  rt10 <- rt1[resp1 == 0]
+  rt01 <- rt0[resp0 == 1]
+  rt00 <- rt0[resp0 == 0]
+
+  # truth is "upper" so use v1; resp is "upper" so use "upper" parameters
+  dens11 <- dfddm_fast(rt = rt11, a = pars[[3]], v = -pars[[1]],
+                       t0 = t0, w = 1-pars[[4]], err_tol = err_tol)
+  # truth is "upper" so use v1; resp is "lower" so use "lower" parameters
+  dens10 <- dfddm_fast(rt = rt10, a = pars[[3]], v = pars[[1]],
+                       t0 = t0, w = pars[[4]], err_tol = err_tol)
+  # truth is "lower" so use v0; resp is "upper" so use "upper" parameters
+  dens01 <- dfddm_fast(rt = rt01, a = pars[[3]], v = -pars[[1]],
+                       t0 = t0, w = 1-pars[[4]], err_tol = err_tol)
+  # truth is "lower" so use v0; resp is "lower" so use "lower" parameters
+  dens00 <- dfddm_fast(rt = rt00, a = pars[[3]], v = pars[[1]],
+                       t0 = t0, w = pars[[4]], err_tol = err_tol)
+
+  densities <- c(dens11, dens10, dens01, dens00)
+  if (any(densities == 0)) return(1e6)
+  return(-sum(log(densities)))
+}
+
 ll_fs_Fos_17 <- function(pars, rt, resp, truth, t0, err_tol) {
   rt1 <- rt[truth == 1]
   rt0 <- rt[truth == 0]
@@ -43,6 +72,54 @@ ll_fs_Fos_17 <- function(pars, rt, resp, truth, t0, err_tol) {
 
   densities <- c(dens1, dens0)
   if (any(densities == 0)) return(1e6)
+  return(-sum(log(densities)))
+}
+
+ll_fs_Kes_17 <- function(pars, rt, resp, truth, t0, err_tol) {
+  rt1 <- rt[truth == 1]
+  rt0 <- rt[truth == 0]
+  resp1 <- resp[truth == 1]
+  resp0 <- resp[truth == 0]
+
+  # the truth is "upper" so use v1
+  dens1 <- dfddm(rt = rt1, response = resp1, a = pars[[3]],
+                 v = pars[[1]], t0 = t0, w = pars[[4]],
+                 log = FALSE, n_terms_small = "Kesselmeier",
+                 summation_small = "2017", scale = "small",
+                 err_tol = err_tol)
+  # the truth is "lower" so use v0
+  dens0 <- dfddm(rt = rt0, response = resp0, a = pars[[3]],
+                 v = pars[[2]], t0 = t0, w = pars[[4]],
+                 log = FALSE, n_terms_small = "Kesselmeier",
+                 summation_small = "2017", scale = "small",
+                 err_tol = err_tol)
+
+  densities <- c(dens1, dens0)
+  if (any(densities == 0)) return(1e6)
+  return(-sum(log(densities)))
+}
+
+ll_fs_Nav_17 <- function(pars, rt, resp, truth, t0, err_tol) {
+  rt1 <- rt[truth == 1]
+  rt0 <- rt[truth == 0]
+  resp1 <- resp[truth == 1]
+  resp0 <- resp[truth == 0]
+
+  # the truth is "upper" so use v1
+  dens1 <- dfddm(rt = rt1, response = resp1, a = pars[[3]],
+                 v = pars[[1]], t0 = t0, w = pars[[4]],
+                 log = FALSE, n_terms_small = "Navarro",
+                 summation_small = "2017", scale = "small",
+                 err_tol = err_tol)
+  # the truth is "lower" so use v0
+  dens0 <- dfddm(rt = rt0, response = resp0, a = pars[[3]],
+                 v = pars[[2]], t0 = t0, w = pars[[4]],
+                 log = FALSE, n_terms_small = "Navarro",
+                 summation_small = "2017", scale = "small",
+                 err_tol = err_tol)
+
+  densities <- c(dens1, dens0)
+  if (any(densities <= 0)) return(1e6) # Nav can give (small) negative densities
   return(-sum(log(densities)))
 }
 
@@ -94,24 +171,6 @@ ll_fb_Nav_17 <- function(pars, rt, resp, truth, t0, err_tol) {
   return(-sum(log(densities)))
 }
 
-ll_RTDists <- function(pars, rt, resp, truth, t0) {
-  rt1 <- rt[truth == 1]
-  rt0 <- rt[truth == 0]
-  resp1 <- resp[truth == 1]
-  resp0 <- resp[truth == 0]
-
-  # the truth is "upper" so use v1
-  dens1 <- ddiffusion(rt1, resp1, a = pars[[3]],
-                      v = pars[[1]], z = pars[[4]]*pars[[3]], t0 = t0)
-  # the truth is "lower" so use v0
-  dens0 <- ddiffusion(rt0, resp0, a = pars[[3]],
-                      v = pars[[2]], z = pars[[4]]*pars[[3]], t0 = t0)
-
-  densities <- c(dens1, dens0)
-  if (any(densities == 0)) return(1e6)
-  return(-sum(log(densities)))
-}
-
 ll_RWiener <- function(pars, rt, resp, truth, t0) {
   rt1 <- rt[truth == 1]
   rt0 <- rt[truth == 0]
@@ -140,8 +199,6 @@ ll_Kesselmeier <- function(pars, rt, resp, truth, t0, err_tol) {
   rt10 <- rt1[resp1 == 0]
   rt01 <- rt0[resp0 == 1]
   rt00 <- rt0[resp0 == 0]
-  # print("pars is: ")
-  # print(pars)
 
   # truth is "upper" so use v1; resp is "upper" so use "upper" parameters
   dens11 <- fs14_R(t = rt11-t0, a = pars[[3]], v = -pars[[1]],
@@ -157,6 +214,24 @@ ll_Kesselmeier <- function(pars, rt, resp, truth, t0, err_tol) {
                    w = pars[[4]], eps = err_tol)
 
   densities <- c(dens11, dens10, dens01, dens00)
+  if (any(densities == 0)) return(1e6)
+  return(-sum(log(densities)))
+}
+
+ll_RTDists <- function(pars, rt, resp, truth, t0) {
+  rt1 <- rt[truth == 1]
+  rt0 <- rt[truth == 0]
+  resp1 <- resp[truth == 1]
+  resp0 <- resp[truth == 0]
+
+  # the truth is "upper" so use v1
+  dens1 <- ddiffusion(rt1, resp1, a = pars[[3]],
+                      v = pars[[1]], z = pars[[4]]*pars[[3]], t0 = t0)
+  # the truth is "lower" so use v0
+  dens0 <- ddiffusion(rt0, resp0, a = pars[[3]],
+                      v = pars[[2]], z = pars[[4]]*pars[[3]], t0 = t0)
+
+  densities <- c(dens1, dens0)
   if (any(densities == 0)) return(1e6)
   return(-sum(log(densities)))
 }
@@ -206,7 +281,7 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
                    list(   0,    0,   1, 0.5), # defaults
                    list( 0.4, -0.4,   1, 0.5), # vary v1 & v0
                    list(-0.4,  0.4,   1, 0.5), # vary v1 & v0
-                   list(   0,    0, 0.6, 0.5), # vary a; <.6 breaks KesselmeierR
+                   # list(   0,    0, 0.9, 0.5), # vary a; <.6 breaks Kesselmeier, <.9 breaks fs_Nav_17
                    list(   0,    0, 2.5, 0.5), # vary a
                    list(   0,    0,   1, 0.2), # vary w
                    list(   0,    0,   1, 0.8)  # vary w
@@ -215,10 +290,12 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
   nstvals <- length(stvals)
   stvals_mat <- matrix(unlist(stvals), ncol = 4, nrow = nstvals, byrow = TRUE)
 
-  algo_names <- c(rep("fs_Fos_17", nstvals), rep("fb_Kes_17", nstvals),
-                  rep("fb_Nav_17", nstvals), rep("rtdists",    nstvals),
-                  rep("RWiener", nstvals), rep("Kesselmeier", nstvals))
-  nalgos <- 6
+  algo_names <- c(rep("fddm_fast", nstvals), rep("fs_Fos_17", nstvals),
+                  rep("fs_Kes_17", nstvals), rep("fs_Nav_17", nstvals),
+                  rep("fb_Kes_17", nstvals), rep("fb_Nav_17", nstvals),
+                  rep("RWiener", nstvals), rep("Kesselmeier", nstvals),
+                  rep("rtdists", nstvals))
+  nalgos <- length(unique(algo_names))
   ni <- nalgos*nstvals
 
   # Initilize the result dataframe
@@ -242,15 +319,15 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
     rrespi <- dfi$rresponse
     truthi <- dfi$truth
     for (j in 1:nstvals) {
-      temp <- nlminb(stvals[[j]], ll_fs_Fos_17,
+      temp <- nlminb(stvals[[j]], ll_fddm_fast,
                      rt = rti, resp = respi, truth = truthi,
                      t0 = t0, err_tol = err_tol,
-                     lower = c(-Inf, -Inf,   0, 0),
+                     lower = c(-Inf, -Inf,   0.01, 0), # lower bound for a > 0
                      upper = c( Inf,  Inf, Inf, 1))
       res[(i-1)*ni+j,3] <- temp$evaluations[[1]]
       res[(i-1)*ni+j,8:11] <- temp$par
 
-      temp <- nlminb(stvals[[j]], ll_fb_Kes_17,
+      temp <- nlminb(stvals[[j]], ll_fs_Fos_17,
                      rt = rti, resp = respi, truth = truthi,
                      t0 = t0, err_tol = err_tol,
                      lower = c(-Inf, -Inf,   0, 0),
@@ -258,7 +335,7 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
       res[(i-1)*ni+nstvals+j,3] <- temp$evaluations[[1]]
       res[(i-1)*ni+nstvals+j,8:11] <- temp$par
 
-      temp <- nlminb(stvals[[j]], ll_fb_Nav_17,
+      temp <- nlminb(stvals[[j]], ll_fs_Kes_17,
                      rt = rti, resp = respi, truth = truthi,
                      t0 = t0, err_tol = err_tol,
                      lower = c(-Inf, -Inf,   0, 0),
@@ -266,29 +343,53 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
       res[(i-1)*ni+2*nstvals+j,3] <- temp$evaluations[[1]]
       res[(i-1)*ni+2*nstvals+j,8:11] <- temp$par
 
-      temp <- nlminb(stvals[[j]], ll_RTDists,
-                     rt = rti, resp = rrespi, truth = truthi,
-                     t0 = t0,
+      temp <- nlminb(stvals[[j]], ll_fs_Nav_17,
+                     rt = rti, resp = respi, truth = truthi,
+                     t0 = t0, err_tol = err_tol,
                      lower = c(-Inf, -Inf,   0, 0),
                      upper = c( Inf,  Inf, Inf, 1))
       res[(i-1)*ni+3*nstvals+j,3] <- temp$evaluations[[1]]
       res[(i-1)*ni+3*nstvals+j,8:11] <- temp$par
+
+      temp <- nlminb(stvals[[j]], ll_fb_Kes_17,
+                     rt = rti, resp = respi, truth = truthi,
+                     t0 = t0, err_tol = err_tol,
+                     lower = c(-Inf, -Inf,   0, 0),
+                     upper = c( Inf,  Inf, Inf, 1))
+      res[(i-1)*ni+4*nstvals+j,3] <- temp$evaluations[[1]]
+      res[(i-1)*ni+4*nstvals+j,8:11] <- temp$par
+
+      temp <- nlminb(stvals[[j]], ll_fb_Nav_17,
+                     rt = rti, resp = respi, truth = truthi,
+                     t0 = t0, err_tol = err_tol,
+                     lower = c(-Inf, -Inf,   0, 0),
+                     upper = c( Inf,  Inf, Inf, 1))
+      res[(i-1)*ni+5*nstvals+j,3] <- temp$evaluations[[1]]
+      res[(i-1)*ni+5*nstvals+j,8:11] <- temp$par
 
       temp <- nlminb(stvals[[j]], ll_RWiener,
                      rt = rti, resp = rrespi, truth = truthi,
                      t0 = t0,
                      lower = c(-Inf, -Inf,   0, 0),
                      upper = c( Inf,  Inf, Inf, 1))
-      res[(i-1)*ni+4*nstvals+j,3] <- temp$evaluations[[1]]
-      res[(i-1)*ni+4*nstvals+j,8:11] <- temp$par
+      res[(i-1)*ni+6*nstvals+j,3] <- temp$evaluations[[1]]
+      res[(i-1)*ni+6*nstvals+j,8:11] <- temp$par
 
       temp <- nlminb(stvals[[j]], ll_Kesselmeier,
                      rt = rti, resp = respi, truth = truthi,
                      t0 = t0, err_tol = err_tol,
                      lower = c(-Inf, -Inf,   0.01, 0), # lower bound for a > 0
                      upper = c( Inf,  Inf, Inf, 1))
-      res[(i-1)*ni+5*nstvals+j,3] <- temp$evaluations[[1]]
-      res[(i-1)*ni+5*nstvals+j,8:11] <- temp$par
+      res[(i-1)*ni+7*nstvals+j,3] <- temp$evaluations[[1]]
+      res[(i-1)*ni+7*nstvals+j,8:11] <- temp$par
+
+      temp <- nlminb(stvals[[j]], ll_RTDists,
+                     rt = rti, resp = rrespi, truth = truthi,
+                     t0 = t0,
+                     lower = c(-Inf, -Inf,   0, 0),
+                     upper = c( Inf,  Inf, Inf, 1))
+      res[(i-1)*ni+8*nstvals+j,3] <- temp$evaluations[[1]]
+      res[(i-1)*ni+8*nstvals+j,8:11] <- temp$par
     }
   }
   return(res)

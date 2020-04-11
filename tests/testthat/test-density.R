@@ -2,6 +2,9 @@ context("Accuracy among internal methods and relative to established packages")
 library("rtdists")
 library("RWiener")
 source("inst/extdata/Kesselmeier_density.R")
+library("devtools")
+load_all(recompile = TRUE)
+library("fddm")
 
 ### See Known Errors (KE) at bottom for issues with Navarro's implementation
 
@@ -28,11 +31,11 @@ nSV <- length(SV)
 resp0 = rep(0, nRT)
 rresp0 = rep("lower", nRT)
 
-nf <- 14
-fnames <- c("fs_Fos_17", "fs_Fos_14", "fs_Kes_17", "fs_Kes_14",
-            "fs_Nav_17", "fs_Nav_14", "fl_Nav_09",
+fnames <- c("fddm_fast", "fs_Fos_17", "fs_Fos_14",
+            "fs_Kes_17", "fs_Kes_14", "fs_Nav_17", "fs_Nav_14",
             "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
-            "rtdists", "RWiener", "Kesselmeier")
+            "fl_Nav_09", "RWiener", "Kesselmeier", "rtdists")
+nf <- length(fnames)
 
 res <- data.frame(matrix(ncol = 9, nrow = nf*nRT*nA*nV*nW*nSV))
 colnames(res) <- c('rt', 'a', 'v', 'w', 'sv', 'FuncName', 'res', 'dif',
@@ -55,40 +58,37 @@ for (rt in 1:nRT) {
           res[start:stop, 6] <- fnames
 
           # calculate "lower" density
-          res[start,    7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
-                                    v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Foster",
-                                    summation_small = "2017", scale = "small",
-                                    err_tol = eps)
+          res[start,    7] <- dfddm_fast(rt = RT[rt], a = A[a], v = V[v],
+                                         t0 = t0, w = W[w], err_tol = eps)
           res[start+1,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
                                     log = FALSE, n_terms_small = "Foster",
-                                    summation_small = "2014", scale = "small",
+                                    summation_small = "2017", scale = "small",
                                     err_tol = eps)
           res[start+2,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Kesselmeier",
-                                    summation_small = "2017", scale = "small",
+                                    log = FALSE, n_terms_small = "Foster",
+                                    summation_small = "2014", scale = "small",
                                     err_tol = eps)
           res[start+3,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
                                     log = FALSE, n_terms_small = "Kesselmeier",
-                                    summation_small = "2014", scale = "small",
+                                    summation_small = "2017", scale = "small",
                                     err_tol = eps)
           res[start+4,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Navarro",
-                                    summation_small = "2017", scale = "small",
+                                    log = FALSE, n_terms_small = "Kesselmeier",
+                                    summation_small = "2014", scale = "small",
                                     err_tol = eps)
           res[start+5,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
                                     log = FALSE, n_terms_small = "Navarro",
-                                    summation_small = "2014", scale = "small",
+                                    summation_small = "2017", scale = "small",
                                     err_tol = eps)
           res[start+6,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = NULL,
-                                    summation_small = NULL, scale = "large",
+                                    log = FALSE, n_terms_small = "Navarro",
+                                    summation_small = "2014", scale = "small",
                                     err_tol = eps)
           res[start+7,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
@@ -110,26 +110,31 @@ for (rt in 1:nRT) {
                                     log = FALSE, n_terms_small = "Navarro",
                                     summation_small = "2014", scale = "both",
                                     err_tol = eps)
-          res[start+11, 7] <- ddiffusion(RT[rt], rresp0[rt], a = A[a], v = V[v],
-                                         t0 = t0, z = W[w]*A[a], sv = SV[sv])
-          # no sv handling for the following two densities
+          res[start+11,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
+                                    v = V[v], t0 = t0, w = W[w], sv = SV[sv],
+                                    log = FALSE, n_terms_small = "",
+                                    summation_small = "", scale = "large",
+                                    err_tol = eps)
           res[start+12, 7] <- dwiener(RT[rt], resp = rresp0[rt], alpha = A[a],
                                       delta = V[v], tau = t0, beta = W[w],
                                       give_log = FALSE)
           res[start+13, 7] <- fs14_R(t = RT[rt]-t0, a = A[a], v = V[v],
                                      w = W[w], eps = eps)
+          res[start+14, 7] <- ddiffusion(RT[rt], rresp0[rt], a = A[a], v = V[v],
+                                        t0 = t0, z = W[w]*A[a], sv = SV[sv])
           if (sv > 0.05) { # multiply to get density with sv
             t <- RT[rt] - t0
             M <- exp(V[v] * A[a] * W[w] + V[v]*V[v] * t / 2 +
                      (SV[sv]*SV[sv] * A[a]*A[a] * W[w]*W[w] -
                        2 * V[v] * A[a] * W[w] - V[v]*V[v] * t) /
                      (2 + 2 * SV[sv]*SV[sv] * t)) / sqrt(1 + SV[sv]*SV[sv] * t)
-            res[start+12, 7] <- M * res[start+12, 7]
-            res[start+13, 7] <- M * res[start+13, 7]
+            res[start,    7] <- M * res[start,    7] # fddm_fast
+            res[start+12, 7] <- M * res[start+12, 7] # RWiener
+            res[start+13, 7] <- M * res[start+13, 7] # Kesselmeier_R
           }
 
           # calculate differences
-          ans <- res[start, 7] # use Foster_2017_small as truth
+          ans <- res[start+1, 7] # use Foster_2017_small as truth
           res[start,    8] <- abs(res[start,    7] - ans)
           res[start+1,  8] <- abs(res[start+1,  7] - ans)
           res[start+2,  8] <- abs(res[start+2,  7] - ans)
@@ -144,80 +149,83 @@ for (rt in 1:nRT) {
           res[start+11, 8] <- abs(res[start+11, 7] - ans)
           res[start+12, 8] <- abs(res[start+12, 7] - ans)
           res[start+13, 8] <- abs(res[start+13, 7] - ans)
+          res[start+14, 8] <- abs(res[start+14, 7] - ans)
 
           # calculate log of "lower" density
-          res[start,    9] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
+          res[start,    7] <- log(dfddm_fast(rt = RT[rt], a = A[a], v = V[v],
+                                             t0 = t0, w = W[w], err_tol = eps))
+          res[start+1,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
                                     log = TRUE, n_terms_small = "Foster",
                                     summation_small = "2017", scale = "small",
                                     err_tol = eps)
-          res[start+1,  9] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
+          res[start+2,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
                                     log = TRUE, n_terms_small = "Foster",
                                     summation_small = "2014", scale = "small",
                                     err_tol = eps)
-          res[start+2,  9] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
+          res[start+3,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
                                     log = TRUE, n_terms_small = "Kesselmeier",
                                     summation_small = "2017", scale = "small",
                                     err_tol = eps)
-          res[start+3,  9] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
+          res[start+4,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
                                     log = TRUE, n_terms_small = "Kesselmeier",
                                     summation_small = "2014", scale = "small",
                                     err_tol = eps)
-          res[start+4,  9] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
+          res[start+5,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
                                     log = TRUE, n_terms_small = "Navarro",
                                     summation_small = "2017", scale = "small",
                                     err_tol = eps)
-          res[start+5,  9] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
+          res[start+6,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
                                     log = TRUE, n_terms_small = "Navarro",
                                     summation_small = "2014", scale = "small",
                                     err_tol = eps)
-          res[start+6,  9] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
-                                    v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = NULL,
-                                    summation_small = NULL, scale = "large",
-                                    err_tol = eps)
-          res[start+7,  9] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
+          res[start+7,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
                                     log = TRUE, n_terms_small = "Kesselmeier",
                                     summation_small = "2017", scale = "both",
                                     err_tol = eps)
-          res[start+8,  9] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
+          res[start+8,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
                                     log = TRUE, n_terms_small = "Kesselmeier",
                                     summation_small = "2014", scale = "both",
                                     err_tol = eps)
-          res[start+9,  9] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
+          res[start+9,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
                                     log = TRUE, n_terms_small = "Navarro",
                                     summation_small = "2017", scale = "both",
                                     err_tol = eps)
-          res[start+10, 9] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
+          res[start+10, 7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
                                     log = TRUE, n_terms_small = "Navarro",
                                     summation_small = "2014", scale = "both",
                                     err_tol = eps)
-          res[start+11, 9] <- log(ddiffusion(RT[rt], rresp0[rt], a = A[a],
-                                             v = V[v], t0 = t0, z = W[w]*A[a],
-                                             sv = SV[sv]))
-          # no sv handling for the following two densities
-          res[start+12, 9] <- dwiener(RT[rt], resp = rresp0[rt], alpha = A[a],
+          res[start+11,  7] <- dfddm(rt = RT[rt], response = resp0[rt], a = A[a],
+                                    v = V[v], t0 = t0, w = W[w], sv = SV[sv],
+                                    log = TRUE, n_terms_small = "",
+                                    summation_small = "", scale = "large",
+                                    err_tol = eps)
+          res[start+12, 7] <- dwiener(RT[rt], resp = rresp0[rt], alpha = A[a],
                                       delta = V[v], tau = t0, beta = W[w],
                                       give_log = TRUE)
-          res[start+13, 9] <- log(fs14_R(t = RT[rt]-t0, a = A[a], v = V[v],
+          res[start+13, 7] <- log(fs14_R(t = RT[rt]-t0, a = A[a], v = V[v],
                                          w = W[w], eps = eps))
+          res[start+14, 7] <- log(ddiffusion(RT[rt], rresp0[rt], a = A[a],
+                                             v = V[v], t0 = t0, z = W[w]*A[a],
+                                             sv = SV[sv]))
           if (sv > 0.05) { # add to get log of density with sv
             t <- RT[rt] - t0
             M <- V[v] * A[a] * W[w] + V[v]*V[v] * t / 2 +
                  (SV[sv]*SV[sv] * A[a]*A[a] * W[w]*W[w] -
                   2 * V[v] * A[a] * W[w] - V[v]*V[v] * t) /
                  (2 + 2 * SV[sv]*SV[sv] * t) - log(sqrt(1 + SV[sv]*SV[sv] * t))
-            res[start+12, 9] <- M + res[start+12, 9]
-            res[start+13, 9] <- M + res[start+13, 9]
+            res[start,    7] <- M + res[start,    7] # fddm_fast
+            res[start+12, 9] <- M + res[start+12, 9] # RWiener
+            res[start+13, 9] <- M + res[start+13, 9] # Kesselmeier_R
           }
 
           # iterate start and stop values
@@ -231,9 +239,9 @@ for (rt in 1:nRT) {
 
 
 # Subset
-Foster <- subset(res, FuncName %in% fnames[1:2])
-Kesselmeier <- subset(res, FuncName %in% fnames[c(3,4)])
-Navarro <- subset(res, FuncName %in% fnames[c(5,6,7)])
+Foster <- subset(res, FuncName %in% fnames[c(1,2,3)])
+Kesselmeier <- subset(res, FuncName %in% fnames[c(4,5)])
+Navarro <- subset(res, FuncName %in% fnames[c(6,7,12)])
 Both_time_scales <- subset(res, FuncName %in% fnames[c(8,9,10,11)])
 rtdists <- subset(res, FuncName == "rtdists")
 RWiener <- subset(res, FuncName == "RWiener")
@@ -281,6 +289,7 @@ test_that("Log-Accuracy among internal methods", {
 # a <- 0.5
 # v <- 4.5
 # w <- 0.5
+# eps <- 1e-6
 # sv <- 0.9
 # sv0 <- exp(-v*a*w - v*v*t/2) / (a*a)
 # sv0_9 <- exp((-2*v*a*w - v*v*t + sv*sv*a*a*w*w)/(2 + 2*sv*sv*t)) /
