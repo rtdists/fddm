@@ -228,10 +228,14 @@ mbm_meq %>%
   group_by(FuncName, RT) %>%
   summarise(means = mean(time),
             upper = quantile(time, prob = 0.9),
-            lower = quantile(time, prob = 0.1)) %>%
+            lower = quantile(time, prob = 0.1),
+            max = max(time),
+            min = min(time)) %>%
   ggplot(aes(x = RT, y = means, color = FuncName)) +
   geom_ribbon(aes(ymin = lower, ymax = upper, fill = FuncName),
               alpha = 0.2, color = NA) +
+  geom_ribbon(aes(ymin = min, ymax = max, fill = FuncName),
+              alpha = 0.1, color = NA) +
   geom_line(aes(group = 1)) +
   scale_color_manual(values = Color_meq) +
   scale_fill_manual(values = Color_meq) +
@@ -243,7 +247,7 @@ mbm_meq %>%
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
   facet_wrap("FuncName")
-ggsave("benchmark_testing/Results/Images/meq_plots/meq_RT_0-10_TEST3.png",
+ggsave("benchmark_testing/Results/Images/meq_plots/meq_RT_0-10_TEST3_minmax.png",
        width = 16, height = 9)
 
 # A
