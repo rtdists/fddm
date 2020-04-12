@@ -56,7 +56,7 @@ int kl_Nav(const double& t, const double& w, const double& eps)
 {
   // note: w is not used
   if (eps < 1 / (M_PI * t)) { // error threshold is low enough
-    double kl = sqrt(-2 * log(M_PI * t * eps) / (M_PI*M_PI *t));
+    double kl = sqrt(-2 * log(M_PI * t * eps) / (M_PI*M_PI * t));
     return ceil(max(kl, 1 / (M_PI * sqrt(t))));
   }
   return ceil(1 / (M_PI * sqrt(t))); // else set to boundary condition

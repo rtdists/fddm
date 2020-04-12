@@ -17,14 +17,29 @@ NumericVector cpp_dfddm_fast(const NumericVector& rt,
   int Nmax = rt.length();
   NumericVector out(Nmax);
   double t;
-  double mult = a * exp(-v * a * w) / SQRT_2PI;
+  double mult_s = a * exp(-v * a * w) / SQRT_2PI;
 
-  for (int i = 0; i < Nmax; i++) {
-    t = rt[i] - t0;
-    out[i] = mult * exp(-v * v * t / 2) / (t * sqrt(t)) *
-              small_sum_eps_17(t, a, w, 0, eps / mult);
+  if (eps >= 1e-6) {
+  double mult_l = M_PI * exp(-v * a * w) / (a*a);
+  double gamma = -M_PI*M_PI / (2 * a*a);
+    for (int i = 0; i < Nmax; i++) {
+      t = rt[i] - t0;
+      if (t >= 2.5) { // use large-time (1 term in summation)
+        out[i] = -7;//mult_l * exp(-v*v * t / 2) * sin(w * M_PI) * exp(gamma*t);
+      } else { // use small-time
+        out[i] = mult_s * exp(-v * v * t / 2) / (t * sqrt(t)) *
+                  small_sum_eps_17(t, a, w, 0, eps / mult_s);
+      }
+
+    }
+  } else {
+    Rcerr << eps << " < 1e-6" << endl;
+    for (int i = 0; i < Nmax; i++) {
+      t = rt[i] - t0;
+      out[i] = mult_s * exp(-v * v * t / 2) / (t * sqrt(t)) *
+                small_sum_eps_17(t, a, w, 0, eps / mult_s);
+    }
   }
-
   return out;
 }
 

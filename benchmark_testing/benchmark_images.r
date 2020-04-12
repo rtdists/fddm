@@ -8,7 +8,7 @@ library("tidyverse")
 ############## Simulated Data ##############
 
 ### Mean benchmark times (violin plots) for each method
-bm <- readRDS("benchmark_testing/Results/vec_0-3_1000.Rds")
+bm <- readRDS("benchmark_testing/Results/sim_0-10_1000w_TEST3.Rds")
 t_idx <- match("W", colnames(bm))
 bm[,-seq_len(t_idx)] <- bm[, -seq_len(t_idx)]/1000
 mbm <- melt(bm, measure.vars = -seq_len(t_idx),
@@ -49,7 +49,7 @@ violin <- ggplot(mbm, aes(x = FuncName, y = time,
                         axis.title.x = element_text(size = 20),
                         axis.title.y = element_text(size = 20),
                         legend.position = "none")
-ggsave("benchmark_testing/Results/Images/violin_0-3.png", plot = violin,
+ggsave("benchmark_testing/Results/Images/violin_0-10_TEST3.png", plot = violin,
        width = 16, height = 9)
 
 
@@ -195,7 +195,7 @@ ecdf_bRC <- ggplot(mbm_bRC, aes(x = time,
         legend.title = element_text(size = 18),
         legend.text = element_text(size = 16, angle = 0)) +
   guides(color = guide_legend(override.aes = list(size = 2)))
-ggsave("benchmark_testing/Results/Images/ecdf_plots/ecdf_bRC_0-3.png",
+ggsave("benchmark_testing/Results/Images/ecdf_plots/ecdf_bRC_0-3_TEST2.png",
        plot = ecdf_bRC, width = 16, height = 9)
 
 
@@ -243,7 +243,7 @@ mbm_meq %>%
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
   facet_wrap("FuncName")
-ggsave("benchmark_testing/Results/Images/meq_plots/meq_RT_0-3.png",
+ggsave("benchmark_testing/Results/Images/meq_plots/meq_RT_0-10_TEST3.png",
        width = 16, height = 9)
 
 # A
@@ -270,7 +270,7 @@ mbm_meq %>%
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
   facet_wrap("FuncName")
-ggsave("benchmark_testing/Results/Images/meq_plots/meq_A_0-3.png",
+ggsave("benchmark_testing/Results/Images/meq_plots/meq_A_0-10_TEST3.png",
        width = 16, height = 9)
 
 # V
@@ -297,7 +297,7 @@ mbm_meq %>%
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
   facet_wrap("FuncName")
-ggsave("benchmark_testing/Results/Images/meq_plots/meq_V_0-3.png",
+ggsave("benchmark_testing/Results/Images/meq_plots/meq_V_0-10_TEST3.png",
        width = 16, height = 9)
 
 # W
@@ -321,5 +321,5 @@ mbm_meq %>%
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
   facet_wrap("FuncName")
-ggsave("benchmark_testing/Results/Images/meq_plots/meq_W_0-3.png",
+ggsave("benchmark_testing/Results/Images/meq_plots/meq_W_0-10_TEST3.png",
        width = 16, height = 9)
