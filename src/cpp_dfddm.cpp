@@ -25,7 +25,7 @@ NumericVector cpp_dfddm_fast(const NumericVector& rt,
     for (int i = 0; i < Nmax; i++) {
       t = rt[i] - t0;
       if (t >= 2.5) { // use large-time (1 term in summation)
-        out[i] = -7;//mult_l * exp(-v*v * t / 2) * sin(w * M_PI) * exp(gamma*t);
+        out[i] = mult_l * exp(-v*v * t / 2) * sin(w * M_PI) * exp(gamma*t);
       } else { // use small-time
         out[i] = mult_s * exp(-v * v * t / 2) / (t * sqrt(t)) *
                   small_sum_eps_17(t, a, w, 0, eps / mult_s);

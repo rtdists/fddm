@@ -1,73 +1,110 @@
-library("devtools")
-load_all(recompile = TRUE)
-library("fddm")
+library("reshape2")
+library("ggplot2")
 
-t <- c(0.001, 0.005, 0.01, 0.05, 0.1,
-       seq(0.5, 3, by = 0.5))
-fddm_fast <- dfddm_fast(rt = t, a = 1, v = -.4, t0 = 0,
-                       w = 0.5, err_tol = 1e-6)
-fs_Fos_17 <- dfddm(rt = t, response = 0, a = 1,
-                  v = -0.4, t0 = 0, w = 0.5,
-                  log = FALSE, n_terms_small = "Foster",
-                  summation_small = "2017", scale = "small",
-                  err_tol = 1e-5)
-max(abs(fddm_fast - fs_Fos_17)) < 2*1e-5
 
-ks_Kes_t <- function(t, w, eps) {
-  k <- rep(0, length(t))
-  for (i in 1:length(t)) {
-    u_eps = min(-1.0, log(2 * pi * t[i]*t[i] * eps*eps))
-    arg = -t[i] * (u_eps - sqrt(-2 * u_eps - 2))
-    k1 = (sqrt(2 * t[i]) - w)/2
-    if (arg > 0) {
-      k2 = (sqrt(arg) - w) / 2;
-      k[i] = ceiling(max(k1, k2));
-    }
-    else {
-      k[i] = ceiling(k1);
-    }
+kl_Nav <- function(t, eps) {
+  if (pi * t * eps < 1) {
+    kl <- sqrt(-2 * log(pi*t*eps) / (pi*pi*t))
+    kl <- ceiling(max(kl, 1 / (pi*sqrt(t))))
+  } else {
+    kl <- ceiling(1 / (pi * sqrt(t)))
+  }
+  return(kl)
+}
+
+lt <- seq(0.01, 5, by = 0.01)
+leps <- 1e-21*10^(1:20)
+kl <- data.frame(matrix(nrow = length(lt), ncol = length(leps)+1))
+colnames(kl) <- c("t", leps)
+kl[,1] <- lt
+for (ti in 1:length(lt)) {
+  for (epsi in 1:length(leps)) {
+    kl[ti, epsi+1] <- kl_Nav(lt[ti], leps[epsi])
+  }
+}
+kl_melt <- melt(kl, measure.vars = -1, variable.name = "eps", value.name = "kl")
+
+ggplot(kl_melt, aes(x = t, y = eps)) +
+  geom_raster(aes(fill = kl)) +
+  scale_fill_continuous(limits=c(1, 5), breaks=1:5) +
+  labs(title = "Number of terms required",
+       subtitle = "Large-time summation, Navarro 2009",
+       x = "Scaled Time: t/a^2 (ms)", y = "Error Tolerance") +
+  theme_bw() +
+  theme(plot.title = element_text(size = 23),
+        plot.subtitle = element_text(size = 16),
+        axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 16),
+        axis.title.x = element_text(size = 20),
+        axis.title.y = element_text(size = 20),
+        legend.title = element_text(size = 20),
+        legend.text = element_text(size = 16))
+
+
+
+
+ks_Kes <- function(t, w, eps) {
+  u_eps = min(-1.0, log(2 * pi * t*t * eps*eps))
+  arg = -t * (u_eps - sqrt(-2 * u_eps - 2))
+  k1 = (sqrt(2 * t) - w)/2
+  if (arg > 0) {
+    k2 = (sqrt(arg) - w) / 2;
+    k = ceiling(max(k1, k2));
+  }
+  else {
+    k = ceiling(k1);
   }
   return(k)
 }
 
-
-kl_Nav_tif <- function(t, eps) {
-  kl <- rep(0, length(t))
-  for (i in 1:length(t)) {
-    kl[i] <- ceiling(sqrt(-2 * log(pi*t[i]*eps) / (pi*pi*t[i])))
-  }
-  return(kl)
-}
-kl_Nav_tel <- function(t, eps) {
-  kl <- rep(0, length(t))
-  for (i in 1:length(t)) {
-    kl[i] <- ceiling(1 / (pi * sqrt(t[i])))
-  }
-  return(kl)
-}
-kl_Nav_t <- function(t, eps) {
-  kl <- rep(0, length(t))
-  for (i in 1:length(t)) {
-    if (eps < (1 / (pi*t[i]))) { # pi * eps * t[i] < 1
-      kl[i] <- sqrt(-2 * log(pi*t[i]*eps) / (pi*pi*t[i]))
-      kl[i] <- ceiling(max(kl[i], 1 / (pi*sqrt(t[i]))))
-    } else {
-      print("else")
-      kl[i] <- ceiling(1 / (pi * sqrt(t[i])))
+st <- seq(0.1, 5, by = 0.1)
+seps <- 1e-21*10^(1:20)
+sw <- seq(0.1, 0.9, by = 0.1)
+ks <- data.frame(matrix(nrow = length(st)*length(seps)*length(sw), ncol = 4))
+colnames(ks) <- c("t", "w", "eps", "ks")
+idx <- 1
+for (ti in 1:length(st)) {
+  for (wi in 1:length(sw)) {
+    for (epsi in 1:length(seps)) {
+      ks[idx, 1] <- st[ti]
+      ks[idx, 2] <- sw[wi]
+      ks[idx, 3] <- seps[epsi]
+      ks[idx, 4] <- ks_Kes(st[ti], sw[wi], seps[epsi])
+      idx = idx + 1
     }
   }
-  return(kl)
 }
 
+ks
+ks5 <- subset(ks, w == 0.5)[,c(1,3,4)]
+rownames(ks5) <- NULL
+melt(ks, measure.vars = 4, value.name = "ks")
 
-t <- c(0.001, 0.005, 0.01, 0.05, 0.1,
-       seq(0.5, 3, by = 0.5))
-       # seq(4, 10, by = 1),
-       # seq(12.5, 20, by = 2.5),
-       # seq(25, 30, by = 5))
-eps <- 1e-6
 
-plot(t, kl_Nav_tif(t, eps), type = "l", col = "blue", ylim = c(0, 10))
-lines(t, kl_Nav_tel(t, eps), type = "l", col = "red")
-points(t, kl_Nav_t(t, eps), pch = 4, col = "purple")
-lines(t, ks_Kes_t(t, 0.5, eps), type = "l", lty = "dotted", col = "darkgreen")
+st <- seq(0.01, 5, by = 0.01)
+seps <- 1e-21*10^(1:20)
+ks <- data.frame(matrix(nrow = length(st), ncol = length(seps)+1))
+colnames(ks) <- c("t", leps)
+ks[,1] <- st
+for (ti in 1:length(st)) {
+  for (epsi in 1:length(seps)) {
+    ks[ti, epsi+1] <- ks_Kes(st[ti], 0.9, seps[epsi])
+  }
+}
+ks_melt <- melt(ks, measure.vars = -1, variable.name = "eps", value.name = "ks")
+
+ggplot(ks_melt, aes(x = t, y = eps, fill = ks)) +
+  geom_raster() +
+  scale_fill_continuous(limits=c(1, 5), breaks=1:5) +
+  labs(title = "Number of terms required",
+       subtitle = "Small-time summation, Kesselmeier 2014",
+       x = "Scaled Time: t/a^2 (ms)", y = "Error Tolerance") +
+  theme_bw() +
+  theme(plot.title = element_text(size = 23),
+        plot.subtitle = element_text(size = 16),
+        axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 16),
+        axis.title.x = element_text(size = 20),
+        axis.title.y = element_text(size = 20),
+        legend.title = element_text(size = 20),
+        legend.text = element_text(size = 16))
