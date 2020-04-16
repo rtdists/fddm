@@ -29,8 +29,8 @@ sim <- rt_benchmark(RT = c(RT_0_3, RT_4_10), resp = 0, V = V, A = A, W = W, t0 =
 saveRDS(sim, file = "benchmark_testing/Results/sim_0-10_1000w_TEST3.Rds")
 sim <- readRDS("benchmark_testing/Results/sim_0-3_10000.Rds")
 
-sim_vec <- rt_benchmark(RT = RT_0_3, resp = 0, V = V, A = A, W = W, t0 = t0,
+sim_vec <- rt_benchmark(RT = RT_4_10, resp = 0, V = V, A = A, W = W, t0 = t0,
                         err_tol = err_tol, rt_as_vec = TRUE,
                         times = 10000, unit = "us")
-saveRDS(sim_vec, file = "benchmark_testing/Results/vec_0-3_10000.Rds")
+saveRDS(sim_vec, file = "benchmark_testing/Results/vec_4-10_10000.Rds")
 sim_vec <- readRDS("benchmark_testing/Results/vec_0-3_100000.Rds")
