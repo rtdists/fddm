@@ -29,7 +29,7 @@ ggplot(kl_melt, aes(x = t, y = eps)) +
   scale_fill_continuous(limits=c(1, 5), breaks=1:5) +
   labs(title = "Number of terms required",
        subtitle = "Large-time summation, Navarro 2009",
-       x = "Scaled Time: t/a^2 (ms)", y = "Error Tolerance") +
+       x = "Scaled Time: t/a^2 (s)", y = "Error Tolerance") +
   theme_bw() +
   theme(plot.title = element_text(size = 23),
         plot.subtitle = element_text(size = 16),
@@ -98,7 +98,7 @@ ggplot(ks_melt, aes(x = t, y = eps, fill = ks)) +
   scale_fill_continuous(limits=c(1, 5), breaks=1:5) +
   labs(title = "Number of terms required",
        subtitle = "Small-time summation, Kesselmeier 2014",
-       x = "Scaled Time: t/a^2 (ms)", y = "Error Tolerance") +
+       x = "Scaled Time: t/a^2 (s)", y = "Error Tolerance") +
   theme_bw() +
   theme(plot.title = element_text(size = 23),
         plot.subtitle = element_text(size = 16),
