@@ -4,3 +4,4 @@
 .Rhistory
 src/*.o
 src/*.dll
+src/*.so
