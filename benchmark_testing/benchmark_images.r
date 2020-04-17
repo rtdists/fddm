@@ -8,7 +8,7 @@ library("tidyverse")
 ############## Simulated Data ##############
 
 ### Mean benchmark times (violin plots) for each method
-bm <- readRDS("benchmark_testing/Results/vec_4-10_10000.Rds")
+bm <- readRDS("benchmark_testing/Results/vec_0-30_10000.Rds")
 t_idx <- match("W", colnames(bm))
 bm[,-seq_len(t_idx)] <- bm[, -seq_len(t_idx)]/1000
 mbm <- melt(bm, measure.vars = -seq_len(t_idx),
@@ -50,8 +50,35 @@ violin <- ggplot(mbm, aes(x = FuncName, y = time,
                         axis.title.x = element_text(size = 20),
                         axis.title.y = element_text(size = 20),
                         legend.position = "none")
-ggsave("benchmark_testing/Results/Images/violin_4-10_vec.png", plot = violin,
+ggsave("benchmark_testing/Results/Images/violin_0-3_vec.png", plot = violin,
        width = 16, height = 9)
+
+
+
+### Densities of parameters in the tails of the violins (for each method)
+plot_par_dens <- function(df, fname) {
+  # choose the method
+  fbm <- df[, c("V", "A", "W", fname)]
+  times <- fbm[,ncol(fbm)]
+  # (kinda) crudely extract tail
+  tail_start <- median(times) + 2*sd(times)
+  ftbm <- (fbm[fbm[,ncol(fbm)] > tail_start,])[,-ncol(fbm)]
+  # plot density of parameters
+  ftbm_melt <- melt(ftbm, id.vars = NULL, variable.name = "Parameter")
+  ftbm_par_dens <- ggplot(ftbm_melt, aes(value)) +
+                          geom_density() +
+                          labs(title = "Tail densities of parameters",
+                               subtitle = fname,
+                               x = "Parameter Value", y = "Density") +
+                          theme_bw() +
+                          theme(panel.grid.minor = element_blank(),
+                                panel.border = element_blank(),
+                                strip.background = element_rect(fill = "white"),
+                                legend.position = "none") +
+                          facet_wrap("Parameter", scales = "free")
+  return(ftbm_par_dens)
+}
+plot_par_dens(bm, Names[2]) # Names[2:15]
 
 
 
@@ -197,134 +224,134 @@ bm <- readRDS("benchmark_testing/Results/vec_0-3_1000.Rds")
 t_idx <- match("W", colnames(bm))
 bm[,-seq_len(t_idx)] <- bm[, -seq_len(t_idx)]/1000
 mbm <- melt(bm, measure.vars = -seq_len(t_idx),
-       variable.name = "FuncName", value.name = "time")
+            variable.name = "FuncName", value.name = "time")
 
 
 Names_RCp <- c("fddm_fast", "fs_Fos_17", "fs_Fos_14",
-          "fs_Kes_17", "fs_Kes_14", "fs_Nav_17", "fs_Nav_14",
-          "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
-          "fl_Nav_09", "RWiener", "Kesselmeier", "rtdists")
+               "fs_Kes_17", "fs_Kes_14", "fs_Nav_17", "fs_Nav_14",
+               "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
+               "fl_Nav_09", "RWiener", "Kesselmeier", "rtdists")
 Color_RCp <- c("#ff00cc", "#9900cc", "#cc99ff",
-          "#006699", "#66ccff", "#336600", "#33cc33",
-          "#c2a500", "#d7db42", "#e68a00", "#ffb366",
-          "#996633", "#ff9999", "#ff5050", "#990000")
+               "#006699", "#66ccff", "#336600", "#33cc33",
+               "#c2a500", "#d7db42", "#e68a00", "#ffb366",
+               "#996633", "#ff9999", "#ff5050", "#990000")
 mbm_RCp <- mbm
 ecdf_RCp <- ggplot(mbm_RCp, aes(x = time,
-                           color = factor(FuncName, levels = Names_RCp))) +
-geom_line(aes(y = 1 - ..y..), stat = 'ecdf') +
-scale_color_manual(values=Color_RCp) +
-# coord_cartesian(xlim = c(0,50)) +
-labs(title = "Complementary ECDF of median Microbenchmark results",
-  x = "Time (ms)", y = "Complementary ECDF",
-  color = "Method") +
-theme_bw() +
-theme(panel.grid.minor = element_blank(),
-   panel.border = element_blank(),
-   plot.title = element_text(size = 23),
-   axis.text.x = element_text(size = 16),
-   axis.text.y = element_text(size = 16),
-   axis.title.x = element_text(size = 20),
-   axis.title.y = element_text(size = 20),
-   legend.position = c(1,1),
-   legend.justification = c(1,1),
-   legend.direction = "vertical",
-   legend.title = element_text(size = 18),
-   legend.text = element_text(size = 16, angle = 0)) +
-guides(color = guide_legend(override.aes = list(size = 2)))
+                                color = factor(FuncName, levels = Names_RCp))) +
+  geom_line(aes(y = 1 - ..y..), stat = 'ecdf') +
+  scale_color_manual(values=Color_RCp) +
+  # coord_cartesian(xlim = c(0,50)) +
+  labs(title = "Complementary ECDF of median Microbenchmark results",
+       x = "Time (ms)", y = "Complementary ECDF",
+       color = "Method") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        plot.title = element_text(size = 23),
+        axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 16),
+        axis.title.x = element_text(size = 20),
+        axis.title.y = element_text(size = 20),
+        legend.position = c(1,1),
+        legend.justification = c(1,1),
+        legend.direction = "vertical",
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 16, angle = 0)) +
+  guides(color = guide_legend(override.aes = list(size = 2)))
 ggsave("benchmark_testing/Results/Images/ecdf_plots/ecdf_RCp_0-3.png",
-  plot = ecdf_RCp, width = 16, height = 9)
+       plot = ecdf_RCp, width = 16, height = 9)
 
 
 Names_sum <- c("fs_Fos_17", "fs_Fos_14",
-          "fs_Kes_17", "fs_Kes_14", "fs_Nav_17", "fs_Nav_14",
-          "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14")
+               "fs_Kes_17", "fs_Kes_14", "fs_Nav_17", "fs_Nav_14",
+               "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14")
 Color_sum <- c("#9900cc", "#cc99ff",
-          "#006699", "#66ccff", "#336600", "#33cc33",
-          "#c2a500", "#d7db42", "#e68a00", "#ffb366")
+               "#006699", "#66ccff", "#336600", "#33cc33",
+               "#c2a500", "#d7db42", "#e68a00", "#ffb366")
 mbm_sum <- subset(mbm, FuncName %in% Names_sum)
 ecdf_sum <- ggplot(mbm_sum, aes(x = time,
-                           color = factor(FuncName, levels = Names_sum))) +
-geom_line(aes(y = 1 - ..y..), stat = 'ecdf') +
-scale_color_manual(values = Color_sum) +
-# coord_cartesian(xlim = c(25,200)) +
-labs(title = "Complementary ECDF of median Microbenchmark results",
-  x = "Time (ms)", y = "Complementary ECDF",
-  color = "Method") +
-theme_bw() +
-theme(panel.grid.minor = element_blank(),
-   panel.border = element_blank(),
-   plot.title = element_text(size = 23),
-   axis.text.x = element_text(size = 16),
-   axis.text.y = element_text(size = 16),
-   axis.title.x = element_text(size = 20),
-   axis.title.y = element_text(size = 20),
-   legend.position = c(1,1),
-   legend.justification = c(1,1),
-   legend.direction = "vertical",
-   legend.title = element_text(size = 18),
-   legend.text = element_text(size = 16, angle = 0)) +
-guides(color = guide_legend(override.aes = list(size = 2)))
+                                color = factor(FuncName, levels = Names_sum))) +
+  geom_line(aes(y = 1 - ..y..), stat = 'ecdf') +
+  scale_color_manual(values = Color_sum) +
+  # coord_cartesian(xlim = c(25,200)) +
+  labs(title = "Complementary ECDF of median Microbenchmark results",
+       x = "Time (ms)", y = "Complementary ECDF",
+       color = "Method") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        plot.title = element_text(size = 23),
+        axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 16),
+        axis.title.x = element_text(size = 20),
+        axis.title.y = element_text(size = 20),
+        legend.position = c(1,1),
+        legend.justification = c(1,1),
+        legend.direction = "vertical",
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 16, angle = 0)) +
+  guides(color = guide_legend(override.aes = list(size = 2)))
 ggsave("benchmark_testing/Results/Images/ecdf_plots/ecdf_sum_0-3.png",
-  plot = ecdf_sum, width = 16, height = 9)
+       plot = ecdf_sum, width = 16, height = 9)
 
 
 Names_slt <- c("fs_Fos_17", "fs_Kes_17", "fs_Nav_17",
-          "fb_Kes_17", "fb_Nav_17", "fl_Nav_09")
+               "fb_Kes_17", "fb_Nav_17", "fl_Nav_09")
 Color_slt <- c("#9900cc", "#006699", "#336600",
-          "#c2a500", "#e68a00", "#996633")
+               "#c2a500", "#e68a00", "#996633")
 mbm_slt <- subset(mbm, FuncName %in% Names_slt)
 ecdf_slt <- ggplot(mbm_slt, aes(x = time,
-                           color = factor(FuncName, levels = Names_slt))) +
-geom_line(aes(y = 1 - ..y..), stat = 'ecdf') +
-scale_color_manual(values = Color_slt) +
-# coord_cartesian(xlim = c(25,200)) +
-labs(title = "Complementary ECDF of median Microbenchmark results",
-  x = "Time (ms)", y = "Complementary ECDF",
-  color="Method") +
-theme_bw() +
-theme(panel.grid.minor = element_blank(),
-   panel.border = element_blank(),
-   plot.title = element_text(size = 23),
-   axis.text.x = element_text(size = 16),
-   axis.text.y = element_text(size = 16),
-   axis.title.x = element_text(size = 20),
-   axis.title.y = element_text(size = 20),
-   legend.position = c(1,1),
-   legend.justification = c(1,1),
-   legend.direction = "vertical",
-   legend.title = element_text(size = 18),
-   legend.text = element_text(size = 16, angle = 0)) +
-guides(color = guide_legend(override.aes = list(size = 2)))
+                                color = factor(FuncName, levels = Names_slt))) +
+  geom_line(aes(y = 1 - ..y..), stat = 'ecdf') +
+  scale_color_manual(values = Color_slt) +
+  # coord_cartesian(xlim = c(25,200)) +
+  labs(title = "Complementary ECDF of median Microbenchmark results",
+       x = "Time (ms)", y = "Complementary ECDF",
+       color="Method") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        plot.title = element_text(size = 23),
+        axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 16),
+        axis.title.x = element_text(size = 20),
+        axis.title.y = element_text(size = 20),
+        legend.position = c(1,1),
+        legend.justification = c(1,1),
+        legend.direction = "vertical",
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 16, angle = 0)) +
+  guides(color = guide_legend(override.aes = list(size = 2)))
 ggsave("benchmark_testing/Results/Images/ecdf_plots/ecdf_slt_0-3.png",
-  plot = ecdf_slt, width = 16, height = 9)
+       plot = ecdf_slt, width = 16, height = 9)
 
 
 Names_bRC <- c("fddm_fast", "fs_Fos_17", "fs_Kes_17", "fs_Nav_17",
-          "fb_Kes_17", "fb_Nav_17", "RWiener", "Kesselmeier")
+               "fb_Kes_17", "fb_Nav_17", "RWiener", "Kesselmeier")
 Color_bRC <- c("#ff00cc", "#9900cc", "#006699", "#336600",
-          "#c2a500", "#e68a00", "#ff9999", "#ff5050")
+               "#c2a500", "#e68a00", "#ff9999", "#ff5050")
 mbm_bRC <- subset(mbm, FuncName %in% Names_bRC)
 ecdf_bRC <- ggplot(mbm_bRC, aes(x = time,
-                           color = factor(FuncName, levels = Names_bRC))) +
-geom_line(aes(y = 1 - ..y..), stat = 'ecdf') +
-scale_color_manual(values = Color_bRC) +
-# coord_cartesian(xlim = c(25,200)) +
-labs(title="Complementary ECDF of median Microbenchmark results",
-  x="Time (ms)", y="Complementary ECDF",
-  color="Method") +
-theme_bw() +
-theme(panel.grid.minor = element_blank(),
-   panel.border = element_blank(),
-   plot.title = element_text(size = 23),
-   axis.text.x = element_text(size = 16),
-   axis.text.y = element_text(size = 16),
-   axis.title.x = element_text(size = 20),
-   axis.title.y = element_text(size = 20),
-   legend.position = c(1,1),
-   legend.justification = c(1,1),
-   legend.direction = "vertical",
-   legend.title = element_text(size = 18),
-   legend.text = element_text(size = 16, angle = 0)) +
-guides(color = guide_legend(override.aes = list(size = 2)))
+                                color = factor(FuncName, levels = Names_bRC))) +
+  geom_line(aes(y = 1 - ..y..), stat = 'ecdf') +
+  scale_color_manual(values = Color_bRC) +
+  # coord_cartesian(xlim = c(25,200)) +
+  labs(title="Complementary ECDF of median Microbenchmark results",
+       x="Time (ms)", y="Complementary ECDF",
+       color="Method") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        plot.title = element_text(size = 23),
+        axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 16),
+        axis.title.x = element_text(size = 20),
+        axis.title.y = element_text(size = 20),
+        legend.position = c(1,1),
+        legend.justification = c(1,1),
+        legend.direction = "vertical",
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 16, angle = 0)) +
+  guides(color = guide_legend(override.aes = list(size = 2)))
 ggsave("benchmark_testing/Results/Images/ecdf_plots/ecdf_bRC_0-3_TEST2.png",
-  plot = ecdf_bRC, width = 16, height = 9)
+       plot = ecdf_bRC, width = 16, height = 9)
