@@ -8,7 +8,7 @@ library("tidyverse")
 ############## Simulated Data ##############
 
 ### Mean benchmark times (violin plots) for each method
-bm <- readRDS("benchmark_testing/Results/vec_0-3_10000.Rds")
+bm <- readRDS("benchmark_testing/Results/vec_4-10_10000.Rds")
 t_idx <- match("W", colnames(bm))
 bm[,-seq_len(t_idx)] <- bm[, -seq_len(t_idx)]/1000
 mbm <- melt(bm, measure.vars = -seq_len(t_idx),
@@ -50,7 +50,7 @@ violin <- ggplot(mbm, aes(x = FuncName, y = time,
                         axis.title.x = element_text(size = 20),
                         axis.title.y = element_text(size = 20),
                         legend.position = "none")
-ggsave("benchmark_testing/Results/Images/violin_0-3_vec.png", plot = violin,
+ggsave("benchmark_testing/Results/Images/violin_4-10_vec.png", plot = violin,
        width = 16, height = 9)
 
 
