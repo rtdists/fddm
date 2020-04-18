@@ -23,10 +23,10 @@ err_tol = 1e-6 # this is the setting from rtdists
 
 
 # Run benchmark tests
-sim <- rt_benchmark(RT = c(RT_0_3, RT_4_10), resp = 0, V = V, A = A, W = W, t0 = t0,
+sim <- rt_benchmark(RT = RT_4_10, resp = 0, V = V, A = A, W = W, t0 = t0,
                     err_tol = err_tol, rt_as_vec = FALSE,
-                    times = 1000, unit = "us")
-saveRDS(sim, file = "benchmark_testing/Results/sim_0-10_1000w_TEST3.Rds")
+                    times = 10000, unit = "us")
+saveRDS(sim, file = "benchmark_testing/Results/sim_4-10_10000.Rds")
 sim <- readRDS("benchmark_testing/Results/sim_0-3_10000.Rds")
 
 sim_vec <- rt_benchmark(RT = c(RT_0_3, RT_4_10), resp = 0, V = V, A = A, W = W, t0 = t0,
