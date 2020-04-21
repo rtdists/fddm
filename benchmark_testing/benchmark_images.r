@@ -8,7 +8,7 @@ library("tidyverse")
 ############## Simulated Data ##############
 
 ### Mean benchmark times (violin plots) for each method
-bm <- readRDS("benchmark_testing/Results/vec_12-30_10000.Rds")
+bm <- readRDS("benchmark_testing/Results/sim_0-10_10000.Rds")
 t_idx <- match("W", colnames(bm))
 bm[,-seq_len(t_idx)] <- bm[, -seq_len(t_idx)]/1000
 mbm <- melt(bm, measure.vars = -seq_len(t_idx),
@@ -50,7 +50,7 @@ violin <- ggplot(mbm, aes(x = FuncName, y = time,
                         axis.title.x = element_text(size = 20),
                         axis.title.y = element_text(size = 20),
                         legend.position = "none")
-ggsave("benchmark_testing/Results/Images/violin_12-30_vec.png", plot = violin,
+ggsave("benchmark_testing/Results/Images/violin_0-10_indRT.png", plot = violin,
        width = 16, height = 9)
 
 
@@ -60,7 +60,7 @@ plot_par_dens <- function(df, fname) {
   # choose the method
   fbm <- df[, c("V", "A", "W", fname)]
   times <- fbm[,ncol(fbm)]
-  # (kinda) crudely extract tail
+  # crudely extract tail
   tail_start <- median(times) + 2*sd(times)
   ftbm <- (fbm[fbm[,ncol(fbm)] > tail_start,])[,-ncol(fbm)]
   # plot density of parameters
@@ -79,7 +79,8 @@ plot_par_dens <- function(df, fname) {
   return(ftbm_par_dens)
 }
 plot_par_dens(bm, Names[2]) # Names[2:15]
-
+ggsave("benchmark_testing/Results/Images/violin_tails/fs_Fos_17_0-10.png",
+       width = 16, height = 9)
 
 
 
@@ -90,7 +91,7 @@ plot_par_dens(bm, Names[2]) # Names[2:15]
 
 
 ### Each parameter vs benchmark time
-bm <- readRDS("benchmark_testing/Results/sim_0-3_10000.Rds")
+bm <- readRDS("benchmark_testing/Results/sim_0-10_10000.Rds")
 t_idx <- match("W", colnames(bm))
 bm[,-seq_len(t_idx)] <- bm[, -seq_len(t_idx)]/1000
 mbm <- melt(bm, measure.vars = -seq_len(t_idx),
@@ -129,7 +130,7 @@ mbm_meq %>%
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
   facet_wrap("FuncName")
-ggsave("benchmark_testing/Results/Images/meq_plots/meq_RT_0-3.png",
+ggsave("benchmark_testing/Results/Images/meq_plots/meq_RT_0-10.png",
        width = 16, height = 9)
 
 # A
@@ -156,7 +157,7 @@ mbm_meq %>%
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
   facet_wrap("FuncName")
-ggsave("benchmark_testing/Results/Images/meq_plots/meq_A_0-3.png",
+ggsave("benchmark_testing/Results/Images/meq_plots/meq_A_0-10.png",
        width = 16, height = 9)
 
 # V
@@ -183,7 +184,7 @@ mbm_meq %>%
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
   facet_wrap("FuncName")
-ggsave("benchmark_testing/Results/Images/meq_plots/meq_V_0-3.png",
+ggsave("benchmark_testing/Results/Images/meq_plots/meq_V_0-10.png",
        width = 16, height = 9)
 
 # W
@@ -207,7 +208,7 @@ mbm_meq %>%
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
   facet_wrap("FuncName")
-ggsave("benchmark_testing/Results/Images/meq_plots/meq_W_0-3.png",
+ggsave("benchmark_testing/Results/Images/meq_plots/meq_W_0-10.png",
        width = 16, height = 9)
 
 
