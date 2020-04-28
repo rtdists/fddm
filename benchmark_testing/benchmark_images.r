@@ -56,9 +56,13 @@ ggsave("benchmark_testing/Results/Images/violin_0-10_indRT.png", plot = violin,
 
 
 ### Densities of parameters in the tails of the violins (for each method)
-plot_par_dens <- function(df, fname) {
+plot_par_dens <- function(df, fname, rt_vec = TRUE, nbins = 50) {
   # choose the method
-  fbm <- df[, c("V", "A", "W", fname)]
+  if (rt_vec) {
+    fbm <- df[, c("RT", "V", "A", "W", fname)]
+  } else {
+    fbm <- df[, c("V", "A", "W", fname)]
+  }
   times <- fbm[,ncol(fbm)]
   # crudely extract tail
   tail_start <- median(times) + 2*sd(times)
@@ -66,10 +70,11 @@ plot_par_dens <- function(df, fname) {
   # plot density of parameters
   ftbm_melt <- melt(ftbm, id.vars = NULL, variable.name = "Parameter")
   ftbm_par_dens <- ggplot(ftbm_melt, aes(value)) +
-                          geom_density() +
-                          labs(title = "Tail densities of parameters",
-                               subtitle = fname,
-                               x = "Parameter Value", y = "Density") +
+                          geom_histogram(bins = nbins) +
+                          labs(title = paste0("Tail densities of parameters for ",
+                                              fname),
+                               subtitle = paste0("Tail count: ", nrow(ftbm)),
+                               x = "Parameter Value", y = "Count") +
                           theme_bw() +
                           theme(panel.grid.minor = element_blank(),
                                 panel.border = element_blank(),
@@ -78,7 +83,7 @@ plot_par_dens <- function(df, fname) {
                           facet_wrap("Parameter", scales = "free")
   return(ftbm_par_dens)
 }
-plot_par_dens(bm, Names[2]) # Names[2:15]
+plot_par_dens(bm, Names[2], TRUE) # Names[2:15]
 ggsave("benchmark_testing/Results/Images/violin_tails/fs_Fos_17_0-10.png",
        width = 16, height = 9)
 

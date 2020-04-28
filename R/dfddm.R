@@ -124,9 +124,9 @@ dfddm <- function(rt, response,
                   a, v, t0, w = 0.5,
                   sv = 0,
                   log = FALSE,
-                  n_terms_small = "Foster",
+                  n_terms_small = "Kesselmeier",
                   summation_small = "2017",
-                  scale = "small",
+                  scale = "both",
                   err_tol = 0.000001)
 {
   return(cpp_dfddm(rt, response, a, v, t0, w, sv, log,
@@ -134,7 +134,7 @@ dfddm <- function(rt, response,
 }
 
 
-dfddm_fast <- function(rt, a, v, t0, w = 0.5, err_tol = 0.000001)
-{
-  return(cpp_dfddm_fast(rt, a, v, t0, w, err_tol))
-}
+# dfddm_fast <- function(rt, a, v, t0, w = 0.5, err_tol = 0.000001)
+# {
+#   return(cpp_dfddm_fast(rt, a, v, t0, w, err_tol))
+# }

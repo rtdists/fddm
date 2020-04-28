@@ -108,3 +108,53 @@ ggplot(ks_melt, aes(x = t, y = eps, fill = ks)) +
         axis.title.y = element_text(size = 20),
         legend.title = element_text(size = 20),
         legend.text = element_text(size = 16))
+
+
+
+
+
+
+
+################################################################################
+library("devtools")
+load_all(recompile = TRUE)
+library("fddm")
+library("rtdists")
+library("RWiener")
+source("inst/extdata/Kesselmeier_density.R")
+
+a = 1
+v = -2
+w = 0.5
+rt = 4
+t0 = 0
+t = rt - t0
+err_tol = 1e-6
+
+abs(dfddm(rt, 0, a, v, t0, n_terms_small = "F", scale = "s") - ddiffusion(rt, "lower", a = a, v = v, t0 = t0, z = w*a))
+abs(dfddm(rt, 0, a, v, t0, n_terms_small = "F", scale = "s") - fs14_R(rt-t0, a = a, v = v, w = w, eps = err_tol))
+abs(dfddm(rt, 0, a, v, t0, n_terms_small = "N", scale = "s") - ddiffusion(rt, "lower", a = a, v = v, t0 = t0, z = w*a))
+abs(dfddm(rt, 0, a, v, t0, n_terms_small = "N", scale = "s") - fs14_R(rt-t0, a = a, v = v, w = w, eps = err_tol))
+
+mult_s = exp(-v * a * w - v * v * t / 2)
+
+dfddm(3, 0, a = 0.5, v = -3, t0 = 0, w = 0.5, sv = 1, n_terms_small = "F", scale = "s", err_tol = 1e-6) - dfddm(3, 0, a = 0.5, v = -3, t0 = 0, w = 0.5, sv = 1, n_terms_small = "N", scale = "s", err_tol = 1e-6)
+ddiffusion(3, "lower", a = 0.5, v = -3, t0 = 0, z = 0.5*0.5, sv = 1)
+
+
+ks14_R(rt-t0, w, err_tol*a*a/mult_s)
+ks14_R((rt-t0)/a/a, w, err_tol/(1/a/a * exp(-v*a*w - v*v*t/2)))
+ks_Kes <- function(t, w, eps) {
+  u_eps = min(-1.0, log(2 * pi * t*t * eps*eps))
+  arg = -t * (u_eps - sqrt(-2 * u_eps - 2))
+  k1 = (sqrt(2 * t) - w)/2
+  if (arg > 0) {
+    k2 = (sqrt(arg) - w) / 2;
+    k = ceiling(max(k1, k2));
+  }
+  else {
+    k = ceiling(k1);
+  }
+  return(k)
+}
+ks_Kes(rt, w, err_tol*a*a*exp(v*a*w + v*v*t/2))
