@@ -15,11 +15,13 @@ mbm <- melt(bm, measure.vars = -seq_len(t_idx),
             variable.name = "FuncName", value.name = "time")
 
 
-Names <- c("fddm_fast", "fs_Fos_17", "fs_Fos_14",
+Names <- c(#"fddm_fast",
+           "fs_Fos_17", "fs_Fos_14",
            "fs_Kes_17", "fs_Kes_14", "fs_Nav_17", "fs_Nav_14",
            "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
            "fl_Nav_09", "RWiener", "Kesselmeier", "rtdists")
-Color <- c("#ff00cc", "#9900cc", "#cc99ff",
+Color <- c(#"#ff00cc",
+           "#9900cc", "#cc99ff",
            "#006699", "#66ccff", "#336600", "#33cc33",
            "#c2a500", "#d7db42", "#e68a00", "#ffb366",
            "#996633", "#ff9999", "#ff5050", "#990000")
@@ -83,7 +85,7 @@ plot_par_dens <- function(df, fname, rt_vec = TRUE, nbins = 50) {
                           facet_wrap("Parameter", scales = "free")
   return(ftbm_par_dens)
 }
-plot_par_dens(bm, Names[2], TRUE) # Names[2:15]
+plot_par_dens(bm, Names[1], TRUE) # Names[1:15]
 ggsave("benchmark_testing/Results/Images/violin_tails/fs_Fos_17_0-10.png",
        width = 16, height = 9)
 
@@ -123,7 +125,7 @@ mbm_meq %>%
   geom_ribbon(aes(ymin = lower, ymax = upper, fill = FuncName),
               alpha = 0.2, color = NA) +
   geom_ribbon(aes(ymin = min, ymax = max, fill = FuncName),
-              alpha = 0.1, color = NA) +
+              alpha = 0.15, color = NA) +
   geom_line(aes(group = 1)) +
   scale_color_manual(values = Color_meq) +
   scale_fill_manual(values = Color_meq) +
@@ -134,7 +136,7 @@ mbm_meq %>%
         panel.border = element_blank(),
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
-  facet_wrap("FuncName")
+  facet_wrap("FuncName", scales = "free_y")
 ggsave("benchmark_testing/Results/Images/meq_plots/meq_RT_0-10.png",
        width = 16, height = 9)
 
@@ -144,12 +146,14 @@ mbm_meq %>%
   group_by(FuncName, A) %>%
   summarise(means = mean(time),
             upper = quantile(time, prob = 0.9),
-            lower = quantile(time, prob = 0.1)) %>%
+            lower = quantile(time, prob = 0.1),
+            max = max(time),
+            min = min(time)) %>%
   ggplot(aes(x = A, y = means, color = FuncName)) +
-  annotate("rect", fill = "lightgrey", alpha = 0.3,
-           xmin = 0.5, xmax = 2, ymin = -Inf, ymax = Inf) +
   geom_ribbon(aes(ymin = lower, ymax = upper, fill = FuncName),
               alpha = 0.2, color = NA) +
+  geom_ribbon(aes(ymin = min, ymax = max, fill = FuncName),
+              alpha = 0.15, color = NA) +
   geom_line(aes(group = 1)) +
   scale_color_manual(values = Color_meq) +
   scale_fill_manual(values = Color_meq) +
@@ -161,7 +165,7 @@ mbm_meq %>%
         panel.border = element_blank(),
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
-  facet_wrap("FuncName")
+  facet_wrap("FuncName", scales = "free_y")
 ggsave("benchmark_testing/Results/Images/meq_plots/meq_A_0-10.png",
        width = 16, height = 9)
 
@@ -171,12 +175,14 @@ mbm_meq %>%
   group_by(FuncName, V) %>%
   summarise(means = mean(time),
             upper = quantile(time, prob = 0.9),
-            lower = quantile(time, prob = 0.1)) %>%
+            lower = quantile(time, prob = 0.1),
+            max = max(time),
+            min = min(time)) %>%
   ggplot(aes(x = V, y = means, color = FuncName)) +
-  annotate("rect", fill = "lightgrey", alpha = 0.3,
-           xmin = -5, xmax = 5, ymin = -Inf, ymax = Inf) +
   geom_ribbon(aes(ymin = lower, ymax = upper, fill = FuncName),
               alpha = 0.2, color = NA) +
+  geom_ribbon(aes(ymin = min, ymax = max, fill = FuncName),
+              alpha = 0.15, color = NA) +
   geom_line(aes(group = 1)) +
   scale_color_manual(values = Color_meq) +
   scale_fill_manual(values = Color_meq) +
@@ -188,7 +194,7 @@ mbm_meq %>%
         panel.border = element_blank(),
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
-  facet_wrap("FuncName")
+  facet_wrap("FuncName", scales = "free_y")
 ggsave("benchmark_testing/Results/Images/meq_plots/meq_V_0-10.png",
        width = 16, height = 9)
 
@@ -198,10 +204,14 @@ mbm_meq %>%
   group_by(FuncName, W) %>%
   summarise(means = mean(time),
             upper = quantile(time, prob = 0.9),
-            lower = quantile(time, prob = 0.1)) %>%
+            lower = quantile(time, prob = 0.1),
+            max = max(time),
+            min = min(time)) %>%
   ggplot(aes(x = W, y = means, color = FuncName)) +
   geom_ribbon(aes(ymin = lower, ymax = upper, fill = FuncName),
               alpha = 0.2, color = NA) +
+  geom_ribbon(aes(ymin = min, ymax = max, fill = FuncName),
+              alpha = 0.15, color = NA) +
   geom_line(aes(group = 1)) +
   scale_color_manual(values = Color_meq) +
   scale_fill_manual(values = Color_meq) +
@@ -212,7 +222,7 @@ mbm_meq %>%
         panel.border = element_blank(),
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
-  facet_wrap("FuncName")
+  facet_wrap("FuncName", scales = "free_y")
 ggsave("benchmark_testing/Results/Images/meq_plots/meq_W_0-10.png",
        width = 16, height = 9)
 
@@ -233,11 +243,13 @@ mbm <- melt(bm, measure.vars = -seq_len(t_idx),
             variable.name = "FuncName", value.name = "time")
 
 
-Names_RCp <- c("fddm_fast", "fs_Fos_17", "fs_Fos_14",
+Names_RCp <- c(#"fddm_fast",
+               "fs_Fos_17", "fs_Fos_14",
                "fs_Kes_17", "fs_Kes_14", "fs_Nav_17", "fs_Nav_14",
                "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
                "fl_Nav_09", "RWiener", "Kesselmeier", "rtdists")
-Color_RCp <- c("#ff00cc", "#9900cc", "#cc99ff",
+Color_RCp <- c(#"#ff00cc",
+               "#9900cc", "#cc99ff",
                "#006699", "#66ccff", "#336600", "#33cc33",
                "#c2a500", "#d7db42", "#e68a00", "#ffb366",
                "#996633", "#ff9999", "#ff5050", "#990000")
@@ -332,9 +344,9 @@ ggsave("benchmark_testing/Results/Images/ecdf_plots/ecdf_slt_0-3.png",
        plot = ecdf_slt, width = 16, height = 9)
 
 
-Names_bRC <- c("fddm_fast", "fs_Fos_17", "fs_Kes_17", "fs_Nav_17",
+Names_bRC <- c("fs_Fos_17", "fs_Kes_17", "fs_Nav_17",
                "fb_Kes_17", "fb_Nav_17", "RWiener", "Kesselmeier")
-Color_bRC <- c("#ff00cc", "#9900cc", "#006699", "#336600",
+Color_bRC <- c("#9900cc", "#006699", "#336600",
                "#c2a500", "#e68a00", "#ff9999", "#ff5050")
 mbm_bRC <- subset(mbm, FuncName %in% Names_bRC)
 ecdf_bRC <- ggplot(mbm_bRC, aes(x = time,

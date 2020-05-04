@@ -108,7 +108,7 @@ bm <- function(RT, resp, V, A, W, t0 = 1e-4, err_tol = 1e-6,
           mbm_res[row_idx, 4] <- W[w]
           # add the median microbenchmark results to the dataframe
           for (i in 1:nf) {
-            mbm_res[row_idx, 4+i] <- median(subset(mbm, expr == fnames[i])$time)
+            mbm_res[row_idx, 4+i] <- median(subset(mbm, expr==fnames[i])$time)
           }
           # iterate start value
           row_idx = row_idx + 1

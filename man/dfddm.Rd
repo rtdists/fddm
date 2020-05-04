@@ -13,9 +13,9 @@ dfddm(
   w = 0.5,
   sv = 0,
   log = FALSE,
-  n_terms_small = c("Foster", "Kesselmeier", "Navarro"),
-  summation_small = c("2017", "2014"),
-  scale = c("small", "large", "both"),
+  n_terms_small = "Kesselmeier",
+  summation_small = "2017",
+  scale = "both",
   err_tol = 1e-06
 )
 }
@@ -76,7 +76,9 @@ approximation to the infinite sum. Can be one of \{\code{"2017"},
 Default is \code{"2017"}.}
 
 \item{scale}{Which density function to use. Can be one of \{\code{"small"},
-\code{"large"}, \code{"both"}\}. See Details for more information. Default
+\code{"large"}, \code{"both"}\}. Note that the large-time approximation is
+unstable for small effective response times (\code{rt}\eqn{/(}\code{a}
+\eqn{*}\code{a}\eqn{) < 0.009}). See Details for more information. Default
 is \code{"small"}.}
 
 \item{err_tol}{Allowed error tolerance of the density function. Since the
@@ -90,25 +92,29 @@ A vector containing the densities of the DDM with precision
 }
 \description{
 Density function for the Ratcliff diffusion decision model (DDM) with
-following parameters: \code{a} (threshold separation), \code{w} (relative
-starting point), \code{v} (drift rate), \code{t0} (non-decision time/response
-time constant), and \code{sv} (inter-trial-variability of drift).
+following parameters: \code{a} (threshold separation), \code{v} (drift rate),
+\code{t0} (non-decision time/response time constant), \code{w} (relative
+starting point), and \code{sv} (inter-trial-variability of drift).
 }
 \details{
-The default settings of \code{n_terms_small = "Foster"},
-code{summation_small = "2017"}, \code{scale = "small"} produce the fastest
+The default settings of \code{n_terms_small = "Kesselmeier"},
+code{summation_small = "2017"}, \code{scale = "both"} produce the fastest
 and most accurate results, as shown in our associated paper.
 
 \code{scale} - The density function for the DDM has traditionally been
 written in two forms: a "large-time" variant, and a "small-time" variant. The
 parameter \code{scale} determines which of these variants will be used in the
 calculation; \code{"large"} uses the "large-time" variant, and \code{"small"}
-uses the "small-time" variant. \code{"both"} utilizes both variants by
-determining which variant is more computationally efficient before
-calculating the density. Whereas the \code{"both"} option sounds the most
-efficient, the "large-time" density function is nearly always slower than the
-"small-time" density function; hence, it is recommended to use the
-\code{"small"} option.
+uses the "small-time" variant. The "large-time" variant is unstable for small
+effective response times (\code{rt}\eqn{/(}\code{a}\eqn{*}\code{a}\eqn{) <
+0.009}) and produces inaccurate densities; thus we do not recommend using
+only the \code{"large"} option if the inputs contain such small response
+times. To circumvent this issue, the \code{"both"} option utilizes both the
+"small-time" and "large-time" variants by determining which variant is more
+computationally efficient before calculating the density. Even though the
+"large-time" density function is often significantly slower than the
+"small-time" variant, it is extremely efficient in some areas of the
+parameter space, and so the \code{"both"} option is the fastest.
 
 \code{sv} - Both the "small-time" and "large-time" variants of the density
 function have two further variants: one with a constant drift rate \code{v}

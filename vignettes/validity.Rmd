@@ -1,18 +1,38 @@
-context("Accuracy among internal methods and relative to established packages")
+---
+title: "Vignette for dfddm"
+author: "Kendal Foster"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output:
+  html_document:
+    theme: paper
+    highlight: default
+    keep_md: true
+    toc: false
+    code_folding: hide
+    fig_width: 16
+    fig_height: 9
+    fig_caption: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Validity of Methods {.tabset .tabset-fade}
+
+`dfddm` is a density function for the Ratcliff diffusion decision model (DDM) with following parameters: `a` (threshold separation), `v` (drift rate), `t0` (non-decision time/response time constant), `w` (relative starting point), and `sv` (inter-trial-variability of drift).
+
+## Regular Function
+
+It is imperative to show that our density functions produce the same results as the current standards. To demonstrate this, we calculate the lower probability density for a granular parameter space and show that all of the results are within an acceptable error tolerance. The parameter space can be found in the code chunk below, and it includes both realistically feasible values and some extreme values for each parameter.
+
+Since each of these functions approximates an infinite summation to a desired precision of $\epsilon$, we allow for a difference of $2 \cdot \epsilon$ between any pair of calculated densities. This doubling of the error tolerance accounts for convergence from above and below the limit of the summation. (would a little picture description help here?). The following code chunk runs the full validity tests, but this takes a looooong while so we'll just read the data from file later on.
+```{r validity-run, eval=FALSE}
 library("rtdists")
 library("RWiener")
-source("inst/extdata/Kesselmeier_density.R")
-library("devtools")
-load_all(recompile = TRUE)
-library("fddm")
+source("data/Kesselmeier_density.R")
 
 
-### See Known Errors (KE) at bottom for issues with Navarro's implementation
-### Can read result dataframe in following line or rerun in lines 14-233
-# res <- readRDS("inst/extdata/test-density-res.Rds")
-
-
-# Evaluate densities
 RT <- c(0.001, 0.005, 0.01, 0.05, 0.1,
         seq(0.5, 3, by = 0.5),
         seq(4, 10, by = 1),
@@ -232,8 +252,21 @@ for (rt in 1:nRT) {
     }
   }
 }
-# saveRDS(res, file = "inst/extdata/test-density-res.Rds")
+saveRDS(res, file = "data/test-density-res.Rds")
+```
 
+Here is where we actually evaluate the tests (using testthat package). We have to amend some of the checks because of the instability of some of the methods, and these are documented in the section below. If all tests pass correctly, there should be no output.
+```{r validity-test, eval=TRUE}
+library("testthat")
+res <- readRDS("data/test-density-res.Rds")
+
+SV_THRESH <- 0.05
+eps <- 1e-6
+
+fnames <- c("fs_Fos_17", "fs_Fos_14",
+            "fs_Kes_17", "fs_Kes_14", "fs_Nav_17", "fs_Nav_14",
+            "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
+            "fl_Nav_09", "RWiener", "Kesselmeier", "rtdists")
 
 # Subset results
 Foster <- subset(res, FuncName %in% fnames[c(1,2)])
@@ -302,42 +335,152 @@ test_that("Log-Consistency of established packages", {
 })
 
 
+```
 
 
 
-### Known Errors (KE) ###
-# 1) Navarro small-time approximation is unstable for "large" effective response
-#    times, rt/(a*a) >= 10. It gives slightly negative densities for effective
-#    response times in this range. These parameter values should not have an
-#    effect on the "both" time scale because the large-time approximation should
-#    handle such locations in the parameter space. The negative results,
-#    however, are still within 2*eps of the accepted results (basically zero).
-# 2) Navarro large-time approximation is unstable for "small" effective response
-#    times, rt/(a*a) <= 0.06. It gives slightly negative densities for effective
-#    response times in this range and gives inaccurate densities for effective
-#    response times of rt/(a*a) <= 0.009. These parameter values should not have
-#    an effect on the "both" time scale because the small-time approximation
-#    should handle such locations in the parameter space.
-# 3) The Navarro "both" time scale switches between the small-time and large-
-#    time approximations. This method relies too much on the unstable large time
-#    approximation, leading to its instability; thus we only need to subset to
-#    correct for the large time.
-# 4) Kesselmeier_R approximation divides the error tolerance by the
-#    multiplicative term outside of the summation. Since the outside term is
-#    different when sv > 0, the approximation uses the incorrect error tolerance
-#    for sv > 0. This affects the number of terms required in the summation to
-#    achieve the desired precision, thus not actually achieving that desired
-#    precision. This is issue is fixed in our implementation of the Kesselmeier
-#    method. For an example of this discrepancy, see the code below:
-# rt <- 1.5
-# t <- rt - 1e-4
-# a <- 0.5
-# v <- 4.5
-# w <- 0.5
-# eps <- 1e-6
-# sv <- 0.9
-# sv0 <- exp(-v*a*w - v*v*t/2) / (a*a) # for constant drift rate
-# sv0_9 <- exp((-2*v*a*w - v*v*t + sv*sv*a*a*w*w)/(2 + 2*sv*sv*t)) /
-#          (a*a*sqrt(1+sv*sv*t)) # for variable drift rate
-# ks14_R(t/(a*a), w, eps/sv0) # = 2; the summation will only calculate 2 terms
-# ks14_R(t/(a*a), w, eps/sv0_9) # = 5; but the summation actually needs 5 terms
+
+### Known Errors
+
+1) Navarro small-time approximation is unstable for "large" effective response times, $\frac{\texttt{rt}}{\texttt{a}^2} \leq 10$. It gives slightly negative densities for effective response times in this range. These parameter values should not have an effect on the "both" time scale because the large-time approximation should handle such locations in the parameter space. The negative results, however, are still within 2*eps of the accepted results (basically zero).
+
+2) Navarro large-time approximation is unstable for "small" effective response times, $\frac{\texttt{rt}}{\texttt{a}^2} \leq 0.06$. It gives slightly negative densities for effective response times in this range and gives inaccurate densities for effective response times of $\frac{\texttt{rt}}{\texttt{a}^2} \leq 0.009$. These parameter values should not have an effect on the "both" time scale because the small-time approximation should handle such locations in the parameter space.
+
+3) The Navarro "both" time scale switches between the small-time and large-time approximations. This method relies too much on the unstable large time approximation, leading to its instability; thus we only need to subset to correct for the large time.
+
+4) Kesselmeier_R approximation divides the error tolerance by the multiplicative term outside of the summation. Since the outside term is different when $\texttt{sv} > 0$, the approximation uses the incorrect error tolerance for $\texttt{sv} > 0$. This affects the number of terms required in the summation to achieve the desired precision, thus not actually achieving that desired precision. This is issue is fixed in our implementation of the Kesselmeier method. For an example of this discrepancy, see the code below:
+```{r known-errors, eval=FALSE}
+source("code/Kesselmeier_density.R")
+rt <- 1.5
+t <- rt - 1e-4
+a <- 0.5
+v <- 4.5
+w <- 0.5
+eps <- 1e-6
+sv <- 0.9
+sv0 <- exp(-v*a*w - v*v*t/2) / (a*a) # for constant drift rate
+sv0_9 <- exp((-2*v*a*w - v*v*t + sv*sv*a*a*w*w)/(2 + 2*sv*sv*t)) /
+         (a*a*sqrt(1+sv*sv*t)) # for variable drift rate
+ks14_R(t/(a*a), w, eps/sv0) # = 2; the summation will only calculate 2 terms
+ks14_R(t/(a*a), w, eps/sv0_9) # = 5; but the summation actually needs 5 terms
+```
+
+
+
+
+
+## Fitting (Optimization)
+Show results of testthat-fitting
+
+Perhaps the most practical use of `dfddm` is to use it in an optimization setting, such as fitting DDM parameters to real world data. This section will walk through an example of using `dfddm` in this manner.
+
+As discussed in the Known Errors section below, we restrict the starting values of the parameter $\texttt{a} \geq 0.9$ to prevent fitting issues with some of the older small-time methods.
+
+The following code chunk runs the full fitting tests, but this takes a looooong while so we'll just read the data from file later on.
+```{r fitting-run, eval=FALSE}
+source("code/fitting_functions.r")
+data <- read.csv("data/medical_dm.csv", stringsAsFactors = FALSE)
+fit <- rt_fit(data, ind_idx = 1, rt_idx = 8, response_idx = 7, truth_idx = 5,
+              response_upper = "blast", times = 10000, unit = "us")
+```
+
+Here is where we actually evaluate the tests (using testthat package). If all tests pass correctly, there should be no output.
+```{r fitting-test, eval=TRUE}
+library("testthat")
+fit <- readRDS("data/test-fitting-fit.Rds")
+
+# Define error tolerance
+eps = 1e-4
+
+# Calculate differences and means
+fit$v1_dif <- rep(0, nrow(fit))
+fit$v0_dif <- rep(0, nrow(fit))
+fit$a_dif <- rep(0, nrow(fit))
+fit$w_dif <- rep(0, nrow(fit))
+
+inds <- unique(fit$ind)
+ninds <- length(inds)
+algos <- unique(fit$Algorithm)
+nalgos <- length(algos)
+
+avg_df <- data.frame(matrix(ncol = 6, nrow = ninds*nalgos))
+colnames(avg_df) <- c('ind', 'Algorithm', 'v1_avg', 'v0_avg', 'a_avg', 'w_avg')
+avg_df$Algorithm <- rep(algos, ninds)
+
+start <- 1
+stop <- nrow(subset(fit, ind == inds[1] & Algorithm == algos[1]))
+for (i in 1:ninds) {
+  avg_df$ind[((i-1)*nalgos+1):(i*nalgos)] <- rep(inds[i], nalgos) # label ind
+  for (j in 1:nalgos) {
+    tmp <- subset(fit, ind == inds[i] & Algorithm == algos[j])[,8:11]
+    avg_df[(i-1)*nalgos+j,3:6] <- colMeans(tmp) # collect means
+    for (k in 1:(stop-1)) {
+      fit[start+k, 12:15] <- abs(fit[start, 8:11] - fit[(start+k), 8:11])
+    }
+    start = start + stop
+  }
+}
+
+
+# Subset
+Foster <- subset(fit, Algorithm == "fs_Fos_17")
+Kesselmeier_s <- subset(fit, Algorithm == "fs_Kes_17")
+Navarro_s <- subset(fit, Algorithm == "fs_Nav_17")
+Kesselmeier_b <- subset(fit, Algorithm == "fb_Kes_17")
+Navarro_b <- subset(fit, Algorithm == "fb_Nav_17")
+RWiener <- subset(fit, Algorithm == "RWiener")
+Kesselmeier_R <- subset(fit, Algorithm == "Kesselmeier")
+rtdists <- subset(fit, Algorithm == "rtdists")
+
+Foster_avg <- subset(avg_df, Algorithm == "fs_Fos_17")
+Kesselmeier_s_avg <- subset(avg_df, Algorithm == "fs_Kes_17")
+Navarro_s_avg <- subset(avg_df, Algorithm == "fs_Nav_17")
+Kesselmeier_b_avg <- subset(avg_df, Algorithm == "fb_Kes_17")
+Navarro_b_avg <- subset(avg_df, Algorithm == "fb_Nav_17")
+RWiener_avg <- subset(avg_df, Algorithm == "RWiener")
+Kesselmeier_R_avg <- subset(avg_df, Algorithm == "Kesselmeier")
+rtdists_avg <- subset(avg_df, Algorithm == "rtdists")
+
+
+# Test accuracy for fitted parameters: v_upper, v_lower, a, w
+test_that("Consistency within each method, using different starting values", {
+  expect_true(all(Foster[,13:16] < eps))
+  expect_true(all(Kesselmeier_s[,13:16] < eps))
+  expect_true(all(Navarro_s[,13:16] < eps))
+  expect_true(all(Kesselmeier_b[,13:16] < eps))
+  expect_true(all(Navarro_b[,13:16] < eps))
+  expect_true(all(RWiener[,13:16] < eps))
+  expect_true(all(Kesselmeier_R[,13:16] < eps))
+  expect_true(all(rtdists[,13:16] < eps))
+})
+
+test_that("Accuracy across different methods", {
+  expect_true(all(abs(Foster_avg[,-(1:2)] - Kesselmeier_s_avg[,-(1:2)]) < eps))
+  expect_true(all(abs(Foster_avg[,-(1:2)] - Navarro_s_avg[,-(1:2)]) < eps))
+  expect_true(all(abs(Foster_avg[,-(1:2)] - Kesselmeier_b_avg[,-(1:2)]) < eps))
+  expect_true(all(abs(Foster_avg[,-(1:2)] - Navarro_b_avg[,-(1:2)]) < eps))
+  expect_true(all(abs(Foster_avg[,-(1:2)] - RWiener_avg[,-(1:2)]) < eps))
+  expect_true(all(abs(Foster_avg[,-(1:2)] - Kesselmeier_R_avg[,-(1:2)]) < eps))
+  expect_true(all(abs(Foster_avg[,-(1:2)] - rtdists_avg[,-(1:2)]) < eps))
+})
+
+```
+
+
+
+### Known Errors
+
+1) For some reason, if the starting parameter value for $\texttt{a} \leq 0.6$ then the Kesselmeier `R` code yields wildly inaccurate parameter estimates for all of the parameters.
+
+2) For some reason, if the starting parameter value for $\texttt{a} \leq 0.9$ then the Navarro small-time approximation yields wildly inaccurate parameter estimates for all of the parameters.
+
+
+
+
+
+</div>
+## {-}
+#### R Session Info
+```{r session-info, collapse=TRUE}
+sessionInfo()
+```

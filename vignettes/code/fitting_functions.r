@@ -1,4 +1,3 @@
-library("microbenchmark")
 library("rtdists")
 library("RWiener")
 source("inst/extdata/Kesselmeier_density.R")
@@ -9,6 +8,48 @@ source("inst/extdata/Kesselmeier_density.R")
 ######################## Log-Likelihood functions ##############################
 ################################################################################
 
+# Get initial parameter values
+get_start_values <- function() {
+  return(c(
+    v1 = 0.1, # "upper" drift rate
+    v0 = -0.1, # "lower" drift rate
+    a = 1,
+    w = 0.5
+  ))
+}
+
+
+
+
+# Loglikelihood functions
+# ll_fddm_fast <- function(pars, rt, resp, truth, t0, err_tol) {
+#   rt1 <- rt[truth == 1]
+#   rt0 <- rt[truth == 0]
+#   resp1 <- resp[truth == 1]
+#   resp0 <- resp[truth == 0]
+#
+#   rt11 <- rt1[resp1 == 1]
+#   rt10 <- rt1[resp1 == 0]
+#   rt01 <- rt0[resp0 == 1]
+#   rt00 <- rt0[resp0 == 0]
+#
+#   # truth is "upper" so use v1; resp is "upper" so use "upper" parameters
+#   dens11 <- dfddm_fast(rt = rt11, a = pars[[3]], v = -pars[[1]],
+#                        t0 = t0, w = 1-pars[[4]], err_tol = err_tol)
+#   # truth is "upper" so use v1; resp is "lower" so use "lower" parameters
+#   dens10 <- dfddm_fast(rt = rt10, a = pars[[3]], v = pars[[1]],
+#                        t0 = t0, w = pars[[4]], err_tol = err_tol)
+#   # truth is "lower" so use v0; resp is "upper" so use "upper" parameters
+#   dens01 <- dfddm_fast(rt = rt01, a = pars[[3]], v = -pars[[1]],
+#                        t0 = t0, w = 1-pars[[4]], err_tol = err_tol)
+#   # truth is "lower" so use v0; resp is "lower" so use "lower" parameters
+#   dens00 <- dfddm_fast(rt = rt00, a = pars[[3]], v = pars[[1]],
+#                        t0 = t0, w = pars[[4]], err_tol = err_tol)
+#
+#   densities <- c(dens11, dens10, dens01, dens00)
+#   if (any(densities == 0)) return(1e6)
+#   return(-sum(log(densities)))
+# }
 
 ll_fs_Fos_17 <- function(pars, rt, resp, truth, t0, err_tol) {
   rt1 <- rt[truth == 1]
@@ -204,8 +245,7 @@ ll_RTDists <- function(pars, rt, resp, truth, t0) {
 
 rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
                    truth_idx = NULL, response_upper = NULL,
-                   stvals = NULL, t0 = 1e-4, err_tol = 1e-6,
-                   times = 1000, unit = "us")
+                   stvals = NULL, t0 = 1e-4, err_tol = 1e-6)
 {
   # Format data for fitting
   if (all(is.null(ind_idx), is.null(rt_idx), is.null(response_idx),
@@ -259,17 +299,16 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
   ni <- nalgos*nstvals
 
   # Initilize the result dataframe
-  res <- data.frame(matrix(ncol = 12, nrow = ninds*nstvals*nalgos))
-  colnames(res) <- c("ind", "Algorithm", "AlgoCalls", "BmTime",
-                     "init_v1", "init_v0", "init_a", "init_w",
-                     "fit_v1", "fit_v0", "fit_a", "fit_w")
+  res <- data.frame(matrix(ncol = 11, nrow = ninds*nstvals*nalgos))
+  colnames(res) <- c("ind", "Algorithm", "AlgoCalls", "init_v1", "init_v0",
+                     "init_a", "init_w", "fit_v1", "fit_v0", "fit_a", "fit_w")
 
   # Fill in known values
   res[,2] <- algo_names # label algorithms
-  res[,5] <- stvals_mat[,1] # label initial v1
-  res[,6] <- stvals_mat[,2] # label initial v0
-  res[,7] <- stvals_mat[,3] # label initial a
-  res[,8] <- stvals_mat[,4] # label initial w
+  res[,4] <- stvals_mat[,1] # label initial v1
+  res[,5] <- stvals_mat[,2] # label initial v0
+  res[,6] <- stvals_mat[,3] # label initial a
+  res[,7] <- stvals_mat[,4] # label initial w
 
   # Loop through each individual and starting values
   for (i in 1:ninds) {
@@ -280,118 +319,77 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
     rrespi <- dfi$rresponse
     truthi <- dfi$truth
     for (j in 1:nstvals) {
-      # Perform optimization and record results
+      # temp <- nlminb(stvals[[j]], ll_fddm_fast,
+      #                rt = rti, resp = respi, truth = truthi,
+      #                t0 = t0, err_tol = err_tol,
+      #                lower = c(-Inf, -Inf,   0.01, 0), # lower bound for a > 0
+      #                upper = c( Inf,  Inf, Inf, 1))
+      # res[(i-1)*ni+j,3] <- temp$evaluations[[1]]
+      # res[(i-1)*ni+j,8:11] <- temp$par
+
       temp <- nlminb(stvals[[j]], ll_fs_Fos_17,
                      rt = rti, resp = respi, truth = truthi,
                      t0 = t0, err_tol = err_tol,
                      lower = c(-Inf, -Inf,   0, 0),
                      upper = c( Inf,  Inf, Inf, 1))
-      res[(i-1)*ni+0*nstvals+j, 3] <- temp$evaluations[[1]]
-      res[(i-1)*ni+0*nstvals+j, 9:12] <- temp$par
+      res[(i-1)*ni+0*nstvals+j,3] <- temp$evaluations[[1]]
+      res[(i-1)*ni+0*nstvals+j,8:11] <- temp$par
 
       temp <- nlminb(stvals[[j]], ll_fs_Kes_17,
                      rt = rti, resp = respi, truth = truthi,
                      t0 = t0, err_tol = err_tol,
                      lower = c(-Inf, -Inf,   0, 0),
                      upper = c( Inf,  Inf, Inf, 1))
-      res[(i-1)*ni+1*nstvals+j, 3] <- temp$evaluations[[1]]
-      res[(i-1)*ni+1*nstvals+j, 9:12] <- temp$par
+      res[(i-1)*ni+1*nstvals+j,3] <- temp$evaluations[[1]]
+      res[(i-1)*ni+1*nstvals+j,8:11] <- temp$par
 
       temp <- nlminb(stvals[[j]], ll_fs_Nav_17,
                      rt = rti, resp = respi, truth = truthi,
                      t0 = t0, err_tol = err_tol,
                      lower = c(-Inf, -Inf,   0, 0),
                      upper = c( Inf,  Inf, Inf, 1))
-      res[(i-1)*ni+2*nstvals+j, 3] <- temp$evaluations[[1]]
-      res[(i-1)*ni+2*nstvals+j, 9:12] <- temp$par
+      res[(i-1)*ni+2*nstvals+j,3] <- temp$evaluations[[1]]
+      res[(i-1)*ni+2*nstvals+j,8:11] <- temp$par
 
       temp <- nlminb(stvals[[j]], ll_fb_Kes_17,
                      rt = rti, resp = respi, truth = truthi,
                      t0 = t0, err_tol = err_tol,
                      lower = c(-Inf, -Inf,   0, 0),
                      upper = c( Inf,  Inf, Inf, 1))
-      res[(i-1)*ni+3*nstvals+j, 3] <- temp$evaluations[[1]]
-      res[(i-1)*ni+3*nstvals+j, 9:12] <- temp$par
+      res[(i-1)*ni+3*nstvals+j,3] <- temp$evaluations[[1]]
+      res[(i-1)*ni+3*nstvals+j,8:11] <- temp$par
 
       temp <- nlminb(stvals[[j]], ll_fb_Nav_17,
                      rt = rti, resp = respi, truth = truthi,
                      t0 = t0, err_tol = err_tol,
                      lower = c(-Inf, -Inf,   0, 0),
                      upper = c( Inf,  Inf, Inf, 1))
-      res[(i-1)*ni+4*nstvals+j, 3] <- temp$evaluations[[1]]
-      res[(i-1)*ni+4*nstvals+j, 9:12] <- temp$par
+      res[(i-1)*ni+4*nstvals+j,3] <- temp$evaluations[[1]]
+      res[(i-1)*ni+4*nstvals+j,8:11] <- temp$par
 
       temp <- nlminb(stvals[[j]], ll_RWiener,
                      rt = rti, resp = rrespi, truth = truthi,
                      t0 = t0,
                      lower = c(-Inf, -Inf,   0, 0),
                      upper = c( Inf,  Inf, Inf, 1))
-      res[(i-1)*ni+5*nstvals+j, 3] <- temp$evaluations[[1]]
-      res[(i-1)*ni+5*nstvals+j, 9:12] <- temp$par
+      res[(i-1)*ni+5*nstvals+j,3] <- temp$evaluations[[1]]
+      res[(i-1)*ni+5*nstvals+j,8:11] <- temp$par
 
       temp <- nlminb(stvals[[j]], ll_Kesselmeier,
                      rt = rti, resp = respi, truth = truthi,
                      t0 = t0, err_tol = err_tol,
                      lower = c(-Inf, -Inf,   0.01, 0), # lower bound for a > 0
                      upper = c( Inf,  Inf, Inf, 1))
-      res[(i-1)*ni+6*nstvals+j, 3] <- temp$evaluations[[1]]
-      res[(i-1)*ni+6*nstvals+j, 9:12] <- temp$par
+      res[(i-1)*ni+6*nstvals+j,3] <- temp$evaluations[[1]]
+      res[(i-1)*ni+6*nstvals+j,8:11] <- temp$par
 
       temp <- nlminb(stvals[[j]], ll_RTDists,
                      rt = rti, resp = rrespi, truth = truthi,
                      t0 = t0,
                      lower = c(-Inf, -Inf,   0, 0),
                      upper = c( Inf,  Inf, Inf, 1))
-      res[(i-1)*ni+7*nstvals+j, 3] <- temp$evaluations[[1]]
-      res[(i-1)*ni+7*nstvals+j, 9:12] <- temp$par
-
-      # Benchmark optimizations
-      mbm <- microbenchmark(
-        fs_Fos_17 = nlminb(stvals[[j]], ll_fs_Fos_17,
-                           rt = rti, resp = respi, truth = truthi,
-                           t0 = t0, err_tol = err_tol,
-                           lower = c(-Inf, -Inf,   0, 0),
-                           upper = c( Inf,  Inf, Inf, 1)),
-        fs_Kes_17 = nlminb(stvals[[j]], ll_fs_Kes_17,
-                           rt = rti, resp = respi, truth = truthi,
-                           t0 = t0, err_tol = err_tol,
-                           lower = c(-Inf, -Inf,   0, 0),
-                           upper = c( Inf,  Inf, Inf, 1)),
-        fs_Nav_17 = nlminb(stvals[[j]], ll_fs_Nav_17,
-                           rt = rti, resp = respi, truth = truthi,
-                           t0 = t0, err_tol = err_tol,
-                           lower = c(-Inf, -Inf,   0, 0),
-                           upper = c( Inf,  Inf, Inf, 1)),
-        fb_Kes_17 = nlminb(stvals[[j]], ll_fb_Kes_17,
-                           rt = rti, resp = respi, truth = truthi,
-                           t0 = t0, err_tol = err_tol,
-                           lower = c(-Inf, -Inf,   0, 0),
-                           upper = c( Inf,  Inf, Inf, 1)),
-        fb_Nav_17 = nlminb(stvals[[j]], ll_fb_Nav_17,
-                           rt = rti, resp = respi, truth = truthi,
-                           t0 = t0, err_tol = err_tol,
-                           lower = c(-Inf, -Inf,   0, 0),
-                           upper = c( Inf,  Inf, Inf, 1)),
-        RWiener = nlminb(stvals[[j]], ll_RWiener,
-                         rt = rti, resp = rrespi, truth = truthi,
-                         t0 = t0,
-                         lower = c(-Inf, -Inf,   0, 0),
-                         upper = c( Inf,  Inf, Inf, 1)),
-        Kesselmeier = nlminb(stvals[[j]], ll_Kesselmeier,
-                             rt = rti, resp = respi, truth = truthi,
-                             t0 = t0, err_tol = err_tol,
-                             lower = c(-Inf, -Inf,   0.01, 0), # lower bound for a > 0
-                             upper = c( Inf,  Inf, Inf, 1)),
-        rtdists = nlminb(stvals[[j]], ll_RTDists,
-                         rt = rti, resp = rrespi, truth = truthi,
-                         t0 = t0,
-                         lower = c(-Inf, -Inf,   0, 0),
-                         upper = c( Inf,  Inf, Inf, 1)),
-        times = times, unit = unit
-      )
-      for (k in 1:nalgos) {
-        res[(i-1)*ni+(k-1)*nstvals+j, 4] <- median(subset(mbm, expr == algo_names[k])$time)
-      }
+      res[(i-1)*ni+7*nstvals+j,3] <- temp$evaluations[[1]]
+      res[(i-1)*ni+7*nstvals+j,8:11] <- temp$par
     }
   }
   return(res)

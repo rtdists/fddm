@@ -1,0 +1,148 @@
+---
+title: "Vignette for dfddm"
+author: "Kendal Foster"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+bibliography: references.bib
+output:
+  html_document:
+    theme: paper
+    highlight: default
+    keep_md: true
+    toc: false
+    code_folding: hide
+    fig_width: 16
+    fig_height: 9
+    fig_caption: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Title
+
+
+`dfddm` is a density function for the Ratcliff diffusion decision model (DDM) with following parameters: $a$ (threshold separation), $v$ (drift rate), $t0$ (non-decision time/response time constant), $w$ (relative starting point), and $sv$ (inter-trial-variability of drift).
+
+Since the DDM is widely used in optimization settings, a lot of effort has been put into making the evaluation of its density as fast as possible. However, the density function for the DDM is notorious for containing an unavoidable infinite sum; hence the literature has produced a few different methods of approximating the density. This vignette explores/details the various methods used in the literature to approximate the density function for the DDM.
+
+First, the origins of the density function are from (that book), where (the author) goes through the derivation from first principles. In this derivation there is a step that requires taking a limit, and (the author) provides two different- but equivalent- limiting processes that yield two different- but equal- forms of the density function. Both of these forms contain an infinite sum, and they are known as the large-time and the small-time because of their respective speed at calculating the density for large response times and small response times.
+
+When the drift rate is held constant (i.e. $sv = 0$), the density function for the DDM is often written in a factorized form [@navarro2009fast]
+\begin{equation}
+	f(t ~|~ v, a, w) = \frac{1}{a^2} \exp \left( -vaw -\frac{v^2 t}{2} \right) f_i \left( \frac{t}{a^2} ~\Big\vert~ 0, 1, w \right),
+\end{equation}
+where $f_i(\frac{t}{a^2} | 0, 1, w)$ determines whether the large-time or small-time model will be used:
+\begin{equation}
+\begin{aligned}
+	f_{i=\ell} (t ~|~ 0, 1, w) &= \pi \sum_{j = 1}^{\infty} j \exp \left( -\frac{j^2 \pi^2 t}{2a^2} \right) \sin \left( j w \pi \right),\\
+	f_{i=s} (t ~|~ 0, 1, w) &= \frac{1}{\sqrt{2 \pi t^3}} \sum_{j = -\infty}^{\infty} (w + 2j) \exp \left( -\frac{(w + 2j)^2}{2t} \right).
+\end{aligned}
+\end{equation}
+
+In an effort to simplify the terms inside the infinite summations as much as possible, we rewrite the constant drift rate density function as two separate functions:
+\begin{equation}
+\begin{aligned}
+	f_\ell(t | v, a, w) &= \frac{\pi}{a^2} e^{ \left( -vaw-\frac{v^2 t}{2} \right)}
+										     \sum_{j = 1}^{\infty} j \sin \left( j w \pi \right) \exp{ \left( -\frac{j^2 \pi^2 t}{2a^2} \right)},\\
+  f_s(t | v, a, w) &= \frac{a}{\sqrt{2 \pi t^3}} e^{ \left( -vaw-\frac{v^2 t}{2} \right)}
+										  \sum_{j = -\infty}^{\infty} (w + 2j) \exp{ \left( -\frac{a^2}{2t} \left( w + 2j \right)^2 \right)}.
+\end{aligned}
+\tag{1}
+\end{equation}
+
+
+In addition to having large-time and small-time variants, there exist two mathematically equivalent formulations for the infinite summation in the small-time density functions. The details and proof of equivalence of these two formulations can be found in the fddm paper, but we will continue to use the traditional formulation for the remainder of this vignette.
+
+Now allowing the drift rate to vary across trials (i.e. $sv > 0$) yields the following small-time [@blurton2017first] and large-time density functions (only the small-time variable drift rate density function has been available in the literature, and we provide the derivation of the large-time variable drift rate density function in the fddm paper):
+\begin{equation}
+\begin{aligned}
+f_\ell(t | v, \eta^2, a, w) &= \frac{\pi}{a^2 \sqrt{1 + \eta^2 t}}
+                               \exp{ \left( \frac{\eta^2 a^2 w^2 -2vaw -v^2 t}{2 (1 + \eta^2 t)} \right)}
+															 \sum_{j = 1}^{\infty} j \sin \left( j w \pi \right) \exp{ \left( -\frac{j^2 \pi^2 t}{2a^2} \right)},\\
+f_s(t | v, \eta^2, a, w) &= \frac{a}{\sqrt{2 \pi t^3 \left( 1 + \eta^2 t \right)}}
+											 			\exp{ \left( \frac{\eta^2 a^2 w^2 -2vaw -v^2 t}{2 (1 + \eta^2 t)} \right)}
+											 		 	\sum_{j = -\infty}^{\infty} (w + 2j) \exp{ \left( -\frac{a^2}{2t} \left( w + 2j \right)^2 \right)}.
+\end{aligned}
+\tag{2}
+\end{equation}
+
+Immediately of note is that the infinite summation for each time scale is the same regardless of the inclusion of variability in the drift rate. It then follows that there exists a term $M$ such that the density function for the constant drift rate multiplied by $M$ yields the density function for the variable drift rate. That is, $M \cdot f(t | v, a, w) = f(t | v, a, w, \eta^2)$ from the above equations. This $M$ works for converting both the large-time and small-time constant drift rate densities to variable drift rate densities. Although we do not use this term, it may be useful in adapting current algorithms to easily outputting the density with variable drift rate. The multiplicative term $M$ is given below:
+\begin{equation}
+  M = \frac{1}{\sqrt{1 + \eta^2 t}} \exp \left( vaw + \frac{v^2 t}{2} + \frac{\eta^2 a^2 w^2 -2vaw -v^2 t}{2 (1 + \eta^2 t)} \right).
+\end{equation}
+
+The main issue of these families of density functions is that they all contain an infinite sum that must be approximated. Since there is no closed form analytical solution to this infinite sum, we instead calculate only a partial sum by truncating the sequence of terms after a certain point. We cannot actually calculate the true value of the density function, but we can mathematically prove that we can get arbitrarily close to the true value; this proof is provided in the fddm paper. The nature of this truncation has been the topic of many papers in the literature, but the underlying idea supporting all of the methods is the same: the user specifies an allowable error tolerance, and the algorithm calculates terms of the infinite sum until the result is within the allowed error tolerance of the true value. The methods in the literature precalculate the number of terms required for the infinite sum to converge within the allowed error tolerance, and this number of terms is reffered to as $k_\ell$ and $k_s$ for the large-time and small-time infinite sums, respectively. @navarro2009fast include a method for calculating $k_b$, the number of terms required terms for the infinite sum when combining the density functions of the two time scales. In addition to these existing methods, we add a new combination of large-time and small-time density functions and also provide a novel method that does not perform this precalculation. Note that in each method that precalculates the number of terms, the response time $t$ is scaled by $a^2$, that is $t := \tfrac{t}{a^2}$. Also note that the ceiling function is denoted by $\lceil \cdot \rceil$.
+
+
+## The Density Functions {.tabset .tabset-fade}
+
+### Large Time
+
+The large-time density functions (reference equation) have an infinite sum that runs for all of the positive integers. For a given error tolerance $\epsilon$, @navarro2009fast provide an expression for $k_\ell$, the number of terms required for the large-time infinite sum to be within $\epsilon$ of the true value of the density function. Thus the infinite sum becomes bounded:
+\begin{equation}
+  \sum_{j = 1}^{k_\ell^\text{Nav}} j \sin \left( j w \pi \right) \exp{ \left( -\frac{j^2 \pi^2 t}{2a^2} \right)}.
+\end{equation}
+
+The large time approximation- it's just Navarro 2009
+\begin{equation}
+	k_\ell^{\text{Nav}} \left( t, \epsilon \right) = \left\lceil \max \left\{ \sqrt{\frac{-2 \log(\pi t \epsilon)}{\pi^2 t}}, \frac{1}{\pi \sqrt{t}} \right\} \right\rceil.
+\tag{L.1}
+\end{equation}
+
+
+
+
+### Small Time
+
+The small time approximations
+
+
+#### Navarro & Fuss
+For a given error tolerance $\epsilon$, @navarro2009fast provide an expression for $k_s$, the number of terms required for the small-time infinite sum to be within $\epsilon$ of the true value of the density function.
+\begin{equation}
+  k_s^{\text{Nav}} \left( t, \epsilon \right) = \left\lceil \max \left\{ 2 + \sqrt{-2t \log(2 \epsilon \sqrt{2 \pi t})}, 1 + \sqrt{t} \right\} \right\rceil.
+\tag{S.1}
+\end{equation}
+
+#### Kesselmeier, Blurton, and Gondan
+\begin{equation}
+\begin{aligned}
+  k_s^{\text{Kes}} \left( t, w, \epsilon \right) &= \left\lceil \max \left\{ \tfrac{1}{2} \left( \sqrt{2t} - w \right), \tfrac{1}{2} \left( \sqrt{-t (u_\epsilon - \sqrt{-2 u_\epsilon -2})} - w \right) \right\} \right\rceil,\\
+  u_\epsilon &= \min \left\{ -1, \log(2 \pi t^2 \epsilon^2) \right\}.
+\end{aligned}
+\tag{S.2}
+\end{equation}
+
+#### Foster
+
+
+
+
+
+### Combining Large and Small Time
+
+#### Navarro Small & Navarro Large
+\begin{equation}
+  k_b^\text{Nav} \left( t, w, \epsilon \right) = \min \left\{ k_s^{\text{Nav}}, k_l^{\text{Nav}} \right\}.
+\tag{B.1}
+\end{equation}
+
+#### Kesselmeier Small & Navarro Large
+\begin{equation}
+  k_b^{\text{Kes}} \left( t, w, \epsilon \right) = \min \left\{ k_s^{\text{Kes}}, k_l^{\text{Nav}} \right\}.
+\tag{B.2}
+\end{equation}
+
+
+
+</div>
+### {-}
+#### R Session Info
+```{r session-info, collapse=TRUE}
+sessionInfo()
+```
+
+
+
+### References
