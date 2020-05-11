@@ -24,7 +24,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Regular Function
 
-It is imperative to show that our density functions produce the same results as the current standards. To demonstrate this, we calculate the lower probability density for a granular parameter space and show that all of the results are within an acceptable error tolerance. The parameter space can be found in the code chunk below, and it includes both realistically feasible values and some extreme values for each parameter.
+It is imperative to show that our density functions produce the same results as the current standards. To demonstrate this, we calculate the lower probability density for a granular parameter space and show that all of the results are within an acceptable error tolerance. The parameter space can be found in full in the code chunk below, and it includes both realistically feasible values and some extreme values for each parameter.
 
 Since each of these functions approximates an infinite summation to a desired precision of $\epsilon$, we allow for a difference of $2 \cdot \epsilon$ between any pair of calculated densities. This doubling of the error tolerance accounts for convergence from above and below the limit of the summation. (would a little picture description help here?). The following code chunk runs the full validity tests, but this takes a looooong while so we'll just read the data from file later on.
 ```{r validity-run, eval=FALSE}
@@ -255,7 +255,7 @@ for (rt in 1:nRT) {
 saveRDS(res, file = "data/test-density-res.Rds")
 ```
 
-Here is where we actually evaluate the tests (using testthat package). We have to amend some of the checks because of the instability of some of the methods, and these are documented in the section below. If all tests pass correctly, there should be no output.
+Here is where we actually evaluate the tests (using testthat package). We have to amend some of the checks because of the instability of some of the methods, and these are documented in the Known Errors section below. If all tests pass correctly, there should be no output.
 ```{r validity-test, eval=TRUE}
 library("testthat")
 res <- readRDS("data/test-density-res.Rds")
@@ -370,13 +370,10 @@ ks14_R(t/(a*a), w, eps/sv0_9) # = 5; but the summation actually needs 5 terms
 
 
 ## Fitting (Optimization)
-Show results of testthat-fitting
 
-Perhaps the most practical use of `dfddm` is to use it in an optimization setting, such as fitting DDM parameters to real world data. This section will walk through an example of using `dfddm` in this manner.
+Perhaps the most practical use of `dfddm` is to use it in an optimization setting, such as fitting DDM parameters to real world data. This section will show that all of the methods implemented in `dfddm` yield the same results in this setting.
 
-As discussed in the Known Errors section below, we restrict the starting values of the parameter $\texttt{a} \geq 0.9$ to prevent fitting issues with some of the older small-time methods.
-
-The following code chunk runs the full fitting tests, but this takes a looooong while so we'll just read the data from file later on.
+We use a range of different starting values for the optimization function to ensure that none of the methods encounters a problem in the parameter space. However, we restrict the starting values of the parameter $\texttt{a} \geq 0.9$ to prevent fitting issues with some of the older small-time methods (Known Errors 1 and 2). We allow a difference of $0.0001$ across the methods for each combination of parameters since the density functions do return slightly different results (within $2 \cdot \epsilon$), as discussed in the previous section. The following code chunk runs the full fitting tests, but this takes a looooong while so we'll just read the data from file later on.
 ```{r fitting-run, eval=FALSE}
 source("code/fitting_functions.r")
 data <- read.csv("data/medical_dm.csv", stringsAsFactors = FALSE)

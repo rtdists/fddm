@@ -24,3 +24,8 @@ usethis::use_build_ignore("docs/")
 
 usethis::use_travis()
 usethis::use_readme_rmd()
+
+med_dec <- read.csv("inst/extdata/medical_dm.csv", stringsAsFactors = FALSE)
+save(med_dec, file = "data/med_dec.rda")
+tools::checkRdaFiles("data/med_dec.rda")
+usethis::use_data(med_dec, overwrite = TRUE, compress = "gzip", version = 3)
