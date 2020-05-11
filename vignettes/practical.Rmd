@@ -281,8 +281,6 @@ rt_benchmark <- function(RT, resp, V, A, W, t0 = 1e-4, err_tol = 1e-6,
 ```
 
 ```{r bm-run, eval=FALSE}
-source("code/benchmark_functions.r")
-
 # Define parameter space
 RT_0_30 = c(0.001, 0.005, 0.01, 0.05, 0.1,
             seq(0.5, 3, by = 0.5),
