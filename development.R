@@ -25,6 +25,20 @@ usethis::use_build_ignore("docs/")
 usethis::use_travis()
 usethis::use_readme_rmd()
 
+use_vignette("Practical")
+build_vignettes()
+# html_document aesthetic options that I can't use........
+output:
+  html_document:
+    theme: paper
+    highlight: default
+    keep_md: true
+    toc: false
+    code_folding: hide
+    fig_width: 16
+    fig_height: 9
+    fig_caption: true
+
 med_dec <- read.csv("inst/extdata/medical_dm.csv", stringsAsFactors = FALSE)
 save(med_dec, file = "data/med_dec.rda")
 tools::checkRdaFiles("data/med_dec.rda")

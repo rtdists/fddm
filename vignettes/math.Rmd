@@ -1,22 +1,22 @@
 ---
-title: "Vignette for dfddm"
+title: "Math"
 author: "Kendal Foster"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 bibliography: references.bib
 output:
-  html_document:
-    theme: paper
-    highlight: default
-    keep_md: true
-    toc: false
-    code_folding: hide
-    fig_width: 16
-    fig_height: 9
-    fig_caption: true
+  rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Math}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(fddm)
 ```
 
 # Title

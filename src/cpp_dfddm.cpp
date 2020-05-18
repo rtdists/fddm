@@ -1,6 +1,6 @@
 // Density function for the Ratcliff Diffusion Decision Model (DDM) PDF
 
-#include "funcs.hpp"
+#include "funcs.h"
 
 using std::endl;
 using Rcpp::Rcerr;

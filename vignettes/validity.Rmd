@@ -1,21 +1,21 @@
 ---
-title: "Vignette for dfddm"
+title: "Validity"
 author: "Kendal Foster"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output:
-  html_document:
-    theme: paper
-    highlight: default
-    keep_md: true
-    toc: false
-    code_folding: hide
-    fig_width: 16
-    fig_height: 9
-    fig_caption: true
+  rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Validity}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(fddm)
 ```
 
 # Validity of Methods {.tabset .tabset-fade}

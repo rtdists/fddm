@@ -1,6 +1,6 @@
 // Functions to evaluate the DDM PDF for specific criteria
 
-#include "funcs.hpp"
+#include "funcs.h"
 
 
 

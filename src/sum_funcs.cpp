@@ -1,6 +1,6 @@
 // Functions to approximate the infinite sum in the density function
 
-#include "funcs.hpp"
+#include "funcs.h"
 
 
 

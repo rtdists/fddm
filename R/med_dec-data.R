@@ -23,5 +23,8 @@
 #'   \item{stimulus}{the image file used for the specific trial}
 #' }
 #' 
-#' @source Henrik
+#' @source Trueblood, J.S., Holmes, W.R., Seegmiller, A.C. et al. The impact of
+#'   speed and bias on the cognitive processes of experts and novices in medical
+#'   image decision-making. Cogn. Research 3, 28 (2018).
+#'   https://doi.org/10.1186/s41235-018-0119-2
 "med_dec"

@@ -1,8 +1,9 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^development\.R$
-^other_stuff$
 ^examples$
 ^\.travis\.yml$
 ^README\.Rmd$
 ^docs$
+^.*\.ini$
+^benchmark_testing$
