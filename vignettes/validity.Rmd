@@ -27,7 +27,7 @@ library(fddm)
 It is imperative to show that our density functions produce the same results as the current standards. To demonstrate this, we calculate the lower probability density for a granular parameter space and show that all of the results are within an acceptable error tolerance. The parameter space can be found in full in the code chunk below, and it includes both realistically feasible values and some extreme values for each parameter.
 
 Since each of these functions approximates an infinite summation to a desired precision of $\epsilon$, we allow for a difference of $2 \cdot \epsilon$ between any pair of calculated densities. This doubling of the error tolerance accounts for convergence from above and below the limit of the summation. (would a little picture description help here?). The following code chunk runs the full validity tests, but this takes a looooong while so we'll just read the data from file later on.
-```{r validity-run, eval=FALSE}
+```{r validity-run, eval=TRUE}
 library("devtools")
 load_all(recompile = TRUE)
 library("fddm")
@@ -36,16 +36,12 @@ library("RWiener")
 source(system.file("extdata", "Kesselmeier_density.R", package = "fddm", mustWork = TRUE))
 
 
-RT <- c(0.001, 0.005, 0.01, 0.05, 0.1,
-        seq(0.5, 3, by = 0.5),
-        seq(4, 10, by = 1),
-        seq(12.5, 20, by = 2.5),
-        seq(25, 30, by = 5))
-A <- seq(0.5, 5, by = 0.5)
-V <- seq(-6, 6, by = 0.5)
+RT <- c(0.001, 0.1, 1, 2, 3, 4, 5, 10, 30)
+A <- c(0.25, 0.5, 1, 2.5, 5)
+V <- c(-5, -2, 0, 2, 5)
 t0 <- 1e-4 # must be nonzero for RWiener
-W <- seq(0.2, 0.8, by = 0.1)
-SV <- seq(0, 3, by = 0.3)
+W <- c(0.2, 0.5, 0.8)
+SV <- c(0, 0.5, 1, 1.5)
 SV_THRESH <- 0.05
 eps <- 1e-6 # this is the setting from rtdists
 
@@ -255,21 +251,20 @@ for (rt in 1:nRT) {
     }
   }
 }
-saveRDS(res, file = "data/test-density-res.Rds")
 ```
 
 Here is where we actually evaluate the tests (using testthat package). We have to amend some of the checks because of the instability of some of the methods, and these are documented in the Known Errors section below. If all tests pass correctly, there should be no output.
 ```{r validity-test, eval=TRUE}
 library("testthat")
-res <- readRDS("data/test-density-res.Rds")
+# res <- readRDS(system.file("extdata", "test-density-res.Rds", package = "fddm", mustWork = TRUE))
 
-SV_THRESH <- 0.05
-eps <- 1e-6
-
-fnames <- c("fs_Fos_17", "fs_Fos_14",
-            "fs_Kes_17", "fs_Kes_14", "fs_Nav_17", "fs_Nav_14",
-            "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
-            "fl_Nav_09", "RWiener", "Kesselmeier", "rtdists")
+# SV_THRESH <- 0.05
+# eps <- 1e-6
+# 
+# fnames <- c("fs_Fos_17", "fs_Fos_14",
+#             "fs_Kes_17", "fs_Kes_14", "fs_Nav_17", "fs_Nav_14",
+#             "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
+#             "fl_Nav_09", "RWiener", "Kesselmeier", "rtdists")
 
 # Subset results
 Foster <- subset(res, FuncName %in% fnames[c(1,2)])
@@ -289,6 +284,26 @@ Nav_l_res_0 <- subset(Navarro_l, res < 0) # KE 3
 Nav_l_0 <- max(Nav_l_res_0$rt / Nav_l_res_0$a / Nav_l_res_0$a) # = 0.06
 Nav_l_dif_2eps <- subset(Navarro_l, dif > 2*eps) # KE 3
 Nav_l_2 <- max(Nav_l_dif_2eps$rt / Nav_l_dif_2eps$a / Nav_l_dif_2eps$a) # = 0.008
+
+# Subset results
+Foster <- subset(res, FuncName %in% fnames[c(1,2)])
+Kesselmeier_s <- subset(res, FuncName %in% fnames[c(3,4)])
+Kesselmeier_b <- subset(res, FuncName %in% fnames[c(7,8)])
+Navarro_s <- subset(res, FuncName %in% fnames[c(5,6)])
+Navarro_l <- subset(res, FuncName %in% fnames[11])
+Navarro_b <- subset(res, FuncName %in% fnames[c(9,10)])
+rtdists <- subset(res, FuncName == "rtdists")
+RWiener <- subset(res, FuncName == "RWiener")
+Kesselmeier_R <- subset(res, FuncName == "Kesselmeier")
+
+# Compensate for KE 1, 2
+Nav_s_res_0 <- subset(Navarro_s, res < 0) # KE 1
+Nav_s_0 <- min(Nav_s_res_0$rt / Nav_s_res_0$a / Nav_s_res_0$a) # = 8.88
+Nav_l_res_0 <- subset(Navarro_l, res < 0) # KE 2
+Nav_l_0 <- max(Nav_l_res_0$rt / Nav_l_res_0$a / Nav_l_res_0$a) # = 0.075
+Nav_l_dif_2eps <- subset(Navarro_l, dif > 2*eps) # KE 2
+Nav_l_2 <- max(Nav_l_dif_2eps$rt / Nav_l_dif_2eps$a / Nav_l_dif_2eps$a) # = 0.009
+
 
 # Ensure all densities are non-negative
 test_that("Non-negativity of densities", {
@@ -319,22 +334,28 @@ test_that("Accuracy relative to established packages", {
   expect_true(all(subset(Kesselmeier_R, sv < SV_THRESH)$dif < 2*eps)) # see KE 4
 })
 
-test_that("Log-Consistency among internal methods", {
-  expect_equal(Foster$log_res, log(Foster$res))
-  expect_equal(Kesselmeier_s$log_res, log(Kesselmeier_s$res))
-  expect_equal(Kesselmeier_b$log_res, log(Kesselmeier_b$res))
-  expect_equal(subset(Navarro_s, rt/a/a < Nav_s_0)$log_res,
-               log(subset(Navarro_s, rt/a/a < Nav_s_0)$res)) # see KE 1
-  expect_equal(subset(Navarro_l, rt/a/a > Nav_l_0)$log_res,
-               log(subset(Navarro_l, rt/a/a > Nav_l_0)$res)) # see KE 2
-  expect_equal(subset(Navarro_b, rt/a/a > Nav_l_0)$log_res,
-               log(subset(Navarro_b, rt/a/a > Nav_l_0)$res)) # see KE 1,2
+test_that("Log-Consistency among internal methods", { # see KE 5
+  expect_equal(subset(Foster, res > eps*eps)$log_res,
+               log(subset(Foster, res > eps*eps)$res))
+  expect_equal(subset(Kesselmeier_s, res > eps*eps)$log_res,
+               log(subset(Kesselmeier_s, res > eps*eps)$res))
+  expect_equal(subset(Kesselmeier_b, res > eps*eps)$log_res,
+               log(subset(Kesselmeier_b, res > eps*eps)$res))
+  expect_equal(subset(Navarro_s, res > eps*eps)$log_res,
+               log(subset(Navarro_s, res > eps*eps)$res))
+  expect_equal(subset(Navarro_l, res > eps*eps)$log_res,
+               log(subset(Navarro_l, res > eps*eps)$res))
+  expect_equal(subset(Navarro_b, res > eps*eps)$log_res,
+               log(subset(Navarro_b, res > eps*eps)$res))
 })
 
 test_that("Log-Consistency of established packages", {
-  expect_equal(rtdists$log_res, log(rtdists$res))
-  expect_equal(RWiener$log_res, log(RWiener$res))
-  expect_equal(Kesselmeier_R$log_res, log(Kesselmeier_R$res))
+  expect_equal(subset(rtdists, res > eps*eps)$log_res,
+               log(subset(rtdists, res > eps*eps)$res))
+  expect_equal(subset(RWiener, res > eps*eps)$log_res,
+               log(subset(RWiener, res > eps*eps)$res))
+  expect_equal(subset(Kesselmeier_R, res > eps*eps)$log_res,
+               log(subset(Kesselmeier_R, res > eps*eps)$res))
 })
 
 
@@ -736,7 +757,7 @@ fit <- rt_fit(med_dec, ind_idx = 1, rt_idx = 8, response_idx = 7, truth_idx = 5,
 ```
 
 Here is where we actually evaluate the tests (using testthat package). If all tests pass correctly, there should be no output.
-```{r fitting-test, eval=TRUE}
+```{r fitting-test, eval=FALSE}
 library("testthat")
 fit <- readRDS("data/test-fitting-fit.Rds")
 

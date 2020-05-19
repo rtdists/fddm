@@ -4,10 +4,10 @@ author: "Kendal Foster"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 bibliography: references.bib
 output:
-  rmarkdown::html_vignette:
-    css: stile.css
-    toc: true
-    toc_depth: 3
+  html_document:
+    theme: paper
+    toc: false
+    code_folding: hide
 vignette: >
   %\VignetteIndexEntry{Math}
   %\VignetteEngine{knitr::rmarkdown}

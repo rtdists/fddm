@@ -1,0 +1,40 @@
+body {
+  background-color: #ffffff;
+}
+nav {
+  color: #444444;
+  font-family: verdana;
+  font-size: 20;
+  margin-left: 100px;
+}
+h1 {
+  color: #444444;
+  font-family: verdana;
+  font-size: 28;
+  margin-left: 100px;
+}
+h2 {
+  color: #444444;
+  font-family: verdana;
+  font-size: 26;
+  margin-left: 100px;
+}
+h3 {
+  color: #444444;
+  font-family: verdana;
+  font-size: 22;
+  margin-left: 100px;
+}
+h4 {
+  color: #444444;
+  font-family: verdana;
+  font-size: 18;
+  margin-left: 100px;
+}
+p {
+  color: #444444;
+  font-family: verdana;
+  font-size: 16;
+  margin-left: 100px;
+  margin-right: 100px;
+}

@@ -27,6 +27,7 @@ usethis::use_readme_rmd()
 
 use_vignette("Practical")
 build_vignettes()
+devtools::install(build_vignettes = TRUE)
 # html_document aesthetic options that I can't use........
 output:
   html_document:
