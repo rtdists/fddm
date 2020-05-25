@@ -504,18 +504,18 @@ ggsave("data/images/meq/meq_W_0-10.png",
 ```
 
 <center>
-![meq_rt](data/images/meq/meq_RT_0-10.png)
+![meq_rt](images/meq/meq_RT_0-10.png)
 **Figure 2.** Ribbon plots showing the `microbenchmark` timings as a function of the value of input response time for each method using a vector of response times as input.
 <br><br>
-![meq_a](data/images/meq/meq_A_0-10.png)
+![meq_a](images/meq/meq_A_0-10.png)
 **Figure 3.** Ribbon plots showing the `microbenchmark` timings as a function of the value of the threshold separation for each method using a vector of response times as input.
 
 <br><br>
-![meq_v](data/images/meq/meq_V_0-10.png)
+![meq_v](images/meq/meq_V_0-10.png)
 **Figure 4.** Ribbon plots showing the `microbenchmark` timings as a function of the value of the drift rate for each method using a vector of response times as input.
 
 <br><br>
-![meq_w](data/images/meq/meq_W_0-10.png)
+![meq_w](images/meq/meq_W_0-10.png)
 <br>
 **Figure 5.** Ribbon plots showing the `microbenchmark` timings as a function of the value of the starting point for each method using a vector of response times as input.
 </center>
