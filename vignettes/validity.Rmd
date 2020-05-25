@@ -31,7 +31,7 @@ library("fddm")
 It is imperative to show that our density functions produce the same results as the current standards. To demonstrate this, we calculate the lower probability density for a granular parameter space and show that all of the results are within an acceptable error tolerance. The parameter space can be found in full in the code chunk below, and it includes both realistically feasible values and some extreme values for each parameter.
 
 Since each of these functions approximates an infinite summation to a desired precision of $\epsilon$, we allow for a difference of $2 \cdot \epsilon$ between any pair of calculated densities. This doubling of the error tolerance accounts for convergence from above and below the limit of the summation. (would a little picture description help here?). The following code chunk runs the full validity tests, but this takes a looooong while so we'll just read the data from file later on.
-```{r validity-run, eval=FALSE, collapse=TRUE}
+```{r validity-run, eval=TRUE, collapse=TRUE}
 library("rtdists")
 library("RWiener")
 source(system.file("extdata", "Kesselmeier_density.R", package = "fddm", mustWork = TRUE))
@@ -255,7 +255,7 @@ for (rt in 1:nRT) {
 ```
 
 Here is where we actually evaluate the tests (using testthat package). We have to amend some of the checks because of the instability of some of the methods, and these are documented in the Known Errors section below. If all tests pass correctly, there should be no output.
-```{r validity-test, eval=FALSE}
+```{r validity-test, eval=TRUE}
 library("testthat")
 
 # Subset results

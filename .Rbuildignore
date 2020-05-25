@@ -7,3 +7,5 @@
 ^docs$
 ^.*\.ini$
 ^benchmark_testing$
+^doc$
+^Meta$

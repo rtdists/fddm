@@ -361,7 +361,7 @@ ggsave("data/images/violin/violin_0-10_vec.png", plot = violin,
 ```
 
 <center>
-![violin](data/images/violin/violin_0-10_vec.png)
+![violin](images/violin/violin_0-10_vec.png)
 **Figure 1.** Violin plots showing the distribution of `microbenchmark` timings for each method using a vector of response times as input.
 </center>
 
