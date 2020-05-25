@@ -2,8 +2,12 @@
 title: "Validity"
 author: "Kendal Foster"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
+bibliography: references.bib
 output:
-  rmarkdown::html_vignette
+  rmarkdown::html_vignette:
+    # css: default1.css
+    toc: true
+    toc_depth: 2
 vignette: >
   %\VignetteIndexEntry{Validity}
   %\VignetteEngine{knitr::rmarkdown}
@@ -15,22 +19,19 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-library(fddm)
+library("fddm")
 ```
 
 # Validity of Methods {.tabset .tabset-fade}
 
 `dfddm` is a density function for the Ratcliff diffusion decision model (DDM) with following parameters: `a` (threshold separation), `v` (drift rate), `t0` (non-decision time/response time constant), `w` (relative starting point), and `sv` (inter-trial-variability of drift).
 
-## Regular Function
+## Density Function
 
 It is imperative to show that our density functions produce the same results as the current standards. To demonstrate this, we calculate the lower probability density for a granular parameter space and show that all of the results are within an acceptable error tolerance. The parameter space can be found in full in the code chunk below, and it includes both realistically feasible values and some extreme values for each parameter.
 
 Since each of these functions approximates an infinite summation to a desired precision of $\epsilon$, we allow for a difference of $2 \cdot \epsilon$ between any pair of calculated densities. This doubling of the error tolerance accounts for convergence from above and below the limit of the summation. (would a little picture description help here?). The following code chunk runs the full validity tests, but this takes a looooong while so we'll just read the data from file later on.
-```{r validity-run, eval=TRUE}
-library("devtools")
-load_all(recompile = TRUE)
-library("fddm")
+```{r validity-run, eval=FALSE, collapse=TRUE}
 library("rtdists")
 library("RWiener")
 source(system.file("extdata", "Kesselmeier_density.R", package = "fddm", mustWork = TRUE))
@@ -254,17 +255,8 @@ for (rt in 1:nRT) {
 ```
 
 Here is where we actually evaluate the tests (using testthat package). We have to amend some of the checks because of the instability of some of the methods, and these are documented in the Known Errors section below. If all tests pass correctly, there should be no output.
-```{r validity-test, eval=TRUE}
+```{r validity-test, eval=FALSE}
 library("testthat")
-# res <- readRDS(system.file("extdata", "test-density-res.Rds", package = "fddm", mustWork = TRUE))
-
-# SV_THRESH <- 0.05
-# eps <- 1e-6
-# 
-# fnames <- c("fs_Fos_17", "fs_Fos_14",
-#             "fs_Kes_17", "fs_Kes_14", "fs_Nav_17", "fs_Nav_14",
-#             "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
-#             "fl_Nav_09", "RWiener", "Kesselmeier", "rtdists")
 
 # Subset results
 Foster <- subset(res, FuncName %in% fnames[c(1,2)])
@@ -851,8 +843,8 @@ test_that("Accuracy across different methods", {
 
 
 </div>
-## {-}
-#### R Session Info
+##  {.unlisted .unnumbered}
+#### R Session Info {.unlisted .unnumbered}
 ```{r session-info, collapse=TRUE}
 sessionInfo()
 ```

@@ -5,9 +5,9 @@ date: '`r format(Sys.Date(), "%B %d, %Y")`'
 bibliography: references.bib
 output:
   rmarkdown::html_vignette:
-    css: stile.css
-    toc: true
-    toc_depth: 3
+  css: default1.css
+  toc: true
+  toc_depth: 3
 vignette: >
   %\VignetteIndexEntry{Math}
   %\VignetteEngine{knitr::rmarkdown}
@@ -19,10 +19,9 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-# library("fddm")
 ```
 
-
+## Mathematical Background
 
 `dfddm` is a density function for the Ratcliff diffusion decision model (DDM) with following parameters: $a$ (threshold separation), $v$ (drift rate), $t_0$ (non-decision time/response time constant), $w$ (relative starting point), and $sv$ (inter-trial-variability of drift).
 
@@ -147,11 +146,11 @@ This combination of methods has not been explored in the literature before, but 
 
 </div>
 ### {.unlisted .unnumbered}
-#### R Session Info
+#### R Session Info {.unlisted .unnumbered}
 ```{r session-info, collapse=TRUE}
 sessionInfo()
 ```
 
 
 
-### References
+### References {.unlisted .unnumbered}
