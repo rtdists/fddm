@@ -51,6 +51,8 @@ We want to determine the performance of each method across a wide variety of par
 
 
 ## Generating Benchmark Data {#den-gen}
+
+This code chunk defines the function that we will use to benchmark the algorithms; we will be using the `microbenchmark` package to time the evaluations.
 ```{r bm-fun, eval=FALSE}
 library("fddm")
 library("rtdists")
