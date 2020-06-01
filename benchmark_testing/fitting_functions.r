@@ -260,7 +260,7 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
   # Initilize the result dataframe
   res <- data.frame(matrix(ncol = 12, nrow = ninds*nstvals*nalgos))
-  colnames(res) <- c("ind", "Algorithm", "AlgoCalls", "BmTime",
+  colnames(res) <- c("ind", "Algorithm", "AlgoCalls", "MedBmTime",
                      "init_v1", "init_v0", "init_a", "init_w",
                      "fit_v1", "fit_v0", "fit_a", "fit_w")
 

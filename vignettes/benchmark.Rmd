@@ -1,11 +1,14 @@
 ---
-title: "Practical"
+title: "Benchmark Testing"
 author: "Kendal Foster"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output:
-  rmarkdown::html_vignette
+  rmarkdown::html_vignette:
+    css: stile.css
+    toc: true
+    toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{Practical}
+  %\VignetteIndexEntry{Benchmark Testing}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,35 +18,49 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-library(fddm)
 ```
 
-# Example Uses for dfddm {.tabset .tabset-fade}
-
-`dfddm` is a density function for the Ratcliff diffusion decision model (DDM) with following parameters: `a` (threshold separation), `v` (drift rate), `t0` (non-decision time/response time constant), `w` (relative starting point), and `sv` (inter-trial-variability of drift).
 
 
 
 
-## Benchmark Tests
+From the `fddm` package, `dfddm` evaluates the density function (or probability density function, PDF) for the Ratcliff diffusion decision model (DDM) with following parameters: $a \in (0, \infty)$ (threshold separation), $v \in (-\infty, \infty)$ (drift rate), $t_0 \in [0, \infty)$ (non-decision time/response time constant), $w \in (0, 1)$ (relative starting point), and $sv \in (0, \infty)$ (inter-trial-variability of drift).
+<br><br>
+
+
+
+
+
+# Introduction {#intro}
+<hr class="sec1">
+
+The DDM is a widely used model, and a lot of effort has been put into making the evaluation of its density as fast as possible. This vignette is designed to compare the speed of the currently available algorithms to calculate the lower probability density of the DDM. To this aim, we present benchmark data of currently available methods from the literature, our streamlined implementations of those methods, and our own novel method. The [first section](#den) will show the results of benchmarking just the approximations to the density function themselves, and the [second section](#fit) will show the enchmark results of parameter estimation that uses the density approximations in its optimization.
+
+
+
+
+
+# Benchmarking the Density Functions {#den}
+<hr class="sec1">
 
 This section shows the results of the benchmark tests that were performed to evaluate the speed of each method. The consistency across the different methods is shown in the Validity vignette.
 
 We want to determine the performance of each method across a wide variety of parameters in order to identify any slow areas for individual methods. To achieve this rigor, we define an extensive parameter space (in full in the code chunk below) and loop through each combination of parameters. We have two different ways of inputting the response times to the functions: either as a vector of response times or as individual response times. For each combination, we run `microbenchmark` 10,000 times for each method and only save the median benchmark time of these 10,000. The following code chunk defines the benchmarking functions, and the one after runs the full benchmark tests; but running the full tests takes a looooong while so we'll just read the data from file later on.
+
+
+
+
+## Generating Benchmark Data {#den-gen}
 ```{r bm-fun, eval=FALSE}
-library("microbenchmark")
+library("fddm")
 library("rtdists")
 library("RWiener")
-library("devtools")
-load_all(recompile = TRUE)
-library("fddm")
 source(system.file("extdata", "Kesselmeier_density.R", package = "fddm", mustWork = TRUE))
+library("microbenchmark")
 
 
-
-####################### Constant Drift Rate
-bm <- function(RT, resp, V, A, W, t0 = 1e-4, err_tol = 1e-6,
-               times = 1000, unit = "us")
+rt_benchmark <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
+                         err_tol = 1e-6, times = 1000, unit = "us")
 {
   if (resp < 0.5) {
     rresp <- "lower"
@@ -56,137 +73,23 @@ bm <- function(RT, resp, V, A, W, t0 = 1e-4, err_tol = 1e-6,
               "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
               "fl_Nav_09", "RWiener", "Kesselmeier", "rtdists")
   nf <- length(fnames) # number of functions being benchmarked
-  nRT <- length(RT) # number of response times
-  nV <- length(V) # number of drift rates
-  nA <- length(A) # number of boundary separations
-  nW <- length(W) # number of starting points
-
-  # Initialize the dataframe to contain the microbenchmark results
-  mbm_res <- data.frame(matrix(ncol = 4+nf, nrow=nRT*nV*nA*nW))
-  colnames(mbm_res) <- c('RT', 'V', 'A', 'W', fnames)
-  row_idx <- 1
-
-  # Loop through each combination of parameters and record microbenchmark results
-  for (rt in 1:nRT) {
-    for (v in 1:nV) {
-      for (a in 1:nA) {
-        for (w in 1:nW) {
-          mbm <- microbenchmark(
-            # fddm_fast = dfddm_fast(rt = RT[rt], a = A[a], v = V[v], t0 = t0,
-            #                        w = W[w], err_tol = err_tol),
-            fs_Fos_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Foster",
-                              summation_small = "2017", scale = "small",
-                              err_tol = err_tol),
-            fs_Fos_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Foster",
-                              summation_small = "2014", scale = "small",
-                              err_tol = err_tol),
-            fs_Kes_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Kesselmeier",
-                              summation_small = "2017", scale = "small",
-                              err_tol = err_tol),
-            fs_Kes_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Kesselmeier",
-                              summation_small = "2014", scale = "small",
-                              err_tol = err_tol),
-            fs_Nav_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Navarro",
-                              summation_small = "2017", scale = "small",
-                              err_tol = err_tol),
-            fs_Nav_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Navarro",
-                              summation_small = "2014", scale = "small",
-                              err_tol = err_tol),
-            fb_Kes_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Kesselmeier",
-                              summation_small = "2017", scale = "both",
-                              err_tol = err_tol),
-            fb_Kes_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Kesselmeier",
-                              summation_small = "2014", scale = "both",
-                              err_tol = err_tol),
-            fb_Nav_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Navarro",
-                              summation_small = "2017", scale = "both",
-                              err_tol = err_tol),
-            fb_Nav_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Navarro",
-                              summation_small = "2014", scale = "both",
-                              err_tol = err_tol),
-            fl_Nav_09 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "",
-                              summation_small = "", scale = "large",
-                              err_tol = err_tol),
-            RWiener = dwiener(RT[rt], resp = rresp, alpha = A[a],
-                              delta = V[v], tau = t0, beta = W[w],
-                              give_log = FALSE),
-            Kesselmeier = fs14_R(t = RT[rt]-t0, a = A[a], v = V[v],
-                                 w = W[w], eps = err_tol), # only "lower" resp
-            rtdists = ddiffusion(RT[rt], rresp, a = A[a], v = V[v],
-                                 t0 = t0, z = W[w]*A[a]),
-            times = times, unit = unit)
-          # add the rt, v, a, and w values to the dataframe
-          mbm_res[row_idx, 1] <- RT[rt]
-          mbm_res[row_idx, 2] <- V[v]
-          mbm_res[row_idx, 3] <- A[a]
-          mbm_res[row_idx, 4] <- W[w]
-          # add the median microbenchmark results to the dataframe
-          for (i in 1:nf) {
-            mbm_res[row_idx, 4+i] <- median(subset(mbm, expr==fnames[i])$time)
-          }
-          # iterate start value
-          row_idx = row_idx + 1
-        }
-      }
-    }
-  }
-  return(mbm_res)
-}
-
-
-bm_vec <- function(RT, resp, V, A, W, t0 = 1e-4, err_tol = 1e-6,
-                   times = 1000, unit = "us")
-{
-  if (resp < 0.5) {
-    rresp <- "lower"
-  } else {
-    rresp <- "upper"
-  }
-
-  fnames <- c("fs_Fos_17", "fs_Fos_14",
-              "fs_Kes_17", "fs_Kes_14", "fs_Nav_17", "fs_Nav_14",
-              "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
-              "fl_Nav_09", "RWiener", "Kesselmeier", "rtdists")
-  nf <- length(fnames) # number of functions being benchmarked
-  nV <- length(V) # number of drift rates
-  nA <- length(A) # number of boundary separations
-  nW <- length(W) # number of starting points
+  nV <- length(V)
+  nA <- length(A)
+  nW <- length(W)
+  nSV <- length(SV)
   rresp <- rep(rresp, length(RT)) # for RWiener
 
   # Initialize the dataframe to contain the microbenchmark results
-  mbm_res <- data.frame(matrix(ncol = 3+nf, nrow = nV*nA*nW))
-  colnames(mbm_res) <- c('V', 'A', 'W', fnames)
+  mbm_res <- data.frame(matrix(ncol = 4+nf, nrow = nV*nA*nW*nSV))
+  colnames(mbm_res) <- c('V', 'A', 'W', 'SV', fnames)
   row_idx <- 1
 
   # Loop through each combination of parameters and record microbenchmark results
   for (v in 1:nV) {
     for (a in 1:nA) {
       for (w in 1:nW) {
-        mbm <- microbenchmark(
-          # fddm_fast = dfddm_fast(rt = RT, a = A[a], v = V[v], t0 = t0,
-          #                        w = W[w], err_tol = err_tol),
+        for (sv in 1:nSV) {
+          mbm <- microbenchmark(
           fs_Fos_17 = dfddm(rt = RT, response = resp, a = A[a],
                             v = V[v], t0 = t0, w = W[w],
                             log = FALSE, n_terms_small = "Foster",
@@ -254,63 +157,40 @@ bm_vec <- function(RT, resp, V, A, W, t0 = 1e-4, err_tol = 1e-6,
         mbm_res[row_idx, 1] <- V[v]
         mbm_res[row_idx, 2] <- A[a]
         mbm_res[row_idx, 3] <- W[w]
+        mbm_res[row_idx, 4] <- SV[sv]
         # add the median microbenchmark results to the dataframe
         for (i in 1:nf) {
-          mbm_res[row_idx, 3+i] <- median(subset(mbm, expr==fnames[i])$time)
+          mbm_res[row_idx, 4+i] <- median(subset(mbm, expr==fnames[i])$time)
         }
         # iterate start value
         row_idx = row_idx + 1
+        }
       }
     }
   }
   return(mbm_res)
 }
-
-####################### Wrapper for Benchmarks #################################
-rt_benchmark <- function(RT, resp, V, A, W, t0 = 1e-4, err_tol = 1e-6,
-                         rt_as_vec = FALSE, times = 1000, unit = "us")
-{
-  if (rt_as_vec) { # benchmark all rt's as a vector
-    return(bm_vec(RT = RT, resp = resp, V = V, A = A, W = W, t0 = t0,
-                  err_tol = err_tol, times = times, unit = unit))
-  } else { # benchmark each rt individually
-    return(bm(RT = RT, resp = resp, V = V, A = A, W = W, t0 = t0,
-              err_tol = err_tol, times = times, unit = unit))
-  }
-}
 ```
 
 ```{r bm-run, eval=FALSE}
 # Define parameter space
-RT_0_30 = c(0.001, 0.005, 0.01, 0.05, 0.1,
-            seq(0.5, 3, by = 0.5),
-            seq(4, 10, by = 1),
-            seq(12.5, 20, by = 2.5),
-            seq(25, 30, by = 5))
-RT_0_3 = c(0.001, 0.005, 0.01, 0.05, 0.1,
-           seq(0.5, 3, by = 0.5))
-RT_4_10 = seq(4, 10, by = 1)
-RT_12_30 = c(seq(12.5, 20, by = 2.5),
-             seq(25, 30, by = 5))
-A = c(0.25, seq(0.5, 5, by = 0.5))
-V = seq(-6, 6, by = 0.5)
-t0 = 1e-4 # must be nonzero for RWiener
-W = seq(0.2, 0.8, by = 0.1)
-err_tol = 1e-6 # this is the setting from rtdists
+RT <- c(0.001, 0.1, 1, 2, 3, 4, 5, 10, 30)
+A <- c(0.25, 0.5, 1, 2.5, 5)
+V <- c(-5, -2, 0, 2, 5)
+t0 <- 1e-4 # must be nonzero for RWiener
+W <- c(0.2, 0.5, 0.8)
+SV <- c(0, 0.5, 1, 1.5)
+err_tol <- 1e-6 # this is the setting from rtdists
 
 # Run benchmark tests
-sim <- rt_benchmark(RT = RT_4_10, resp = 0, V = V, A = A, W = W, t0 = t0,
-                    err_tol = err_tol, rt_as_vec = FALSE,
-                    times = 10000, unit = "us")
-saveRDS(sim, file = "data/sim_4-10_10000.Rds")
-
-sim_vec <- rt_benchmark(RT = c(RT_0_3, RT_4_10), resp = 0, V = V, A = A, W = W, t0 = t0,
-                        err_tol = err_tol, rt_as_vec = TRUE,
-                        times = 10000, unit = "us")
-saveRDS(sim_vec, file = "data/vec_0-10_10000.Rds")
+bm <- rt_benchmark(RT = RT, resp = 0, V = V, A = A, t0 = t0, W = W, SV = SV,
+                    err_tol = err_tol, times = 1000, unit = "us")
 ```
 
-<br>
+
+
+
+## Analysis of Benchmark Results {#den-ana}
 The first step in analyzing the benchmark data is to visualize the results in side-by-side violin plots that show the distribution of `microbenchmark` timings. We read the results data from the file and plot a violin for each method investigated. For this visualization we will use the benchmark data where the response times are input as a vector to each function; this should help the the mainly `R`-based functions operate more efficiently because of `R`'s use of vectorization. The following code chunk saves violin plots of the benchmark results (can take a short while).
 ```{r bm-violin, eval=FALSE}
 library("reshape2")
@@ -361,7 +241,6 @@ ggsave("data/images/violin/violin_0-10_vec.png", plot = violin,
 ```
 
 <center>
-![violin](images/violin/violin_0-10_vec.png)
 **Figure 1.** Violin plots showing the distribution of `microbenchmark` timings for each method using a vector of response times as input.
 </center>
 
@@ -504,45 +383,31 @@ ggsave("data/images/meq/meq_W_0-10.png",
 ```
 
 <center>
-![meq_rt](images/meq/meq_RT_0-10.png)
 **Figure 2.** Ribbon plots showing the `microbenchmark` timings as a function of the value of input response time for each method using a vector of response times as input.
 <br><br>
-![meq_a](images/meq/meq_A_0-10.png)
 **Figure 3.** Ribbon plots showing the `microbenchmark` timings as a function of the value of the threshold separation for each method using a vector of response times as input.
 
 <br><br>
-![meq_v](images/meq/meq_V_0-10.png)
 **Figure 4.** Ribbon plots showing the `microbenchmark` timings as a function of the value of the drift rate for each method using a vector of response times as input.
 
 <br><br>
-![meq_w](images/meq/meq_W_0-10.png)
 <br>
 **Figure 5.** Ribbon plots showing the `microbenchmark` timings as a function of the value of the starting point for each method using a vector of response times as input.
 </center>
 
-Unsurprisingly, the small-time densities struggled for large response times and the large-time densities were very inefficient for small response times (Figure 2). However, we must also consider "effective response times" $\frac{\texttt{rt}}{\texttt{a}^2}$ because `a` scales every instance of `t` in the density functions. We see a sensible pattern in Figure 3 where the small-time densities were more efficient for large values of `a` (leading to a smaller "effective response time"), and the large-time densities were more efficient for small values of `a` (leading to a larger "effective response time"). We see that the methods that combined the two density functions were noticeably more consistent across all "effective response times," confirming the theory behind using a combination of both methods.
+Unsurprisingly, the small-time densities struggled for large response times and the large-time densities were very inefficient for small response times (Figure 2). However, we must also consider "effective response times" $\frac{rt}{a^2}$ because `a` scales every instance of `t` in the density functions. We see a sensible pattern in Figure 3 where the small-time densities were more efficient for large values of `a` (leading to a smaller "effective response time"), and the large-time densities were more efficient for small values of `a` (leading to a larger "effective response time"). We see that the methods that combined the two density functions were noticeably more consistent across all "effective response times," confirming the theory behind using a combination of both methods.
 
 The other two figures vary `v` and `w`, and do not reveal any patterns. `v` has nothing to do with the infinite sum, and `w` only has a minimal role in the infinite sum; thus we do not expect any great contributions to slowdowns in the evaluation of either density function.
 
 
 
-## Fitting to Data
+# Benchmarking Parameter Fits to Data {#fit}
+<hr class="sec1">
 
 This section shows an example of how to use `dfddm` to fit the Ratcliff DDM to data and the speed of each method used in the fitting. The consistency across methods is shown in the Validity vignette.
 
 To determine the performance of each method, we loop through each combination of parameters and perform 'microbenchmark' testing 10,000 times for each method. To save disk space and remove outliers, we only record the median benchmark time from these tests. The following code chunk contains the fitting functions, and the one after actually runs all of the fittings; this takes a while so we'll just load it from file later.
 ```{r fit-fun, eval=FALSE}
-library("microbenchmark")
-library("rtdists")
-library("RWiener")
-library("devtools")
-load_all(recompile = TRUE)
-library("fddm")
-source(system.file("extdata", "Kesselmeier_density.R", package = "fddm", mustWork = TRUE))
-
-
-
-
 ################################################################################
 ######################## Log-Likelihood functions ##############################
 ################################################################################
