@@ -52,13 +52,16 @@ It is imperative to show that our density functions produce the same results as 
 
 ## Generating Data {#den-gen}
 
-The following code chunk stores the lower probability densities calculated across the parameter space using the different methods; we also calculate and store the log-probability for consistency testing.
-```{r validity-run, eval=FALSE, collapse=TRUE}
+First we load the necessary packages and code available from the current literature.
+```{r validity-pkg, eval=TRUE}
 library("fddm")
 library("rtdists")
 library("RWiener")
 source(system.file("extdata", "Kesselmeier_density.R", package = "fddm", mustWork = TRUE))
+```
 
+The following code chunk stores the lower probability densities calculated across the parameter space using the different methods; we also calculate and store the log-probability for consistency testing.
+```{r validity-run, eval=TRUE}
 # Define parameter space
 RT <- c(0.001, 0.1, 1, 2, 3, 4, 5, 10, 30)
 A <- c(0.25, 0.5, 1, 2.5, 5)
@@ -282,7 +285,7 @@ for (rt in 1:nRT) {
 ## Testing the Density Functions {#den-test}
 
 Now we test the consistency of the various density function approximations by using the `testthat` package. As [discussed above](#den), we allow the difference between any two outputs to be twice the original desired accuracy to allow for convergence from either above or below. We have to amend some of the checks because of the instability of some of the methods, and these are documented in the [Known Errors](#den-ke) section below. First we check that all of the approximations produce densities that are non-negative (we allow a density equal to zero). Next, we check the consistency of the internal `dfddm` methods before confirming their accuracy with external code from established packages. Lastly, we run similar tests to check the consistency of the logged results. If all tests pass correctly, there should be no output.
-```{r validity-test, eval=FALSE}
+```{r validity-test, eval=TRUE}
 library("testthat")
 
 # Subset results
@@ -368,8 +371,6 @@ test_that("Log-Consistency of established packages", {
   expect_equal(subset(Kesselmeier_R, res > eps*eps)$log_res,
                log(subset(Kesselmeier_R, res > eps*eps)$res))
 })
-
-
 ```
 
 
@@ -411,14 +412,18 @@ Perhaps the most practical use of `dfddm` is to use it in an optimization settin
 
 ## Generating the Parameter Estimates Using Real-World Data {#fit-gen}
 
-We use a range of different starting values for the optimization function to ensure that none of the methods encounters a problem in the parameter space. However, we restrict the starting values of the parameter $a \geq 0.9$ to prevent fitting issues with some of the older small-time methods (see [Known Errors 1 and 2](#fit-ke)). We allow a difference of $0.0001$ across the methods for each combination of parameters since the density functions do return slightly different results (within $2 \cdot \epsilon$), as discussed in the previous section. The following subsections will define all of the functions used to generate the fittings and store the parameter estimates, provide the code to run the full fitting, and read the pre-fit data. Since running the full fitting for all of the individuals in the data takes a long time, we will forgo running the fitting and instead read pre-fitted parameter estimates.
+We use a range of different starting values for the optimization function to ensure that none of the methods encounters a problem in the parameter space; however, we need to slightly restrict the starting values to prevent fitting issues with some of the small-time methods (see [Known Errors 5 and 6](#fit-ke)). We allow a difference of $0.0001$ across the methods for each combination of parameters since the density functions do return slightly different results (within $2 \cdot \epsilon$), as discussed in the previous section. The following subsections will define all of the functions used to generate the fittings and store the parameter estimates, provide the code to run the full fitting, and read the pre-fit data. Since running the full fitting for all of the individuals in the data takes a long time, we will forgo running the fitting and instead read pre-fitted parameter estimates.
+
+First we load the necessary packages.
+```{r fitting-pkg, eval=FALSE}
+library("fddm")
+library("rtdists")
+```
 
 ### Log-Likelihood Functions {#fit-gen-llf}
 
 This code chunk defines the log-likelihood functions used in the optimization algorithm. We only use a selection of the methods available in `dfddm` to avoid redundancy in our testing since most of the methods have multiple sibling approximations that are confirmed to be extremely similar. The log-likelihood functions are fairly straightforward and split the responses and associated response times by the truth to enable fitting distinct drift rates ($v_0$ for the lower density and $v_1$ for the upper density). In addition, the log-likelihood functions heavily penalize any approximations that return negative or otherwise invalid densities.
 ```{r loglik-fun, eval=FALSE}
-
-# Loglikelihood functions
 ll_fs_Fos_17 <- function(pars, rt, resp, truth, err_tol) {
   rt1 <- rt[truth == 1]
   rt0 <- rt[truth == 0]
@@ -552,13 +557,11 @@ ll_RTDists <- function(pars, rt, resp, truth) {
 
 ### Fitting Functions {#fit-gen-fun}
 
-This code chunk defines the function that will run the optimization and produce the fitted parameter estimates for $v_0$, $v_1$, $a$, $w$, and $sv$. We include a variety of starting points to ensure that the optimization algorithm avoids reasonable local minima. As [discussed above](#fit), we cannot decrease the starting value for $a$ below $0.9$; this is explored more in-depth in [Known Errors](#fit-ke).
+This code chunk defines the function that will run the optimization and produce the fitted parameter estimates for $v_1$, $v_0$, $a$, $w$, and $sv$. We include a variety of starting points to ensure that the optimization algorithm avoids reasonable local minima. As [discussed above](#fit), we must slightly restrict the starting values; this is exlained in [Known Errors](#fit-ke).
 ``` {r fitting-fun, eval=FALSE}
-
 rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
                    truth_idx = NULL, response_upper = NULL,
-                   stvals = NULL, err_tol = 1e-6)
-{
+                   stvals = NULL, err_tol = 1e-6) {
   # Format data for fitting
   if (all(is.null(ind_idx), is.null(rt_idx), is.null(response_idx),
       is.null(truth_idx), is.null(response_upper))) {
@@ -596,7 +599,7 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
     t0_hi <- 0.99*min_rt
     stvals <- list(#    v1, v0,   a,    t0,    w, sv
                    list( 0,  0,   1, t0_me,  0.5,  1), # defaults
-                   list( 5, -5,   1, t0_me,  0.5,  1), # vary v1 & v0
+                   list( 6, -6,   1, t0_me,  0.5,  1), # vary v1 & v0
                    list(-1,  1,   1, t0_me,  0.5,  1), # vary v1 & v0
                    list( 0,  0, 0.5, t0_me,  0.5,  1), # vary a; see KE 5
                    list( 0,  0,   5, t0_me,  0.5,  1), # vary a
@@ -620,7 +623,7 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
   ni <- nalgos*nstvals
 
   # Initilize the result dataframe
-  cnames <- c("ind", "Algorithm", "AlgoCalls",
+  cnames <- c("ind", "Algorithm",
               "init_v1", "init_v0", "init_a", "init_t0", "init_w", "init_sv",
               "fit_v1", "fit_v0", "fit_a", "fit_t0", "fit_w", "fit_sv")
   res <- data.frame(matrix(ncol = length(cnames), nrow = ninds*nstvals*nalgos))
@@ -628,12 +631,12 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
   # Fill in known values
   res[,2] <- algo_names # label algorithms
-  res[,4] <- stvals_mat[,1] # label initial v1
-  res[,5] <- stvals_mat[,2] # label initial v0
-  res[,6] <- stvals_mat[,3] # label initial a
-  res[,7] <- stvals_mat[,4] # label initial t0
-  res[,8] <- stvals_mat[,5] # label initial w
-  res[,9] <- stvals_mat[,6] # label initial sv
+  res[,3] <- stvals_mat[,1] # label initial v1
+  res[,4] <- stvals_mat[,2] # label initial v0
+  res[,5] <- stvals_mat[,3] # label initial a
+  res[,6] <- stvals_mat[,4] # label initial t0
+  res[,7] <- stvals_mat[,5] # label initial w
+  res[,8] <- stvals_mat[,6] # label initial sv
 
   # Loop through each individual and starting values
   for (i in 1:ninds) {
@@ -649,48 +652,42 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      # limits:   v1,   v0,   a,  t0, w,  sv
                      lower = c(-Inf, -Inf,   0,   0, 0,   0),
                      upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
-      res[(i-1)*ni+0*nstvals+j, 3] <- temp$evaluations[[1]]
-      res[(i-1)*ni+0*nstvals+j, 10:15] <- temp$par
+      res[(i-1)*ni+0*nstvals+j, 9:14] <- temp$par
 
       temp <- nlminb(stvals[[j]], ll_fs_Kes_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   v1,   v0,   a,  t0, w,  sv
                      lower = c(-Inf, -Inf,   0,   0, 0,   0),
                      upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
-      res[(i-1)*ni+1*nstvals+j, 3] <- temp$evaluations[[1]]
-      res[(i-1)*ni+1*nstvals+j, 10:15] <- temp$par
+      res[(i-1)*ni+1*nstvals+j, 9:14] <- temp$par
 
       temp <- nlminb(stvals[[j]], ll_fs_Nav_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   v1,   v0,   a,  t0, w,  sv
                      lower = c(-Inf, -Inf,   0,   0, 0,   0),
                      upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
-      res[(i-1)*ni+2*nstvals+j, 3] <- temp$evaluations[[1]]
-      res[(i-1)*ni+2*nstvals+j, 10:15] <- temp$par
+      res[(i-1)*ni+2*nstvals+j, 9:14] <- temp$par
 
       temp <- nlminb(stvals[[j]], ll_fb_Kes_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   v1,   v0,   a,  t0, w,  sv
                      lower = c(-Inf, -Inf,   0,   0, 0,   0),
                      upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
-      res[(i-1)*ni+3*nstvals+j, 3] <- temp$evaluations[[1]]
-      res[(i-1)*ni+3*nstvals+j, 10:15] <- temp$par
+      res[(i-1)*ni+3*nstvals+j, 9:14] <- temp$par
 
       temp <- nlminb(stvals[[j]], ll_fb_Nav_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   v1,   v0,   a,  t0, w,  sv
                      lower = c(-Inf, -Inf,   0,   0, 0,   0),
                      upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
-      res[(i-1)*ni+4*nstvals+j, 3] <- temp$evaluations[[1]]
-      res[(i-1)*ni+4*nstvals+j, 10:15] <- temp$par
+      res[(i-1)*ni+4*nstvals+j, 9:14] <- temp$par
 
       temp <- nlminb(stvals[[j]], ll_RTDists,
                      rt = rti, resp = rrespi, truth = truthi,
                      # limits:   v1,   v0,   a,  t0, w,  sv
                      lower = c(-Inf, -Inf,   0,   0, 0,   0),
                      upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
-      res[(i-1)*ni+5*nstvals+j, 3] <- temp$evaluations[[1]]
-      res[(i-1)*ni+5*nstvals+j, 10:15] <- temp$par
+      res[(i-1)*ni+5*nstvals+j, 9:14] <- temp$par
     }
   }
   return(res)
@@ -703,13 +700,11 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
 Having set up the fitting functions in the above chunks of code, we run and save the fitting here. However, this takes a long time so we will read the pre-fit parameter estimates in the subsequent code chunk.
 ```{r fitting-run, eval=FALSE}
 data(med_dec, package = "fddm")
-data <- subset(med_dec, id == unique(med_dec$id)[1])
 fit <- rt_fit(data, ind_idx = 1, rt_idx = 8, response_idx = 7, truth_idx = 5,
               response_upper = "blast")
 ```
 
-```{r fitting-read, eval=FALSE}
-
+```{r fitting-read, eval=TRUE}
 fit <- readRDS(system.file("extdata", "test-fitting-fit.Rds", package = "fddm", mustWork = TRUE))
 ```
 
@@ -717,11 +712,11 @@ fit <- readRDS(system.file("extdata", "test-fitting-fit.Rds", package = "fddm", 
 
 ## Testing the Fitted Parameters {#fit-test}
 Now we test the consistency of the fitted parameters using the various density function approximations by using the `testthat` package. As [discussed above](#fit), we use an allowable tolerance of 0.0001 to account for the slight differences in the output of the different approximations. We initially compare the fitted parameter values produced from one method across all starting points to ensure local minima have been avoided. Upon confirming that the method yields the same fitted parameters, we use the mean parameter for each method to compare the fitting results across the methods. If all tests pass correctly, there should be no output.
-```{r fitting-test, eval=FALSE}
+```{r fitting-test, eval=TRUE}
 library("testthat")
 
 # Define error tolerance
-eps = 1e-4
+eps <- 1e-4
 
 # Calculate differences and means
 nr <- nrow(fit)
@@ -748,14 +743,14 @@ stop <- nrow(subset(fit, ind == inds[1] & Algorithm == algos[1]))
 for (i in 1:ninds) {
   avg_df$ind[((i-1)*nalgos+1):(i*nalgos)] <- rep(inds[i], nalgos) # label ind
   for (j in 1:nalgos) {
-    if (j == 3) { # Navarro_s, see KE 5
-      tmp_fits <- subset(fit, ind == inds[i] & Algorithm == algos[j] & init_a > 0.9)[, 10:15]
+    if (j == 3) { # Navarro_s, see KE 6
+      tmp_fits <- subset(fit, ind == inds[i] & Algorithm == algos[j] & init_a > 0.9)[, 9:14]
     } else{
-      tmp_fits <- subset(fit, ind == inds[i] & Algorithm == algos[j])[, 10:15]
+      tmp_fits <- subset(fit, ind == inds[i] & Algorithm == algos[j])[, 9:14]
     }
     avg_df[(i-1)*nalgos+j,3:8] <- colMeans(tmp_fits) # collect means
     for (k in 1:(stop-1)) {
-      fit[start+k, 16:21] <- abs(fit[start, 10:15] - fit[(start+k), 10:15])
+      fit[start+k, 15:20] <- abs(fit[start, 9:14] - fit[(start+k), 9:14])
     }
     start = start + stop
   }
@@ -765,7 +760,7 @@ for (i in 1:ninds) {
 # Subset
 Foster <- subset(fit, Algorithm == "fs_Fos_17")
 Kesselmeier_s <- subset(fit, Algorithm == "fs_Kes_17")
-Navarro_s <- subset(fit, Algorithm == "fs_Nav_17" & init_a > 0.9) # see KE 5
+Navarro_s <- subset(fit, Algorithm == "fs_Nav_17" & init_a > 0.9) # see KE 6
 Kesselmeier_b <- subset(fit, Algorithm == "fb_Kes_17")
 Navarro_b <- subset(fit, Algorithm == "fb_Nav_17")
 rtdists <- subset(fit, Algorithm == "rtdists")
@@ -780,12 +775,12 @@ rtdists_avg <- subset(avg_df, Algorithm == "rtdists")
 
 # Test accuracy for fitted parameters: v_upper, v_lower, a, w
 test_that("Consistency within each method, using different starting values", {
-  expect_true(all(Foster[,16:21] < eps))
-  expect_true(all(Kesselmeier_s[,16:21] < eps))
-  expect_true(all(Navarro_s[,16:21] < eps))
-  expect_true(all(Kesselmeier_b[,16:21] < eps))
-  expect_true(all(Navarro_b[,16:21] < eps))
-  expect_true(all(rtdists[,16:21] < eps))
+  expect_true(all(Foster[,15:20] < eps))
+  expect_true(all(Kesselmeier_s[,15:20] < eps))
+  expect_true(all(Navarro_s[,15:20] < eps))
+  expect_true(all(Kesselmeier_b[,15:20] < eps))
+  expect_true(all(Navarro_b[,15:20] < eps))
+  expect_true(all(rtdists[,15:20] < eps))
 })
 
 test_that("Accuracy across different methods", {
@@ -802,7 +797,9 @@ test_that("Accuracy across different methods", {
 
 ## Known Errors {#fit-ke}
 
-5) For some reason, if the starting parameter value for $a \leq 0.9$ then the Navarro small-time approximation yields wildly inaccurate parameter estimates for all of the parameters.
+5) If the two starting parameter values for the drift rates are precisely $v_1 = 5$ and $v_0 = -5$, then the optimization using Foster small-time approximation gets stuck and hangs.
+
+6) If the starting parameter value for $a \leq 0.9$ then the Navarro small-time approximation yields wildly inaccurate parameter estimates for all of the parameters.
 
 
 
