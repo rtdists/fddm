@@ -52,7 +52,7 @@ From the `fddm` package, `dfddm` evaluates the density function (or probability 
 # Mathematical Background
 <hr class="sec1">
 
-There are several different methods for approximating the PDF of the DDM, and there are three optional parameters in `dfddm` that can be used to indicate which method should be in the function call: `scale`, `n_terms_small`, and `summation_small`. For each method we describe, we include the parameter settings for the function call to `dfddm` so that it uses the desired method. As these parameters are optional, leaving them blank results in the default method that is indicated later in this vignette. For general purpose use, we recommend leaving these optional parameters blank and using the default settings since this will be the fastest algorithm. Note that precedence for the optional parameters is first given to checking if the default option is selected, (state default method here). If not, precedence is then given to the `scale` parameter value; for example, a `scale` value set to "large" will ignore the `summation_small` input value.
+There are several different methods for approximating the PDF of the DDM, and there are three optional parameters in `dfddm` that can be used to indicate which method should be in the function call: `scale`, `n_terms_small`, and `summation_small`. For each method we describe, we include the parameter settings for the function call to `dfddm` so that it uses the desired method. As these parameters are optional, leaving them blank results in the default method that is indicated later in this vignette. For general purpose use, we recommend leaving these optional parameters blank and using the default settings since this will be the fastest algorithm. Note that precedence for the optional parameters is first given to checking if the default option is selected, (state default method here). If not, precedence is then given to the `scale` parameter value; for example, `scale = "large"` will ignore the `summation_small` input value.
 
 Since the DDM is widely used in parameter estimation usually involving numerical optimization, a lot of effort has been put into making the evaluation of its density as fast as possible. However, the density function for the DDM is notorious for containing an unavoidable infinite sum; hence the literature has produced a few different methods of approximating the density. This vignette details the various methods used in the literature to approximate the infinite sum in the density function for the DDM.
 
@@ -121,7 +121,7 @@ It remains to find the value of $k_\ell^\text{Nav}$ that ensures the truncated s
 \end{equation}
 
 <p class="method">
-This method is often viewed as the most inefficient of the available options in the literature; however, this method proves to be extremely efficient in particular areas of the parameter space (typically for a large $t'$). The argument used to implement this method in `dfddm` is to set the parameter `scale` to "large" in the function call. The other parameters, `n_terms_small` and `summation_small`, should be left blank to avoid any potential clashes with overridden options.
+This method is often viewed as the most inefficient of the available options in the literature; however, this method proves to be extremely efficient in particular areas of the parameter space (typically for a large $t'$). The argument used to implement this method in `dfddm` is to set the parameter `scale = "large"` in the function call. In this case the other parameters, `n_terms_small` and `summation_small`, are ignored to avoid any potential clashes with overridden options.
 </p>
 
 
@@ -130,9 +130,9 @@ This method is often viewed as the most inefficient of the available options in 
 
 ## Small Time
 
-The small-time approximations, Equations <span class="math inline eqref">\(\eqref{eq:con-s}\)</span> and <span class="math inline eqref">\(\eqref{eq:var-s}\)</span>, also have an infinite sum, but this one runs over all of the integers- from negative infinity to positive infinity. Given this infinite nature in both directions, it is impossible to rigorously define the number of terms required to achieve the $\epsilon$-accuracy because we don't know where to start counting the terms. To solve this issue, we rearrange the terms in the sum into the pattern $\left\{ b_0, b_{-1}, b_1, \dots, b_{-i}, b_i, b_{-(i+1)}, b_{i+1}, \dots \right\}$; this gives us a first term and allows us to count the terms in a sensible manner.
+The small-time approximations, Equations <span class="math inline eqref">\(\eqref{eq:con-s}\)</span> and <span class="math inline eqref">\(\eqref{eq:var-s}\)</span>, also have an infinite sum, but this one runs over all of the integers &ndash; from negative infinity to positive infinity. Given this infinite nature in both directions, it is impossible to rigorously define the number of terms required to achieve the $\epsilon$-accuracy because we don't know where to start counting the terms. To solve this issue, we rearrange the terms in the sum into the pattern $\left\{ b_0, b_{-1}, b_1, \dots, b_{-i}, b_i, b_{-(i+1)}, b_{i+1}, \dots \right\}$; this gives us a first term and allows us to count the terms in a sensible manner.
 
-To choose the small-time methods when using `dfddm`, set the optional parameter `scale` to "small" in the function call. You can also set the optional parameter `summation_small` to either "2017" or "2014", but it is recommended to leave this parameter blank so it retains its default value of "2017" that evaluates slightly faster than its counterpart. This parameter controls the style of summation used in the small-time approximation, and more details on the differences between these two styles can be found in the paper accompanying `fddm`. The final parameter, `n_terms_small`, will be discussed in the following three subsections.
+To choose the small-time methods when using `dfddm`, set the optional parameter `scale = "small"` in the function call. You can also set the optional parameter `summation_small = "2017"` or `summation_small = "2014"`, but it is recommended to ignore this parameter so it retains its default value of "2017" that evaluates slightly faster than its counterpart. This parameter controls the style of summation used in the small-time approximation, and more details on the differences between these two styles can be found in the paper accompanying `fddm`. The final parameter, `n_terms_small`, will be discussed in the following three subsections.
 
 
 
@@ -146,7 +146,7 @@ Similarly to their large-time solution, @navarro2009fast provide an expression f
 \end{equation}
 
 <p class="method">
-To use this method, set `n_terms_small` to "Navarro" and keep `scale` set to "small" in the function call. The parameter `summation_small` should be left to its default to obtain the best performance.
+To use this method, set `n_terms_small = "Navarro"` and keep `scale = "small"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 
 
@@ -163,7 +163,7 @@ To use this method, set `n_terms_small` to "Navarro" and keep `scale` set to "sm
 \end{equation}
 
 <p class="method">
-To use this method, set `n_terms_small` to "Kesselmeier" and keep `scale` set to "small" in the function call. The parameter `summation_small` should be left to its default to obtain the best performance.
+To use this method, set `n_terms_small = "Kesselmeier"` and keep `scale = "small"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 
 
@@ -172,7 +172,7 @@ To use this method, set `n_terms_small` to "Kesselmeier" and keep `scale` set to
 If we consider the terms of the infinite sum as the sequence defined above, the series alternates in sign $(+, -, +, ...)$; moreover, the series eventually decreases monotonically (in absolute value) due to the exponential term. Combining and exploiting these two mathematical properties has been the cornerstone of the previous approximations, but we will instead use a novel method of truncating the sum. This method does not precalculate the number of terms required to achieve the given error tolerance. Instead, the general idea of this method is to take full advantage of the alternating and decreasing nature of the terms in the infinite sum by applying a handy theorem (commonly known as Leibniz's rule) to place an upper bound on the truncation error after including so many terms. It has been proven that this upper bound is in fact the absolute value of the next term in the sequence, thus we can truncate the infinite sum once one of its terms is less than the desired error tolerance, $\epsilon$. Hence we do not consider the number of terms in the sum, rather just that the terms in the summation will eventually be small enough. The validity of this method is proven in the paper that accompanies the `fddm` package.
 
 <p class="method">
-To use this method, set `n_terms_small` to "Foster" and keep `scale` set to "small" in the function call. The parameter `summation_small` should be left to its default to obtain the best performance.
+To use this method, set `n_terms_small = "Foster"` and keep `scale = "small"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 </div>
 
@@ -182,7 +182,7 @@ To use this method, set `n_terms_small` to "Foster" and keep `scale` set to "sma
 
 A sensible next approach to approximating the density of the DDM is to use some combination of the large-time and small-time density functions. As their names suggest, each scale has a section of the parameter space where it outperforms the other one. Essentially these methods involve calculating the number of terms required for both the large-time and small-time density functions, then using whichever function requires fewer terms. The goal is to use each approximation where it is efficient and avoid the areas of the parameter space where it is horribly inefficient.
 
-To use this method of evaluating the PDF, set the optional parameter `scale` to "both" in the function call. These methods include similar options to the small-time approximations from the previous section, and thus it is possible to set the optional parameters in a similar fashion to above. The value of `summation_small` triggers the same effect as above since it only affects the small-time approximation to the PDF; we recommend leaving this parameter blank so it assumes its default value of "2017" that evaluates slightly faster than its counterpart. The final parameter, `n_terms_small`, will be discussed in the following two subsections. Note that there is no "Foster" option for the "both" `scale`, and setting `n_terms_small` to "Foster" will override the `scale` setting. As there is only one option for the large time approximation, there are no optional parameters to set for this part of the combined time scale approximation.
+To use this method of evaluating the PDF, set the optional parameter `scale = "both"` in the function call. These methods include similar options to the small-time approximations from the previous section, and thus it is possible to set the optional parameters in a similar fashion to above. The value of `summation_small` triggers the same effect as above since it only affects the small-time approximation to the PDF; we recommend ignoring this parameter so it assumes its default value of "2017" that evaluates slightly faster than its counterpart. The final parameter, `n_terms_small`, will be discussed in the following two subsections. Note that there is no "Foster" option for `scale = "both"`, and setting `n_terms_small = "Foster"` will override the `scale = "both"` setting. As there is only one option for the large time approximation, there are no optional parameters to set for this part of the combined time scale approximation.
 
 
 
@@ -196,7 +196,7 @@ To use this method of evaluating the PDF, set the optional parameter `scale` to 
 \end{equation}
 
 <p class="method">
-To use this method, set `n_terms_small` to "Navarro" and keep `scale` set to "both" in the function call. The parameter `summation_small` should be left to its default to obtain the best performance.
+To use this method, set `n_terms_small = "Navarro"` and keep `scale = "both"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 
 
@@ -209,7 +209,7 @@ This combination of methods has not been explored in the literature before, but 
 \end{equation}
 
 <p class="method">
-To use this method, set `n_terms_small` to "Kesselmeier" and keep `scale` set to "both" in the function call. The parameter `summation_small` should be left to its default to obtain the best performance.
+To use this method, set `n_terms_small = "Kesselmeier"` and keep `scale = "both"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 </div>
 

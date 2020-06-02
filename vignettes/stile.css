@@ -4,6 +4,7 @@
 body {
   background-color: #ffffff;
   margin: auto;
+  max-width: 800px;
   overflow: visible;
   padding-left: 5%;
   padding-right: 4%;
@@ -81,6 +82,7 @@ p.method {
   border-width: 4px;
   border-color: #b3fffa;
   border-radius: 5px;
+  padding: 0.25em 0.75em 0.25em 1em;
 }
 
 span.math {

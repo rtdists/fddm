@@ -47,6 +47,8 @@ This section shows the results of the benchmark tests that were performed to eva
 
 We want to determine the performance of each method across a wide variety of parameters in order to identify any slow areas for individual methods. To achieve this rigor, we define an extensive parameter space (in full in the code chunk below) and loop through each combination of parameters. We have two different ways of inputting the response times to the functions: either as a vector of response times or as individual response times. For each combination, we run `microbenchmark` 10,000 times for each method and only save the median benchmark time of these 10,000. The following code chunk defines the benchmarking functions, and the one after runs the full benchmark tests; but running the full tests takes a looooong while so we'll just read the data from file later on.
 
+Running the benchmark tests many times for each set of parameters generates a lot of benchmark data but takes a long time, so we only generate a small number of samples at each set of parameters. For the benchmark tests with 10,000 samples at each point in a more granular parameter space, see this thing that will probably be another pkgdown vignette elsewhere because the files are too big for an html_vignette.
+
 
 
 
