@@ -559,22 +559,33 @@ ll_RTDists <- function(pars, rt, resp, truth) {
 
 This code chunk defines the function that will run the optimization and produce the fitted parameter estimates for $v_1$, $v_0$, $a$, $w$, and $sv$. We include a variety of starting points to ensure that the optimization algorithm avoids reasonable local minima. As [discussed above](#fit), we must slightly restrict the starting values; this is exlained in [Known Errors](#fit-ke).
 ``` {r fitting-fun, eval=FALSE}
-rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
+rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                    truth_idx = NULL, response_upper = NULL,
                    stvals = NULL, err_tol = 1e-6) {
+
   # Format data for fitting
-  if (all(is.null(ind_idx), is.null(rt_idx), is.null(response_idx),
+  if (all(is.null(id_idx), is.null(rt_idx), is.null(response_idx),
       is.null(truth_idx), is.null(response_upper))) {
     df <- data # assume input data is already formatted
   } else {
     nr <- nrow(data)
-    df <- data.frame(ind = integer(nr),
+    df <- data.frame(id = character(nr),
                      rt = double(nr),
                      response = integer(nr),
                      rresponse = character(nr),
-                     truth = integer(nr))
+                     truth = integer(nr),
+                     stringsAsFactors = FALSE)
 
-    df$ind <- as.integer(data[,ind_idx])
+    if (!is.null(id_idx)) { # relabel identification tags
+      for (i in 1:length(id_idx)) {
+        idi <- unique(data[,id_idx[i]])
+        for (j in 1:length(idi)) {
+          df$id[data[,id_idx[i]] == idi[j]] <- paste(df$id[data[,id_idx[i]] == idi[j]], idi[j], sep = " ")
+        }
+      }
+      df$id <- trimws(df$id, which = "left")
+    }
+
     df$rt <- as.double(data[,rt_idx])
 
     df$response <- as.integer(0)
@@ -588,8 +599,8 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
   # Preliminaries
   df <- subset(df, rt >= 0) # remove any respnose times below 0
-  inds <- sort(unique(df$ind))
-  ninds <- max(length(inds), 1) # if inds is null, there is only one individual
+  ids <- unique(df$id)
+  nids <- max(length(ids), 1) # if inds is null, there is only one individual
 
   if (is.null(stvals)) {
     # starting value for t0 must be smaller than the smallest rt
@@ -599,11 +610,11 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
     t0_hi <- 0.99*min_rt
     stvals <- list(#    v1, v0,   a,    t0,    w, sv
                    list( 0,  0,   1, t0_me,  0.5,  1), # defaults
-                   list( 6, -6,   1, t0_me,  0.5,  1), # vary v1 & v0
+                   list( 5, -5,   1, t0_me,  0.5,  1), # vary v1 & v0
                    list(-1,  1,   1, t0_me,  0.5,  1), # vary v1 & v0
                    list( 0,  0, 0.5, t0_me,  0.5,  1), # vary a; see KE 5
-                   list( 0,  0,   5, t0_me,  0.5,  1), # vary a
-                   list( 0,  0,   1, t0_lo,  0.5,  1), # vary t0
+                   list( 0,  0,   4, t0_me,  0.5,  1), # vary a
+                   list( 0,  0,   1, t0_lo,  0.5,  1), # vary t0 !!! .00392 - .00467
                    list( 0,  0,   1, t0_hi,  0.5,  1), # vary t0
                    list( 0,  0,   1, t0_me,  0.2,  1), # vary w
                    list( 0,  0,   1, t0_me,  0.8,  1), # vary w
@@ -623,10 +634,10 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
   ni <- nalgos*nstvals
 
   # Initilize the result dataframe
-  cnames <- c("ind", "Algorithm",
+  cnames <- c("id", "Algorithm",
               "init_v1", "init_v0", "init_a", "init_t0", "init_w", "init_sv",
               "fit_v1", "fit_v0", "fit_a", "fit_t0", "fit_w", "fit_sv")
-  res <- data.frame(matrix(ncol = length(cnames), nrow = ninds*nstvals*nalgos))
+  res <- data.frame(matrix(ncol = length(cnames), nrow = nids*nstvals*nalgos))
   colnames(res) <- cnames
 
   # Fill in known values
@@ -639,9 +650,9 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
   res[,8] <- stvals_mat[,6] # label initial sv
 
   # Loop through each individual and starting values
-  for (i in 1:ninds) {
-    dfi <- subset(df, ind == inds[i])
-    res[((i-1)*ni+1):(i*ni), 1] <- inds[i] # label individuals
+  for (i in 1:nids) {
+    dfi <- subset(df, id == ids[i])
+    res[((i-1)*ni+1):(i*ni), 1] <- ids[i] # label individuals
     rti <- dfi$rt
     respi <- dfi$response
     rrespi <- dfi$rresponse
@@ -700,11 +711,13 @@ rt_fit <- function(data, ind_idx = NULL, rt_idx = NULL, response_idx = NULL,
 Having set up the fitting functions in the above chunks of code, we run and save the fitting here. However, this takes a long time so we will read the pre-fit parameter estimates in the subsequent code chunk.
 ```{r fitting-run, eval=FALSE}
 data(med_dec, package = "fddm")
-fit <- rt_fit(data, ind_idx = 1, rt_idx = 8, response_idx = 7, truth_idx = 5,
-              response_upper = "blast")
+data <- subset(med_dec, id %in% unique(med_dec$id)[2] & group %in% unique(med_dec$group)[1])
+fit <- rt_fit(data, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
+              truth_idx = 5, response_upper = "blast", err_tol = 1e-6)
 ```
 
 ```{r fitting-read, eval=TRUE}
+saveRDS(fit, file = "inst/extdata/test-fitting-fit1.Rds")
 fit <- readRDS(system.file("extdata", "test-fitting-fit.Rds", package = "fddm", mustWork = TRUE))
 ```
 
