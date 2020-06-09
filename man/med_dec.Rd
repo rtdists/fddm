@@ -8,7 +8,7 @@
 A data frame with 11000 rows and 9 variables:
 \describe{
   \item{id}{identification number of the participant}
-  \item{group}{expertise of participant; either "expert" or "novice"}
+  \item{group}{expertise of participant; "experienced", "inexperienced", or "novice". The first two levels refer to different type of medical professional (i.e., experts).}
   \item{block}{block number}
   \item{trial}{index of trial for each participant}
   \item{classification}{true classification of the pictured cell; i.e. the correct response}
@@ -78,7 +78,7 @@ str(med_dec)
 ## number of participants per expertise condition:
 aggregate(id ~ group, med_dec, function(x) length(unique(x)))
 
-
-aggregate(block ~ group + id, med_dec, length)
+## number of trials per participant
+aggregate(rt ~ group + id, med_dec, length)
 }
 \keyword{dataset}
