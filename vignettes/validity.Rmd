@@ -1,6 +1,6 @@
 ---
 title: "Validity of Methods"
-author: "Kendal Foster"
+author: "Kendal Foster and Henrik Singmann"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 bibliography: references.bib
 output:
@@ -26,8 +26,7 @@ knitr::opts_chunk$set(
 
 
 
-
-From the `fddm` package, `dfddm` evaluates the density function (or probability density function, PDF) for the Ratcliff diffusion decision model (DDM) with following parameters: $a \in (0, \infty)$ (threshold separation), $v \in (-\infty, \infty)$ (drift rate), $t_0 \in [0, \infty)$ (non-decision time/response time constant), $w \in (0, 1)$ (relative starting point), and $sv \in (0, \infty)$ (inter-trial-variability of drift).
+Function `dfddm` evaluates the density function (or probability density function, PDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full PDF, which contains an infinite sum. A overview of the mathematical details of the different approximations is provided in the [Math Vignette](math.html). Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ (threshold separation), $v \in (-\infty, \infty)$ (drift rate), $t_0 \in [0, \infty)$ (non-decision time/response time constant), $w \in (0, 1)$ (relative starting point), and $sv \in (0, \infty)$ (inter-trial-variability of drift). 
 <br><br>
 
 
@@ -37,19 +36,18 @@ From the `fddm` package, `dfddm` evaluates the density function (or probability 
 # Background {#background}
 <hr class="sec1">
 
-This vignette is more techincal in nature and will demonstrate not only the consistency across our implementations but also in accordance with the other state-of-the-art algorithms in the current literature. In addition to testing all of the methods available in `dfddm`, we also include three functions that are considered to be current and widely used. First we include the function `ddiffusion` from the package `rtdists` as it is well known for being not only user friendly and feature-rich but also designed specifically for handling data with regard to distributions for response time models. Second we also test the `dwiener` function from the `RWiener` package, a bundle of software that is mainly aimed at providing an `R` language interface to calculate various functions from the Wiener process. Third we include some raw `R` code that is bundled with the paper written by @gondan2014even about improving the approximation to the density function; this code is not bundled in a package so we instead `source` it from file.
+This vignette is more techincal in nature and will demonstrate not only the consistency across the different implemented methods but show that `dfddm` is in accordance with other implementations in the literature. In addition to testing all of the methods available in `dfddm`, we also include three functions that are considered to be current and widely used. First we include the function `ddiffusion` from the package [`rtdists`](https://cran.r-project.org/package=rtdists) as it is well known for being not only user friendly and feature-rich but also designed specifically for handling data with regard to distributions for response time models. Second we also test the `dwiener` function from the [`RWiener`](https://cran.r-project.org/package=RWiener) package, a bundle of software that is mainly aimed at providing an `R` language interface to calculate various functions from the Wiener process. Third we include some raw `R` code that is bundled with the paper written by @gondan2014even about improving the approximation to the density function. As this code was not yet available in an `R` package, it is part of `fddm` and can be accessed after running `source` on the corresponding file as shown below.
 
 First we perform a simple test in [Validating the Density Functions](#den), evaluating each algorithm for the density function of the DDM and comparing their consistency. To ensure rigorous concordance across all algorithms, we test each algorithm throughout a sufficiently large and granular parameter space that can be found fully defined in the subsection [Generating Data](#den-gen). Of course these algorithms are approximations, and as such they will provide slightly different results given the same parameter inputs. To ensure that these small differences in density output do not affect the results of fitting parameters to real-world data, we also include testing in an optimization setting in [Validating Fitting (Optimization) Using the Density Functions](#fit). We use the various algorithms as the bases for loglikelihood functions for the optimization process and include a variety of starting points in the parameter space to ensure rigorous consistency testing.
 
 
-
+Note that we include $sv$ in all the likelihood functions tested below, even those that do not contain $sv$ themselvses (i.e., `RWiener` and  @gondan2014even). This is possible because variability in drift rate can be added to those functions via the constant $M$ as described in the [Math Vignette](math.html#mathematical-background).
 
 
 # Validating the Density Functions {#den}
 <hr class="sec1">
 
 It is imperative to show that our density functions produce the same results as the current standards. To demonstrate this, we calculate the lower probability density for a granular parameter space and show that all of the results are within an acceptable error tolerance. We only calculate the lower probability density because the upper probability density negates $v$ ($v' = v$) and takes the complement of $w$ ($w' = 1-w$); our parameter space already includes all of these values so calculating the upper probability density would be redundant. The fully defined parameter space can be found in the code chunk in the [following subsection](#den-gen), and it includes both realistically feasible values and some extreme values for each parameter. Since each of these functions approximates an infinite summation to a desired precision of $\epsilon$, we allow for a difference of $2 \cdot \epsilon$ between any pair of calculated densities to account for convergence from above and below the limit of the summation.
-
 
 
 ## Generating Data {#den-gen}
@@ -71,7 +69,7 @@ V <- c(-5, -2, 0, 2, 5)
 t0 <- 1e-4 # must be nonzero for RWiener
 W <- c(0.2, 0.5, 0.8)
 SV <- c(0, 0.5, 1, 1.5)
-SV_THRESH <- 0.05
+SV_THRESH <- 1e-6
 eps <- 1e-6 # this is the setting from rtdists
 
 nRT <- length(RT)
@@ -379,7 +377,7 @@ test_that("Log-Consistency of established packages", {
 
 ## Known Errors {#den-ke}
 
-1) Navarro small-time approximation is unstable for "large" effective response times, $\frac{rt}{a^2} \leq 10$. It gives slightly negative densities for effective response times in this range. These parameter values should not have an effect on the "both" time scale because the large-time approximation should handle such locations in the parameter space. The negative results, however, are still within $2 \cdot \epsilon$ of the accepted results (basically zero).
+1) Navarro small-time approximation is unstable for "large" effective response times, $\frac{rt}{a^2} \geq 10$. It gives slightly negative densities for effective response times above this threshold. These parameter values should not have an effect on the "both" time scale because the large-time approximation should handle such locations in the parameter space. The negative results, however, are still within $2 \cdot \epsilon$ of the accepted results (basically zero).
 
 2) Navarro large-time approximation is unstable for "small" effective response times, $\frac{rt}{a^2} \leq 0.06$. It gives slightly negative densities for effective response times in this range and gives inaccurate densities for effective response times of $\frac{rt}{a^2} \leq 0.009$. These parameter values should not have an effect on the "both" time scale because the small-time approximation should handle such locations in the parameter space.
 
@@ -408,7 +406,7 @@ ks14_R(t/(a*a), w, eps/sv0_9) # = 5; but the summation actually needs 5 terms
 # Validating Fitting (Optimization) Using the Density Functions {#fit}
 <hr class="sec1">
 
-Perhaps the most practical use of `dfddm` is to use it in an optimization setting, such as fitting DDM parameters to real world data, and this section will show that all of the methods implemented in `dfddm` yield the same results in this setting. The parameters that we will fit are $a$ (threshold separation), $w$ (relative starting point), and $sv$ (inter-trial-variability of drift). Since the data contains a truthful classification for each trial, we also fit two different versions of $v$ (drift rate): $v_0$ for fitting to the truthful lower boundary, and $v_1$ for fitting to the truthful upper boundary. As many of the approximations in `dfddm` have different styles, we only test a subset of all the available methods in `dfddm` to avoid unnecessary testing. After using the various density function approximations in fitting the DDM to real-world data, we then validate that the produced parameter estimates are consistent across the various methods, within a given error tolerance.
+Perhaps the most practical use of `dfddm` is to use it in an optimization setting, such as fitting DDM parameters to real world data, and this section will show that all of the methods implemented in `dfddm` yield the same results in this setting. The parameters that we will fit are one $a$ (threshold separation), one $w$ (relative starting point), and one $sv$ (inter-trial-variability of drift). Since the example data we are using consists of two different item type that each require a different correct response (i.e., for one item type the correct response is mapped to the lower boundary and one for item type the ocrrect response is mapped to the upper boundary), the model includes two different versions of $v$ (drift rate): $v_0$ for fitting to the truthful lower boundary, and $v_1$ for fitting to the truthful upper boundary. As many of the approximations in `dfddm` have different styles, we only test a subset of all the available methods in `dfddm` to avoid unnecessary testing. After using the various density function approximations in fitting the DDM to real-world data, we then validate that the produced parameter estimates are consistent across the various methods, within a given error tolerance.
 
 
 
@@ -424,7 +422,8 @@ library("rtdists")
 
 ### Log-Likelihood Functions {#fit-gen-llf}
 
-This code chunk defines the log-likelihood functions used in the optimization algorithm. We only use a selection of the methods available in `dfddm` to avoid redundancy in our testing since most of the methods have multiple sibling approximations that are confirmed to be extremely similar. The log-likelihood functions are fairly straightforward and split the responses and associated response times by the truth to enable fitting distinct drift rates ($v_0$ for the lower density and $v_1$ for the upper density). In addition, the log-likelihood functions heavily penalize any approximations that return negative or otherwise invalid densities.
+This code chunk defines the log-likelihood functions used in the optimization algorithm. We only use a selection of the methods available in `dfddm` to avoid redundancy in our testing since most of the methods have multiple sibling approximations that are confirmed to be extremely similar. The log-likelihood functions are fairly straightforward and split the responses and associated response times by the true item status (i.e., correct response lower versus upper boundary) to enable fitting distinct drift rates ($v_0$ for the items in which the correct response is the lower boundary and $v_1$ for the items for which the correct response is the upper boundary). In addition, the log-likelihood functions heavily penalize any approximations that return zero, negative, or otherwise invalid densities.
+
 ```{r loglik-fun, eval=FALSE}
 ll_fs_Fos_17 <- function(pars, rt, resp, truth, err_tol) {
   rt1 <- rt[truth == 1]
@@ -559,10 +558,12 @@ ll_RTDists <- function(pars, rt, resp, truth) {
 
 ### Fitting Functions {#fit-gen-fun}
 
-This code chunk defines the function that will run the optimization and produce the fitted parameter estimates for $v_1$, $v_0$, $a$, $w$, and $sv$. As [discussed above](#fit-gen-llf), we only use a selection of methods from those available in `dfddm`. To ensure that the optimization algorithm avoids local minima, we include a variety of initial values for the optimization; however, there are a couple of restrictions to these initial values that we must address. The parameter $t_0$ must be less than the response time, so we set the starting values for $t_0$ to be strictly less than the minimum response time according to each individual in the input dataframe. In addition, the optimization algorithm encounters problems for specific values of $a$ when using the log-likelihood function that is based on the Navarro small-time density function approximation, and this is exlained in [Known Errors](#fit-ke).
+This code chunk defines the function that will run the optimization and produce the fitted parameter estimates for $v_1$, $v_0$, $a$, $w$, and $sv$. As [discussed above](#fit-gen-llf), we only use a selection of methods from those available in `dfddm`. 
+
+We also use a different set of start values for each combination of data set and method. In a real-life situation we would probably also do so using random start values to avoid local minima. Here we do this with a fixed set of starting values to ensure that the different method produce the same results for different start points. However, there are a couple of restrictions to these initial values that we must address (we would also have to do so if we picked the start values randomly). The parameter $t_0$ must be less than the response time, so we set the starting values for $t_0$ to be strictly less than the minimum response time according to each individual in the input dataframe. In addition, the optimization algorithm encounters problems for specific values of $a$ when using the log-likelihood function that is based on the Navarro small-time density function approximation, and this is exlained in [Known Errors](#fit-ke).
 
 Furthermore, we must place a lower bound on $a$ because the optimization algorithm occasionaly evaluates the log-likelihood functions (and thus the underlying density function approximations as well) using values of $a$ that are very close to zero in an effort to fully explore the parameter space. In these cases, the small-time approximations struggle because $a$ inversely scales the input response time and effectively changes the input response time into a very large one. In particular, an extremely small value of $a$ can cause the Foster small-time density approximation to run for a very long time. In common use this is not an issue because very small values of $a$ do not make any sense with regard to the psychological interpretation of the parameter, but this issue can arise in an exploratory optimization environment.
-``` {r fitting-fun, eval=FALSE}
+```{r fitting-fun, eval=FALSE}
 rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                    truth_idx = NULL, response_upper = NULL, err_tol = 1e-6) {
 
@@ -719,23 +720,37 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
 ### Running the Fitting {#fit-run}
 
-Having set up the fitting functions in the above chunks of code, we run and save the fitting here. However, this takes a long time so we will instead read the pre-fit parameter estimates in the subsequent code chunk in the following section.
+As an example data set, we use the `med_dec` data that comes with `fddm`. This data contains the accuracy condition reported in @trueblood_impact_2018 investigating medical decision making among medical professionals (pathologists) and novices (i.e., undergraduate students). The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The data set contains 200 decision per participant, 100 true cancerous and 100 true non-canverous cells. 
+
+Having set up the fitting functions in the above chunks of code, we could pass the `med_dec` data to this function and run and save the object containing all model fits in an external file. However, as this takes a long time we skip the fitting in the vignette and instead read the pre-fit parameter estimates in the subsequent code chunk. 
+
+We also print the results for the first data set (`id = 2`) and first set of start values across the different methods to see what it looks like. This shows that at least the agreement across methods for this start values is rather good.
+
 ```{r fitting-run, eval=FALSE}
 data(med_dec, package = "fddm")
 fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
               truth_idx = 5, response_upper = "blast", err_tol = 1e-6)
-save(fit, file = "inst/extdata/test-fitting.Rds",
-     compress = "xz", compression_level = 9)
+save(fit, file = "test-fitting.Rds", compress = "xz")
 ```
 
+```{r fitting-run-iternal, eval=FALSE, echo=FALSE}
+data(med_dec, package = "fddm")
+fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
+              truth_idx = 5, response_upper = "blast", err_tol = 1e-6)
+save(fit, file = "inst/extdata/test-fitting.Rds", compress = "xz")
+```
 
+```{r}
+# load data, will be in the variable 'fit'
+load(system.file("extdata", "test-fitting.Rds", package = "fddm", mustWork = TRUE))
+fit[c(1,12,23,34,45,56),]
+```
 
 
 ## Testing the Fitted Parameters {#fit-test}
 Now we test the consistency of the fitted parameters using the various density function approximations by using the `testthat` package. As [discussed above](#fit), we use an allowable tolerance of 0.0001 to account for the slight differences in the output of the different approximations. First we read the fitting data from file as the fits can take a long time to run. We initially compare the fitted parameter values produced from one method across all starting points to ensure the correct optimum values have been reached and that local minima have been avoided. Upon confirming that the method yields consistent fitted parameters across starting values, we calculate the mean parameter estimates for each method across the starting values and use these means to compare the fitting results across the methods. If all tests pass correctly, there should be no output.
 ```{r fitting-test, eval=TRUE}
-# load data, will be in the variable 'fit'
-load(system.file("extdata", "test-fitting.Rds", package = "fddm", mustWork = TRUE))
+
 # temporarily crop fits
 fit <- fit[1:1188,]
 
