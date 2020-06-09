@@ -25,9 +25,9 @@ usethis::use_build_ignore("docs/")
 usethis::use_travis()
 usethis::use_readme_rmd()
 
-use_vignette("Practical")
+use_vignette("Validity")
 build_vignettes()
-devtools::install(build_vignettes = TRUE)
+devtools::install(build_vignettes = FALSE)
 # html_document aesthetic options that I can't use........
 output:
   html_document:
@@ -41,6 +41,7 @@ output:
     fig_caption: true
 
 med_dec <- read.csv("inst/extdata/medical_dm.csv", stringsAsFactors = FALSE)
-save(med_dec, file = "data/med_dec.rda")
+save(med_dec, file = "data/med_dec.rda", compress = "bzip2", compression_level = 9)
 tools::checkRdaFiles("data/med_dec.rda")
-usethis::use_data(med_dec, overwrite = TRUE, compress = "gzip", version = 3)
+usethis::use_data(med_dec, overwrite = TRUE, version = 3, name = "med_dec",
+                  compress = "bzip2", compression_level = 9)
