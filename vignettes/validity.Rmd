@@ -619,8 +619,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
   # Initilize the result dataframe
   cnames <- c("id", "Algorithm",
-              "init_v1", "init_v0", "init_a", "init_t0", "init_w", "init_sv",
-              "fit_v1", "fit_v0", "fit_a", "fit_t0", "fit_w", "fit_sv")
+              "v1_init", "v0_init", "a_init", "t0_init", "w_init", "sv_init",
+              "v1_fit", "v0_fit", "a_fit", "t0_fit", "w_fit", "sv_fit")
   res <- data.frame(matrix(ncol = length(cnames), nrow = nids*ninit_vals*nalgos))
   colnames(res) <- cnames
 
@@ -722,7 +722,8 @@ Having set up the fitting functions in the above chunks of code, we run and save
 data(med_dec, package = "fddm")
 fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
               truth_idx = 5, response_upper = "blast", err_tol = 1e-6)
-saveRDS(fit, file = "inst/extdata/test-fitting.Rds")
+save(fit, file = "inst/extdata/test-fitting.Rds",
+     compress = "xz", compression_level = 9)
 ```
 
 
@@ -731,21 +732,22 @@ saveRDS(fit, file = "inst/extdata/test-fitting.Rds")
 ## Testing the Fitted Parameters {#fit-test}
 Now we test the consistency of the fitted parameters using the various density function approximations by using the `testthat` package. As [discussed above](#fit), we use an allowable tolerance of 0.0001 to account for the slight differences in the output of the different approximations. First we read the fitting data from file as the fits can take a long time to run. We initially compare the fitted parameter values produced from one method across all starting points to ensure the correct optimum values have been reached and that local minima have been avoided. Upon confirming that the method yields consistent fitted parameters across starting values, we calculate the mean parameter estimates for each method across the starting values and use these means to compare the fitting results across the methods. If all tests pass correctly, there should be no output.
 ```{r fitting-test, eval=TRUE}
-fit <- readRDS(system.file("extdata", "test-fitting.Rds", package = "fddm", mustWork = TRUE))
+# load data, will be in the variable 'fit'
+load(system.file("extdata", "test-fitting.Rds", package = "fddm", mustWork = TRUE))
+# temporarily crop fits
+fit <- fit[1:1188,]
+
 
 library("testthat")
 
-# Define error tolerance
-eps <- 1e-4
-
 # Calculate differences and means
 nr <- nrow(fit)
-fit$v1_dif <- rep(0, nr)
-fit$v0_dif <- rep(0, nr)
-fit$a_dif  <- rep(0, nr)
-fit$t0_dif <- rep(0, nr)
-fit$w_dif  <- rep(0, nr)
-fit$sv_dif <- rep(0, nr)
+fit$v1_diff <- rep(0, nr)
+fit$v0_diff <- rep(0, nr)
+fit$a_diff  <- rep(0, nr)
+fit$t0_diff <- rep(0, nr)
+fit$w_diff  <- rep(0, nr)
+fit$sv_diff <- rep(0, nr)
 
 ids <- unique(fit$id)
 nids <- length(ids)
@@ -758,32 +760,38 @@ avg_df <- data.frame(matrix(ncol = length(cnames), nrow = nids*nalgos))
 colnames(avg_df) <- cnames
 avg_df$Algorithm <- rep(algos, nids)
 
-start <- 1
-stop <- nrow(subset(fit, id == ids[1] & Algorithm == algos[1]))
+ninit_vals <- nrow(subset(fit, id == ids[1] & Algorithm == algos[1]))
 for (i in 1:nids) {
   avg_df$id[((i-1)*nalgos+1):(i*nalgos)] <- rep(ids[i], nalgos) # label id
   for (j in 1:nalgos) {
     if (j == 3) { # Navarro_s, see KE 5
-      tmp_fits <- subset(fit, id == ids[i] & Algorithm == algos[j] & init_a > 0.75)[, 9:14]
+      tmp_fits <- subset(fit, id == ids[i] &
+                              Algorithm == algos[j] &
+                              !is.na(v1_fit) &
+                              a_init > 0.75)[, 9:14]
     } else{
-      tmp_fits <- subset(fit, id == ids[i] & Algorithm == algos[j])[, 9:14]
+      tmp_fits <- subset(fit, id == ids[i] &
+                              Algorithm == algos[j] &
+                              !is.na(v1_fit))[, 9:14]
     }
-    avg_df[(i-1)*nalgos+j,3:8] <- colMeans(tmp_fits) # collect means
-    for (k in 1:(stop-1)) {
-      fit[start+k, 15:20] <- abs(fit[start, 9:14] - fit[(start+k), 9:14])
+    avg_df[(i-1)*nalgos+j, 3:8] <- colMeans(tmp_fits) # collect means
+
+    idx <- (i-1)*(ninit_vals*nalgos) + (j-1)*(ninit_vals) + 1
+    for (k in 1:(ninit_vals-1)) { # calculate intra-algorithm differences
+      fit[idx+k, 15:20] <- abs(fit[idx, 9:14] - fit[(idx+k), 9:14])
     }
-    start = start + stop
   }
 }
 
 
 # Subset
-Foster <- subset(fit, Algorithm == "fs_Fos_17")
-Kesselmeier_s <- subset(fit, Algorithm == "fs_Kes_17")
-Navarro_s <- subset(fit, Algorithm == "fs_Nav_17" & init_a > 0.75) # see KE 5
-Kesselmeier_b <- subset(fit, Algorithm == "fb_Kes_17")
-Navarro_b <- subset(fit, Algorithm == "fb_Nav_17")
-rtdists <- subset(fit, Algorithm == "rtdists")
+Foster <- subset(fit, Algorithm == "fs_Fos_17" & !is.na(v1_fit))
+Kesselmeier_s <- subset(fit, Algorithm == "fs_Kes_17" & !is.na(v1_fit))
+Navarro_s <- subset(fit, Algorithm == "fs_Nav_17" & !is.na(v1_fit) &
+                         a_init > 0.75) # see KE 5
+Kesselmeier_b <- subset(fit, Algorithm == "fb_Kes_17" & !is.na(v1_fit))
+Navarro_b <- subset(fit, Algorithm == "fb_Nav_17" & !is.na(v1_fit))
+rtdists <- subset(fit, Algorithm == "rtdists" & !is.na(v1_fit))
 
 Foster_avg <- subset(avg_df, Algorithm == "fs_Fos_17")
 Kesselmeier_s_avg <- subset(avg_df, Algorithm == "fs_Kes_17")
@@ -792,6 +800,9 @@ Kesselmeier_b_avg <- subset(avg_df, Algorithm == "fb_Kes_17")
 Navarro_b_avg <- subset(avg_df, Algorithm == "fb_Nav_17")
 rtdists_avg <- subset(avg_df, Algorithm == "rtdists")
 
+
+# Define error tolerance
+eps <- 1e-4
 
 # Test accuracy for fitted parameters: v_upper, v_lower, a, w
 test_that("Consistency within each method, using different starting values", {
