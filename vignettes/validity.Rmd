@@ -720,7 +720,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
 ### Running the Fitting {#fit-run}
 
-As an example data set, we use the `med_dec` data that comes with `fddm`. This data contains the accuracy condition reported in @trueblood_impact_2018 investigating medical decision making among medical professionals (pathologists) and novices (i.e., undergraduate students). The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The data set contains 200 decision per participant, 100 true cancerous and 100 true non-canverous cells. 
+As an example data set, we use the `med_dec` data that comes with `fddm`. This data contains the accuracy condition reported in @trueblood_impact_2018 investigating medical decision making among medical professionals (pathologists) and novices (i.e., undergraduate students). The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The data set contains 200 decision per participant, pictures of 100 true cancerous cells and pictures of 100 true non-cancerous cells. 
 
 Having set up the fitting functions in the above chunks of code, we could pass the `med_dec` data to this function and run and save the object containing all model fits in an external file. However, as this takes a long time we skip the fitting in the vignette and instead read the pre-fit parameter estimates in the subsequent code chunk. 
 
