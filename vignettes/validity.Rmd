@@ -571,6 +571,13 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
       is.null(truth_idx), is.null(response_upper))) {
     df <- data # assume input data is already formatted
   } else {
+    if(any(data[,rt_idx] < 0)) {
+      stop("Input data contains negative response times; fit will not be run.")
+    }
+    if(any(is.na(data[,response_idx]))) {
+      stop("Input data contains invalid responses (NA); fit will not be run.")
+    }
+
     nr <- nrow(data)
     df <- data.frame(id = character(nr),
                      rt = double(nr),
@@ -601,7 +608,6 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
   }
 
   # Preliminaries
-  df <- subset(df, rt >= 0) # remove any respnose times below 0
   ids <- unique(df$id)
   nids <- max(length(ids), 1) # if inds is null, there is only one individual
 
@@ -620,7 +626,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
   ni <- nalgos*ninit_vals
 
   # Initilize the result dataframe
-  cnames <- c("id", "Algorithm", "Convergence", "Objective",
+  cnames <- c("ID", "Algorithm", "Convergence", "Objective",
               "v1_init", "v0_init", "a_init", "t0_init", "w_init", "sv_init",
               "v1_fit", "v0_fit", "a_fit", "t0_fit", "w_fit", "sv_fit")
   res <- data.frame(matrix(ncol = length(cnames), nrow = nids*ninit_vals*nalgos))
@@ -637,7 +643,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
   # Loop through each individual and starting values
   for (i in 1:nids) {
     # extract data for id i
-    dfi <- subset(df, id == ids[i])
+    dfi <- df[df$id == ids[i],]
     rti <- dfi$rt
     respi <- dfi$response
     rrespi <- dfi$rresponse
@@ -727,9 +733,12 @@ We also print the results for the first ID in the data set (`ID = "experienced 2
 
 ```{r fitting-run, eval=FALSE}
 data(med_dec, package = "fddm")
-fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
+med_dec[which(med_dec$rt < 0),]
+data <- subset(med_dec, id == 7 & group == "novice")
+med_dec <- subset(med_dec, rt >= 0) # remove any respnose times below 0
+fit <- rt_fit(data, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
               truth_idx = 5, response_upper = "blast", err_tol = 1e-6)
-save(fit, file = "inst/extdata/fit.Rds", compress = "xz")
+save(fit, file = "inst/extdata/fit1.Rds", compress = "xz")
 ```
 
 ```{r fitting-load, eval=TRUE}
@@ -769,22 +778,22 @@ for (i in 1:nids) {
     }
   }
 }
-
-
-# Account for KE 5
-fit <- subset(fit, Algorithm != "fs_Nav_17" | a_init > .75)
-
-# Define error tolerance
-eps <- 1e-4
 ```
 
 Output below are all of the runs where either:
 
-1) the optimization run did not converge; or 
+1) the optimization run did not converge; or
 
 2) the log-likelihood objective value or the parameter estimates differ from that produced using `rtdists`.
 
+Before showing which estimates were sufficiently different from the others, we first subset the fitted data to remove those fits that used the Navarro small-time approximation with an initial value of $a \leq .75$. See [Known Error 5](#fit-ke) for more details.
 ```{r fit-estimates, eval=TRUE}
+# Account for KE 5
+fit2 <- subset(fit, Algorithm != "fs_Nav_17" | a_init > .75)
+
+# Define error tolerance
+eps <- 1e-4
+
 fit[unique(which(fit[,c(3,dif_idx)] > eps)%%nrow(fit)),]
 ```
 
@@ -794,7 +803,7 @@ We can see that only the small time methods have occasional issues with data fit
 
 ## Known Errors {#fit-ke}
 
-5) If the starting parameter value for $a \leq 0.75$ then the optimization that uses Navarro small-time density approximation yields inaccurate parameter estimates for all of the fitted parameters, yet `nlminb` claims to have converged.
+5) If the starting parameter value for $a \leq 0.75$ then the optimization that uses Navarro small-time density approximation yields inaccurate parameter estimates for all of the fitted parameters, yet `nlminb` claims to have converged. This is likely due to the small value of $a$ creating a larger "effective response time" $\frac{rt}{a^2}$, which the small-time approximation may not handle well and thus cause the optimizer to get stuck. This issue does not appear for the density function that uses both the Navarro small-time and large-time approximations ('n_terms_small == "Navarro", scale == "both") because the large-time approximation will handle this region of the parameter space and produce more accurate results.
 
 
 

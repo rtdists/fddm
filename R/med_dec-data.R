@@ -7,14 +7,14 @@
 #' cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The
 #' current data set contains 200 decisions per participant (the "accuracy"
 #' condition from Trueblood et al.).
-#' 
+#'
 #' @docType data
 #' @keywords dataset
 #' @name med_dec
 #' @usage med_dec
-#' 
-#' @details 
-#' 
+#'
+#' @details
+#'
 #' At the beginning of the experiment, both novices and medical experts
 #' completed a training to familiarize themselves with blast cells. After that,
 #' each participant performed the main task in which they judged whether or not
@@ -26,7 +26,7 @@
 #'
 #' The relevant part of the method section for the accuracy condition from the
 #' original paper is as follows:
-#' 
+#'
 #' "The main task consisted of six blocks with 100 trials in each block. The
 #' main task was the same as the practice block, where participants were asked
 #' to identify single images. However, participants did not receive
@@ -48,6 +48,11 @@
 #' speed, and bias). The order of the last three blocks was identical to the
 #' order of the first three blocks."
 #'
+#' Note that this dataset contains some negative response times that indicate a
+#' missing response (i.e., the response value for that trial is `NA`). Take care
+#' in removing these values before using this dataset. See our Validity vignette
+#' for an example of use in an optimization setting.
+#'
 #' @format A data frame with 11000 rows and 9 variables:
 #' \describe{
 #'   \item{id}{identification number of the participant}
@@ -61,7 +66,7 @@
 #'   \item{stimulus}{the image file used for the specific trial}
 #' }
 #' @example examples/examples.med_dec.R
-#' 
+#'
 #' @source Trueblood, J.S., Holmes, W.R., Seegmiller, A.C. et al. The impact of
 #'   speed and bias on the cognitive processes of experts and novices in medical
 #'   image decision-making. Cogn. Research 3, 28 (2018).
