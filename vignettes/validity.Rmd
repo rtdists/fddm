@@ -749,7 +749,7 @@ fit[(0:5)*11+1,]
 
 
 ## Testing the Fitted Parameters {#fit-test}
-Now we test the consistency of the fitted parameters using the various density function approximations. As [discussed above](#fit), we use an allowable tolerance of 0.0001 to account for the slight differences in the output of the different approximations. First we read the fitting data from file as the fits can take a long time to run. 
+Now we test the consistency of the fitted parameters using the various density function approximations. As [discussed above](#fit), we use an allowable tolerance of 0.0001 to account for the slight differences in the output of the different approximations. First we read the fitting data from file as the fits can take a long time to run.
 
 
 ```{r fitting-test, eval=TRUE}
@@ -786,7 +786,9 @@ Output below are all of the runs where either:
 
 1) the optimization run did not converge; or
 
-2) the log-likelihood objective value or the parameter estimates differ from that produced using `rtdists`.
+2) the log-likelihood objective value differs from that produced using `rtdists`; or
+
+3) or the parameter estimates differ from that produced using `rtdists`.
 
 Before showing which estimates were sufficiently different from the others, we first subset the fitted data to remove those fits that used the Navarro small-time approximation with an initial value of $a \leq .75$. See [Known Error 5](#fit-ke) for more details.
 ```{r fit-estimates, eval=TRUE}
