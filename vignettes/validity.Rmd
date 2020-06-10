@@ -740,7 +740,9 @@ fit[(0:5)*11+1,]
 
 
 ## Testing the Fitted Parameters {#fit-test}
-Now we test the consistency of the fitted parameters using the various density function approximations. As [discussed above](#fit), we use an allowable tolerance of 0.0001 to account for the slight differences in the output of the different approximations. First we read the fitting data from file as the fits can take a long time to run. We initially compare the fitted parameter values produced from one method across all starting points to ensure the correct optimum values have been reached and that local minima have been avoided. Upon confirming that the method yields consistent fitted parameters across starting values, we calculate the mean parameter estimates for each method across the starting values and use these means to compare the fitting results across the methods.
+Now we test the consistency of the fitted parameters using the various density function approximations. As [discussed above](#fit), we use an allowable tolerance of 0.0001 to account for the slight differences in the output of the different approximations. First we read the fitting data from file as the fits can take a long time to run. 
+
+
 ```{r fitting-test, eval=TRUE}
 nr <- nrow(fit)
 fit$Obj_diff <- rep(0, nr)
@@ -764,8 +766,8 @@ for (i in 1:nids) {
   for (j in 1:ninit) {
     for (k in 0:(nalgos-2)) {
       fit[(i-1)*(ninit*nalgos) + k*ninit + j, dif_idx] <-
-        abs(fit[(i-1)*(ninit*nalgos) + (nalgos-1)*ninit + j, fit_idx] - #rtdists
-            fit[(i-1)*(ninit*nalgos) + k*ninit + j, fit_idx])
+        fit[(i-1)*(ninit*nalgos) + (nalgos-1)*ninit + j, fit_idx] - #rtdists
+            fit[(i-1)*(ninit*nalgos) + k*ninit + j, fit_idx]
     }
   }
 }
@@ -785,7 +787,9 @@ Output below are all of the runs where either:
 2) the log-likelihood objective value or the parameter estimates differ from that produced using `rtdists`.
 
 ```{r fit-estimates, eval=TRUE}
-fit[unique(which(fit[,c(3,dif_idx)] > eps)%%nrow(fit)),]
+out <- fit[unique(which(abs(fit[,c(3,dif_idx)]) > eps, arr.ind = TRUE)[,1]),]
+out[,-c(1:2)] <- zapsmall(out[,-c(1:2)])
+out
 ```
 
 We can see that only the small time methods have occasional issues with data fitting. Although there is one method that appears in the above output that uses both the small-time and large-time approximations, the difference between the offending fitted parameter $sv$ and the fit given using `rtdists` is only very marginally greater than our given error tolerance. These results suggest that the most stable methods are those that use both the small-time and large-time approximations to the density.
