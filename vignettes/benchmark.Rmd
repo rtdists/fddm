@@ -34,7 +34,7 @@ Function `dfddm` evaluates the density function (or probability density function
 # Introduction {#intro}
 <hr class="sec1">
 
-The DDM is a widely used model, and a lot of effort has been put into making the evaluation of its density as fast as possible. This vignette is designed to compare the speed of the currently available algorithms that calculate the lower probability density of the DDM. To this aim, we present benchmark data of currently available methods from the literature, our streamlined implementations of those methods, and our own novel methods. The [first section](#den) will record the benchmark data of the density function approximations themselves and show the results through a series of visualizations. The [second section](#fit) will record the benchmark data of parameter estimation that uses the density function approximations in the optimization process for fitting to real-world data; this section will also include visualizations to express the differences among the density function approximations.
+Since the DDM is widely used in parameter estimation usually involving numerical optimization, a lot of effort has been put into making the evaluation of its density as fast as possible. However, the density function for the DDM is notorious for containing an unavoidable infinite sum; hence the literature has produced a few different methods of approximating the density. This vignette is designed to compare the speed of the currently available algorithms that calculate the lower probability density of the DDM. To this aim, we present benchmark data of currently available methods from the literature, our streamlined implementations of those methods, and our own novel methods. The [first section](#den) will record the benchmark data of the density function approximations themselves and show the results through a series of visualizations. The [second section](#fit) will record the benchmark data of parameter estimation that uses the density function approximations in the optimization process for fitting to real-world data; this section will also include visualizations to express the differences among the density function approximations. Please note that we will not be testing the functions for accuracy or consistency in this vignette, as that is covered in the [Validity Vignette](validity.html).
 
 
 
@@ -43,29 +43,18 @@ The DDM is a widely used model, and a lot of effort has been put into making the
 # Benchmarking the Density Functions {#den}
 <hr class="sec1">
 
-This section shows the benchmark testing that was performed to evaluate the speed of each density function approximation. We will not discuss the consistency across the different methods in this vignette because we demonstrate the consistency in the Validity vignette.
+We want to determine the performance of each method across a wide variety of parameters in order to identify any slow areas for individual methods. To achieve this rigor, we define an extensive parameter space (in a code chunk below) and loop through each combination of parameters. Throughout this vignette we will input the response times as a vector to each function instead of inputting individual response times, as this is the most common way to input the response time data. For each combination, we run the `microbenchmark` function from the package [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) 100 times for each method and only save the median benchmark time of these 100. We will refer to these as the "median benchmark times" for the remainder of this vignette. Running the benchmark tests many times for each set of parameters generates a lot of benchmark data but takes a long time, so we only generate a small number of samples at each set of parameters. For benchmark tests with 10,000 samples at each point in a more granular parameter space, see the full benchmark tests located in another `pkgdown` vignette elsewhere because the files are too big for an `rmarkdown::html_vignette`.
 
-We want to determine the performance of each method across a wide variety of parameters in order to identify any slow areas for individual methods. To achieve this rigor, we define an extensive parameter space (in a code chunk below) and loop through each combination of parameters. In this vignette we will input the response times as a vector to each function instead of inputting individual response times. For each combination, we run `microbenchmark` 100 times for each method and only save the median benchmark time of these 100. Running the benchmark tests many times for each set of parameters generates a lot of benchmark data but takes a long time, so we only generate a small number of samples at each set of parameters. For the benchmark tests with 1,000 samples at each point in a more granular parameter space, see the full benchmark tests located in another `pkgdown` vignette elsewhere because the files are too big for an `rmarkdown::html_vignette`.
-
-Upon collecting the benchmark data, we analyze the performance of the approximations
-
-violin plots
-We also perform a more granular analysis of the benchmark data. We do the meq plots for each parameter for each method (well the fast methods at least)
+Upon collecting the benchmark data, we perform a preliminary analysis of the approximations' performance by showing the distributions of median benchmark times as side-by-side violin plots for each approximation. Then we cull the methods and only test further on the fastest and most widely used approximations. To elucidate the areas of the parameter space where the different methods excel and struggle, we plot the median benchmark times as a function of individual parameter values. These plots will reveal which model parameters affect the efficiency of each approximation and how those parameters can slow down the approximations.
 
 
 
 
 ## Generating Benchmark Data {#den-gen}
 
-Before analyzing how the different density function approximations perform, we must first generate the benchmark data. In addition to testing all of the methods available in `dfddm`, we also include three functions that are considered to be current and widely used. First we include the function `ddiffusion` from the package `rtdists` as it is well known for being not only user friendly and feature-rich but also designed specifically for handling data with regard to distributions for response time models. Second we also test the `dwiener` function from the `RWiener` package, a bundle of software that is mainly aimed at providing an `R` language interface to calculate various functions from the Wiener process. Third we include some raw `R` code that is bundled with the paper written by @gondan2014even about improving the approximation to the density function; this code is not bundled in a package so we instead `source` it from file.
+Before analyzing how the different density function approximations perform, we must first generate the benchmark data. In addition to testing all of the methods available in `dfddm`, we also include three functions that are considered to be current and widely used. First we include the function `ddiffusion` from the package [`rtdists`](https://cran.r-project.org/package=rtdists) as it is well known for being not only user friendly and feature-rich but also designed specifically for handling data with regard to distributions for response time models. Second we also test the `dwiener` function from the [`RWiener`](https://cran.r-project.org/package=RWiener) package, which is mainly aimed at providing an `R` language interface to calculate various functions from the Wiener process. Third we include some raw `R` code that is bundled with the paper written by @gondan2014even about improving the approximation to the density function. As this code was not yet available in an `R` package, it is part of `fddm` and can be accessed after running `source` on the corresponding file as shown below.
 
-parameter space
-To capture the behavior of the the density function approximations, we test each one in a granular parameter space that includes the parameter values most likely used in practice. This parameter space can be found fully defined in the subsequent code chunk.
-
-median of 100 function times
-We use `microbenchmark` to time the function call of each approximation 1,000 times, and then we record the median of these 1,000 times to eliminate any outliers.
-
-This code chunk defines the function that we will use to benchmark the algorithms; we will be using the `microbenchmark` package to time the evaluations. The subsequent code chunk defines the parameter space and runs the benchmark tests.
+To capture the behavior of the the density function approximations, we test each one in a granular parameter space that includes the parameter values most likely used in practice. This parameter space can be found fully defined in the code chunk in the following section. At each point in this parameter space we run the `microbenchmark` function 100 times for each approximation and save the median of these benchmark times. Using the median of these data should reduce the number of outliers in the data while maintaining a truthful representation of the approximations' performance. The following code chunk defines the function that we will use to benchmark the algorithms; we will be using the `microbenchmark` package to time the evaluations. The subsequent code chunk defines the parameter space and runs the benchmark tests.
 ```{r bm-fun, eval=FALSE}
 library("fddm")
 library("rtdists")
@@ -262,7 +251,7 @@ ggsave("data/images/violin/violin_0-10_vec.png", plot = violin,
 
 
 <br><br>
-A simple density plot for each method reveals whether or not a method has troublesome parameter values, but not where these troubles are. To visualize this phenomenon for each method, we can plot that method's median benchmark times as a result of each parameter. This will allow us to see where in the parameter space each method is efficient and where it is not efficient. The following code chunk generates and saves plots of the benchmark results (can take a short time).
+A simple density plot for each method reveals whether or not a method has troublesome parameter values, but not where these troubles are. To visualize th for each method, we plot that method's median benchmark times as a function of each individual parameter; this will allow us to see where in the parameter space each method is efficient and where it is inefficient. The following code chunk generates plots of the benchmark results (can take a short time).
 ```{r bm-meq, eval=FALSE}
 library("reshape2")
 library("ggplot2")
@@ -396,19 +385,6 @@ mbm_meq %>%
 ggsave("data/images/meq/meq_W_0-10.png",
        width = 16, height = 9)
 ```
-
-<center>
-**Figure 2.** Ribbon plots showing the `microbenchmark` timings as a function of the value of input response time for each method using a vector of response times as input.
-<br><br>
-**Figure 3.** Ribbon plots showing the `microbenchmark` timings as a function of the value of the threshold separation for each method using a vector of response times as input.
-
-<br><br>
-**Figure 4.** Ribbon plots showing the `microbenchmark` timings as a function of the value of the drift rate for each method using a vector of response times as input.
-
-<br><br>
-<br>
-**Figure 5.** Ribbon plots showing the `microbenchmark` timings as a function of the value of the starting point for each method using a vector of response times as input.
-</center>
 
 Unsurprisingly, the small-time densities struggled for large response times and the large-time densities were very inefficient for small response times (Figure 2). However, we must also consider "effective response times" $\frac{rt}{a^2}$ because `a` scales every instance of `t` in the density functions. We see a sensible pattern in Figure 3 where the small-time densities were more efficient for large values of `a` (leading to a smaller "effective response time"), and the large-time densities were more efficient for small values of `a` (leading to a larger "effective response time"). We see that the methods that combined the two density functions were noticeably more consistent across all "effective response times," confirming the theory behind using a combination of both methods.
 

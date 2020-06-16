@@ -2,8 +2,7 @@
 
 #include "funcs.h"
 
-using std::endl;
-using Rcpp::Rcerr;
+using Rcpp::stop;
 
 
 
@@ -31,13 +30,38 @@ NumericVector cpp_dfddm(const NumericVector& rt,
   int Neps = eps.length();
   int Nmax = max({Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Nlog, Neps});
 
+  // input checking
+  for (int i = 0; i < Na; i++) {
+    if (a[i] < 0) {
+      stop("dfddm error: model parameter 'a' < 0 at index %i.", i+1);
+    }
+  }
+  for (int i = 0; i < Nt0; i++) {
+    if (t0[i] < 0) {
+      stop("dfddm error: model parameter 't0' < 0 at index %i.", i+1);
+    }
+  }
+  for (int i = 0; i < Nw; i++) {
+    if (w[i] < 0 || w[i] > 1) {
+      stop("dfddm error: model parameter 'w' < 0 or 'w' > 1 at index %i.", i+1);
+    }
+  }
+  for (int i = 0; i < Nsv; i++) {
+    if (sv[i] < 0) {
+      stop("dfddm error: model parameter 'sv' < 0 at index %i.", i+1);
+    }
+  }
+
+  // convert responses to 0 (lower) and 1 (upper)
+  Rcpp::Rcout << response[0] << std::endl;
+
+  // include "upper" and "lower" and maybe factor
+
   // prepare output
   NumericVector out(Nmax);
   double t;
 
-  // determine which method to use (and parameter validation)
-  // paramater validation idea:
-    // if the input is invalid, should we default to something?
+  // determine which method to use
   char n_terms_small0 = n_terms_small[0];
   char summation_small0 = summation_small[summation_small.length()-1];
   SummFunc summ;
@@ -48,15 +72,19 @@ NumericVector cpp_dfddm(const NumericVector& rt,
     } else if (summation_small0 == '4') {
       summ = &small_sum_eps_14;
     } else {
-      Rcerr << "error: invalid parameter summation_small" << endl;
+      stop("dfddm error: invalid function parameter summation_small");
       return NAN;
     }
 
     // loop through all inputs
     for (int i = 0; i < Nmax; i++) {
       t = rt[i % Nrt] - t0[i % Nt0]; // take non-decisison time from response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of potential NAN
+      if (t <= 0) { // handle density outside of time bounds
+        if (log_prob[i % Nlog]) {
+          out[i] = -std::numeric_limits<double>::infinity();
+        } else {
+          out[i] = 0;
+        }
         continue;
       }
 
@@ -85,7 +113,7 @@ NumericVector cpp_dfddm(const NumericVector& rt,
       } else if (scale0 == 'b' || scale0 == 'B') {
         dens = &fb;
       } else {
-        Rcerr << "error: invalid parameter scale" << endl;
+        stop("dfddm error: invalid function parameter scale");
         return NAN;
       }
       if (n_terms_small0 == 'K' || n_terms_small0 == 'k') { // Kesselmeier
@@ -93,7 +121,7 @@ NumericVector cpp_dfddm(const NumericVector& rt,
       } else if (n_terms_small0 == 'N' || n_terms_small0 == 'n') { // Navarro
         numm = &ks_Nav;
       } else {
-        Rcerr << "error: invalid parameter n_terms_small" << endl;
+        stop("dfddm error: invalid function parameter n_terms_small");
         return NAN;
       }
       if (summation_small0 == '7') {
@@ -101,7 +129,7 @@ NumericVector cpp_dfddm(const NumericVector& rt,
       } else if (summation_small0 == '4') {
         summ = &small_sum_2014;
       } else {
-        Rcerr << "error: invalid parameter summation_small" << endl;
+        stop("dfddm error: invalid function parameter summation_small");
         return NAN;
       }
     }
@@ -109,8 +137,12 @@ NumericVector cpp_dfddm(const NumericVector& rt,
     // loop through all inputs
     for (int i = 0; i < Nmax; i++) {
       t = rt[i % Nrt] - t0[i % Nt0]; // take non-decisison time from response time
-      if (t <= 0) {
-        out[i] = 0; // if t=0, return 0 instead of potential NAN
+      if (t <= 0) { // handle density outside of time bounds
+        if (log_prob[i % Nlog]) {
+          out[i] = -std::numeric_limits<double>::infinity();
+        } else {
+          out[i] = 0;
+        }
         continue;
       }
 
