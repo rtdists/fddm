@@ -53,7 +53,7 @@ NumericVector cpp_dfddm(const NumericVector& rt,
   }
 
   // convert responses to 0 (lower) and 1 (upper)
-  Rcpp::Rcout << response[0] << std::endl;
+  
 
   // include "upper" and "lower" and maybe factor
 
