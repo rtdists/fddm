@@ -3,13 +3,15 @@
 #include "funcs.h"
 
 using Rcpp::stop;
+using std::vector;
+using std::string;
 
 
 
 
 // [[Rcpp::export]]
 NumericVector cpp_dfddm(const NumericVector& rt,
-                        const LogicalVector& response,
+                        const SEXP& response,
                         const NumericVector& a, const NumericVector& v,
                         const NumericVector& t0, const NumericVector& w,
                         const NumericVector& sv, const LogicalVector& log_prob,
@@ -18,9 +20,32 @@ NumericVector cpp_dfddm(const NumericVector& rt,
                         const std::string& scale,
                         const NumericVector& eps)
 {
+  // convert responses to false (0, lower) and true (1, upper)
+  vector<bool> resp;
+
+  int Nres, type = TYPEOF(response);
+  if (type == 10 || type == 13 || type == 14) { // LogicalVector, IntegerVector, NumericVector
+    resp = Rcpp::as<vector<bool> >(response);
+    Nres = resp.size();
+  } else if (type == 16) { // StringVector (contains at least one string)
+    vector<string> temp = Rcpp::as<vector<string> >(response);
+    Nres = temp.size();
+    resp.reserve(Nres);
+    for (int i = 0; i < Nres; i++) {
+      if (temp[i][0] == 'u' || temp[i][0] == 'U') {
+        resp[i] = 1;
+      } else if (temp[i][0] == 'l' || temp[i][0] == 'L') {
+        resp[i] = 0;
+      } else {
+        stop("dfddm error: unknown value in function parameter 'response' at index %i.", i+1);
+      }
+    }
+  } else {
+    stop("dfddm error: type of function parameter 'response' vector is not one of: integer, double, boolean (logical), or string (character).");
+  }
+
   // find Nmax (max length of parameter inputs)
   int Nrt  = rt.length();
-  int Nres = response.length();
   int Na   = a.length();
   int Nv   = v.length();
   int Nt0  = t0.length();
@@ -46,16 +71,15 @@ NumericVector cpp_dfddm(const NumericVector& rt,
       stop("dfddm error: model parameter 'w' < 0 or 'w' > 1 at index %i.", i+1);
     }
   }
-  for (int i = 0; i < Nsv; i++) {
-    if (sv[i] < 0) {
-      stop("dfddm error: model parameter 'sv' < 0 at index %i.", i+1);
+  if (sv[0] != -1) {
+    for (int i = 0; i < Nsv; i++) {
+      if (sv[i] < 0) {
+        stop("dfddm error: model parameter 'sv' < 0 at index %i.", i+1);
+      }
     }
   }
 
-  // convert responses to 0 (lower) and 1 (upper)
-  
 
-  // include "upper" and "lower" and maybe factor
 
   // prepare output
   NumericVector out(Nmax);
@@ -88,7 +112,7 @@ NumericVector cpp_dfddm(const NumericVector& rt,
         continue;
       }
 
-      if (response[i % Nres]) { // response is "upper" so use alternate parameters
+      if (resp[i % Nres]) { // response is "upper" so use alternate parameters
         out[i] = ff(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw], sv[i % Nsv],
                       log_prob[i % Nlog], eps[i % Neps], NULL, summ);
       } else { // response is "lower" so use unchanged parameters
@@ -146,7 +170,7 @@ NumericVector cpp_dfddm(const NumericVector& rt,
         continue;
       }
 
-      if (response[i % Nres]) { // response is "upper" so use alternate parameters
+      if (resp[i % Nres]) { // response is "upper" so use alternate parameters
         out[i] = dens(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw], sv[i % Nsv],
                       log_prob[i % Nlog], eps[i % Neps], numm, summ);
       } else { // response is "lower" so use unchanged parameters
