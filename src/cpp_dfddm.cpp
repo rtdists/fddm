@@ -21,13 +21,46 @@ NumericVector cpp_dfddm(const NumericVector& rt,
                         const NumericVector& eps)
 {
   // convert responses to false (0, lower) and true (1, upper)
-  // add factor
   vector<bool> resp;
   int Nres, type = TYPEOF(response);
   if (type == 10) { // LogicalVector
     resp = Rcpp::as<vector<bool> >(response);
     Nres = resp.size();
-  } else if (type == 13 || type == 14) { // IntegerVector or NumericVector
+  } else if (type == 13) { // IntegerVector (including factors)
+    Rcpp::IntegerVector temp = Rcpp::wrap(response);
+    if (Rf_isFactor(response) == 1) { // factor
+      Rcpp::CharacterVector levs = temp.attr("levels");
+      vector<int> temp = Rcpp::as<vector<int> >(response);
+      Nres = temp.size();
+      resp.reserve(Nres);
+      for (int i = 0; i < Nres; i++) {
+        if (levs[temp[i]-1] == levs[0]) { // upper
+          resp[i] = 1;
+        } else if (levs[temp[i]-1] == levs[1]) { // lower
+          resp[i] = 0;
+        } else {
+          Rcpp::stop("dfddm error: index %i of function parameter 'response' contains a value that is not in the levels provided by the factor structure.", i+1);
+        }
+      }
+    } else { // IntegerVector, NOT factor
+      vector<int> temp = Rcpp::as<vector<int> >(response);
+      Nres = temp.size();
+      resp.reserve(Nres);
+      int m = temp[0];
+      for (int i = 1; i < Nres; i++) { // get min
+        if (temp[i] < m) {
+          m = temp[i];
+        }
+      }
+      for (int i = 0; i < Nres; i++) {
+        if (temp[i] > m) {
+          resp[i] = 1;
+        } else {
+          resp[i] = 0;
+        }
+      }
+    }
+  } else if (type == 14) { // NumericVector
     vector<double> temp = Rcpp::as<vector<double> >(response);
     Nres = temp.size();
     resp.reserve(Nres);
