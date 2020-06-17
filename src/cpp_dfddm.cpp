@@ -21,12 +21,29 @@ NumericVector cpp_dfddm(const NumericVector& rt,
                         const NumericVector& eps)
 {
   // convert responses to false (0, lower) and true (1, upper)
+  // add factor
   vector<bool> resp;
-
   int Nres, type = TYPEOF(response);
-  if (type == 10 || type == 13 || type == 14) { // LogicalVector, IntegerVector, NumericVector
+  if (type == 10) { // LogicalVector
     resp = Rcpp::as<vector<bool> >(response);
     Nres = resp.size();
+  } else if (type == 13 || type == 14) { // IntegerVector or NumericVector
+    vector<double> temp = Rcpp::as<vector<double> >(response);
+    Nres = temp.size();
+    resp.reserve(Nres);
+    double m = temp[0];
+    for (int i = 1; i < Nres; i++) { // get min
+      if (temp[i] < m) {
+        m = temp[i];
+      }
+    }
+    for (int i = 0; i < Nres; i++) {
+      if (temp[i] > m) {
+        resp[i] = 1;
+      } else {
+        resp[i] = 0;
+      }
+    }
   } else if (type == 16) { // StringVector (contains at least one string)
     vector<string> temp = Rcpp::as<vector<string> >(response);
     Nres = temp.size();
