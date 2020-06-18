@@ -298,20 +298,9 @@ rtdists <- subset(res, FuncName == "rtdists")
 RWiener <- subset(res, FuncName == "RWiener")
 Kesselmeier_R <- subset(res, FuncName == "Kesselmeier")
 
-# Subset results
-Foster <- subset(res, FuncName %in% fnames[c(1,2)])
-Kesselmeier_s <- subset(res, FuncName %in% fnames[c(3,4)])
-Kesselmeier_b <- subset(res, FuncName %in% fnames[c(7,8)])
-Navarro_s <- subset(res, FuncName %in% fnames[c(5,6)])
-Navarro_l <- subset(res, FuncName %in% fnames[11])
-Navarro_b <- subset(res, FuncName %in% fnames[c(9,10)])
-rtdists <- subset(res, FuncName == "rtdists")
-RWiener <- subset(res, FuncName == "RWiener")
-Kesselmeier_R <- subset(res, FuncName == "Kesselmeier")
-
 # Compensate for KE 1, 2
 Nav_s_res_0 <- subset(Navarro_s, res < 0) # KE 2
-Nav_s_0 <- min(Nav_s_res_0$rt / Nav_s_res_0$a / Nav_s_res_0$a) # = 10
+Nav_s_0 <- min(Nav_s_res_0$rt / Nav_s_res_0$a / Nav_s_res_0$a) # = 12
 Nav_l_res_0 <- subset(Navarro_l, res < 0) # KE 3
 Nav_l_0 <- max(Nav_l_res_0$rt / Nav_l_res_0$a / Nav_l_res_0$a) # = 0.04
 Nav_l_dif_2eps <- subset(Navarro_l, dif > 2*eps) # KE 3
@@ -432,18 +421,18 @@ ll_fs_Fos_17 <- function(pars, rt, resp, truth, err_tol) {
 
   # the truth is "upper" so use v1
   dens1 <- dfddm(rt = rt1, response = resp1, a = pars[[3]], v = pars[[1]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = FALSE,
+                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                  n_terms_small = "Foster", summation_small = "2017",
                  scale = "small", err_tol = err_tol)
   # the truth is "lower" so use v0
   dens0 <- dfddm(rt = rt0, response = resp0, a = pars[[3]], v = pars[[2]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = FALSE,
+                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                  n_terms_small = "Foster", summation_small = "2017",
                  scale = "small", err_tol = err_tol)
 
   densities <- c(dens1, dens0)
-  if (any(densities <= 0)) return(1e6)
-  return(-sum(log(densities)))
+  if (any(!is.finite(densities))) return(1e6)
+  return(-sum(densities))
 }
 
 ll_fs_Kes_17 <- function(pars, rt, resp, truth, err_tol) {
@@ -454,18 +443,18 @@ ll_fs_Kes_17 <- function(pars, rt, resp, truth, err_tol) {
 
   # the truth is "upper" so use v1
   dens1 <- dfddm(rt = rt1, response = resp1, a = pars[[3]], v = pars[[1]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = FALSE,
+                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                  n_terms_small = "Kesselmeier", summation_small = "2017",
                  scale = "small", err_tol = err_tol)
   # the truth is "lower" so use v0
   dens0 <- dfddm(rt = rt0, response = resp0, a = pars[[3]], v = pars[[2]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = FALSE,
+                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                  n_terms_small = "Kesselmeier", summation_small = "2017",
                  scale = "small", err_tol = err_tol)
 
   densities <- c(dens1, dens0)
-  if (any(densities <= 0)) return(1e6)
-  return(-sum(log(densities)))
+  if (any(!is.finite(densities))) return(1e6)
+  return(-sum(densities))
 }
 
 ll_fs_Nav_17 <- function(pars, rt, resp, truth, err_tol) {
@@ -476,18 +465,18 @@ ll_fs_Nav_17 <- function(pars, rt, resp, truth, err_tol) {
 
   # the truth is "upper" so use v1
   dens1 <- dfddm(rt = rt1, response = resp1, a = pars[[3]], v = pars[[1]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = FALSE,
+                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                  n_terms_small = "Navarro", summation_small = "2017",
                  scale = "small", err_tol = err_tol)
   # the truth is "lower" so use v0
   dens0 <- dfddm(rt = rt0, response = resp0, a = pars[[3]], v = pars[[2]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = FALSE,
+                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                  n_terms_small = "Navarro", summation_small = "2017",
                  scale = "small", err_tol = err_tol)
 
   densities <- c(dens1, dens0)
-  if (any(densities <= 0)) return(1e6)
-  return(-sum(log(densities)))
+  if (any(!is.finite(densities))) return(1e6)
+  return(-sum(densities))
 }
 
 ll_fb_Kes_17 <- function(pars, rt, resp, truth, err_tol) {
@@ -498,18 +487,18 @@ ll_fb_Kes_17 <- function(pars, rt, resp, truth, err_tol) {
 
   # the truth is "upper" so use v1
   dens1 <- dfddm(rt = rt1, response = resp1, a = pars[[3]], v = pars[[1]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = FALSE,
+                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                  n_terms_small = "Kesselmeier", summation_small = "2017",
                  scale = "both", err_tol = err_tol)
   # the truth is "lower" so use v0
   dens0 <- dfddm(rt = rt0, response = resp0, a = pars[[3]], v = pars[[2]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = FALSE,
+                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                  n_terms_small = "Kesselmeier", summation_small = "2017",
                  scale = "both", err_tol = err_tol)
 
   densities <- c(dens1, dens0)
-  if (any(densities <= 0)) return(1e6)
-  return(-sum(log(densities)))
+  if (any(!is.finite(densities))) return(1e6)
+  return(-sum(densities))
 }
 
 ll_fb_Nav_17 <- function(pars, rt, resp, truth, err_tol) {
@@ -520,18 +509,18 @@ ll_fb_Nav_17 <- function(pars, rt, resp, truth, err_tol) {
 
   # the truth is "upper" so use v1
   dens1 <- dfddm(rt = rt1, response = resp1, a = pars[[3]], v = pars[[1]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = FALSE,
+                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                  n_terms_small = "Navarro", summation_small = "2017",
                  scale = "both", err_tol = err_tol)
   # the truth is "lower" so use v0
   dens0 <- dfddm(rt = rt0, response = resp0, a = pars[[3]], v = pars[[2]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = FALSE,
+                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                  n_terms_small = "Navarro", summation_small = "2017",
                  scale = "both", err_tol = err_tol)
 
   densities <- c(dens1, dens0)
-  if (any(densities <= 0)) return(1e6)
-  return(-sum(log(densities)))
+  if (any(!is.finite(densities))) return(1e6)
+  return(-sum(densities))
 }
 
 ll_RTDists <- function(pars, rt, resp, truth) {
@@ -733,10 +722,9 @@ We also print the results for the first ID in the data set (`ID = "experienced 2
 
 ```{r fitting-run, eval=FALSE}
 data(med_dec, package = "fddm")
-med_dec[which(med_dec$rt < 0),]
-data <- subset(med_dec, id == 7 & group == "novice")
-med_dec <- subset(med_dec, rt >= 0) # remove any respnose times below 0
-fit <- rt_fit(data, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
+med_dec <- med_dec[which(med_dec$rt >= 0),]
+data <- subset(med_dec, id == 2 & group == "novice")
+fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
               truth_idx = 5, response_upper = "blast", err_tol = 1e-6)
 save(fit, file = "inst/extdata/fit1.Rds", compress = "xz")
 ```
@@ -793,12 +781,12 @@ Output below are all of the runs where either:
 Before showing which estimates were sufficiently different from the others, we first subset the fitted data to remove those fits that used the Navarro small-time approximation with an initial value of $a \leq .75$. See [Known Error 5](#fit-ke) for more details.
 ```{r fit-estimates, eval=TRUE}
 # Account for KE 5
-fit <- subset(fit, Algorithm != "fs_Nav_17" | a_init > .75)
+fit2 <- subset(fit, Algorithm != "fs_Nav_17" | a_init > .75)
 
 # Define error tolerance
 eps <- 1e-4
 
-out <- fit[unique(which(abs(fit[,c(3,dif_idx)]) > eps, arr.ind = TRUE)[,1]),]
+out <- fit2[unique(which(abs(fit2[,c(3,dif_idx)]) > eps, arr.ind = TRUE)[,1]),]
 out[,-c(1:2)] <- zapsmall(out[,-c(1:2)])
 out
 ```

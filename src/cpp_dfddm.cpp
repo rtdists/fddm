@@ -14,7 +14,7 @@ NumericVector cpp_dfddm(const NumericVector& rt,
                         const SEXP& response,
                         const NumericVector& a, const NumericVector& v,
                         const NumericVector& t0, const NumericVector& w,
-                        const NumericVector& sv, const LogicalVector& log_prob,
+                        const NumericVector& sv, const bool& log_prob,
                         const std::string& n_terms_small,
                         const std::string& summation_small,
                         const std::string& scale,
@@ -94,6 +94,8 @@ NumericVector cpp_dfddm(const NumericVector& rt,
     stop("dfddm error: type of function parameter 'response' vector is not one of: integer, double, boolean (logical), or string (character).");
   }
 
+
+
   // find Nmax (max length of parameter inputs)
   int Nrt  = rt.length();
   int Na   = a.length();
@@ -101,9 +103,8 @@ NumericVector cpp_dfddm(const NumericVector& rt,
   int Nt0  = t0.length();
   int Nw   = w.length();
   int Nsv  = sv.length();
-  int Nlog = log_prob.length();
   int Neps = eps.length();
-  int Nmax = max({Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Nlog, Neps});
+  int Nmax = max({Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Neps});
 
   // input checking
   for (int i = 0; i < Na; i++) {
@@ -131,105 +132,124 @@ NumericVector cpp_dfddm(const NumericVector& rt,
 
 
 
-  // prepare output
-  NumericVector out(Nmax);
-  double t;
-
   // determine which method to use
   char n_terms_small0 = n_terms_small[0];
   char summation_small0 = summation_small[summation_small.length()-1];
+  char scale0 = scale[0];
+  NummFunc numm;
   SummFunc summ;
+  DensFunc dens;
+  double rt0;
 
-  if (n_terms_small0 == 'F' || n_terms_small0 == 'f') { // Foster method
-    if (summation_small0 == '7') {
-      summ = &small_sum_eps_17;
-    } else if (summation_small0 == '4') {
-      summ = &small_sum_eps_14;
-    } else {
-      stop("dfddm error: invalid function parameter summation_small");
-      return NAN;
-    }
-
-    // loop through all inputs
-    for (int i = 0; i < Nmax; i++) {
-      t = rt[i % Nrt] - t0[i % Nt0]; // take non-decisison time from response time
-      if (t <= 0) { // handle density outside of time bounds
-        if (log_prob[i % Nlog]) {
-          out[i] = -std::numeric_limits<double>::infinity();
-        } else {
-          out[i] = 0;
-        }
-        continue;
-      }
-
-      if (resp[i % Nres]) { // response is "upper" so use alternate parameters
-        out[i] = ff(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw], sv[i % Nsv],
-                      log_prob[i % Nlog], eps[i % Neps], NULL, summ);
-      } else { // response is "lower" so use unchanged parameters
-        out[i] = ff(t, a[i % Na], v[i % Nv], w[i % Nw], sv[i % Nsv],
-                      log_prob[i % Nlog], eps[i % Neps], NULL, summ);
-      }
-    }
-
-
-
-  } else{ // Kesselmeier and Navarro methods
-    char scale0 = scale[0];
-    DensFunc dens;
-    NummFunc numm;
-    if (scale0 == 'l' || scale0 == 'L') {
-      dens = &fl;
+  if (log_prob) { // calculate log(probability)
+    rt0 = -std::numeric_limits<double>::infinity();
+    if (n_terms_small0 == 'F' || n_terms_small0 == 'f') { // Foster method
+      dens = &ff_log;
       numm = NULL;
-      summ = NULL;
+      if (summation_small0 == '7') { // 2017
+        summ = &small_sum_eps_17;
+      } else if (summation_small0 == '4') { // 2014
+        summ = &small_sum_eps_14;
+      } else {
+        stop("dfddm error: invalid function parameter 'summation_small': %s",
+             summation_small);
+      }
     } else {
-      if (scale0 == 's' || scale0 == 'S') {
-        dens = &fs;
-      } else if (scale0 == 'b' || scale0 == 'B') {
-        dens = &fb;
+      if (scale0 == 'l' || scale0 == 'L') { // large
+        dens = &fl_log;
+        numm = NULL;
+        summ = NULL;
       } else {
-        stop("dfddm error: invalid function parameter scale");
-        return NAN;
-      }
-      if (n_terms_small0 == 'K' || n_terms_small0 == 'k') { // Kesselmeier
-        numm = &ks_Kes;
-      } else if (n_terms_small0 == 'N' || n_terms_small0 == 'n') { // Navarro
-        numm = &ks_Nav;
-      } else {
-        stop("dfddm error: invalid function parameter n_terms_small");
-        return NAN;
-      }
-      if (summation_small0 == '7') {
-        summ = &small_sum_2017;
-      } else if (summation_small0 == '4') {
-        summ = &small_sum_2014;
-      } else {
-        stop("dfddm error: invalid function parameter summation_small");
-        return NAN;
+        if (scale0 == 'b' || scale0 == 'B') { // both
+          dens = &fb_log;
+        } else if (scale0 == 's' || scale0 == 'S') { // small
+          dens = &fs_log;
+        } else {
+          stop("dfddm error: invalid function parameter 'scale': %s", scale);
+        }
+        if (n_terms_small0 == 'K' || n_terms_small0 == 'k') { // Kesselmeier
+          numm = &ks_Kes;
+        } else if (n_terms_small0 == 'N' || n_terms_small0 == 'n') { // Navarro
+          numm = &ks_Nav;
+        } else {
+          stop("dfddm error: invalid function parameter 'n_terms_small': %s",
+               n_terms_small);
+        }
+        if (summation_small0 == '7') { // 2017
+          summ = &small_sum_2017;
+        } else if (summation_small0 == '4') { // 2014
+          summ = &small_sum_2014;
+        } else {
+          stop("dfddm error: invalid function parameter 'summation_small': %s",
+               summation_small);
+        }
       }
     }
-
-    // loop through all inputs
-    for (int i = 0; i < Nmax; i++) {
-      t = rt[i % Nrt] - t0[i % Nt0]; // take non-decisison time from response time
-      if (t <= 0) { // handle density outside of time bounds
-        if (log_prob[i % Nlog]) {
-          out[i] = -std::numeric_limits<double>::infinity();
-        } else {
-          out[i] = 0;
-        }
-        continue;
+  } else { // calculate regular probability
+    rt0 = 0;
+    if (n_terms_small0 == 'F' || n_terms_small0 == 'f') { // Foster method
+      dens = &ff;
+      numm = NULL;
+      if (summation_small0 == '7') { // 2017
+        summ = &small_sum_eps_17;
+      } else if (summation_small0 == '4') { // 2014
+        summ = &small_sum_eps_14;
+      } else {
+        stop("dfddm error: invalid function parameter 'summation_small': %s",
+             summation_small);
       }
-
-      if (resp[i % Nres]) { // response is "upper" so use alternate parameters
-        out[i] = dens(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw], sv[i % Nsv],
-                      log_prob[i % Nlog], eps[i % Neps], numm, summ);
-      } else { // response is "lower" so use unchanged parameters
-        out[i] = dens(t, a[i % Na], v[i % Nv], w[i % Nw], sv[i % Nsv],
-                      log_prob[i % Nlog], eps[i % Neps], numm, summ);
+    } else {
+      if (scale0 == 'l' || scale0 == 'L') { // large
+        dens = &fl;
+        numm = NULL;
+        summ = NULL;
+      } else {
+        if (scale0 == 'b' || scale0 == 'B') { // both
+          dens = &fb;
+        } else if (scale0 == 's' || scale0 == 'S') { // small
+          dens = &fs;
+        } else {
+          stop("dfddm error: invalid function parameter 'scale': %s", scale);
+        }
+        if (n_terms_small0 == 'K' || n_terms_small0 == 'k') { // Kesselmeier
+          numm = &ks_Kes;
+        } else if (n_terms_small0 == 'N' || n_terms_small0 == 'n') { // Navarro
+          numm = &ks_Nav;
+        } else {
+          stop("dfddm error: invalid function parameter 'n_terms_small': %s",
+               n_terms_small);
+        }
+        if (summation_small0 == '7') { // 2017
+          summ = &small_sum_2017;
+        } else if (summation_small0 == '4') { // 2014
+          summ = &small_sum_2014;
+        } else {
+          stop("dfddm error: invalid function parameter 'summation_small': %s",
+               summation_small);
+        }
       }
     }
   }
 
+
+
+  // loop through all inputs
+  NumericVector out(Nmax);
+  double t;
+  for (int i = 0; i < Nmax; i++) {
+    t = rt[i % Nrt] - t0[i % Nt0]; // take non-decisison time from response time
+    if (t <= 0) { // handle density outside of time bounds
+      out[i] = rt0;
+      continue;
+    }
+    if (resp[i % Nres]) { // response is "upper" so use alternate parameters
+      out[i] = dens(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw], sv[i % Nsv],
+                    eps[i % Neps], numm, summ);
+    } else { // response is "lower" so use unchanged parameters
+      out[i] = dens(t, a[i % Na], v[i % Nv], w[i % Nw], sv[i % Nsv],
+                    eps[i % Neps], numm, summ);
+    }
+  }
 
 
   return out;

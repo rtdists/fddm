@@ -6,7 +6,7 @@
 using namespace Rcpp;
 
 // cpp_dfddm
-NumericVector cpp_dfddm(const NumericVector& rt, const SEXP& response, const NumericVector& a, const NumericVector& v, const NumericVector& t0, const NumericVector& w, const NumericVector& sv, const LogicalVector& log_prob, const std::string& n_terms_small, const std::string& summation_small, const std::string& scale, const NumericVector& eps);
+NumericVector cpp_dfddm(const NumericVector& rt, const SEXP& response, const NumericVector& a, const NumericVector& v, const NumericVector& t0, const NumericVector& w, const NumericVector& sv, const bool& log_prob, const std::string& n_terms_small, const std::string& summation_small, const std::string& scale, const NumericVector& eps);
 RcppExport SEXP _fddm_cpp_dfddm(SEXP rtSEXP, SEXP responseSEXP, SEXP aSEXP, SEXP vSEXP, SEXP t0SEXP, SEXP wSEXP, SEXP svSEXP, SEXP log_probSEXP, SEXP n_terms_smallSEXP, SEXP summation_smallSEXP, SEXP scaleSEXP, SEXP epsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -18,7 +18,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const NumericVector& >::type t0(t0SEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type w(wSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type sv(svSEXP);
-    Rcpp::traits::input_parameter< const LogicalVector& >::type log_prob(log_probSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type log_prob(log_probSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type n_terms_small(n_terms_smallSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type summation_small(summation_smallSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type scale(scaleSEXP);

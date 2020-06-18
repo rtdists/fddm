@@ -30,8 +30,8 @@ typedef int    (*NummFunc)(const double&, const double&, const double&);
 typedef double (*SummFunc)(const double&, const double&, const double&,
                            const int&, const double&);
 typedef double (*DensFunc)(const double&, const double&, const double&,
-                           const double&, const double&, const bool&,
-                           const double&, NummFunc, SummFunc);
+                           const double&, const double&, const double&,
+                           NummFunc, SummFunc);
 
 
 
@@ -59,15 +59,27 @@ double large_sum_Nav(const double& t, const double& a, const double& w,
 
 
 // Density Functions
-double ff(const double& t, const double& a, const double& v, const double& w,
-          const double& sv, const bool& log_prob, const double& eps,
+double ff(const double& t, const double& a, const double& v,
+          const double& w, const double& sv, const double& eps,
           NummFunc numm, SummFunc summ);
-double fs(const double& t, const double& a, const double& v, const double& w,
-          const double& sv, const bool& log_prob, const double& eps,
+double ff_log(const double& t, const double& a, const double& v,
+              const double& w, const double& sv, const double& eps,
+              NummFunc numm, SummFunc summ);
+double fs(const double& t, const double& a, const double& v,
+          const double& w, const double& sv, const double& eps,
           NummFunc numm, SummFunc summ);
-double fl(const double& t, const double& a, const double& v, const double& w,
-          const double& sv, const bool& log_prob, const double& eps,
+double fs_log(const double& t, const double& a, const double& v,
+              const double& w, const double& sv, const double& eps,
+              NummFunc numm, SummFunc summ);
+double fl(const double& t, const double& a, const double& v,
+          const double& w, const double& sv, const double& eps,
           NummFunc numm, SummFunc summ);
-double fb(const double& t, const double& a, const double& v, const double& w,
-          const double& sv, const bool& log_prob, const double& eps,
+double fl_log(const double& t, const double& a, const double& v,
+              const double& w, const double& sv, const double& eps,
+              NummFunc numm, SummFunc summ);
+double fb(const double& t, const double& a, const double& v,
+          const double& w, const double& sv, const double& eps,
           NummFunc numm, SummFunc summ);
+double fb_log(const double& t, const double& a, const double& v,
+              const double& w, const double& sv, const double& eps,
+              NummFunc numm, SummFunc summ);
