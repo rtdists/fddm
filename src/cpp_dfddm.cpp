@@ -34,29 +34,25 @@ NumericVector cpp_dfddm(const NumericVector& rt,
       Nres = temp.size();
       resp.reserve(Nres);
       for (int i = 0; i < Nres; i++) {
-        if (levs[temp[i]-1] == levs[0]) { // upper
+        if (levs[temp[i]-1][0] == '1') { // upper
           resp[i] = 1;
-        } else if (levs[temp[i]-1] == levs[1]) { // lower
+        } else if (levs[temp[i]-1][0] == '0') { // lower
           resp[i] = 0;
         } else {
-          Rcpp::stop("dfddm error: index %i of function parameter 'response' contains a value that is not in the levels provided by the factor structure.", i+1);
+          Rcpp::stop("dfddm error: index %i of function parameter 'response' contains a value that is neither 1 nor 0", i+1);
         }
       }
     } else { // IntegerVector, NOT factor
       vector<int> temp = Rcpp::as<vector<int> >(response);
       Nres = temp.size();
       resp.reserve(Nres);
-      int m = temp[0];
-      for (int i = 1; i < Nres; i++) { // get min
-        if (temp[i] < m) {
-          m = temp[i];
-        }
-      }
       for (int i = 0; i < Nres; i++) {
-        if (temp[i] > m) {
+        if (temp[i] == 1) {
           resp[i] = 1;
-        } else {
+        } else if (temp[i] == 0){
           resp[i] = 0;
+        } else {
+          stop("dfdmm error: unknown function parameter 'response' at index %i", i+1);
         }
       }
     }
@@ -64,17 +60,13 @@ NumericVector cpp_dfddm(const NumericVector& rt,
     vector<double> temp = Rcpp::as<vector<double> >(response);
     Nres = temp.size();
     resp.reserve(Nres);
-    double m = temp[0];
-    for (int i = 1; i < Nres; i++) { // get min
-      if (temp[i] < m) {
-        m = temp[i];
-      }
-    }
     for (int i = 0; i < Nres; i++) {
-      if (temp[i] > m) {
+      if (temp[i] == 1) {
         resp[i] = 1;
-      } else {
+      } else if (temp[i] == 0){
         resp[i] = 0;
+      } else {
+        stop("dfdmm error: unknown function parameter 'response' at index %i", i+1);
       }
     }
   } else if (type == 16) { // StringVector (contains at least one string)
