@@ -281,6 +281,7 @@ for (rt in 1:nRT) {
 
 
 
+
 ## Testing the Density Functions {#den-test}
 
 Now we test the consistency of the various density function approximations by using the `testthat` package. As [discussed above](#den), we allow the difference between any two outputs to be twice the original desired accuracy to allow for convergence from either above or below. We have to amend some of the checks because of the instability of some of the methods, and these are documented in the [Known Errors](#den-ke) section below. First we check that all of the approximations produce densities that are non-negative (we allow a density equal to zero). Next, we check the consistency of the internal `dfddm` methods before confirming their accuracy with external code from established packages. Lastly, we run similar tests to check the consistency of the logged results. However, we do not test the logs of densities that are very close to zero (i.e., less than $\epsilon^2$) because even a small difference in approximated density can lead to a very large difference in logged density. If all tests pass correctly, there should be no output.
@@ -718,29 +719,29 @@ As an example data set, we use the `med_dec` data that comes with `fddm`. This d
 
 Having set up the fitting functions in the above chunks of code, we could pass the `med_dec` data to this function to get the parameter estimates. However, as this takes a long time we skip the fitting in the vignette and instead read the pre-fit parameter estimates in the subsequent code chunk.
 
-We also print the results for the first ID in the data set (`ID = "experienced 2"`) and first set of initial values across the different methods to see what it looks like. This shows that at least the agreement across methods for this set of initial parameter values is rather good for the first participant in the study.
-
 ```{r fitting-run, eval=FALSE}
 data(med_dec, package = "fddm")
 med_dec <- med_dec[which(med_dec$rt >= 0),]
 data <- subset(med_dec, id == 2 & group == "novice")
 fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
               truth_idx = 5, response_upper = "blast", err_tol = 1e-6)
-save(fit, file = "inst/extdata/fit1.Rds", compress = "xz")
+save(fit, file = "inst/extdata/fit.Rds", compress = "xz", compression_level = 9)
 ```
 
-```{r fitting-load, eval=TRUE}
-# load data, will be in the variable 'fit'
-load(system.file("extdata", "fit.Rds", package = "fddm", mustWork = TRUE))
-fit[(0:5)*11+1,]
-```
+
 
 
 ## Testing the Fitted Parameters {#fit-test}
 Now we test the consistency of the fitted parameters using the various density function approximations. As [discussed above](#fit), we use an allowable tolerance of 0.0001 to account for the slight differences in the output of the different approximations. First we read the fitting data from file as the fits can take a long time to run.
 
+We also print the results for the first ID in the data set (`ID = "experienced 2"`) and first set of initial values across the different methods to see what it looks like. This shows that at least the agreement across methods for this set of initial parameter values is rather good for the first participant in the study.
 
-```{r fitting-test, eval=TRUE}
+
+```{r fitting-prep, eval=TRUE}
+# load data, will be in the variable 'fit'
+load(system.file("extdata", "fit.Rds", package = "fddm", mustWork = TRUE))
+fit[(0:5)*11+1,] # print results for `ID = "experienced 2"``
+
 nr <- nrow(fit)
 fit$Obj_diff <- rep(0, nr)
 fit$v1_diff  <- rep(0, nr)
@@ -763,8 +764,9 @@ for (i in 1:nids) {
   for (j in 1:ninit) {
     for (k in 0:(nalgos-2)) {
       fit[(i-1)*(ninit*nalgos) + k*ninit + j, dif_idx] <-
-        fit[(i-1)*(ninit*nalgos) + (nalgos-1)*ninit + j, fit_idx] - #rtdists
-            fit[(i-1)*(ninit*nalgos) + k*ninit + j, fit_idx]
+        fit[(i-1)*(ninit*nalgos) + k*ninit + j, fit_idx] - # every method
+        fit[(i-1)*(ninit*nalgos) + (nalgos-1)*ninit + j, fit_idx] #rtdists
+
     }
   }
 }
@@ -788,10 +790,11 @@ eps <- 1e-4
 
 out <- fit2[unique(which(abs(fit2[,c(3,dif_idx)]) > eps, arr.ind = TRUE)[,1]),]
 out[,-c(1:2)] <- zapsmall(out[,-c(1:2)])
+
 out
 ```
 
-We can see that only the small time methods have occasional issues with data fitting. Although there is one method that appears in the above output that uses both the small-time and large-time approximations, the difference between the offending fitted parameter $sv$ and the fit given using `rtdists` is only very marginally greater than our given error tolerance. These results suggest that the most stable methods are those that use both the small-time and large-time approximations to the density.
+We can see that it is mostly the small time methods that have occasional issues with data fitting. Although there are two method that appears in the above output that use both the small-time and large-time approximations, the method that combines the large-time approximation of Navarro with the small-time approximation of Kesselmeier is actually quite stable. Using this method, there are two offending fitted parameters whose difference from the fits given using `rtdists` are not smaller than our given error tolerance; in this case, the differences are only very marginally greater than our given error tolerance. These results suggest that the most stable methods are those that use both the small-time and large-time approximations to the density, and in particular the default option for `dfddm`, `scale = "both", n_terms_small = "Kesselmeier"`, is very stable .
 
 
 
