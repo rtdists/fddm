@@ -1,6 +1,6 @@
 ---
 title: "Mathematical Description of Methods"
-author: "Kendal Foster"
+author: "Kendal Foster and Henrik Singmann"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 bibliography: references.bib
 output:

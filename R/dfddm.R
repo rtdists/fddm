@@ -7,8 +7,12 @@
 #'
 #' @param rt A vector of response times (in seconds). If a response time is
 #'   non-positve, then its density will evaluate to \eqn{0}.
-#' @param response A vector of binary responses, either \eqn{0} (representing
-#'   the "lower" threshold) or \eqn{1} (representing the "upper" threshold).
+#' @param response A vector of binary responses that represent either the
+#`   "upper" or "lower" threshold. The elements of this vector can be any one
+#`   of: logicals (FALSE \eqn{\to} "lower", TRUE \eqn{\to} "upper"),
+#`   integers or doubles (\eqn{0} \eqn{\to} "lower", \eqn{1} \eqn{\to} "upper"),
+#`   factors (levels must be: "0" \eqn{\to} "lower", "1" \eqn{\to} "upper"), or
+#`   strings (either "lower" or "upper", case insensitive).
 #' @param a Threshold separation. Amount of information that is considered for a
 #'   decision. Large values indicate a conservative decisional style. Allowed
 #'   range: \eqn{0 <} \code{a}. Typical range: \eqn{0.5 <} \code{a} \eqn{< 2}.

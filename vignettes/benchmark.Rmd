@@ -1,6 +1,6 @@
 ---
 title: "Benchmark Testing"
-author: "Kendal Foster"
+author: "Kendal Foster and Henrik Singmann"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output:
   rmarkdown::html_vignette:
