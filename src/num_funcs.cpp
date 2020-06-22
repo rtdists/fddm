@@ -13,8 +13,8 @@
 //////////                                                           //////////
 
 
-// Kesselmeier and co 2014
-int ks_Kes(const double& t, const double& w, const double& eps)
+// Gondan et al 2014
+int ks_Gon(const double& t, const double& w, const double& eps)
 {
   double u_eps, arg, k1;
   int k;
@@ -32,7 +32,7 @@ int ks_Kes(const double& t, const double& w, const double& eps)
 }
 
 
-// Navarro2009
+// Navarro and Fuss 2009
 int ks_Nav(const double& t, const double& w, const double& eps)
 {
   // note: w is not used
@@ -51,7 +51,7 @@ int ks_Nav(const double& t, const double& w, const double& eps)
 //////////                                                           //////////
 
 
-// Navarro2009
+// Navarro and Fuss 2009
 int kl_Nav(const double& t, const double& w, const double& eps)
 {
   // note: w is not used

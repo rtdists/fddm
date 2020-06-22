@@ -13,7 +13,7 @@ dfddm(
   w = 0.5,
   sv = -1,
   log = FALSE,
-  n_terms_small = "Kesselmeier",
+  n_terms_small = "Gondan",
   summation_small = "2017",
   scale = "both",
   err_tol = 1e-06
@@ -27,18 +27,15 @@ non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
 \item{response}{Binary response(s) that correspond(s) to either the "lower"
 or "upper" threshold. This model parameter can either be a singular value
 or a vector. The value(s) in 'response' can be of the following data types:
-\itemize{
-  \item logicals (FALSE \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "lower",
-        TRUE \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper");
-  \item integers or doubles (\eqn{1}
-        \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "lower", \eqn{2}
-        \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper");
-  \item strings (only the first character is checked, "L"
-        \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "lower" or "U"
-        \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper", case insensitive);
-  \item factors (the first level gets mapped to "lower", and the second
-        level gets mapped to "upper"; any additional levels are ignored).
-}}
+\itemize{ \item logicals (FALSE \ifelse{html}{\out{&#8594;}}{\eqn{\to}}
+"lower", TRUE \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper"); \item
+integers or doubles (\eqn{1} \ifelse{html}{\out{&#8594;}}{\eqn{\to}}
+"lower", \eqn{2} \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper"); \item
+strings (only the first character is checked, "L"
+\ifelse{html}{\out{&#8594;}}{\eqn{\to}} "lower" or "U"
+\ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper", case insensitive); \item
+factors (the first level gets mapped to "lower", and the second level gets
+mapped to "upper"; any additional levels are ignored). }}
 
 \item{a}{Threshold separation. Amount of information that is considered for a
 decision. Large values indicate a conservative decisional style. Allowed
@@ -107,54 +104,59 @@ A vector containing the densities of the DDM with precision
 Density function for the Ratcliff diffusion decision model (DDM) with
 following parameters: \code{a} (threshold separation), \code{v} (drift rate),
 \code{t0} (non-decision time/response time constant), \code{w} (relative
-starting point), and \code{sv} (inter-trial-variability of drift).
+starting point), and \code{sv} (inter-trial variability of drift).
 }
 \details{
-The default settings of \code{n_terms_small = "Kesselmeier"},
-code{summation_small = "2017"}, \code{scale = "both"} produce the fastest
-and most accurate results, as shown in our associated paper.
+All of the model inputs and parameters (\code{rt}, response, \code{a},
+  \code{v}, \code{t0}, \code{w}, and \code{sv}) can be input as a single value
+  or as a vector of values. If input as a vector of values, then the standard
+  \code{R} input wrapping will occur.
+  
+  The default settings of \code{n_terms_small = "Kesselmeier"},
+  code{summation_small = "2017"}, \code{scale = "both"} produce the fastest
+  and most accurate results, as shown in our associated paper.
 
-\code{scale} - The density function for the DDM has traditionally been
-written in two forms: a "large-time" variant, and a "small-time" variant. The
-parameter \code{scale} determines which of these variants will be used in the
-calculation; \code{scale = "large"} uses the "large-time" variant, and
-\code{scale = "small"} uses the "small-time" variant. The "large-time"
-variant is unstable for small effective response times
-(\code{rt}\eqn{/(}\code{a}\eqn{*}\code{a}\eqn{) < 0.009}) and produces
-inaccurate densities; thus we do not recommend using only the \code{scale =
-"large"} option if the inputs contain such small response times. To
-circumvent this issue, the \code{scale = "both"} option utilizes both the
-"small-time" and "large-time" variants by determining which variant is more
-computationally efficient before calculating the density. Even though the
-"large-time" density function is often significantly slower than the
-"small-time" variant, it is extremely efficient in some areas of the
-parameter space, and so the \code{scale = "both"} option is the fastest.
+  \code{scale} - The density function for the DDM has traditionally been
+  written in two forms: a "large-time" variant, and a "small-time" variant.
+  The parameter \code{scale} determines which of these variants will be used
+  in the calculation; \code{scale = "large"} uses the "large-time" variant,
+  and \code{scale = "small"} uses the "small-time" variant. The "large-time"
+  variant is unstable for small effective response times
+  (\code{rt}\eqn{/(}\code{a}\eqn{*}\code{a}\eqn{) < 0.009}) and produces
+  inaccurate densities; thus we do not recommend using only the \code{scale =
+  "large"} option if the inputs contain such small response times. To
+  circumvent this issue, the \code{scale = "both"} option utilizes both the
+  "small-time" and "large-time" variants by determining which variant is more
+  computationally efficient before calculating the density. Even though the
+  "large-time" density function is often significantly slower than the
+  "small-time" variant, it is extremely efficient in some areas of the
+  parameter space, and so the \code{scale = "both"} option is the fastest.
 
-\code{sv} - Both the "small-time" and "large-time" variants of the density
-function have two further variants: one with a constant drift rate \code{v}
-(i.e., \code{sv} \eqn{= 0}), and one with a variable drift rate \code{v}
-(i.e., \code{sv} \eqn{> 0}). The details of the differences between these two
-density functions can be found in our associated paper. To use the density
-function with a constant drift rate, leave the parameter \code{sv} to its
-default value of \code{sv = -1}, as this will indicate no drift to the
-function. To use the density function with a variable drift rate, set the
-parameter \code{sv} to some positive value, e.g. \code{sv = .75}.
+  \code{sv} - Both the "small-time" and "large-time" variants of the density
+  function have two further variants: one with a constant drift rate \code{v}
+  (i.e., \code{sv} \eqn{= 0}), and one with a variable drift rate \code{v}
+  (i.e., \code{sv} \eqn{> 0}). The details of the differences between these
+  two density functions can be found in our associated paper. To use the
+  density function with a constant drift rate, leave the parameter \code{sv}
+  to its default value of \code{sv = -1}, as this will indicate no drift to
+  the function. To use the density function with a variable drift rate, set
+  the parameter \code{sv} to some positive value, e.g. \code{sv = .75}.
 
-\code{summation_small} - The "large-time" variant of the density function
-does not have any further variants, but the "small-time" has more options
-with respect to evaluating the infinite sum. There are two equivalent styles
-of summation, \code{summation_small = "2017"} and \code{summation_small =
-"2014"}, of which the \code{"2017"} version evaluates slightly faster and
-thus earns our recommendation. These different styles of summation are
-discussed in our associated paper.
+  \code{summation_small} - The "large-time" variant of the density function
+  does not have any further variants, but the "small-time" has more options
+  with respect to evaluating the infinite sum. There are two equivalent
+  styles of summation, \code{summation_small = "2017"} and
+  \code{summation_small = "2014"}, of which the \code{"2017"} version
+  evaluates slightly faster and thus earns our recommendation. These
+  different styles of summation are discussed in our associated paper.
 
-\code{n_terms_small} - The "small-time" variant also has three different
-methods for how to truncate the infinite sum in the density function. These
-different methods are discussed extensively in our associated paper, but the
-key distinction is that \code{n_terms_small = "Foster"} uses a new method of
-truncating the infinite sum. The \code{n_terms_small = "Foster"} method is
-recommended because it is the fastest and guarantees the most accurate
-approximation to the density function of the DDM.
+  \code{n_terms_small} - The "small-time" variant also has three different
+  methods for how to truncate the infinite sum in the density function. These
+  different methods are discussed extensively in our associated paper, but
+  the key distinction is that \code{n_terms_small = "Foster"} uses a new
+  method of truncating the infinite sum. The \code{n_terms_small = "Foster"}
+  method is recommended because it is the fastest and guarantees the most
+  accurate approximation to the density function of the DDM.
 }
 \examples{
 rt <- seq(0.1, 3, by = 0.1)
@@ -181,14 +183,14 @@ dfddm(rt = rt, response = response, a = 1.5, v = -0.4, t0 = 0.3)
 }
 \references{
 Navarro, D. J., & Fuss, I. G. (2009). Fast and accurate
-calculations for first-passage times in Wiener diffusion models. Journal of
-Mathematical Psychology, 53(4), 222-230.
+  calculations for first-passage times in Wiener diffusion models. Journal of
+  Mathematical Psychology, 53(4), 222-230.
 
-Gondan, M., Blurton, S. P., & Kesselmeier, M. (2014). Even faster and even
-more accurate first-passage time densities and distributions for the Wiener
-diffusion model. Journal of Mathematical Psychology, 60, 20-22.
+  Gondan, M., Blurton, S. P., & Kesselmeier, M. (2014). Even faster and even
+  more accurate first-passage time densities and distributions for the Wiener
+  diffusion model. Journal of Mathematical Psychology, 60, 20-22.
 
-Blurton, S. P., Kesselmeier, M., & Gondan, M. (2017). The first-passage time
-distribution for the diffusion model with variable drift. Journal of
-Mathematical Psychology, 76, 7-12.
+  Blurton, S. P., Kesselmeier, M., & Gondan, M. (2017). The first-passage
+  time distribution for the diffusion model with variable drift. Journal of
+  Mathematical Psychology, 76, 7-12.
 }

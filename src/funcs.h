@@ -37,7 +37,7 @@ typedef double (*DensFunc)(const double&, const double&, const double&,
 
 // Number of Terms
 
-int ks_Kes(const double& t, const double& w, const double& eps);
+int ks_Gon(const double& t, const double& w, const double& eps);
 int ks_Nav(const double& t, const double& w, const double& eps);
 int kl_Nav(const double& t, const double& w, const double& eps);
 

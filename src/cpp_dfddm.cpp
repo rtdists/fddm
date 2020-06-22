@@ -135,7 +135,7 @@ NumericVector cpp_dfddm(const NumericVector& rt,
 
   if (log_prob) { // calculate log(probability)
     rt0 = -std::numeric_limits<double>::infinity();
-    if (n_terms_small0 == 'F' || n_terms_small0 == 'f') { // Foster method
+    if (n_terms_small0 == 'S' || n_terms_small0 == 's') { // SWSE method
       dens = &ff_log;
       numm = NULL;
       if (summation_small0 == '7') { // 2017
@@ -159,8 +159,8 @@ NumericVector cpp_dfddm(const NumericVector& rt,
         } else {
           stop("dfddm error: invalid function parameter 'scale': %s", scale);
         }
-        if (n_terms_small0 == 'K' || n_terms_small0 == 'k') { // Kesselmeier
-          numm = &ks_Kes;
+        if (n_terms_small0 == 'G' || n_terms_small0 == 'g') { // Gondan
+          numm = &ks_Gon;
         } else if (n_terms_small0 == 'N' || n_terms_small0 == 'n') { // Navarro
           numm = &ks_Nav;
         } else {
@@ -179,7 +179,7 @@ NumericVector cpp_dfddm(const NumericVector& rt,
     }
   } else { // calculate regular probability
     rt0 = 0;
-    if (n_terms_small0 == 'F' || n_terms_small0 == 'f') { // Foster method
+    if (n_terms_small0 == 'S' || n_terms_small0 == 's') { // SWSE method
       dens = &ff;
       numm = NULL;
       if (summation_small0 == '7') { // 2017
@@ -203,8 +203,8 @@ NumericVector cpp_dfddm(const NumericVector& rt,
         } else {
           stop("dfddm error: invalid function parameter 'scale': %s", scale);
         }
-        if (n_terms_small0 == 'K' || n_terms_small0 == 'k') { // Kesselmeier
-          numm = &ks_Kes;
+        if (n_terms_small0 == 'G' || n_terms_small0 == 'g') { // Gondan
+          numm = &ks_Gon;
         } else if (n_terms_small0 == 'N' || n_terms_small0 == 'n') { // Navarro
           numm = &ks_Nav;
         } else {

@@ -10,7 +10,7 @@
 //////////                                                           //////////
 
 
-// term < eps BGK2017 style truncated sum, with minimum terms
+// term < eps Blurton et al 2017 style truncated sum, with minimum terms
 double small_sum_eps_17(const double& t, const double& a, const double& w,
                         const int& ks, const double& eps)
 {
@@ -46,7 +46,7 @@ double small_sum_eps_17(const double& t, const double& a, const double& w,
 }
 
 
-// term < eps BGK2014 style truncated sum, with minimum terms
+// term < eps Gondan et al 2014 style truncated sum, with minimum terms
 double small_sum_eps_14(const double& t, const double& a, const double& w,
                         const int& ks, const double& eps)
 {
@@ -73,7 +73,7 @@ double small_sum_eps_14(const double& t, const double& a, const double& w,
 }
 
 
-// BGK2017 style truncated sum
+// Blurton et al 2017 style truncated sum
 double small_sum_2017(const double& t, const double& a, const double& w,
                       const int& ks, const double& eps)
 {
@@ -94,7 +94,7 @@ double small_sum_2017(const double& t, const double& a, const double& w,
 }
 
 
-// BGK2014 style truncated sum
+// Gondan et al 2014 style truncated sum
 double small_sum_2014(const double& t, const double& a, const double& w,
                       const int& ks, const double& eps)
 {
@@ -115,7 +115,7 @@ double small_sum_2014(const double& t, const double& a, const double& w,
 //////////                                                           //////////
 
 
-// Navarro2009 style truncated sum
+// Navarro and Fuss 2009 style truncated sum
 double large_sum_Nav(const double& t, const double& a, const double& w,
                      const int& kl, const double& eps)
 {
