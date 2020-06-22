@@ -1,8 +1,8 @@
 
 library("devtools")
 load_all(recompile = TRUE)
-
-document()
+library("fddm")
+devtools::document()
 
 
 sqrt(.Machine$double.eps)
@@ -10,7 +10,7 @@ sqrt(.Machine$double.eps)
 ### preliminary testing
 rt <- seq(1,3,by=0.5)
 eps <- 1e-6
-dfddm(rt, 0, 1, 0.4, 0, 0.5, 0, TRUE, "Foster", "2017", "small", eps)
+dfddm(rt, 1, 1, 0.4, 0, 0.5, 0, TRUE, "Foster", "2017", "small", eps)
 
 
 

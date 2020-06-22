@@ -5,17 +5,32 @@
 #' \code{t0} (non-decision time/response time constant), \code{w} (relative
 #' starting point), and \code{sv} (inter-trial-variability of drift).
 #'
+#'
+#'
 #' @param rt A vector of response times (in seconds). If a response time is
-#'   non-positve, then its density will evaluate to \eqn{0}.
-#' @param response A vector of binary responses that represent either the
-#`   "upper" or "lower" threshold. The elements of this vector can be any one
-#`   of: logicals (FALSE \eqn{\to} "lower", TRUE \eqn{\to} "upper"),
-#`   integers or doubles (\eqn{1} \eqn{\to} "lower", \eqn{2} \eqn{\to} "upper"),
-#`   factors (levels must be: "1" \eqn{\to} "lower", "2" \eqn{\to} "upper"), or
-#`   strings (either "lower" or "upper", case insensitive).
+#'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
+#'   \eqn{-Inf} if log = TRUE.
+#'   
+#' @param response Binary response(s) that correspond(s) to either the "lower"
+#'   or "upper" threshold. This model parameter can either be a singular value
+#'   or a vector. The value(s) in 'response' can be of the following data types:
+#'   \itemize{
+#'     \item logicals (FALSE \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "lower",
+#'           TRUE \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper");
+#'     \item integers or doubles (\eqn{1}
+#'           \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "lower", \eqn{2}
+#'           \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper");
+#'     \item strings (only the first character is checked, "L"
+#'           \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "lower" or "U"
+#'           \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper", case insensitive);
+#'     \item factors (the first level gets mapped to "lower", and the second
+#'           level gets mapped to "upper"; any additional levels are ignored).
+#'   }
+#'   
 #' @param a Threshold separation. Amount of information that is considered for a
 #'   decision. Large values indicate a conservative decisional style. Allowed
 #'   range: \eqn{0 <} \code{a}. Typical range: \eqn{0.5 <} \code{a} \eqn{< 2}.
+#'   
 #' @param v Drift rate. Average slope of the information accumulation process.
 #'   The drift gives information about the speed and direction of the
 #'   accumulation of information. Large (absolute) values of drift indicate a
@@ -24,43 +39,53 @@
 #'   value indicates that the received information supports the response linked
 #'   to the lower threshold. Allowed range: \code{v} is a real number. Typical
 #'   range: \eqn{-5 <} \code{v} \eqn{< 5}.
+#'   
 #' @param t0 Non-decision time or response time constant (in seconds). Lower
 #'   bound for the duration of all non-decisional processes (encoding and
 #'   response execution). If this value is greater than \code{rt}, then the
-#'   resulting density is \eqn{0}.Allowed range: \eqn{0 <} \code{t0}. Typical
-#'   range: \eqn{0.1 <} \code{t0} \eqn{< 0.5}.
+#'   resulting density is returned as if \code{rt} \eqn{ \leq 0}. Allowed range:
+#'   \eqn{0 <} \code{t0}. Typical range: \eqn{0.1 <} \code{t0} \eqn{< 0.5}.
+#'   
 #' @param w Relative starting point. Indicator of an a priori bias in decision
 #'   making. When the relative starting point \code{w} deviates from \eqn{0.5},
 #'   the amount of information necessary for a decision differs between response
 #'   alternatives. Allowed range: \eqn{0 <} \code{w} \eqn{< 1}. Default is
 #'   \eqn{0.5} (i.e., no bias).
+#'   
 #' @param sv Inter-trial-variability of drift rate. Standard deviation of a
 #'   normal distribution with mean \code{v} describing the distribution of
 #'   actual drift rates from specific trials. Values different from \eqn{0} can
 #'   predict slow errors. Allowed range: \eqn{0 <} \code{sv}. Typical range:
 #'   \eqn{0 <} \code{sv} \eqn{< 2}. Default is \eqn{-1}, which indicates no
 #'   drift in the function call. See Details for more information.
+#'   
 #' @param log Logical; if \code{TRUE}, probabilities \eqn{p} are given as
 #'   \eqn{log(p)}. Default is \code{FALSE}.
+#'   
 #' @param n_terms_small Which method for calculating number of terms used in the
 #'   approximation of the infinite sum in the small-time approximation of the
 #'   density function. Can be one of \{\code{"Foster"}, \code{"Kesselmeier"},
 #'   \code{"Navarro"}\}. Only applicable if \code{scale} is one of
 #'   \{\code{"small"}, \code{"both"}\}. See Details for more information.
 #'   Default is \code{"Foster"}.
+#'   
 #' @param summation_small Which style of summation to use for the small-time
 #'   approximation to the infinite sum. Can be one of \{\code{"2017"},
 #'   \code{"2014"}\}. Only applicable if \code{scale} is one of
 #'   \{\code{"small"}, \code{"both"}\}. See Details for more information.
 #'   Default is \code{"2017"}.
+#'   
 #' @param scale Which density function to use. Can be one of \{\code{"small"},
 #'   \code{"large"}, \code{"both"}\}. Note that the large-time approximation is
 #'   unstable for small effective response times (\code{rt}\eqn{/(}\code{a}
 #'   \eqn{*}\code{a}\eqn{) < 0.009}). See Details for more information. Default
 #'   is \code{"small"}.
+#'   
 #' @param err_tol Allowed error tolerance of the density function. Since the
 #'   density function contains an infinite sum, this parameter defines the
 #'   precision of the approximation to that infinite sum. Default is \eqn{1e-6}.
+#'
+#'
 #'
 #' @details The default settings of \code{n_terms_small = "Kesselmeier"},
 #' code{summation_small = "2017"}, \code{scale = "both"} produce the fastest
@@ -108,6 +133,8 @@
 #' recommended because it is the fastest and guarantees the most accurate
 #' approximation to the density function of the DDM.
 #'
+#'
+#'
 #' @references Navarro, D. J., & Fuss, I. G. (2009). Fast and accurate
 #' calculations for first-passage times in Wiener diffusion models. Journal of
 #' Mathematical Psychology, 53(4), 222-230.
@@ -121,14 +148,16 @@
 #' Mathematical Psychology, 76, 7-12.
 #'
 #'
+#'
 #' @example examples/examples.diffusion.R
+#'
+#'
 #'
 #' @return A vector containing the densities of the DDM with precision
 #'   \code{err_tol} whose length matches that of the longest input parameter
 #'   (usually \code{rt}).
 #'
 #' @useDynLib fddm, .registration = TRUE
-#' @importFrom Rcpp evalCpp
 #' @export
 dfddm <- function(rt, response,
                   a, v, t0, w = 0.5,

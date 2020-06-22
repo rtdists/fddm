@@ -151,7 +151,7 @@ To use this method, set `n_terms_small = "Navarro"` and keep `scale = "small"` i
 
 
 
-### Kesselmeier, Blurton, and Gondan
+### Gondan, Blurton, Kesselmeier
 
 @gondan2014even improve on the approximation provided by @navarro2009fast by using fewer terms in the sum to achieve the same level of accuracy, translating into a faster computation time. Given the error tolerance $\epsilon$, @gondan2014even exploit the intrinsic nature of the terms in the infinite sum to derive a smaller value for $k_s$. After a few terms of the sum have been evaluated, each remaining term is smaller in absolute value than the previous term. They combine this knowledge with the observation that the terms alternate in sign to produce the following required number of terms:
 \begin{equation} \label{eq:ks-Kes}

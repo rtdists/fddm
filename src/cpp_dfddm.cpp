@@ -34,12 +34,12 @@ NumericVector cpp_dfddm(const NumericVector& rt,
       Nres = temp.size();
       resp.reserve(Nres);
       for (int i = 0; i < Nres; i++) {
-        if (levs[temp[i]-1][0] == '2') { // upper
-          resp[i] = 1;
-        } else if (levs[temp[i]-1][0] == '1') { // lower
+        if (levs[temp[i]-1] == levs[0]) { // lower
           resp[i] = 0;
+        } else if (levs[temp[i]-1] == levs[1]) { // upper
+          resp[i] = 1;
         } else {
-          Rcpp::stop("dfddm error: index %i of function parameter 'response' contains a value that is neither 1 nor 0", i+1);
+          stop("dfddm error: index %i of function parameter 'response' contains a value that is neither 1 nor 2", i+1);
         }
       }
     } else { // IntegerVector, NOT factor
@@ -47,12 +47,12 @@ NumericVector cpp_dfddm(const NumericVector& rt,
       Nres = temp.size();
       resp.reserve(Nres);
       for (int i = 0; i < Nres; i++) {
-        if (temp[i] == 2) { // upper
-          resp[i] = 1;
-        } else if (temp[i] == 1){ // lower
+        if (temp[i] == 1) { // lower
+          resp[i] = 0;
+        } else if (temp[i] == 1){ // upper
           resp[i] = 0;
         } else {
-          stop("dfdmm error: unknown function parameter 'response' at index %i", i+1);
+          stop("dfdmm error: function parameter 'response' was input as a vector of integers, and an integer other than 1 or 2 was detected at index %i", i+1);
         }
       }
     }
@@ -61,12 +61,12 @@ NumericVector cpp_dfddm(const NumericVector& rt,
     Nres = temp.size();
     resp.reserve(Nres);
     for (int i = 0; i < Nres; i++) {
-      if (temp[i] == 2) { // upper
-        resp[i] = 1;
-      } else if (temp[i] == 1){ // lower
+      if (temp[i] == 1) { // lower
         resp[i] = 0;
+      } else if (temp[i] == 2){ // upper
+        resp[i] = 1;
       } else {
-        stop("dfdmm error: unknown function parameter 'response' at index %i", i+1);
+        stop("dfdmm error: function parameter 'response' was input as a vector of integers, and an integer other than 1 or 2 was detected at index %i", i+1);
       }
     }
   } else if (type == 16) { // StringVector (contains at least one string)
@@ -74,12 +74,12 @@ NumericVector cpp_dfddm(const NumericVector& rt,
     Nres = temp.size();
     resp.reserve(Nres);
     for (int i = 0; i < Nres; i++) {
-      if (temp[i][0] == 'u' || temp[i][0] == 'U') {
-        resp[i] = 1;
-      } else if (temp[i][0] == 'l' || temp[i][0] == 'L') {
+      if (temp[i][0] == 'l' || temp[i][0] == 'L') { // lower
         resp[i] = 0;
+      } else if (temp[i][0] == 'u' || temp[i][0] == 'U') { // upper
+        resp[i] = 1;
       } else {
-        stop("dfddm error: unknown value in function parameter 'response' at index %i.", i+1);
+        stop("dfddm error: function parameter 'response' was input as a vector of strings (characters), and an object other than 'u' or 'l' (case insensitive) was detected as the first character at index %i.", i+1);
       }
     }
   } else {

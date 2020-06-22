@@ -69,6 +69,11 @@ The order of the first three blocks was randomized but with the constraint
 that there was one block for each type of manipulation (i.e., accuracy,
 speed, and bias). The order of the last three blocks was identical to the
 order of the first three blocks."
+
+Note that this dataset contains some negative response times that indicate a
+missing response (i.e., the response value for that trial is `NA`). Take care
+in removing these values before using this dataset. See our Validity vignette
+for an example of use in an optimization setting.
 }
 \examples{
 
