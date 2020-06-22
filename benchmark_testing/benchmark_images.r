@@ -60,7 +60,7 @@ ggsave("benchmark_testing/Results/Images/violin_0-10_indRT.png", plot = violin,
 ### Densities of parameters in the tails of the violins (for each method)
 plot_par_dens <- function(df, fname, rt_vec = TRUE, nbins = 50) {
   # choose the method
-  if (rt_vec) {
+  if (rt_vec) { # I think this if-else is reversed
     fbm <- df[, c("RT", "V", "A", "W", fname)]
   } else {
     fbm <- df[, c("V", "A", "W", fname)]

@@ -34,9 +34,9 @@ NumericVector cpp_dfddm(const NumericVector& rt,
       Nres = temp.size();
       resp.reserve(Nres);
       for (int i = 0; i < Nres; i++) {
-        if (levs[temp[i]-1][0] == '1') { // upper
+        if (levs[temp[i]-1][0] == '2') { // upper
           resp[i] = 1;
-        } else if (levs[temp[i]-1][0] == '0') { // lower
+        } else if (levs[temp[i]-1][0] == '1') { // lower
           resp[i] = 0;
         } else {
           Rcpp::stop("dfddm error: index %i of function parameter 'response' contains a value that is neither 1 nor 0", i+1);
@@ -47,9 +47,9 @@ NumericVector cpp_dfddm(const NumericVector& rt,
       Nres = temp.size();
       resp.reserve(Nres);
       for (int i = 0; i < Nres; i++) {
-        if (temp[i] == 1) {
+        if (temp[i] == 2) { // upper
           resp[i] = 1;
-        } else if (temp[i] == 0){
+        } else if (temp[i] == 1){ // lower
           resp[i] = 0;
         } else {
           stop("dfdmm error: unknown function parameter 'response' at index %i", i+1);
@@ -61,9 +61,9 @@ NumericVector cpp_dfddm(const NumericVector& rt,
     Nres = temp.size();
     resp.reserve(Nres);
     for (int i = 0; i < Nres; i++) {
-      if (temp[i] == 1) {
+      if (temp[i] == 2) { // upper
         resp[i] = 1;
-      } else if (temp[i] == 0){
+      } else if (temp[i] == 1){ // lower
         resp[i] = 0;
       } else {
         stop("dfdmm error: unknown function parameter 'response' at index %i", i+1);

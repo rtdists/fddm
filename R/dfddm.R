@@ -10,8 +10,8 @@
 #' @param response A vector of binary responses that represent either the
 #`   "upper" or "lower" threshold. The elements of this vector can be any one
 #`   of: logicals (FALSE \eqn{\to} "lower", TRUE \eqn{\to} "upper"),
-#`   integers or doubles (\eqn{0} \eqn{\to} "lower", \eqn{1} \eqn{\to} "upper"),
-#`   factors (levels must be: "0" \eqn{\to} "lower", "1" \eqn{\to} "upper"), or
+#`   integers or doubles (\eqn{1} \eqn{\to} "lower", \eqn{2} \eqn{\to} "upper"),
+#`   factors (levels must be: "1" \eqn{\to} "lower", "2" \eqn{\to} "upper"), or
 #`   strings (either "lower" or "upper", case insensitive).
 #' @param a Threshold separation. Amount of information that is considered for a
 #'   decision. Large values indicate a conservative decisional style. Allowed
