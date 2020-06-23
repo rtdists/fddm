@@ -35,6 +35,7 @@ MathJax.Hub.Config({
 <li><a href="#small-time">Small Time</a></li>
 <li><a href="#combining-large-and-small-time">Combining Large and Small Time</a></li>
 </ul></li>
+<li><a href="#references">References</a></li>
 </ul>
 </div>
 
@@ -154,25 +155,25 @@ To use this method, set `n_terms_small = "Navarro"` and keep `scale = "small"` i
 ### Gondan, Blurton, Kesselmeier
 
 @gondan2014even improve on the approximation provided by @navarro2009fast by using fewer terms in the sum to achieve the same level of accuracy, translating into a faster computation time. Given the error tolerance $\epsilon$, @gondan2014even exploit the intrinsic nature of the terms in the infinite sum to derive a smaller value for $k_s$. After a few terms of the sum have been evaluated, each remaining term is smaller in absolute value than the previous term. They combine this knowledge with the observation that the terms alternate in sign to produce the following required number of terms:
-\begin{equation} \label{eq:ks-Kes}
+\begin{equation} \label{eq:ks-Gon}
 \begin{aligned}
-  k_s^{\text{Kes}} \left( t', w, \epsilon \right) &= \left\lceil \max \left\{ \tfrac{1}{2} \left( \sqrt{2t'} - w \right), \tfrac{1}{2} \left( \sqrt{-t' (u_\epsilon - \sqrt{-2 u_\epsilon -2})} - w \right) \right\} \right\rceil,\\
+  k_s^{\text{Gon}} \left( t', w, \epsilon \right) &= \left\lceil \max \left\{ \tfrac{1}{2} \left( \sqrt{2t'} - w \right), \tfrac{1}{2} \left( \sqrt{-t' (u_\epsilon - \sqrt{-2 u_\epsilon -2})} - w \right) \right\} \right\rceil,\\
   u_\epsilon &= \min \left\{ -1, \log(2 \pi t'^2 \epsilon^2) \right\}.
 \end{aligned}
 \tag{S.2}
 \end{equation}
 
 <p class="method">
-To use this method, set `n_terms_small = "Kesselmeier"` and keep `scale = "small"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
+To use this method, set `n_terms_small = "Gondan"` and keep `scale = "small"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 
 
-### Foster
+### Stop When Small Enough (SWSE)
 
 If we consider the terms of the infinite sum as the sequence defined above, the series alternates in sign $(+, -, +, ...)$; moreover, the series eventually decreases monotonically (in absolute value) due to the exponential term. Combining and exploiting these two mathematical properties has been the cornerstone of the previous approximations, but we will instead use a novel method of truncating the sum. This method does not precalculate the number of terms required to achieve the given error tolerance. Instead, the general idea of this method is to take full advantage of the alternating and decreasing nature of the terms in the infinite sum by applying a handy theorem (commonly known as Leibniz's rule) to place an upper bound on the truncation error after including so many terms. It has been proven that this upper bound is in fact the absolute value of the next term in the sequence, thus we can truncate the infinite sum once one of its terms is less than the desired error tolerance, $\epsilon$. Hence we do not consider the number of terms in the sum, rather just that the terms in the summation will eventually be small enough. The validity of this method is proven in the paper that accompanies the `fddm` package.
 
 <p class="method">
-To use this method, set `n_terms_small = "Foster"` and keep `scale = "small"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
+To use this method, set `n_terms_small = "SWSE"` and keep `scale = "small"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 </div>
 
@@ -182,7 +183,7 @@ To use this method, set `n_terms_small = "Foster"` and keep `scale = "small"` in
 
 A sensible next approach to approximating the density of the DDM is to use some combination of the large-time and small-time density functions. As their names suggest, each scale has a section of the parameter space where it outperforms the other one. Essentially these methods involve calculating the number of terms required for both the large-time and small-time density functions, then using whichever function requires fewer terms. The goal is to use each approximation where it is efficient and avoid the areas of the parameter space where it is horribly inefficient.
 
-To use this method of evaluating the PDF, set the optional parameter `scale = "both"` in the function call. These methods include similar options to the small-time approximations from the previous section, and thus it is possible to set the optional parameters in a similar fashion to above. The value of `summation_small` triggers the same effect as above since it only affects the small-time approximation to the PDF; we recommend ignoring this parameter so it assumes its default value of "2017" that evaluates slightly faster than its counterpart. The final parameter, `n_terms_small`, will be discussed in the following two subsections. Note that there is no "Foster" option for `scale = "both"`, and setting `n_terms_small = "Foster"` will override the `scale = "both"` setting. As there is only one option for the large time approximation, there are no optional parameters to set for this part of the combined time scale approximation.
+To use this method of evaluating the PDF, set the optional parameter `scale = "both"` in the function call. These methods include similar options to the small-time approximations from the previous section, and thus it is possible to set the optional parameters in a similar fashion to above. The value of `summation_small` triggers the same effect as above since it only affects the small-time approximation to the PDF; we recommend ignoring this parameter so it assumes its default value of "2017" that evaluates slightly faster than its counterpart. The final parameter, `n_terms_small`, will be discussed in the following two subsections. Note that there is no "SWSE" option for `scale = "both"`, and setting `n_terms_small = "SWSE"` will override the `scale = "both"` setting. As there is only one option for the large time approximation, there are no optional parameters to set for this part of the combined time scale approximation.
 
 
 
@@ -200,16 +201,16 @@ To use this method, set `n_terms_small = "Navarro"` and keep `scale = "both"` in
 </p>
 
 
-### Kesselmeier Small & Navarro Large
+### Gondan Small & Navarro Large
 
-This combination of methods has not been explored in the literature before, but it works very similarly to the combination above. The only difference is that we use the @gondan2014even approximation for the small-time instead of the one provided by @navarro2009fast. Since $k_s^\text{Kes} \leq k_s^\text{Nav}$, this method will give approximations at least as fast as the above combination.
-\begin{equation} \label{eq:kb-Kes}
-  k_b^{\text{Kes}} \left( t', w, \epsilon \right) = \min \left\{ k_s^{\text{Kes}}, k_l^{\text{Nav}} \right\}.
+This combination of methods has not been explored in the literature before, but it works very similarly to the combination above. The only difference is that we use the @gondan2014even approximation for the small-time instead of the one provided by @navarro2009fast. Since $k_s^\text{Gon} \leq k_s^\text{Nav}$, this method will give approximations at least as fast as the above combination.
+\begin{equation} \label{eq:kb-Gon}
+  k_b^{\text{Gon}} \left( t', w, \epsilon \right) = \min \left\{ k_s^{\text{Gon}}, k_l^{\text{Nav}} \right\}.
 \tag{B.2}
 \end{equation}
 
 <p class="method">
-To use this method, set `n_terms_small = "Kesselmeier"` and keep `scale = "both"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
+To use this method, set `n_terms_small = "Gondan"` and keep `scale = "both"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 </div>
 

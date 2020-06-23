@@ -6,8 +6,7 @@ bibliography: references.bib
 output:
   rmarkdown::html_vignette:
     css: stile.css
-    toc: true
-    toc_depth: 2
+    toc: false
 vignette: >
   %\VignetteIndexEntry{Validity of Methods}
   %\VignetteEngine{knitr::rmarkdown}
@@ -21,6 +20,25 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
+
+<div id="TOC">
+<ul>
+<li><a href="#background">Background</a></li>
+<li><a href="#den">Validating the Density Functions</a>
+<ul>
+<li><a href="#den-gen">Generating Data</a></li>
+<li><a href="#den-test">Testing the Density Functions</a></li>
+<li><a href="#den-ke">Known Errors</a></li>
+</ul></li>
+<li><a href="#fit">Validating Fitting Using the Density Functions</a>
+<ul>
+<li><a href="#fit-gen">Generating Parameter Estimates</a></li>
+<li><a href="#fit-test">Testing the Parameter Estimates</a></li>
+<li><a href="#fit-ke">Known Errors</a></li>
+</ul></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
 
 
 
@@ -53,16 +71,16 @@ Note that we include $sv$ in all the functions tested below, even those that do 
 
 First we load the necessary packages and code available from the current literature.
 
-```{r validity-pkg, eval=TRUE}
+```{r validity-pkg, eval=FALSE}
 library("fddm")
 library("rtdists")
 library("RWiener")
-source(system.file("extdata", "Kesselmeier_density.R", package = "fddm", mustWork = TRUE))
+source(system.file("extdata", "Gondan_et_al_density.R", package = "fddm", mustWork = TRUE))
 ```
 
 The following code chunk stores the lower probability densities calculated across the parameter space using the different methods; we also calculate and store the log-probability for consistency testing.
 
-```{r validity-run, eval=TRUE}
+```{r validity-run, eval=FALSE}
 # Define parameter space
 RT <- c(0.001, 0.1, 1, 2, 3, 4, 5, 10, 30)
 A <- c(0.25, 0.5, 1, 2.5, 5)
@@ -80,10 +98,10 @@ nW <- length(W)
 nSV <- length(SV)
 resp <- rep("lower", nRT) # for RWiener
 
-fnames <- c("fs_Fos_17", "fs_Fos_14",
-            "fs_Kes_17", "fs_Kes_14", "fs_Nav_17", "fs_Nav_14",
-            "fb_Kes_17", "fb_Kes_14", "fb_Nav_17", "fb_Nav_14",
-            "fl_Nav_09", "RWiener", "Kesselmeier", "rtdists")
+fnames <- c("fs_SWSE_17", "fs_SWSE_14",
+            "fs_Gon_17", "fs_Gon_14", "fs_Nav_17", "fs_Nav_14",
+            "fb_Gon_17", "fb_Gon_14", "fb_Nav_17", "fb_Nav_14",
+            "fl_Nav_09", "RWiener", "Gondan", "rtdists")
 nf <- length(fnames)
 
 res <- data.frame(matrix(ncol = 9, nrow = nf*nRT*nA*nV*nW*nSV))
@@ -109,22 +127,22 @@ for (rt in 1:nRT) {
           # calculate "lower" density
           res[start,    7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Foster",
+                                    log = FALSE, n_terms_small = "SWSE",
                                     summation_small = "2017", scale = "small",
                                     err_tol = eps)
           res[start+1,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Foster",
+                                    log = FALSE, n_terms_small = "SWSE",
                                     summation_small = "2014", scale = "small",
                                     err_tol = eps)
           res[start+2,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Kesselmeier",
+                                    log = FALSE, n_terms_small = "Gondan",
                                     summation_small = "2017", scale = "small",
                                     err_tol = eps)
           res[start+3,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Kesselmeier",
+                                    log = FALSE, n_terms_small = "Gondan",
                                     summation_small = "2014", scale = "small",
                                     err_tol = eps)
           res[start+4,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
@@ -139,12 +157,12 @@ for (rt in 1:nRT) {
                                     err_tol = eps)
           res[start+6,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Kesselmeier",
+                                    log = FALSE, n_terms_small = "Gondan",
                                     summation_small = "2017", scale = "both",
                                     err_tol = eps)
           res[start+7,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Kesselmeier",
+                                    log = FALSE, n_terms_small = "Gondan",
                                     summation_small = "2014", scale = "both",
                                     err_tol = eps)
           res[start+8,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
@@ -176,7 +194,7 @@ for (rt in 1:nRT) {
                        2 * V[v] * A[a] * W[w] - V[v]*V[v] * t) /
                      (2 + 2 * SV[sv]*SV[sv] * t)) / sqrt(1 + SV[sv]*SV[sv] * t)
             res[start+11, 7] <- M * res[start+11, 7] # RWiener
-            res[start+12, 7] <- M * res[start+12, 7] # Kesselmeier_R
+            res[start+12, 7] <- M * res[start+12, 7] # Gondan_R
           }
 
           # calculate differences
@@ -199,22 +217,22 @@ for (rt in 1:nRT) {
           # calculate log of "lower" density
           res[start,    9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "Foster",
+                                    log = TRUE, n_terms_small = "SWSE",
                                     summation_small = "2017", scale = "small",
                                     err_tol = eps)
           res[start+1,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "Foster",
+                                    log = TRUE, n_terms_small = "SWSE",
                                     summation_small = "2014", scale = "small",
                                     err_tol = eps)
           res[start+2,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "Kesselmeier",
+                                    log = TRUE, n_terms_small = "Gondan",
                                     summation_small = "2017", scale = "small",
                                     err_tol = eps)
           res[start+3,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "Kesselmeier",
+                                    log = TRUE, n_terms_small = "Gondan",
                                     summation_small = "2014", scale = "small",
                                     err_tol = eps)
           res[start+4,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
@@ -229,12 +247,12 @@ for (rt in 1:nRT) {
                                     err_tol = eps)
           res[start+6,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "Kesselmeier",
+                                    log = TRUE, n_terms_small = "Gondan",
                                     summation_small = "2017", scale = "both",
                                     err_tol = eps)
           res[start+7,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "Kesselmeier",
+                                    log = TRUE, n_terms_small = "Gondan",
                                     summation_small = "2014", scale = "both",
                                     err_tol = eps)
           res[start+8,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
@@ -267,7 +285,7 @@ for (rt in 1:nRT) {
                   2 * V[v] * A[a] * W[w] - V[v]*V[v] * t) /
                  (2 + 2 * SV[sv]*SV[sv] * t) - 0.5 * log(1 + SV[sv]*SV[sv] * t)
             res[start+11, 9] <- M + res[start+11, 9] # RWiener
-            res[start+12, 9] <- M + res[start+12, 9] # Kesselmeier_R
+            res[start+12, 9] <- M + res[start+12, 9] # Gondan_R
           }
 
           # iterate start and stop values
@@ -287,19 +305,19 @@ for (rt in 1:nRT) {
 
 Now we test the consistency of the various density function approximations by using the `testthat` package. As [discussed above](#den), we allow the difference between any two outputs to be twice the original desired accuracy to allow for convergence from either above or below. We have to amend some of the checks because of the instability of some of the methods, and these are documented in the [Known Errors](#den-ke) section below. First we check that all of the approximations produce densities that are non-negative (we allow a density equal to zero). Next, we check the consistency of the internal `dfddm` methods before confirming their accuracy with external code from established packages. Lastly, we run similar tests to check the consistency of the logged results. However, we do not test the logs of densities that are very close to zero (i.e., less than $\epsilon^2$) because even a small difference in approximated density can lead to a very large difference in logged density. If all tests pass correctly, there should be no output.
 
-```{r validity-test, eval=TRUE}
+```{r validity-test, eval=FALSE}
 library("testthat")
 
 # Subset results
-Foster <- subset(res, FuncName %in% fnames[c(1,2)])
-Kesselmeier_s <- subset(res, FuncName %in% fnames[c(3,4)])
-Kesselmeier_b <- subset(res, FuncName %in% fnames[c(7,8)])
+SWSE <- subset(res, FuncName %in% fnames[c(1,2)])
+Gondan_s <- subset(res, FuncName %in% fnames[c(3,4)])
+Gondan_b <- subset(res, FuncName %in% fnames[c(7,8)])
 Navarro_s <- subset(res, FuncName %in% fnames[c(5,6)])
 Navarro_l <- subset(res, FuncName %in% fnames[11])
 Navarro_b <- subset(res, FuncName %in% fnames[c(9,10)])
 rtdists <- subset(res, FuncName == "rtdists")
 RWiener <- subset(res, FuncName == "RWiener")
-Kesselmeier_R <- subset(res, FuncName == "Kesselmeier")
+Gondan_R <- subset(res, FuncName == "Gondan")
 
 # Compensate for KE 1, 2
 Nav_s_res_0 <- subset(Navarro_s, res < 0) # KE 2
@@ -312,22 +330,22 @@ Nav_l_2 <- max(Nav_l_dif_2eps$rt / Nav_l_dif_2eps$a / Nav_l_dif_2eps$a) # = 0.00
 
 # Ensure all densities are non-negative
 test_that("Non-negativity of densities", {
-  expect_true(all(Foster$res >= 0))
-  expect_true(all(Kesselmeier_s$res >= 0))
-  expect_true(all(Kesselmeier_b$res >= 0))
+  expect_true(all(SWSE$res >= 0))
+  expect_true(all(Gondan_s$res >= 0))
+  expect_true(all(Gondan_b$res >= 0))
   expect_true(all(subset(Navarro_s, rt/a/a < Nav_s_0)$res >= 0)) # see KE 1
   expect_true(all(subset(Navarro_l, rt/a/a > Nav_l_0)$res >= 0)) # see KE 2
   expect_true(all(subset(Navarro_b, rt/a/a > Nav_l_0)$res >= 0)) # see KE 3
   expect_true(all(rtdists$res >= 0))
   expect_true(all(RWiener$res >= 0))
-  expect_true(all(Kesselmeier_R$res >= 0))
+  expect_true(all(Gondan_R$res >= 0))
 })
 
 # Test accuracy within 2*eps (allows for convergence from above and below)
 test_that("Consistency among internal methods", {
-  expect_true(all(Foster$dif < 2*eps))
-  expect_true(all(Kesselmeier_s$dif < 2*eps))
-  expect_true(all(Kesselmeier_b$dif < 2*eps))
+  expect_true(all(SWSE$dif < 2*eps))
+  expect_true(all(Gondan_s$dif < 2*eps))
+  expect_true(all(Gondan_b$dif < 2*eps))
   expect_true(all(Navarro_s$dif < 2*eps)) # see KE 1
   expect_true(all(subset(Navarro_l, rt/a/a > Nav_l_2)$dif < 2*eps)) # see KE 2
   expect_true(all(Navarro_b$dif < 2*eps)) # see KE 1,2
@@ -336,16 +354,16 @@ test_that("Consistency among internal methods", {
 test_that("Accuracy relative to established packages", {
   expect_true(all(rtdists$dif < 2*eps))
   expect_true(all(RWiener$dif < 2*eps))
-  expect_true(all(subset(Kesselmeier_R, sv < SV_THRESH)$dif < 2*eps)) # see KE 4
+  expect_true(all(subset(Gondan_R, sv < SV_THRESH)$dif < 2*eps)) # see KE 4
 })
 
 test_that("Log-Consistency among internal methods", {
-  expect_equal(subset(Foster, res > eps*eps)$log_res,
-               log(subset(Foster, res > eps*eps)$res))
-  expect_equal(subset(Kesselmeier_s, res > eps*eps)$log_res,
-               log(subset(Kesselmeier_s, res > eps*eps)$res))
-  expect_equal(subset(Kesselmeier_b, res > eps*eps)$log_res,
-               log(subset(Kesselmeier_b, res > eps*eps)$res))
+  expect_equal(subset(SWSE, res > eps*eps)$log_res,
+               log(subset(SWSE, res > eps*eps)$res))
+  expect_equal(subset(Gondan_s, res > eps*eps)$log_res,
+               log(subset(Gondan_s, res > eps*eps)$res))
+  expect_equal(subset(Gondan_b, res > eps*eps)$log_res,
+               log(subset(Gondan_b, res > eps*eps)$res))
   expect_equal(subset(Navarro_s, res > eps*eps)$log_res,
                log(subset(Navarro_s, res > eps*eps)$res))
   expect_equal(subset(Navarro_l, res > eps*eps)$log_res,
@@ -359,8 +377,8 @@ test_that("Log-Consistency of established packages", {
                log(subset(rtdists, res > eps*eps)$res))
   expect_equal(subset(RWiener, res > eps*eps)$log_res,
                log(subset(RWiener, res > eps*eps)$res))
-  expect_equal(subset(Kesselmeier_R, res > eps*eps)$log_res,
-               log(subset(Kesselmeier_R, res > eps*eps)$res))
+  expect_equal(subset(Gondan_R, res > eps*eps)$log_res,
+               log(subset(Gondan_R, res > eps*eps)$res))
 })
 ```
 
@@ -374,7 +392,7 @@ test_that("Log-Consistency of established packages", {
 
 3) The Navarro "both" time scale switches between the small-time and large-time approximations. This method relies too much on the unstable large time approximation, leading to its instability; thus we only need to subset to correct for the large time.
 
-4) Kesselmeier_R approximation divides the error tolerance by the multiplicative term outside of the summation. Since the outside term is different when $sv > 0$, the approximation uses the incorrect error tolerance for $sv > 0$. This affects the number of terms required in the summation to achieve the desired precision, thus not actually achieving that desired precision. This issue is fixed in our implementation of the Kesselmeier method, `n_terms_small = "Kesselmeier"`, `scale = "small"`. For an example of this discrepancy, see the code below:
+4) Gondan_R approximation divides the error tolerance by the multiplicative term outside of the summation. Since the outside term is different when $sv > 0$, the approximation uses the incorrect error tolerance for $sv > 0$. This affects the number of terms required in the summation to achieve the desired precision, thus not actually achieving that desired precision. This issue is fixed in our implementation of the Gondan method, `n_terms_small = "Gondan"`, `scale = "small"`. For an example of this discrepancy, see the code below:
 
 ```{r known-errors, eval=FALSE}
 rt <- 1.5
@@ -387,8 +405,8 @@ sv <- 0.9
 sv0 <- exp(-v*a*w - v*v*t/2) / (a*a) # for constant drift rate
 sv0_9 <- exp((-2*v*a*w - v*v*t + sv*sv*a*a*w*w)/(2 + 2*sv*sv*t)) /
          (a*a*sqrt(1+sv*sv*t)) # for variable drift rate
-ks14_R(t/(a*a), w, eps/sv0) # = 2; the summation will only calculate 2 terms
-ks14_R(t/(a*a), w, eps/sv0_9) # = 5; but the summation actually needs 5 terms
+ks(t/(a*a), w, eps/sv0) # = 2; the summation will only calculate 2 terms
+ks(t/(a*a), w, eps/sv0_9) # = 5; but the summation actually needs 5 terms
 ```
 
 
@@ -406,7 +424,7 @@ Perhaps the most practical use of `dfddm` is to use it in an optimization settin
 
 We use a range of different initial parameter values for the optimization function to ensure that none of the methods encounters a problem in the parameter space. However, we need to slightly restrict the starting values to prevent fitting issues with some of the small-time methods, and these restrictions are discussed in a [later subsection](#fit-gen-fun) and in [Known Error 5](#fit-ke)). We allow a difference of $0.0001$ across the methods for each combination of parameters since the density functions do return slightly different results (within $2 \cdot \epsilon$), as discussed in the previous section. The following subsections will define all of the functions used to generate the fittings and store the parameter estimates and provide the code to run the full fitting. Since running the full fitting for all of the individuals in the data takes a long time, we will forgo running the fitting and instead read pre-fit parameter estimates that used the provided code.
 
-To avoid too many repititious plots, we will only include six of the methods from the [previous section](#den-gen) that illustrate the different variations and implementations of the density functions. We include: all three small-time implementations in `dfddm`, the two implementations in `dfddm` that combine the small-time and large-time, and the one method available in the `rtdists` package. We only use a selection of the methods available in `dfddm` to avoid redundancy in our testing since most of the methods have multiple sibling approximations that are confirmed to be extremely similar. Moreover we do not require the `RWiener` package nor the Kesselmeier raw `R` code because the associated density function approximations do not include an option for variability in drift rate. While we can convert the constant drift rate density to the variable drift rate density using a multiplicative factor, the densities are still potentially calculated incorrectly. For more details on the differences between the constant drift rate density functions and their variable drift rate counterparts, see the [Math Vignette](math.html#mathematical-background).
+To avoid too many repititious plots, we will only include six of the methods from the [previous section](#den-gen) that illustrate the different variations and implementations of the density functions. We include: all three small-time implementations in `dfddm`, the two implementations in `dfddm` that combine the small-time and large-time, and the one method available in the `rtdists` package. We only use a selection of the methods available in `dfddm` to avoid redundancy in our testing since most of the methods have multiple sibling approximations that are confirmed to be extremely similar. Moreover we do not require the `RWiener` package nor the Gondan raw `R` code because the associated density function approximations do not include an option for variability in drift rate. While we can convert the constant drift rate density to the variable drift rate density using a multiplicative factor, the densities are still potentially calculated incorrectly. For more details on the differences between the constant drift rate density functions and their variable drift rate counterparts, see the [Math Vignette](math.html#mathematical-background).
 
 First we load the necessary packages.
 
@@ -420,7 +438,7 @@ library("rtdists")
 This code chunk defines the log-likelihood functions used in the optimization algorithm. The log-likelihood functions are fairly straightforward and split the responses and associated response times by the true item status (i.e., correct response lower versus upper boundary) to enable fitting distinct drift rates ($v_\ell$ for the items in which the correct response is the lower boundary and $v_u$ for the items for which the correct response is the upper boundary). In addition, the log-likelihood functions heavily penalize any approximations that return zero, negative, or otherwise invalid densities.
 
 ```{r loglik-fun, eval=FALSE}
-ll_fs_Fos_17 <- function(pars, rt, resp, truth, err_tol) {
+ll_fs_SWSE_17 <- function(pars, rt, resp, truth, err_tol) {
   rtu <- rt[truth == "upper"]
   rtl <- rt[truth == "lower"]
   respu <- resp[truth == "upper"]
@@ -429,12 +447,12 @@ ll_fs_Fos_17 <- function(pars, rt, resp, truth, err_tol) {
   # the truth is "upper" so use vu
   densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
                  t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Foster", summation_small = "2017",
+                 n_terms_small = "SWSE", summation_small = "2017",
                  scale = "small", err_tol = err_tol)
   # the truth is "lower" so use vl
   densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
                  t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Foster", summation_small = "2017",
+                 n_terms_small = "SWSE", summation_small = "2017",
                  scale = "small", err_tol = err_tol)
 
   densities <- c(densu, densl)
@@ -442,7 +460,7 @@ ll_fs_Fos_17 <- function(pars, rt, resp, truth, err_tol) {
   return(-sum(densities))
 }
 
-ll_fs_Kes_17 <- function(pars, rt, resp, truth, err_tol) {
+ll_fs_Gon_17 <- function(pars, rt, resp, truth, err_tol) {
   rtu <- rt[truth == "upper"]
   rtl <- rt[truth == "lower"]
   respu <- resp[truth == "upper"]
@@ -451,12 +469,12 @@ ll_fs_Kes_17 <- function(pars, rt, resp, truth, err_tol) {
   # the truth is "upper" so use vu
   densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
                  t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Kesselmeier", summation_small = "2017",
+                 n_terms_small = "Gondan", summation_small = "2017",
                  scale = "small", err_tol = err_tol)
   # the truth is "lower" so use vl
   densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
                  t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Kesselmeier", summation_small = "2017",
+                 n_terms_small = "Gondan", summation_small = "2017",
                  scale = "small", err_tol = err_tol)
 
   densities <- c(densu, densl)
@@ -486,7 +504,7 @@ ll_fs_Nav_17 <- function(pars, rt, resp, truth, err_tol) {
   return(-sum(densities))
 }
 
-ll_fb_Kes_17 <- function(pars, rt, resp, truth, err_tol) {
+ll_fb_Gon_17 <- function(pars, rt, resp, truth, err_tol) {
   rtu <- rt[truth == "upper"]
   rtl <- rt[truth == "lower"]
   respu <- resp[truth == "upper"]
@@ -495,12 +513,12 @@ ll_fb_Kes_17 <- function(pars, rt, resp, truth, err_tol) {
   # the truth is "upper" so use vu
   densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
                  t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Kesselmeier", summation_small = "2017",
+                 n_terms_small = "Gondan", summation_small = "2017",
                  scale = "both", err_tol = err_tol)
   # the truth is "lower" so use vl
   densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
                  t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Kesselmeier", summation_small = "2017",
+                 n_terms_small = "Gondan", summation_small = "2017",
                  scale = "both", err_tol = err_tol)
 
   densities <- c(densu, densl)
@@ -613,8 +631,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                           sv = c( 1,   1,   1,  1,  1,  1,  1,  1,  1,  0,  5))
   ninit_vals <- nrow(init_vals)
 
-  algo_names <- c(rep("fs_Fos_17", ninit_vals), rep("fs_Kes_17", ninit_vals),
-                  rep("fs_Nav_17", ninit_vals), rep("fb_Kes_17", ninit_vals),
+  algo_names <- c(rep("fs_SWSE_17", ninit_vals), rep("fs_Gon_17", ninit_vals),
+                  rep("fs_Nav_17", ninit_vals), rep("fb_Gon_17", ninit_vals),
                   rep("fb_Nav_17", ninit_vals), rep("rtdists", ninit_vals))
   nalgos <- length(unique(algo_names))
   ni <- nalgos*ninit_vals
@@ -655,7 +673,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
     # loop through all of the starting values
     for (j in 1:ninit_vals) {
-      temp <- nlminb(init_vals[j,], ll_fs_Fos_17,
+      temp <- nlminb(init_vals[j,], ll_fs_SWSE_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf,   0,       0, 0,   0),
@@ -664,7 +682,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
       res$Objective[(i-1)*ni+0*ninit_vals+j] <- temp$objective
       res[(i-1)*ni+0*ninit_vals+j, 11:16] <- temp$par
 
-      temp <- nlminb(init_vals[j,], ll_fs_Kes_17,
+      temp <- nlminb(init_vals[j,], ll_fs_Gon_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf,   0,       0, 0,   0),
@@ -682,7 +700,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
       res$Objective[(i-1)*ni+2*ninit_vals+j] <- temp$objective
       res[(i-1)*ni+2*ninit_vals+j, 11:16] <- temp$par
 
-      temp <- nlminb(init_vals[j,], ll_fb_Kes_17,
+      temp <- nlminb(init_vals[j,], ll_fb_Gon_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf,   0,       0, 0,   0),
@@ -739,7 +757,7 @@ Now we test the consistency of the fitted parameters using the various density f
 
 We also print the results for the first ID in the data set (`ID = "experienced 2"`) and first set of initial values across the different methods to see what it looks like. This shows that at least the agreement across methods for this set of initial parameter values is rather good for the first participant in the study.
 
-```{r fitting-prep, eval=TRUE}
+```{r fitting-prep, eval=FALSE}
 # load data, will be in the variable 'fit'
 load(system.file("extdata", "valid_fit.Rds", package = "fddm", mustWork = TRUE))
 fit[(0:5)*11+1,] # print results for `ID = "experienced 2"``
@@ -784,7 +802,7 @@ Output below are all of the runs where either:
 
 Before showing which estimates were sufficiently different from the others, we first subset the fitted data to remove those fits that used the Navarro small-time approximation with an initial value of $a \leq .75$. See [Known Error 5](#fit-ke) for more details.
 
-```{r fit-estimates, eval=TRUE}
+```{r fit-estimates, eval=FALSE}
 # Account for KE 5
 fit2 <- subset(fit, Algorithm != "fs_Nav_17" | a_init > .75)
 
@@ -796,7 +814,7 @@ out[,-c(1:2)] <- zapsmall(out[,-c(1:2)])
 out
 ```
 
-We can see that it is mostly the small time methods that have occasional issues with data fitting. Although there are two method that appears in the above output that use both the small-time and large-time approximations, the method that combines the large-time approximation of Navarro with the small-time approximation of Kesselmeier is actually quite stable. Using this method, there are two offending fitted parameters whose difference from the fits given using `rtdists` are not smaller than our given error tolerance; in this case, the differences are only very marginally greater than our given error tolerance. These results suggest that the most stable methods are those that use both the small-time and large-time approximations to the density, and in particular the default option for `dfddm`, `scale = "both", n_terms_small = "Kesselmeier"`, is very stable .
+We can see that it is mostly the small time methods that have occasional issues with data fitting. Although there are two method that appears in the above output that use both the small-time and large-time approximations, the method that combines the large-time approximation of Navarro with the small-time approximation of Gondan is actually quite stable. Using this method, there are two offending fitted parameters whose difference from the fits given using `rtdists` are not smaller than our given error tolerance; in this case, the differences are only very marginally greater than our given error tolerance. These results suggest that the most stable methods are those that use both the small-time and large-time approximations to the density, and in particular the default option for `dfddm`, `scale = "both", n_terms_small = "Gondan"`, is very stable .
 
 
 
