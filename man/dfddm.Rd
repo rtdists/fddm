@@ -74,10 +74,10 @@ drift in the function call. See Details for more information.}
 
 \item{n_terms_small}{Which method for calculating number of terms used in the
 approximation of the infinite sum in the small-time approximation of the
-density function. Can be one of \{\code{"Foster"}, \code{"Kesselmeier"},
+density function. Can be one of \{\code{"SWSE"}, \code{"Gondan"},
 \code{"Navarro"}\}. Only applicable if \code{scale} is one of
 \{\code{"small"}, \code{"both"}\}. See Details for more information.
-Default is \code{"Foster"}.}
+Default is \code{"Gondan"}.}
 
 \item{summation_small}{Which style of summation to use for the small-time
 approximation to the infinite sum. Can be one of \{\code{"2017"},
@@ -89,7 +89,7 @@ Default is \code{"2017"}.}
 \code{"large"}, \code{"both"}\}. Note that the large-time approximation is
 unstable for small effective response times (\code{rt}\eqn{/(}\code{a}
 \eqn{*}\code{a}\eqn{) < 0.009}). See Details for more information. Default
-is \code{"small"}.}
+is \code{"both"}.}
 
 \item{err_tol}{Allowed error tolerance of the density function. Since the
 density function contains an infinite sum, this parameter defines the
@@ -111,8 +111,8 @@ All of the model inputs and parameters (\code{rt}, response, \code{a},
   \code{v}, \code{t0}, \code{w}, and \code{sv}) can be input as a single value
   or as a vector of values. If input as a vector of values, then the standard
   \code{R} input wrapping will occur.
-  
-  The default settings of \code{n_terms_small = "Kesselmeier"},
+
+  The default settings of \code{n_terms_small = "Gondan"},
   code{summation_small = "2017"}, \code{scale = "both"} produce the fastest
   and most accurate results, as shown in our associated paper.
 
@@ -154,9 +154,9 @@ All of the model inputs and parameters (\code{rt}, response, \code{a},
   methods for how to truncate the infinite sum in the density function. These
   different methods are discussed extensively in our associated paper, but
   the key distinction is that \code{n_terms_small = "Foster"} uses a new
-  method of truncating the infinite sum. The \code{n_terms_small = "Foster"}
-  method is recommended because it is the fastest and guarantees the most
-  accurate approximation to the density function of the DDM.
+  method of truncating the infinite sum. The \code{n_terms_small = "Gondan"}
+  method is currently recommended because it is the most stable algorithm
+  when used with \code{scale = "both"}.
 }
 \examples{
 rt <- seq(0.1, 3, by = 0.1)

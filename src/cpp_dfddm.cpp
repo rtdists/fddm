@@ -49,8 +49,8 @@ NumericVector cpp_dfddm(const NumericVector& rt,
       for (int i = 0; i < Nres; i++) {
         if (temp[i] == 1) { // lower
           resp[i] = 0;
-        } else if (temp[i] == 1){ // upper
-          resp[i] = 0;
+        } else if (temp[i] == 2){ // upper
+          resp[i] = 1;
         } else {
           stop("dfdmm error: function parameter 'response' was input as a vector of integers, and an integer other than 1 or 2 was detected at index %i", i+1);
         }

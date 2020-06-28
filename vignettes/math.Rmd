@@ -16,6 +16,7 @@ vignette: >
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
+  error = TRUE,
   comment = "#>"
 )
 ```
@@ -229,4 +230,4 @@ sessionInfo()
 
 
 
-# References {.unlisted .unnumbered}
+# References

@@ -1,0 +1,76 @@
+---
+title: "Examples Using dfddm"
+author: "Kendal Foster and Henrik Singmann"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+bibliography: references.bib
+output:
+  rmarkdown::html_vignette:
+    css: stile.css
+    toc: false
+vignette: >
+  %\VignetteIndexEntry{Examples Using dfddm}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  error = TRUE,
+  comment = "#>"
+)
+```
+
+<div id="TOC">
+<ul>
+<li><a href="#background">Background</a></li>
+<li><a href="#ex1">Example 1</a>
+<li><a href="#ex2">Example 2</a>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+
+
+
+
+
+Function `dfddm` evaluates the density function (or probability density function, PDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full PDF, which contains an infinite sum. An overview of the mathematical details of the different approximations is provided in the [Math Vignette](math.html). Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ (threshold separation), $v \in (-\infty, \infty)$ (drift rate), $t_0 \in [0, \infty)$ (non-decision time/response time constant), $w \in (0, 1)$ (relative starting point), and $sv \in (0, \infty)$ (inter-trial-variability of drift).
+<br><br>
+
+
+
+
+
+# Introduction {#intro}
+<hr class="sec1">
+
+This will be an example of how to use `fddm`, in particular an overview of the options available in the `dfddm` function.
+
+
+
+
+
+# Example 1 {#ex1}
+<hr class="sec1">
+
+
+
+
+
+# Example 2 {#ex2}
+<hr class="sec1">
+
+
+
+
+
+</div>
+# {.unlisted .unnumbered}
+#### R Session Info {.unlisted .unnumbered}
+```{r session-info, collapse=TRUE}
+sessionInfo()
+```
+
+
+
+# References

@@ -26,7 +26,7 @@ usethis::use_travis()
 usethis::use_readme_rmd()
 
 use_vignette("Validity")
-build_vignettes()
+devtools::build_vignettes()
 devtools::install(build_vignettes = FALSE)
 # html_document aesthetic options that I can't use........
 output:

@@ -71,7 +71,7 @@ Note that we include $sv$ in all the functions tested below, even those that do 
 
 First we load the necessary packages and code available from the current literature.
 
-```{r validity-pkg, eval=FALSE}
+```{r validity-pkg, eval=TRUE}
 library("fddm")
 library("rtdists")
 library("RWiener")
@@ -80,7 +80,7 @@ source(system.file("extdata", "Gondan_et_al_density.R", package = "fddm", mustWo
 
 The following code chunk stores the lower probability densities calculated across the parameter space using the different methods; we also calculate and store the log-probability for consistency testing.
 
-```{r validity-run, eval=FALSE}
+```{r validity-run, eval=TRUE}
 # Define parameter space
 RT <- c(0.001, 0.1, 1, 2, 3, 4, 5, 10, 30)
 A <- c(0.25, 0.5, 1, 2.5, 5)
@@ -305,7 +305,7 @@ for (rt in 1:nRT) {
 
 Now we test the consistency of the various density function approximations by using the `testthat` package. As [discussed above](#den), we allow the difference between any two outputs to be twice the original desired accuracy to allow for convergence from either above or below. We have to amend some of the checks because of the instability of some of the methods, and these are documented in the [Known Errors](#den-ke) section below. First we check that all of the approximations produce densities that are non-negative (we allow a density equal to zero). Next, we check the consistency of the internal `dfddm` methods before confirming their accuracy with external code from established packages. Lastly, we run similar tests to check the consistency of the logged results. However, we do not test the logs of densities that are very close to zero (i.e., less than $\epsilon^2$) because even a small difference in approximated density can lead to a very large difference in logged density. If all tests pass correctly, there should be no output.
 
-```{r validity-test, eval=FALSE}
+```{r validity-test, eval=TRUE}
 library("testthat")
 
 # Subset results
@@ -573,7 +573,7 @@ ll_RTDists <- function(pars, rt, resp, truth) {
 
 We use a different set of initial parameter values for each combination of data set and method. In a real-life situation we would probably also do so using random initial parameter values to avoid local minima. Here we do this with a fixed set of initial parameter values to ensure that the different method produce the same results for different starting points. However, there are a couple of restrictions to these initial values that we must address (we would also have to do so if we picked the initial values randomly). The parameter $t_0$ must be less than the response time, so we set the initial values for $t_0$ to be strictly less than the minimum response time according to each individual in the input dataframe. In addition, the optimization algorithm encounters problems for specific values of $a$ when using the log-likelihood function that is based on the Navarro small-time density function approximation, and this is explained in [Known Errors](#fit-ke).
 
-Furthermore, we must place a lower bound on $a$ because the optimization algorithm occasionally evaluates the log-likelihood functions (and thus the underlying density function approximations as well) using values of $a$ that are very close to zero in an effort to fully explore the parameter space. In these cases, the small-time approximations struggle because $a$ inversely scales the input response time and effectively changes the input response time into a very large one. In particular, an extremely small value of $a$ can cause the Foster small-time density approximation to run for a very long time. In common use this is not an issue because very small values of $a$ do not make any sense with regard to the psychological interpretation of the parameter, but this issue can arise in an exploratory optimization environment.
+Furthermore, we must place a lower bound on $a$ because the optimization algorithm occasionally evaluates the log-likelihood functions (and thus the underlying density function approximations as well) using values of $a$ that are very close to zero in an effort to fully explore the parameter space. In these cases, the small-time approximations struggle because $a$ inversely scales the input response time and effectively changes the input response time into a very large one. In particular, an extremely small value of $a$ can cause the Foster small-time density approximation to run for a very long time; to prevent this, we bound $a$ below by $0.05$ as it is a very small value such that anything less would be of no psychological significance to the model. In common use this is not an issue because very small values of $a$ do not make any sense with regard to the psychological interpretation of the parameter, but this issue can arise in an exploratory optimization environment.
 
 The following code chunk defines the function that will run the optimization and produce the fitted parameter estimates for $v_u$, $v_\ell$, $a$, $w$, and $sv$. As [discussed above](#fit-gen), we only use a selection of methods from those available in `dfddm`. This fitting function will run the optimization for each set of initial parameter values and store the resulting convergence code (either $0$ indicating successful convergence or $1$ indicating unsuccessful convergence), minimized value of the objective log-likelihood function, and parameter estimates.
 
@@ -623,12 +623,12 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
   ids <- unique(df$id)
   nids <- max(length(ids), 1) # if inds is null, there is only one individual
 
-  init_vals <- data.frame(vu = c( 0,  10, -.5,  0,  0,  0,  0,  0,  0,  0,  0),
-                          vl = c( 0, -10,  .5,  0,  0,  0,  0,  0,  0,  0,  0),
-                          a  = c( 1,   1,   1, .5,  5,  1,  1,  1,  1,  1,  1),
-                          t0 = c( 0,   0,   0,  0,  0,  0,  0,  0,  0,  0,  0),
-                          w  = c(.5,  .5,  .5, .5, .5, .5, .5, .2, .8, .5, .5),
-                          sv = c( 1,   1,   1,  1,  1,  1,  1,  1,  1,  0,  5))
+  init_vals <- data.frame(v1 = c( 0,  10, -.5,  0,  0,  0,  0,  0,  0,   0,  0),
+                          v0 = c( 0, -10,  .5,  0,  0,  0,  0,  0,  0,   0,  0),
+                          a  = c( 1,   1,   1, .5,  5,  1,  1,  1,  1,   1,  1),
+                          t0 = c( 0,   0,   0,  0,  0,  0,  0,  0,  0,   0,  0),
+                          w  = c(.5,  .5,  .5, .5, .5, .5, .5, .2, .8,  .5, .5),
+                          sv = c( 1,   1,   1,  1,  1,  1,  1,  1,  1, .05,  5))
   ninit_vals <- nrow(init_vals)
 
   algo_names <- c(rep("fs_SWSE_17", ninit_vals), rep("fs_Gon_17", ninit_vals),
@@ -639,20 +639,20 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
   # Initilize the result dataframe
   cnames <- c("ID", "Algorithm", "Convergence", "Objective",
-              "vu_init", "vl_init", "a_init", "t0_init", "w_init", "sv_init",
-              "vu_fit", "vl_fit", "a_fit", "t0_fit", "w_fit", "sv_fit")
+              "v1_init", "v0_init", "a_init", "t0_init", "w_init", "sv_init",
+              "v1_fit", "v0_fit", "a_fit", "t0_fit", "w_fit", "sv_fit")
   res <- data.frame(matrix(ncol = length(cnames), nrow = nids*ninit_vals*nalgos))
   colnames(res) <- cnames
 
   # label the result dataframe
   res$Algorithm <- algo_names # label algorithms
-  res$vu_init <- init_vals$vu # label initial vu
-  res$vl_init <- init_vals$vl # label initial vl
+  res$v1_init <- init_vals$v1 # label initial v1
+  res$v0_init <- init_vals$v0 # label initial v0
   res$a_init  <- init_vals$a  # label initial a
   res$w_init  <- init_vals$w  # label initial w
   res$sv_init <- init_vals$sv # label initial sv
 
-  # Loop through each individual
+  # Loop through each individual and starting values
   for (i in 1:nids) {
     # extract data for id i
     dfi <- df[df$id == ids[i],]
@@ -675,54 +675,54 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
     for (j in 1:ninit_vals) {
       temp <- nlminb(init_vals[j,], ll_fs_SWSE_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
-                     # limits:   vu,   vl,   a,      t0, w,  sv
-                     lower = c(-Inf, -Inf,   0,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     # limits:   v1,   v0,   a,  t0, w,  sv
+                     lower = c(-Inf, -Inf, .05,   0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
       res$Convergence[(i-1)*ni+0*ninit_vals+j] <- temp$convergence
       res$Objective[(i-1)*ni+0*ninit_vals+j] <- temp$objective
       res[(i-1)*ni+0*ninit_vals+j, 11:16] <- temp$par
 
       temp <- nlminb(init_vals[j,], ll_fs_Gon_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
-                     # limits:   vu,   vl,   a,      t0, w,  sv
-                     lower = c(-Inf, -Inf,   0,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     # limits:   v1,   v0,   a,  t0, w,  sv
+                     lower = c(-Inf, -Inf, .05,   0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
       res$Convergence[(i-1)*ni+1*ninit_vals+j] <- temp$convergence
       res$Objective[(i-1)*ni+1*ninit_vals+j] <- temp$objective
       res[(i-1)*ni+1*ninit_vals+j, 11:16] <- temp$par
 
       temp <- nlminb(init_vals[j,], ll_fs_Nav_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
-                     # limits:   vu,   vl,   a,      t0, w,  sv
-                     lower = c(-Inf, -Inf,   0,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     # limits:   v1,   v0,   a,  t0, w,  sv
+                     lower = c(-Inf, -Inf, .05,   0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
       res$Convergence[(i-1)*ni+2*ninit_vals+j] <- temp$convergence
       res$Objective[(i-1)*ni+2*ninit_vals+j] <- temp$objective
       res[(i-1)*ni+2*ninit_vals+j, 11:16] <- temp$par
 
       temp <- nlminb(init_vals[j,], ll_fb_Gon_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
-                     # limits:   vu,   vl,   a,      t0, w,  sv
-                     lower = c(-Inf, -Inf,   0,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     # limits:   v1,   v0,   a,  t0, w,  sv
+                     lower = c(-Inf, -Inf, .05,   0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
       res$Convergence[(i-1)*ni+3*ninit_vals+j] <- temp$convergence
       res$Objective[(i-1)*ni+3*ninit_vals+j] <- temp$objective
       res[(i-1)*ni+3*ninit_vals+j, 11:16] <- temp$par
 
       temp <- nlminb(init_vals[j,], ll_fb_Nav_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
-                     # limits:   vu,   vl,   a,      t0, w,  sv
-                     lower = c(-Inf, -Inf,   0,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     # limits:   v1,   v0,   a,  t0, w,  sv
+                     lower = c(-Inf, -Inf, .05,   0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
       res$Convergence[(i-1)*ni+4*ninit_vals+j] <- temp$convergence
       res$Objective[(i-1)*ni+4*ninit_vals+j] <- temp$objective
       res[(i-1)*ni+4*ninit_vals+j, 11:16] <- temp$par
 
       temp <- nlminb(init_vals[j,], ll_RTDists,
                      rt = rti, resp = respi, truth = truthi,
-                     # limits:   vu,   vl,   a,      t0, w,  sv
-                     lower = c(-Inf, -Inf,   0,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     # limits:   v1,   v0,   a,  t0, w,  sv
+                     lower = c(-Inf, -Inf, .05,   0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
       res$Convergence[(i-1)*ni+5*ninit_vals+j] <- temp$convergence
       res$Objective[(i-1)*ni+5*ninit_vals+j] <- temp$objective
       res[(i-1)*ni+5*ninit_vals+j, 11:16] <- temp$par
@@ -743,74 +743,78 @@ Having set up the fitting functions in the above chunks of code, we could pass t
 ```{r fitting-run, eval=FALSE}
 data(med_dec, package = "fddm")
 med_dec <- med_dec[which(med_dec$rt >= 0),]
-med_dec <- subset(med_dec, id == 2 & group == "novice")
 fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
               truth_idx = 5, response_upper = "blast", err_tol = 1e-6)
-# save(fit, file = "inst/extdata/valid_fit1.Rds", compress = "xz", compression_level = 9)
 ```
 
 
 
 
 ## Testing the Fitted Parameters {#fit-test}
-Now we test the consistency of the fitted parameters using the various density function approximations. As [discussed above](#fit), we use an allowable tolerance of 0.0001 to account for the slight differences in the output of the different approximations. First we read the fitting data from file as the fits can take a long time to run.
+Now we test the consistency of the fitted parameters using the various density function approximations. As [discussed above](#fit), we use an allowable tolerance of 0.0001 to account for the slight differences in the output of the different approximations. First we define a function to determine the differences in the objective value of the log-likelihood function and the parameter estimates. For each set of initial parameter values, there is one objective value corresponding to each algorithm; we take the minimum of these objective values and use the associated parameter estimates as the best estimates. Then we use this set of best estimates to compare against each set parameter estimates that use the same initial parameter values. At the end of this prep function, we first subset the fitted data to remove those fits that used the Navarro small-time approximation with an initial value of $a \leq .75$ (see [Known Error 5](#fit-ke) for more details). The following code chunk defines this function, which will be used next.
 
-We also print the results for the first ID in the data set (`ID = "experienced 2"`) and first set of initial values across the different methods to see what it looks like. This shows that at least the agreement across methods for this set of initial parameter values is rather good for the first participant in the study.
+```{r fitting-prep, eval=TRUE}
+fit_prep <- function(fit) {
+  nr <- nrow(fit)
+  fit$Obj_diff <- rep(0, nr)
+  fit$v1_diff  <- rep(0, nr)
+  fit$v0_diff  <- rep(0, nr)
+  fit$a_diff   <- rep(0, nr)
+  fit$t0_diff  <- rep(0, nr)
+  fit$w_diff   <- rep(0, nr)
+  fit$sv_diff  <- rep(0, nr)
 
-```{r fitting-prep, eval=FALSE}
-# load data, will be in the variable 'fit'
-load(system.file("extdata", "valid_fit.Rds", package = "fddm", mustWork = TRUE))
-fit[(0:5)*11+1,] # print results for `ID = "experienced 2"``
-
-nr <- nrow(fit)
-fit$Obj_diff <- rep(0, nr)
-fit$vu_diff  <- rep(0, nr)
-fit$vl_diff  <- rep(0, nr)
-fit$a_diff   <- rep(0, nr)
-fit$t0_diff  <- rep(0, nr)
-fit$w_diff   <- rep(0, nr)
-fit$sv_diff  <- rep(0, nr)
-
-ids <- unique(fit$ID)
-nids <- length(ids)
-algos <- unique(fit$Algorithm)
-nalgos <- length(algos)
+  ids <- unique(fit$ID)
+  nids <- length(ids)
+  algos <- unique(fit$Algorithm)
+  nalgos <- length(algos)
 
 
-fit_idx <- c(4, 11:16)
-dif_idx <- 17:23
-ninit <- nrow(subset(fit, ID == ids[1] & Algorithm == algos[1]))
-for (i in 1:nids) {
-  for (j in 1:ninit) {
-    for (k in 0:(nalgos-2)) {
-      fit[(i-1)*(ninit*nalgos) + k*ninit + j, dif_idx] <-
-        fit[(i-1)*(ninit*nalgos) + k*ninit + j, fit_idx] - # every method
-        fit[(i-1)*(ninit*nalgos) + (nalgos-1)*ninit + j, fit_idx] #rtdists
+  fit_idx <- c(4, 11:16)
+  dif_idx <- 17:23
+  ninit <- nrow(subset(fit, ID == ids[1] & Algorithm == algos[1]))
+  for (i in 1:nids) {
+    for (j in 1:ninit) {
+      actual_idx <- seq((i-1)*ninit*nalgos+j, i*ninit*nalgos, by = ninit)
+      min_obj_idx <- actual_idx[which.min(fit[actual_idx, 4])]
+      best_fit <- fit[min_obj_idx, fit_idx]
+      for (k in 0:(nalgos-1)) {
+        fit[(i-1)*(ninit*nalgos) + k*ninit + j, dif_idx] <-
+          fit[(i-1)*(ninit*nalgos) + k*ninit + j, fit_idx] - best_fit
 
+      }
     }
   }
+  fit <- fit[fit$Algorithm != "fs_Nav_17" | fit$a_init > .75,] # KE 5
+  return(fit)
 }
 ```
 
-Output below are all of the runs where either:
+As previously mentioned, we will read the pre-fit data from file as the fits can take a long time to run. Then we run our prep function to expose any significant differences in the fits across the algorithms. As an example of the fitting comparison, we print the results for the first ID in the data set (`ID = "experienced 2"`). This sample shows that the agreement across methods for this set of initial parameter values is rather good for at least the first participant in the study.
 
-1) the optimization run did not converge; or
+```{r fit-load, eval=TRUE}
+# load data, will be in the variable 'fit'
+load(system.file("extdata", "valid_fit.Rds", package = "fddm", mustWork = TRUE))
+fit <- fit_prep(fit)
 
-2) the log-likelihood objective value differs from that produced using `rtdists`; or
+print("Results for ID = experienced 2")
+fit[(0:5)*11+1,]
+```
 
-3) or the parameter estimates differ from that produced using `rtdists`.
+We can see that the fits for this individual participant and this set of initial parameter values are very similar across the different algorithms. As there are many individuals in this dataset, we will not print this style of fit comparison for each combination of participant and initial parameter values; instead we will print only those fits that are worse than the best fit. Output below are all of the runs where either:
 
-Before showing which estimates were sufficiently different from the others, we first subset the fitted data to remove those fits that used the Navarro small-time approximation with an initial value of $a \leq .75$. See [Known Error 5](#fit-ke) for more details.
+1) the optimization run did not converge (i.e. Convergence = 0); or
 
-```{r fit-estimates, eval=FALSE}
-# Account for KE 5
-fit2 <- subset(fit, Algorithm != "fs_Nav_17" | a_init > .75)
+2) the log-likelihood objective value differs from the smallest produced of any method for that specific set of initial parameter values; or
 
+3) or the parameter estimates differ from the smallest produced of any method for that specific set of initial parameter values.
+
+```{r fit-estimates, eval=TRUE}
 # Define error tolerance
 eps <- 1e-4
 
-out <- fit2[unique(which(abs(fit2[,c(3,dif_idx)]) > eps, arr.ind = TRUE)[,1]),]
-out[,-c(1:2)] <- zapsmall(out[,-c(1:2)])
+out <- fit[unique(which(abs(fit[, c(3, 17:23)]) > eps, arr.ind = TRUE)[, 1]),]
+out[, -c(1:2)] <- zapsmall(out[, -c(1:2)])
 out
 ```
 
@@ -835,4 +839,4 @@ sessionInfo()
 
 
 
-# References {.unlisted .unnumbered}
+# References

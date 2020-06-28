@@ -2,6 +2,7 @@
 title: "Benchmark Testing"
 author: "Kendal Foster and Henrik Singmann"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
+bibliography: references.bib
 output:
   rmarkdown::html_vignette:
     css: stile.css
@@ -15,6 +16,7 @@ vignette: >
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
+  error = TRUE,
   comment = "#>"
 )
 ```
@@ -348,8 +350,8 @@ mi <- min(bm_vec[, -seq_len(t_idx)])
 ma <- max(bm_vec[, (t_idx+1):(ncol(bm_vec)-4)])
 
 ggplot(mbm_vec, aes(x = FuncName, y = time,
-                color = factor(FuncName, levels = Names_vec),
-                fill = factor(FuncName, levels = Names_vec))) +
+                    color = factor(FuncName, levels = Names_vec),
+                    fill = factor(FuncName, levels = Names_vec))) +
        geom_violin(trim = TRUE, alpha = 0.5) +
        scale_color_manual(values = Color_vec) +
        scale_fill_manual(values = Color_vec) +
@@ -938,4 +940,4 @@ sessionInfo()
 
 
 
-# References {.unlisted .unnumbered}
+# References
