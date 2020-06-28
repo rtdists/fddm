@@ -623,8 +623,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
   ids <- unique(df$id)
   nids <- max(length(ids), 1) # if inds is null, there is only one individual
 
-  init_vals <- data.frame(v1 = c( 0,  10, -.5,  0,  0,  0,  0,  0,  0,   0,  0),
-                          v0 = c( 0, -10,  .5,  0,  0,  0,  0,  0,  0,   0,  0),
+  init_vals <- data.frame(vu = c( 0,  10, -.5,  0,  0,  0,  0,  0,  0,   0,  0),
+                          vl = c( 0, -10,  .5,  0,  0,  0,  0,  0,  0,   0,  0),
                           a  = c( 1,   1,   1, .5,  5,  1,  1,  1,  1,   1,  1),
                           t0 = c( 0,   0,   0,  0,  0,  0,  0,  0,  0,   0,  0),
                           w  = c(.5,  .5,  .5, .5, .5, .5, .5, .2, .8,  .5, .5),
@@ -639,15 +639,15 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
   # Initilize the result dataframe
   cnames <- c("ID", "Algorithm", "Convergence", "Objective",
-              "v1_init", "v0_init", "a_init", "t0_init", "w_init", "sv_init",
-              "v1_fit", "v0_fit", "a_fit", "t0_fit", "w_fit", "sv_fit")
+              "vu_init", "vl_init", "a_init", "t0_init", "w_init", "sv_init",
+              "vu_fit", "vl_fit", "a_fit", "t0_fit", "w_fit", "sv_fit")
   res <- data.frame(matrix(ncol = length(cnames), nrow = nids*ninit_vals*nalgos))
   colnames(res) <- cnames
 
   # label the result dataframe
   res$Algorithm <- algo_names # label algorithms
-  res$v1_init <- init_vals$v1 # label initial v1
-  res$v0_init <- init_vals$v0 # label initial v0
+  res$vu_init <- init_vals$vu # label initial vu
+  res$vl_init <- init_vals$vl # label initial vl
   res$a_init  <- init_vals$a  # label initial a
   res$w_init  <- init_vals$w  # label initial w
   res$sv_init <- init_vals$sv # label initial sv
@@ -675,7 +675,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
     for (j in 1:ninit_vals) {
       temp <- nlminb(init_vals[j,], ll_fs_SWSE_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
-                     # limits:   v1,   v0,   a,  t0, w,  sv
+                     # limits:   vu,   vl,   a,  t0, w,  sv
                      lower = c(-Inf, -Inf, .05,   0, 0,   0),
                      upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
       res$Convergence[(i-1)*ni+0*ninit_vals+j] <- temp$convergence
@@ -684,7 +684,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
       temp <- nlminb(init_vals[j,], ll_fs_Gon_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
-                     # limits:   v1,   v0,   a,  t0, w,  sv
+                     # limits:   vu,   vl,   a,  t0, w,  sv
                      lower = c(-Inf, -Inf, .05,   0, 0,   0),
                      upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
       res$Convergence[(i-1)*ni+1*ninit_vals+j] <- temp$convergence
@@ -693,7 +693,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
       temp <- nlminb(init_vals[j,], ll_fs_Nav_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
-                     # limits:   v1,   v0,   a,  t0, w,  sv
+                     # limits:   vu,   vl,   a,  t0, w,  sv
                      lower = c(-Inf, -Inf, .05,   0, 0,   0),
                      upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
       res$Convergence[(i-1)*ni+2*ninit_vals+j] <- temp$convergence
@@ -702,7 +702,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
       temp <- nlminb(init_vals[j,], ll_fb_Gon_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
-                     # limits:   v1,   v0,   a,  t0, w,  sv
+                     # limits:   vu,   vl,   a,  t0, w,  sv
                      lower = c(-Inf, -Inf, .05,   0, 0,   0),
                      upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
       res$Convergence[(i-1)*ni+3*ninit_vals+j] <- temp$convergence
@@ -711,7 +711,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
       temp <- nlminb(init_vals[j,], ll_fb_Nav_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
-                     # limits:   v1,   v0,   a,  t0, w,  sv
+                     # limits:   vu,   vl,   a,  t0, w,  sv
                      lower = c(-Inf, -Inf, .05,   0, 0,   0),
                      upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
       res$Convergence[(i-1)*ni+4*ninit_vals+j] <- temp$convergence
@@ -720,7 +720,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
       temp <- nlminb(init_vals[j,], ll_RTDists,
                      rt = rti, resp = respi, truth = truthi,
-                     # limits:   v1,   v0,   a,  t0, w,  sv
+                     # limits:   vu,   vl,   a,  t0, w,  sv
                      lower = c(-Inf, -Inf, .05,   0, 0,   0),
                      upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
       res$Convergence[(i-1)*ni+5*ninit_vals+j] <- temp$convergence
@@ -757,8 +757,8 @@ Now we test the consistency of the fitted parameters using the various density f
 fit_prep <- function(fit) {
   nr <- nrow(fit)
   fit$Obj_diff <- rep(0, nr)
-  fit$v1_diff  <- rep(0, nr)
-  fit$v0_diff  <- rep(0, nr)
+  fit$vu_diff  <- rep(0, nr)
+  fit$vl_diff  <- rep(0, nr)
   fit$a_diff   <- rep(0, nr)
   fit$t0_diff  <- rep(0, nr)
   fit$w_diff   <- rep(0, nr)
