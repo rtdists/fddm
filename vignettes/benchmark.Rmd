@@ -7,6 +7,8 @@ output:
   rmarkdown::html_vignette:
     css: stile.css
     toc: false
+    fig_width: 8
+    fig_height: 6
 vignette: >
   %\VignetteIndexEntry{Benchmark Testing}
   %\VignetteEngine{knitr::rmarkdown}
@@ -766,10 +768,9 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                           sv = c( 1,   1,   1,  1,  1,  1,  1,  1,  1, .05,  5))
   ninit_vals <- nrow(init_vals)
 
-  algo_names <- c(rep("fs_SWSE_17", ninit_vals), rep("fs_Gon_17", ninit_vals),
-                  rep("fs_Nav_17", ninit_vals), rep("fb_Gon_17", ninit_vals),
-                  rep("fb_Nav_17", ninit_vals), rep("rtdists", ninit_vals))
-  nalgos <- length(unique(algo_names))
+  algo_names <- c("fs_SWSE_17", "fs_Gon_17", "fs_Nav_17",
+                  "fb_Gon_17", "fb_Nav_17","rtdists")
+  nalgos <- length(algo_names)
   ni <- nalgos*ninit_vals
 
   # Initilize the result dataframe
@@ -779,7 +780,11 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
   colnames(res) <- cnames
 
   # label the result dataframe
-  res$Algorithm <- algo_names # label algorithms
+  algo_col <- c()
+  for (n in 1:nalgos) {
+    algo_col <- c(algo_col, rep(algo_names[n], ninit_vals))
+  }
+  res$Algorithm <- algo_col # label algorithms
 
   # Loop through each individual
   for (i in 1:nids) {
@@ -896,7 +901,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
         times = times, unit = unit
       )
       for (k in 1:nalgos) {
-        res$BmTime[(i-1)*ni+(k-1)*ninit_vals+j] <- median(mbm[mbm$expr == algo_names[k],2])
+        res$BmTime[(i-1)*ni+(k-1)*ninit_vals+j] <- median(mbm[mbm$expr == algo_names[k], 2])
       }
     }
   }
@@ -919,16 +924,229 @@ med_dec <- subset(med_dec, id == "21" & group == "novice")
 fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
               truth_idx = 5, response_upper = "blast", err_tol = 1e-6,
               times = 100, unit = "us")
+save(fit, file = "inst/extdata/bm_fit.Rds", compress = "xz", compression_level = 9)
 ```
+
+
+
 
 ## Analysis of Benchmark Results {#fit-ana}
 
-side-by-side violin plots that show the distribution of `microbenchmark` timings.
+We begin by loading the required packages for plotting the results.
 
-plot number of iterations for each method (maybe with convergence)
+```{r fit-packages, eval=TRUE}
+library("reshape2")
+library("ggplot2")
+```
 
-plot number of function evaluations for each method (maybe with convergence)
+Before visualizing the results of benchmarking the data fitting, we need to provide some context for each set of parameter estimates since each run of the optimization does not necessarily converge. To add this context, we first find the minimum value of the log-likelihood function attained for each set of initial parameter values for each individual. Then we calculate how the objective value of each optimization run compares to that minimum; we will refer to this quantity as the objective difference. The following code chunk defines a function to perform this calculation and some other minor operations that will be helpful when plotting the results. The code chunk also applies this prep function to the pre-run benchmark data and defines some constants that we will use throughout the visualizations.
 
+```{r fitting-prep, eval=TRUE}
+fit_prep <- function(fit) {
+  nr <- nrow(fit)
+  fit$Obj_diff <- rep(0, nr)
+
+  ids <- unique(fit$ID)
+  nids <- length(ids)
+  algos <- unique(fit$Algorithm)
+  nalgos <- length(algos)
+
+  ninit <- nrow(subset(fit, ID == ids[1] & Algorithm == algos[1]))
+  for (i in 1:nids) {
+    for (j in 1:ninit) {
+      min_obj <- min(fit[seq((i-1)*ninit*nalgos+j, i*ninit*nalgos, by = ninit), 4])
+      for (k in 0:(nalgos-1)) {
+        fit[(i-1)*(ninit*nalgos) + k*ninit + j, 8] <-
+          fit[(i-1)*(ninit*nalgos) + k*ninit + j, 4] - min_obj
+
+      }
+    }
+  }
+
+  fit$BmTime <- fit$BmTime/1e6 # convert to seconds
+
+  eps <- 1e-4
+  fit$Obj_diff[fit$Obj_diff > eps] <- eps
+  fit$Obj_diff <- fit$Obj_diff / eps # prep for alpha values
+
+  return(fit)
+}
+
+# sorry, for now it's in the variable "fita" and maybe BmTime is already in sec
+load(system.file("extdata", "bm_fit.Rds", package = "fddm", mustWork = TRUE))
+fit <- fit_prep(fita)
+
+Names <- c("fs_SWSE_17", "fs_Gon_17", "fs_Nav_17",
+           "fb_Gon_17", "fb_Nav_17", "rtdists")
+Color <- c("#9900cc", "#006699", "#336600",
+           "#c2a500", "#e68a00", "#990000")
+Shape <- c(1, 4)
+eps <- 1e-4
+max_alpha <- max(fit$Obj_diff)
+```
+
+We will now present three plots to illustrate how the various methods perform when used in fitting Ratcliff's DDM to real-world data. The measures of interest for each method are the median `microbenchmark` timings, the number of optimization iterations, and the number of function evaluations in the optimization process; each one of the three plots will focus on one of these measures. Each plot will contain violin plots to show the densities of each method with respect to that plot's measure. To help explain problematic fits, the plots will indicate any data point that represents an optimization run for which the objective difference is greater than our predefined tolerance of $\epsilon = 0.0001$. More specifically, the transparency of the data points are determined by their objective difference; so a data point with zero objective difference will not show up on the plots, but a data point with objective difference close to or greater than $\epsilon$ will be visible on the plots. In addition, each of these visible data points will have a shape to indicate its convergence code: "O" for successful convergence, and "X" for failed convergence. For each method in each of the plots, the data points are aggregated over the distinct individuals in the experiment and the different initial parameter values for the fitting.
+
+The first plot will show the densities of the `microbenchmark` timings for each method.
+
+```{r fit-mbm, eval=TRUE}
+fit_mbm <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
+                measure.vars = "BmTime", value.name = "BmTime")[,-4]
+
+ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
+                    y = BmTime)) +
+       geom_violin(trim = TRUE, alpha = 0.5,
+                   aes(color = factor(Algorithm, levels = Names),
+                       fill = factor(Algorithm, levels = Names))) +
+       geom_boxplot(width = 0.2, outlier.shape = NA,
+                    fill = "white", alpha = 0.4,
+                    aes(color = factor(Algorithm, levels = Names))) +
+       geom_point(aes(color = factor(Algorithm, levels = Names),
+                      shape = factor(Convergence, levels = c(0,1)),
+                      alpha = Obj_diff), size = 3) +
+       scale_color_manual(values = Color, guide = FALSE) +
+       scale_fill_manual(values = Color, guide = FALSE) +
+       scale_shape_manual(values = Shape,
+                          name = "Convergence Code",
+                          breaks = c(0, 1),
+                          labels = c("Success", "Failure")) +
+       scale_alpha_continuous(range = c(0, max_alpha),
+                              name = "Objective Difference",
+                              breaks = c(0, max_alpha/2, max_alpha),
+                              labels = c(0, formatC(max_alpha*eps/2, format = "e", digits = 2), formatC(max_alpha*eps, format = "e", digits = 2))) +
+       stat_summary(fun = mean, geom = "errorbar",
+                    aes(ymax = ..y.., ymin = ..y..),
+                    width = .5, linetype = "dashed",
+                    color = Color) +
+       labs(title = "Median microbenchmark times for data fitting",
+            subtitle = "Dashed lines represent mean benchmark times;\nOpaque points have an objective difference greater than 1e-4",
+            x = "Method", y = "Time (sec)") +
+       guides(alpha = guide_legend(order = 1),
+              shape = guide_legend(order = 2)) +
+       theme_bw() +
+       theme(panel.border = element_blank(),
+             plot.title = element_text(size = 23),
+             plot.subtitle = element_text(size = 16),
+             axis.text.x = element_text(size = 16, angle = 90),
+             axis.text.y = element_text(size = 16),
+             axis.title.x = element_text(size = 20),
+             axis.title.y = element_text(size = 20),
+             legend.position = c(0, 1),
+             legend.justification = c(0, 1),
+             legend.box = "horizontal",
+             legend.direction = "vertical",
+             legend.background = element_rect(fill = "transparent"))
+```
+
+Some comment on what the plot looks like.
+
+The second plot will show the densities of the number of optimization iterations for each method.
+
+```{r fit-ite, eval=TRUE}
+fit_ite <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
+                measure.vars = "Iterations", value.name = "Iterations")[,-4]
+
+ggplot(fit_ite, aes(x = factor(Algorithm, levels = Names),
+                    y = Iterations)) +
+       geom_violin(trim = TRUE, alpha = 0.5,
+                   aes(color = factor(Algorithm, levels = Names),
+                       fill = factor(Algorithm, levels = Names))) +
+       geom_boxplot(width = 0.2, outlier.shape = NA,
+                    fill = "white", alpha = 0.4,
+                    aes(color = factor(Algorithm, levels = Names))) +
+       geom_point(aes(color = factor(Algorithm, levels = Names),
+                      shape = factor(Convergence, levels = c(0,1)),
+                      alpha = Obj_diff), size = 3) +
+       scale_color_manual(values = Color, guide = FALSE) +
+       scale_fill_manual(values = Color, guide = FALSE) +
+       scale_shape_manual(values = Shape,
+                          name = "Convergence Code",
+                          breaks = c(0, 1),
+                          labels = c("Success", "Failure")) +
+       scale_alpha_continuous(range = c(0, max_alpha),
+                              name = "Objective Difference",
+                              breaks = c(0, max_alpha/2, max_alpha),
+                              labels = c(0, formatC(max_alpha*eps/2, format = "e", digits = 2), formatC(max_alpha*eps, format = "e", digits = 2))) +
+       stat_summary(fun = mean, geom = "errorbar",
+                    aes(ymax = ..y.., ymin = ..y..),
+                    width = .5, linetype = "dashed",
+                    color = Color) +
+       labs(title = "Optimization iterations for data fitting",
+            subtitle = "Dashed lines represent mean benchmark times;\nOpaque points have an objective difference greater than 1e-4",
+            x = "Method", y = "Number of optimization iterations") +
+       guides(alpha = guide_legend(order = 1),
+              shape = guide_legend(order = 2)) +
+       theme_bw() +
+       theme(panel.border = element_blank(),
+             plot.title = element_text(size = 23),
+             plot.subtitle = element_text(size = 16),
+             axis.text.x = element_text(size = 16, angle = 90),
+             axis.text.y = element_text(size = 16),
+             axis.title.x = element_text(size = 20),
+             axis.title.y = element_text(size = 20),
+             legend.position = c(0, 1),
+             legend.justification = c(0, 1),
+             legend.box = "horizontal",
+             legend.direction = "vertical",
+             legend.background = element_rect(fill = "transparent"))
+```
+
+Some comment on what the plot looks like.
+
+The third plot will show the densities of the number of function evaluations in the optimization process for each method.
+
+```{r fit-fev, eval=TRUE}
+fit_fev <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
+                measure.vars = "FuncEvals", value.name = "FuncEvals")[,-4]
+
+ggplot(fit_fev, aes(x = factor(Algorithm, levels = Names),
+                    y = FuncEvals)) +
+       geom_violin(trim = TRUE, alpha = 0.5,
+                   aes(color = factor(Algorithm, levels = Names),
+                       fill = factor(Algorithm, levels = Names))) +
+       geom_boxplot(width = 0.2, outlier.shape = NA,
+                    fill = "white", alpha = 0.4,
+                    aes(color = factor(Algorithm, levels = Names))) +
+       geom_point(aes(color = factor(Algorithm, levels = Names),
+                      shape = factor(Convergence, levels = c(0,1)),
+                      alpha = Obj_diff), size = 3) +
+       scale_color_manual(values = Color, guide = FALSE) +
+       scale_fill_manual(values = Color, guide = FALSE) +
+       scale_shape_manual(values = Shape,
+                          name = "Convergence Code",
+                          breaks = c(0, 1),
+                          labels = c("Success", "Failure")) +
+       scale_alpha_continuous(range = c(0, max_alpha),
+                              name = "Objective Difference",
+                              breaks = c(0, max_alpha/2, max_alpha),
+                              labels = c(0, formatC(max_alpha*eps/2, format = "e", digits = 2), formatC(max_alpha*eps, format = "e", digits = 2))) +
+       stat_summary(fun = mean, geom = "errorbar",
+                    aes(ymax = ..y.., ymin = ..y..),
+                    width = .5, linetype = "dashed",
+                    color = Color) +
+       labs(title = "Function evaluations for data fitting",
+            subtitle = "Dashed lines represent mean benchmark times;\nOpaque points have an objective difference greater than 1e-4",
+            x = "Method", y = "Number of function evaluations") +
+       guides(alpha = guide_legend(order = 1),
+              shape = guide_legend(order = 2)) +
+       theme_bw() +
+       theme(panel.border = element_blank(),
+             plot.title = element_text(size = 23),
+             plot.subtitle = element_text(size = 16),
+             axis.text.x = element_text(size = 16, angle = 90),
+             axis.text.y = element_text(size = 16),
+             axis.title.x = element_text(size = 20),
+             axis.title.y = element_text(size = 20),
+             legend.position = c(0, 1),
+             legend.justification = c(0, 1),
+             legend.box = "horizontal",
+             legend.direction = "vertical",
+             legend.background = element_rect(fill = "transparent"))
+```
+
+Some comment on what the plot looks like
+
+Some concluding comments on what all three of the plots look like
 
 
 

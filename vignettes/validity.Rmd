@@ -769,7 +769,6 @@ fit_prep <- function(fit) {
   algos <- unique(fit$Algorithm)
   nalgos <- length(algos)
 
-
   fit_idx <- c(4, 11:16)
   dif_idx <- 17:23
   ninit <- nrow(subset(fit, ID == ids[1] & Algorithm == algos[1]))
