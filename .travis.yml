@@ -2,12 +2,10 @@
 
 language: r
 # r: 4
-sudo: required
 cache: packages
-dist: bionic
-addons:
-  apt:
-    packages:
-      - libgsl2
+# addons:
+#   apt:
+#     packages:
+#       - libgsl2
 r_binary_packages:
  - gsl
