@@ -6,7 +6,7 @@
 ^README\.Rmd$
 ^docs$
 ^.*\.ini$
+^.*/.*\.ini$
 ^benchmark_testing$
 ^doc$
 ^Meta$
-^zedonked$
