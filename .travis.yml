@@ -4,5 +4,3 @@ language: r
 r: 3.6.3
 cache: packages
 dist: bionic
-r_binary_packages:
- - gsl
