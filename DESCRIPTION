@@ -14,9 +14,12 @@ Description: Provides the probability density function (PDF) of the diffusion de
 License: GPL (>= 2)
 Imports: Rcpp (>= 1.0.1)
 LinkingTo: Rcpp
+Depends: R (>= 3.5.0)
 Suggests: 
     rtdists,
     RWiener,
+    ggplot2,
+    reshape2,
     testthat,
     knitr,
     rmarkdown

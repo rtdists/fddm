@@ -320,11 +320,11 @@ RWiener <- subset(res, FuncName == "RWiener")
 Gondan_R <- subset(res, FuncName == "Gondan")
 
 # Compensate for KE 1, 2
-Nav_s_res_0 <- subset(Navarro_s, res < 0) # KE 2
+Nav_s_res_0 <- subset(Navarro_s, res < 0) # KE 1
 Nav_s_0 <- min(Nav_s_res_0$rt / Nav_s_res_0$a / Nav_s_res_0$a) # = 12
-Nav_l_res_0 <- subset(Navarro_l, res < 0) # KE 3
+Nav_l_res_0 <- subset(Navarro_l, res < 0) # KE 2
 Nav_l_0 <- max(Nav_l_res_0$rt / Nav_l_res_0$a / Nav_l_res_0$a) # = 0.04
-Nav_l_dif_2eps <- subset(Navarro_l, dif > 2*eps) # KE 3
+Nav_l_dif_2eps <- subset(Navarro_l, dif > 2*eps) # KE 2
 Nav_l_2 <- max(Nav_l_dif_2eps$rt / Nav_l_dif_2eps$a / Nav_l_dif_2eps$a) # = 0.004
 
 
@@ -357,6 +357,7 @@ test_that("Accuracy relative to established packages", {
   expect_true(all(subset(Gondan_R, sv < SV_THRESH)$dif < 2*eps)) # see KE 4
 })
 
+# Test consistency in log vs non-log
 test_that("Log-Consistency among internal methods", {
   expect_equal(subset(SWSE, res > eps*eps)$log_res,
                log(subset(SWSE, res > eps*eps)$res))
@@ -386,9 +387,9 @@ test_that("Log-Consistency of established packages", {
 
 ## Known Errors {#den-ke}
 
-1) Navarro small-time approximation is unstable for "large" effective response times, $\frac{rt}{a^2} \geq 10$. It gives slightly negative densities for effective response times above this threshold. These parameter values should not have an effect on the "both" time scale because the large-time approximation should handle such locations in the parameter space. The negative results, however, are still within $2 \cdot \epsilon$ of the accepted results (basically zero).
+1) Navarro small-time approximation is unstable for "large" effective response times, $\frac{rt}{a^2} \geq 12$. It gives slightly negative densities for effective response times above this threshold. These parameter values should not have an effect on the "both" time scale because the large-time approximation should handle such locations in the parameter space. The negative results, however, are still within $2 \cdot \epsilon$ of the accepted results (basically zero).
 
-2) Navarro large-time approximation is unstable for "small" effective response times, $\frac{rt}{a^2} \leq 0.06$. Similarly to the Navarro small-time approximation above, the large-time approximation gives slightly negative densities for effective response times in this range. Furthermore, it yields inaccurate densities for effective response times of $\frac{rt}{a^2} \leq 0.009$. These parameter values should not have an effect on the "both" time scale because the small-time approximation should handle such locations in the parameter space.
+2) Navarro large-time approximation is unstable for "small" effective response times, $\frac{rt}{a^2} \leq 0.04$. Similarly to the Navarro small-time approximation above, the large-time approximation gives slightly negative densities for effective response times in this range. Furthermore, it yields inaccurate densities for effective response times of $\frac{rt}{a^2} \leq 0.004$. These parameter values should not have an effect on the "both" time scale because the small-time approximation should handle such locations in the parameter space.
 
 3) The Navarro "both" time scale switches between the small-time and large-time approximations. This method relies too much on the unstable large time approximation, leading to its instability; thus we only need to subset to correct for the large time.
 

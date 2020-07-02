@@ -2,3 +2,4 @@
 
 export(dfddm)
 useDynLib(fddm, .registration = TRUE)
+import("Rcpp")

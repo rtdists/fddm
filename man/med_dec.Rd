@@ -77,7 +77,7 @@ for an example of use in an optimization setting.
 }
 \examples{
 
-data("med_dec")
+data("med_dec", package = "fddm")
 str(med_dec)
 
 ## number of participants per expertise condition:
