@@ -2,8 +2,7 @@
 
 language: r
 cache: packages
-before_install:
-  - sudo apt-get install -y r-api-3
+dist: bionic
 addons:
   apt:
     packages:
