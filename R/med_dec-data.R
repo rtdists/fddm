@@ -11,7 +11,7 @@
 #' @docType data
 #' @keywords dataset
 #' @name med_dec
-#' @usage med_dec
+#' @usage data(med_dec)
 #'
 #' @details
 #'

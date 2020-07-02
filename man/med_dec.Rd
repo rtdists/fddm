@@ -25,7 +25,7 @@ Trueblood, J.S., Holmes, W.R., Seegmiller, A.C. et al. The impact of
   https://doi.org/10.1186/s41235-018-0119-2
 }
 \usage{
-med_dec
+data(med_dec)
 }
 \description{
 Part of the accuracy and response time data presented in Trueblood et al.
