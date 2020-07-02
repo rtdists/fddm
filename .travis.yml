@@ -4,3 +4,9 @@ language: r
 r: 3.6.3
 cache: packages
 dist: bionic
+addons:
+  apt:
+    packages:
+      - libgsl2
+r_binary_packages:
+ - gsl
