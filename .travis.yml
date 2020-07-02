@@ -1,3 +1,10 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: r
+cache: packages
+addons:
+  apt:
+    packages:
+      - libgsl2
+r_binary_packages:
+ - gsl
