@@ -2,6 +2,7 @@
 
 language: r
 cache: packages
+dist: bionic
 addons:
   apt:
     packages:
