@@ -7,6 +7,8 @@ output:
   rmarkdown::html_vignette:
     css: stile.css
     toc: false
+    fig_width: 8
+    fig_height: 6
 vignette: >
   %\VignetteIndexEntry{Examples Using dfddm}
   %\VignetteEngine{knitr::rmarkdown}
@@ -23,8 +25,8 @@ knitr::opts_chunk$set(
 
 <div id="TOC">
 <ul>
-<li><a href="#background">Background</a></li>
-<li><a href="#ex1">Example 1</a>
+<li><a href="#intro">Introduction</a></li>
+<li><a href="#ex1">Example Fitting</a>
 <li><a href="#references">References</a></li>
 </ul>
 </div>
@@ -49,7 +51,7 @@ This vignette contains examples of how to use `fddm`, in particular the `dfddm` 
 
 
 
-# Example 1 {#ex1}
+# Example Fitting {#ex1}
 <hr class="sec1">
 
 As an example data set, we use the `med_dec` data that comes with `fddm`. This data contains the accuracy condition reported in @trueblood_impact_2018 investigating medical decision making among medical professionals (pathologists) and novices (i.e., undergraduate students). The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The data set contains 200 decision per participant, based on pictures of 100 true cancerous cells and pictures of 100 true non-cancerous cells. First we load the `fddm` package.
@@ -234,10 +236,12 @@ ggplot(fitp, aes(x = factor(ID, levels = c("novice", "inexperienced", "experienc
   theme(panel.border = element_blank(),
         plot.title = element_text(size = 23),
         plot.subtitle = element_text(size = 16),
-        axis.text.x = element_text(size = 16, angle = 30),
+        axis.text.x = element_text(size = 16),
         axis.text.y = element_text(size = 16),
         axis.title.x = element_text(size = 20),
-        axis.title.y = element_text(size = 20))
+        axis.title.y = element_text(size = 20),
+        legend.title = element_text(size = 20),
+        legend.text = element_text(size = 16))
 ```
 
 From this plot we notice two things. First, the drift rate corresponding to the upper threshold should always be positive, and the drift rate corresponding to the lower threshold should always be negative. Since there are a few fitted values that switch this convention, the novice participants show evidence of consistently responding incorrectly to the stimulus. In contrast, both the inexperienced and experienced participants show a clean division of drift rates around zero.
