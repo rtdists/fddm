@@ -5,10 +5,6 @@ library("fddm")
 devtools::document()
 
 ###################
-# after running devtools::document(), need to add
-# import("Rcpp")
-# to NAMESPACE because the automatic stuff messes up
-# it creates an error where you can't run dfddm because it needs Rcpp
 
 
 sqrt(.Machine$double.eps)

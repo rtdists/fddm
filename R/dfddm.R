@@ -162,6 +162,7 @@
 #'   (usually \code{rt}).
 #'
 #' @useDynLib fddm, .registration = TRUE
+#' @import Rcpp
 #' @export
 dfddm <- function(rt, response,
                   a, v, t0, w = 0.5,
