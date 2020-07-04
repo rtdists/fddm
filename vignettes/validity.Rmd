@@ -14,6 +14,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
+options(width = 100)
 knitr::opts_chunk$set(
   collapse = TRUE,
   error = TRUE, # ensures compilation even if testthat checks fail
@@ -395,7 +396,7 @@ test_that("Log-Consistency of established packages", {
 
 4) Gondan_R approximation divides the error tolerance by the multiplicative term outside of the summation. Since the outside term is different when $sv > 0$, the approximation uses the incorrect error tolerance for $sv > 0$. This affects the number of terms required in the summation to achieve the desired precision, thus not actually achieving that desired precision. This issue is fixed in our implementation of the Gondan method, `n_terms_small = "Gondan"`, `scale = "small"`. For an example of this discrepancy, see the code below:
 
-```{r known-errors, eval=FALSE}
+```{r known-errors, eval=TRUE}
 rt <- 1.5
 t <- rt - 1e-4
 a <- 0.5
@@ -429,7 +430,7 @@ To avoid too many repititious plots, we will only include six of the methods fro
 
 First we load the necessary packages.
 
-```{r fitting-pkg, eval=FALSE}
+```{r fitting-pkg, eval=TRUE}
 library("fddm")
 library("rtdists")
 ```
@@ -438,7 +439,7 @@ library("rtdists")
 
 This code chunk defines the log-likelihood functions used in the optimization algorithm. The log-likelihood functions are fairly straightforward and split the responses and associated response times by the true item status (i.e., correct response lower versus upper boundary) to enable fitting distinct drift rates ($v_\ell$ for the items in which the correct response is the lower boundary and $v_u$ for the items for which the correct response is the upper boundary). In addition, the log-likelihood functions heavily penalize any approximations that return zero, negative, or otherwise invalid densities.
 
-```{r loglik-fun, eval=FALSE}
+```{r loglik-fun, eval=TRUE}
 ll_fs_SWSE_17 <- function(pars, rt, resp, truth, err_tol) {
   rtu <- rt[truth == "upper"]
   rtl <- rt[truth == "lower"]
@@ -578,7 +579,7 @@ Furthermore, we must place a lower bound on $a$ because the optimization algorit
 
 The following code chunk defines the function that will run the optimization and produce the fitted parameter estimates for $v_u$, $v_\ell$, $a$, $w$, and $sv$. As [discussed above](#fit-gen), we only use a selection of methods from those available in `dfddm`. This fitting function will run the optimization for each set of initial parameter values and store the resulting convergence code (either $0$ indicating successful convergence or $1$ indicating unsuccessful convergence), minimized value of the objective log-likelihood function, and parameter estimates.
 
-```{r fitting-fun, eval=FALSE}
+```{r fitting-fun, eval=TRUE}
 rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                    truth_idx = NULL, response_upper = NULL, err_tol = 1e-6) {
 
@@ -749,10 +750,17 @@ fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
 ```
 
 
+```{r fitting-run-internal, eval=FALSE, include=FALSE}
+data(med_dec, package = "fddm")
+med_dec <- med_dec[which(med_dec$rt >= 0),]
+fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
+              truth_idx = 5, response_upper = "blast", err_tol = 1e-6)
+save(fit, file = "inst/extdata/valid_fit.Rds")
+```
 
 
 ## Testing the Fitted Parameters {#fit-test}
-Now we test the consistency of the fitted parameters using the various density function approximations. As [discussed above](#fit), we use an allowable tolerance of 0.0001 to account for the slight differences in the output of the different approximations. First we define a function to determine the differences in the objective value of the log-likelihood function and the parameter estimates. For each set of initial parameter values, there is one objective value corresponding to each algorithm; we take the minimum of these objective values and use the associated parameter estimates as the best estimates. Then we use this set of best estimates to compare against each set parameter estimates that use the same initial parameter values. At the end of this prep function, we first subset the fitted data to remove those fits that used the Navarro small-time approximation with an initial value of $a \leq .75$ (see [Known Error 5](#fit-ke) for more details). The following code chunk defines this function, which will be used next.
+Now we test the consistency of the fitted parameters using the various density function approximations. As [discussed above](#fit), we use an allowable tolerance of 0.0001 to account for the slight differences in the output of the different approximations. First we define a function to determine the differences in the objective value of the log-likelihood function and the parameter estimates. For each set of initial parameter values, there is one objective value corresponding to each algorithm; we take the minimum of these objective values and use the associated parameter estimates as the best estimates. Then we use this set of best estimates to compare against each set parameter estimates that use the same initial parameter values. At the end of this prep function, we first subset the fitted data to remove those fits that used the Navarro small-time approximation with an initial value of $a \leq .75$ (see [Known Error 5](#fit-ke) below for more details). The following code chunk defines this function, which will be used next.
 
 ```{r fitting-prep, eval=TRUE}
 fit_prep <- function(fit) {
@@ -824,7 +832,7 @@ We can see that it is mostly the small time methods that have occasional issues 
 
 ## Known Errors {#fit-ke}
 
-5) If the starting parameter value for $a \leq 0.75$ then the optimization that uses Navarro small-time density approximation yields inaccurate parameter estimates for all of the fitted parameters, yet `nlminb` claims to have converged. This is likely due to the small value of $a$ creating a larger "effective response time" $\frac{rt}{a^2}$, which the small-time approximation may not handle well and thus cause the optimizer to get stuck. This issue does not appear for the density function that uses both the Navarro small-time and large-time approximations ('n_terms_small == "Navarro", scale == "both") because the large-time approximation will handle this region of the parameter space and produce more accurate results.
+5) If the starting parameter value for $a \leq 0.75$ then the optimization that uses Navarro small-time density approximation yields inaccurate parameter estimates for all of the fitted parameters, yet `nlminb` claims to have converged. This is likely due to the small value of $a$ creating a larger "effective response time" $\frac{rt}{a^2}$, which the small-time approximation may not handle well and thus cause the optimizer to get stuck. This issue does not appear for the density function that uses both the Navarro small-time and large-time approximations (`n_terms_small = "Navarro", scale = "both"`) because the large-time approximation will handle this region of the parameter space and produce more accurate results.
 
 
 
