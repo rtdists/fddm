@@ -325,6 +325,12 @@ bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
 ```
 
 
+```{r bm-run-internal, eval=FALSE, include=FALSE}
+save(bm_vec, file = "inst/extdata/bm_vec.Rds", compress = "xz")
+save(bm_ind, file = "inst/extdata/bm_ind.Rds", compress = "xz")
+```
+
+
 
 
 ## Analysis of Benchmark Results {#den-ana}
@@ -947,6 +953,11 @@ med_dec <- med_dec[which(med_dec$rt >= 0),]
 fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
               truth_idx = 5, response_upper = "blast", err_tol = 1e-6,
               times = 100, unit = "us")
+```
+
+
+```{r fit-run-internal, eval=FALSE, include=FALSE}
+save(fit, file = "inst/extdata/bm_fit.Rds", compress = "xz")
 ```
 
 

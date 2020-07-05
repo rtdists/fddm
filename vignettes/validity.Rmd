@@ -751,7 +751,7 @@ fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
 
 
 ```{r fitting-run-internal, eval=FALSE, include=FALSE}
-save(fit, file = "inst/extdata/valid_fit.Rds")
+save(fit, file = "inst/extdata/valid_fit.Rds", compress = "xz")
 ```
 
 
