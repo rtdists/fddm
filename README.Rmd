@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 [![Travis build status](https://travis-ci.org/rtdists/fddm.svg?branch=master)](https://travis-ci.org/rtdists/fddm)
+[![R build status](https://github.com/rtdists/fddm/workflows/R-CMD-check/badge.svg)](https://github.com/rtdists/fddm/actions)
 <!-- badges: end -->
 
 The goal of fddm is to Kendal add some text here.
