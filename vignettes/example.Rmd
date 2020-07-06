@@ -1,5 +1,5 @@
 ---
-title: "Examples Using dfddm"
+title: "Fitting Example Using dfddm"
 author: "Kendal Foster and Henrik Singmann"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 bibliography: references.bib
@@ -10,7 +10,7 @@ output:
     fig_width: 8
     fig_height: 6
 vignette: >
-  %\VignetteIndexEntry{Examples Using dfddm}
+  %\VignetteIndexEntry{Fitting Example Using dfddm}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -35,7 +35,9 @@ knitr::opts_chunk$set(
 
 
 
-Function `dfddm` evaluates the density function (or probability density function, PDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full PDF, which contains an infinite sum. An overview of the mathematical details of the different approximations is provided in the [Math Vignette](math.html). Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ (threshold separation), $v \in (-\infty, \infty)$ (drift rate), $t_0 \in [0, \infty)$ (non-decision time/response time constant), $w \in (0, 1)$ (relative starting point), and $sv \in (0, \infty)$ (inter-trial-variability of drift).
+Function `dfddm` evaluates the density function (or probability density function, PDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full PDF, which contains an infinite sum. An overview of the mathematical details of the different approximations is provided in the [Math Vignette](math.html). An empirical validation of the implemented methods is provided in the [Validity Vignette](validity.html). Timing benchmark for the present methods and comparison with existing methods are provided in the [Benchmark Vignette](benchmark.html)
+
+Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ (threshold separation), $v \in (-\infty, \infty)$ (drift rate), $t_0 \in [0, \infty)$ (non-decision time/response time constant), $w \in (0, 1)$ (relative starting point), and $sv \in (0, \infty)$ (inter-trial-variability of drift).
 <br><br>
 
 
@@ -66,7 +68,7 @@ We are going to be fitting the parameters $v$, $a$, $t_0$, $w$, and $sv$; howeve
 
 The first argument to our log-likelihood function needs to be a vector of the six parameters that are being optimized: $v_u$, $v_\ell$, $a$, $t_0$, $w$, and $sv$. The rest of the arguments will be the other necessary inputs to `dfddm` that are not optimized: the vector of response times, the vector of responses, the vector of the truthful classifications, and the allowable error tolerance for the density function (optional). Details on all of these inputs can be found in the `dfddm` documentation.
 
-Upon being called, the log-likelihood function first separates the input response times and responses by their truthful classification to yield two new response time vectors and two new response vectors. The response times and responses are then input into separate density functions to . These separate densities are then combined, and the log-likelihood function heavily penalizes any combination of parameters that returns a log-density of $-\infty$ (equivalent to a regular density of $0$). Lastly, the actual log-likelihood is returned as the negative of the sum of all of the densities.
+Upon being called, the log-likelihood function first separates the input response times and responses by their truthful classification to yield two new response time vectors and two new response vectors. The response times and responses are then input into separate density functions using a separate $v$ parameter, $v_u$ or $v_\ell$. These separate densities are then combined, and the log-likelihood function heavily penalizes any combination of parameters that returns a log-density of $-\infty$ (equivalent to a regular density of $0$). Lastly, the actual log-likelihood is returned as the negative of the sum of all of the densities.
 
 ```{r log-likelihood, eval=TRUE}
 ll_fun <- function(pars, rt, resp, truth, err_tol) {
