@@ -7,17 +7,26 @@
 
 [![Travis build
 status](https://travis-ci.org/rtdists/fddm.svg?branch=master)](https://travis-ci.org/rtdists/fddm)
+[![R build
+status](https://github.com/rtdists/fddm/workflows/R-CMD-check/badge.svg)](https://github.com/rtdists/fddm/actions)
 <!-- badges: end -->
 
-The goal of fddm is to Kendal add some text here.
+`fddm` provides function Function `dfddm()` which evaluates the density
+function (or probability density function, PDF) for the Ratcliff
+diffusion decision model (DDM) using different methods for approximating
+the full PDF, which contains an infinite sum. Our implementation of the
+DDM has the following parameters: \(a \in (0, \infty)\) (threshold
+separation), \(v \in (-\infty, \infty)\) (drift rate),
+\(t_0 \in [0, \infty)\) (non-decision time/response time constant),
+\(w \in (0, 1)\) (relative starting point), and \(sv \in (0, \infty)\)
+(inter-trial-variability of drift).
 
 ## Installation
 
 You can install the released version of fddm from
 [CRAN](https://CRAN.R-project.org) with:
 
-    ## not yet on CRAN
-    ## install.packages("fddm")
+    install.packages("fddm")
 
 And the development version from [GitHub](https://github.com/) with:
 
@@ -28,33 +37,98 @@ devtools::install_github("rtdists/fddm")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+As an example, we will fit data from one participant from the the
+`med_dec` data that comes with `fddm`. This data contains the accuracy
+condition reported in Trueblood et al. (2018) investigating medical
+decision making. Here we use one data set from one experienced medical
+professionals (pathologists). The task of participants was to judge
+whether pictures of blood cells show cancerous cells (i.e., blast cells)
+or non-cancerous cells (i.e., non-blast cells). The data set contains
+200 decision per participant, based on pictures of 100 true cancerous
+cells and pictures of 100 true non-cancerous cells. First we load the
+`fddm` package and prepare the data.
 
 ``` r
-# library(fddm)
-## basic example code
+library("fddm")
+data(med_dec, package = "fddm")
+med_dec <- med_dec[which(med_dec$rt >= 0),]
+onep <- med_dec[ med_dec$id == "2" & med_dec$group == "experienced",  ]
+str(onep)
+#> 'data.frame':    200 obs. of  9 variables:
+#>  $ id            : int  2 2 2 2 2 2 2 2 2 2 ...
+#>  $ group         : chr  "experienced" "experienced" "experienced" "experienced" ...
+#>  $ block         : int  3 3 3 3 3 3 3 3 3 3 ...
+#>  $ trial         : int  1 2 3 4 5 6 7 8 9 10 ...
+#>  $ classification: chr  "blast" "non-blast" "non-blast" "non-blast" ...
+#>  $ difficulty    : chr  "easy" "easy" "hard" "hard" ...
+#>  $ response      : chr  "blast" "non-blast" "blast" "non-blast" ...
+#>  $ rt            : num  0.853 0.575 1.136 0.875 0.748 ...
+#>  $ stimulus      : chr  "blastEasy/BL_10166384.jpg" "nonBlastEasy/16258001115A_069.jpg" "nonBlastHard/BL_11504083.jpg" "nonBlastHard/MY_9455143.jpg" ...
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
+We then prepare the data by defining upper and lower responses and the
+correct response bounds.
 
 ``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
+onep$resp <- ifelse(onep$response == "blast", "upper", "lower")
+onep$truth <- ifelse(onep$classification == "blast", "upper", "lower")
 ```
 
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date.
+For fitting, we need a simple likelihood function. A detailed
+explanation of the function are provided in the example vignette. Note
+that it returns the negative log-likelihood so we can simply minimze to
+get the maximum likelihood estimate.
 
-You can also embed plots, for example:
+``` r
+ll_fun <- function(pars, rt, resp, truth) {
+  rtu <- rt[truth == "upper"]
+  rtl <- rt[truth == "lower"]
+  respu <- resp[truth == "upper"]
+  respl <- resp[truth == "lower"]
 
-<img src="man/figures/README-pressure-1.png" width="100%" />
+  # the truth is "upper" so use vu
+  densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
+                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE)
+  # the truth is "lower" so use vl
+  densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
+                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE)
 
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub\!
+  densities <- c(densu, densl)
+  if (any(!is.finite(densities))) return(1e6)
+  return(-sum(densities))
+}
+```
+
+We then pass the data and log-likelihood and the additional argument
+needed to an optimisation function. Here, we use `nlminb`. Note that the
+first argument are the starting values. We also need to define upper and
+lower bounds of the parameters, which are in order, \(v_u\), \(v_\ell\),
+\(a\), \(t_0\), \(w\), and \(sv\). Fitting this is basically
+instanteneous.
+
+``` r
+fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun, 
+              rt = onep$rt, resp = onep$resp, truth = onep$truth, 
+              # limits:   vu,   vl,   a,  t0, w,  sv
+              lower = c(-Inf, -Inf,   0,   0, 0,   0),
+              upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
+fit
+#> $par
+#> [1]  5.6813024 -2.1886620  2.7909111  0.3764465  0.4010116  2.2812989
+#> 
+#> $objective
+#> [1] 42.47181
+#> 
+#> $convergence
+#> [1] 0
+#> 
+#> $iterations
+#> [1] 41
+#> 
+#> $evaluations
+#> function gradient 
+#>       60      301 
+#> 
+#> $message
+#> [1] "relative convergence (4)"
+```
