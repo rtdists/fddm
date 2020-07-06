@@ -15,10 +15,10 @@ status](https://github.com/rtdists/fddm/workflows/R-CMD-check/badge.svg)](https:
 function (or probability density function, PDF) for the Ratcliff
 diffusion decision model (DDM) using different methods for approximating
 the full PDF, which contains an infinite sum. Our implementation of the
-DDM has the following parameters: \(a \in (0, \infty)\) (threshold
-separation), \(v \in (-\infty, \infty)\) (drift rate),
-\(t_0 \in [0, \infty)\) (non-decision time/response time constant),
-\(w \in (0, 1)\) (relative starting point), and \(sv \in (0, \infty)\)
+DDM has the following parameters: a in (0, infinity) (threshold
+separation), v in (-infinity, infinity) (drift rate), t0 in \[0,
+infinity) (non-decision time/response time constant), w in (0, 1)
+(relative starting point), and sv in (0, infinity)
 (inter-trial-variability of drift).
 
 ## Installation
@@ -102,9 +102,8 @@ ll_fun <- function(pars, rt, resp, truth) {
 We then pass the data and log-likelihood and the additional argument
 needed to an optimisation function. Here, we use `nlminb`. Note that the
 first argument are the starting values. We also need to define upper and
-lower bounds of the parameters, which are in order, \(v_u\), \(v_\ell\),
-\(a\), \(t_0\), \(w\), and \(sv\). Fitting this is basically
-instanteneous.
+lower bounds of the parameters, which are in order, vu, vl, a, t0, w,
+and sv. Fitting this is basically instanteneous.
 
 ``` r
 fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun, 
