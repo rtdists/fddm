@@ -327,6 +327,15 @@ bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
 
 
 ```{r bm-run-and-save, eval=FALSE, include=FALSE}
+# Define parameter space
+RT <- c(0.001, 0.1, 1, 2, 3, 4, 5, 10, 30)
+A <- c(0.25, 0.5, 1, 2.5, 5)
+V <- c(-5, -2, 0, 2, 5)
+t0 <- 1e-4 # must be nonzero for RWiener
+W <- c(0.2, 0.5, 0.8)
+SV <- c(0, 0.5, 1, 1.5)
+err_tol <- 1e-6 # this is the setting from rtdists
+
 # Run benchmark tests
 bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                            W = W, SV = SV, err_tol = err_tol,
@@ -751,7 +760,7 @@ We use a different set of initial parameter values for each combination of data 
 
 The following code chunk defines the function that will run the optimization and produce the fitted parameter estimates for $v_u$, $v_\ell$, $a$, $w$, and $sv$. As [discussed above](#fit-gen), we only use a selection of methods from those available in `dfddm`. This fitting function will run the optimization for each set of initial parameter values and store the following results from the optimization: 1) resulting convergence code (either $0$ indicating successful convergence or $1$ indicating unsuccessful convergence); 2) minimized value of the objective log-likelihood function; 3) the number of iterations used by the optimizer during the optimization process; 4) the number of calls to the log-likelihood function during the optimization process; and 5) the median microbenchmark time of the optimization using each method.
 
-As in the [previous section](#den-gen), we run the `microbenchmark` function 100 times for each approximation at each point in this parameter space and save the median of these 100 benchmark times. Using the median of these data should reduce the number of outliers in the data while maintaining a truthful representation of the approximations' performance. We will be using the [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) package to time the evaluations.
+As in the [previous section](#den-gen), we run the `microbenchmark` function multiple times for each approximation at each point in this parameter space and save the median of these benchmark times. However, because a full optimisation run entails several calls to the density function, we only use a smaller num of repetitions here. Using the median of these data should reduce the number of outliers in the data while maintaining a truthful representation of the approximations' performance. We will be using the [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) package to time the evaluations.
 
 ```{r fit-fun, eval=TRUE}
 rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
@@ -955,13 +964,13 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
 As an example data set, we use the `med_dec` data that comes with `fddm`. This data contains the accuracy condition reported in @trueblood_impact_2018 investigating medical decision making among medical professionals (pathologists) and novices (i.e., undergraduate students). The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The data set contains 200 decision per participant, based on pictures of 100 true cancerous cells and pictures of 100 true non-cancerous cells.
 
-Having set up the fitting functions in the above chunks of code, we could pass the `med_dec` data to this function to get the parameter estimates. However, as this takes a long time we skip the fitting in the vignette and instead read the pre-fit parameter estimates in the next section.
+Having set up the fitting functions in the above chunks of code, we could pass the `med_dec` data to this function to get the parameter estimates. However, as this takes a relatively long time (around 30 minutes) we skip the fitting in the vignette and instead read the pre-fit parameter estimates in the next section.
 
 ```{r fit-run, eval=FALSE}
 data(med_dec, package = "fddm")
 med_dec <- med_dec[which(med_dec$rt >= 0),]
 fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
-              truth_idx = 5, response_upper = "blast", err_tol = 1e-8,
+              truth_idx = 5, response_upper = "blast", err_tol = 1e-6,
               times = 6, unit = "us")
 ```
 
@@ -1007,7 +1016,8 @@ fit_prep <- function(fit) {
   fit$BmTime <- fit$BmTime/1e6 # convert to milliseconds
 
   eps <- 1e-4
-  # fit$Obj_diff[fit$Obj_diff > eps] <- eps
+  fit$Obj_diff[fit$Obj_diff < eps] <- NA
+  fit$Diff_cat <- ifelse(fit$Obj_diff > 2, "> 2", "< 2")
   # fit$Obj_diff <- fit$Obj_diff / eps # prep for alpha values
 
   return(fit)
@@ -1021,69 +1031,69 @@ Names <- c("fs_SWSE_17", "fs_Gon_17", "fs_Nav_17",
            "fb_Gon_17", "fb_Nav_17", "rtdists")
 Color <- c("#9900cc", "#006699", "#336600",
            "#c2a500", "#e68a00", "#990000")
-Shape <- c(1, 4)
+Shape <- c(21, 25)
 eps <- 1e-4
 max_alpha <- max(fit$Obj_diff)
 ```
 
-We will now present three plots to illustrate how the various methods perform when used in fitting Ratcliff's DDM to real-world data. The measures of interest for each method are the median `microbenchmark` timings, the number of optimization iterations, and the number of function evaluations in the optimization process; each one of the three plots will focus on one of these measures. Each plot will contain violin plots to show the densities of each method with respect to that plot's measure. To help explain problematic fits, the plots will indicate any data point that represents an optimization run for which the objective difference is greater than our predefined tolerance of $\epsilon = 0.0001$. More specifically, the transparency of the data points are determined by their objective difference; so a data point with zero objective difference will not show up on the plots, but a data point with objective difference close to or greater than $\epsilon$ will be visible on the plots. In addition, each of these visible data points will have a shape to indicate its convergence code: "O" for successful convergence, and "X" for failed convergence. For each method in each of the plots, the data points are aggregated over the distinct individuals in the experiment and the different initial parameter values for the fitting.
+We will now present three plots to illustrate how the various methods perform when used in fitting Ratcliff's DDM to real-world data. The measures of interest for each method are the median `microbenchmark` timings, the number of optimization iterations, and the number of function evaluations in the optimization process; each one of the three plots will focus on one of these measures. Each plot will show a distribution of values of this measure in terms of violin plots and box plots. The distribution shown is the distribution across participants and starting values for each of the different methods of approximating the diffusion model; that is, for each of the `r length(unique(fit$ID))` participants, we present results based on the 11 different starting values for each method (the starting values are constant across methods). 
+
+
+To help explain problematic fits, the plots will show any data point that represents an optimization run for which the objective difference is greater than our predefined tolerance of $\epsilon = 0.0001$. More specifically, for the points shown in grey, the objective difference is comparatively small (i.e., smaller than 2 on the log-likelihood scale) and poitns shown with a grey background have a difference from the optimum of larger than 2 points on the log-likelihood scale. Data point with objective difference smaller than $\epsilon$ will not be shown on the plot. In addition, each of these visible data points will have a shape to indicate its convergence code: a round point for successful convergence, and  a triangle for failed convergence. 
 
 The first plot will show the densities of the `microbenchmark` timings for each method.
 
 ```{r fit-mbm, eval=TRUE}
-fit_mbm <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
-                measure.vars = "BmTime", value.name = "BmTime")[,-4]
+fit_mbm <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff", "Diff_cat"),
+                measure.vars = "BmTime", value.name = "BmTime")
+fit_mbm$Convergence <- ifelse(is.na(fit_mbm$Diff_cat), NA, fit_mbm$Convergence)
 
 ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
                     y = BmTime)) +
-       geom_violin(trim = TRUE, alpha = 0.5,
-                   aes(color = factor(Algorithm, levels = Names),
-                       fill = factor(Algorithm, levels = Names))) +
-       geom_boxplot(width = 0.2, outlier.shape = NA,
-                    fill = "white", alpha = 0.4,
-                    aes(color = factor(Algorithm, levels = Names))) +
-       geom_point(aes(color = factor(Algorithm, levels = Names),
-                      shape = factor(Convergence, levels = c(0,1)),
-                      alpha = Obj_diff), size = 3) +
-       scale_color_manual(values = Color, guide = FALSE) +
-       scale_fill_manual(values = Color, guide = FALSE) +
-       scale_shape_manual(values = Shape,
-                          name = "Convergence Code",
-                          breaks = c(0, 1),
-                          labels = c("Success", "Failure")) +
-       scale_alpha_continuous(range = c(0, max_alpha),
-                              name = "Objective Difference",
-                              breaks = c(0, max_alpha/2, max_alpha),
-                              labels = 
-                                c(0, 
-                                  formatC(max_alpha*eps/2, format = "e", digits = 2),
-                                  formatC(max_alpha*eps, format = "e", digits = 2))) +
-       stat_summary(fun = mean, geom = "errorbar",
-                    aes(ymax = ..y.., ymin = ..y..),
-                    width = .5, linetype = "dashed",
-                    color = Color) +
-       labs(title = "Median microbenchmark times for data fitting",
-            subtitle = "Dashed lines represent mean benchmark times;\nOpaque points have an objective difference greater than 1e-4",
-            x = "Method", y = "Time (milliseconds)") +
-       guides(alpha = guide_legend(order = 1),
-              shape = guide_legend(order = 2)) +
-       theme_bw() +
-       theme(panel.border = element_blank(),
-             plot.title = element_text(size = 23),
-             plot.subtitle = element_text(size = 16,
-                                          margin = margin(5, 5, 85, 5, "pt")),
-             axis.text.x = element_text(size = 16, angle = 90),
-             axis.text.y = element_text(size = 16),
-             axis.title.x = element_text(size = 20),
-             axis.title.y = element_text(size = 20),
-             legend.position = c(0, 1),
-             legend.justification = c(0, 0),
-             legend.box = "horizontal",
-             legend.direction = "vertical",
-             legend.background = element_rect(fill = "transparent"))
+  geom_violin(trim = TRUE, alpha = 0.5,
+              aes(color = factor(Algorithm, levels = Names),
+                  fill = factor(Algorithm, levels = Names))) +
+  geom_boxplot(width = 0.2, outlier.shape = NA,
+               fill = "white", alpha = 0.4,
+               aes(color = factor(Algorithm, levels = Names))) +
+  scale_fill_manual("Algorithm", values = Color, guide = FALSE) +
+  ggnewscale::new_scale_fill() +
+  geom_point(aes(color = factor(Algorithm, levels = Names),
+                 shape = factor(Convergence, levels = c(0,1)), 
+                 fill = Diff_cat), size = 3) +
+  scale_fill_manual(name = "Difference",
+                    values = c("> 2" = "grey", "< 2" = "transparent"), 
+                    na.translate = FALSE, guide = FALSE) +
+  scale_color_manual(values = Color, guide = FALSE) +
+  scale_shape_manual(values = Shape,
+                     name = "Convergence Code",
+                     breaks = c(0, 1),
+                     labels = c("Success", "Failure")) +
+  stat_summary(fun = mean, geom = "errorbar",
+               aes(ymax = ..y.., ymin = ..y..),
+               width = .5, linetype = "dashed",
+               color = Color) +
+  labs(title = "Median microbenchmark times for data fitting",
+       subtitle = "Dashed lines represent mean benchmark times;\nOpaque points have an objective difference greater than 1e-4",
+       x = "Method", y = "Time (milliseconds)") +
+  guides(shape = guide_legend(order = 2)) +
+  theme_bw() +
+  theme(panel.border = element_blank(),
+        plot.title = element_text(size = 23),
+        plot.subtitle = element_text(size = 16,
+                                     margin = margin(5, 5, 85, 5, "pt")),
+        axis.text.x = element_text(size = 16, angle = 90),
+        axis.text.y = element_text(size = 16),
+        axis.title.x = element_text(size = 20),
+        axis.title.y = element_text(size = 20),
+        legend.position = c(0, 1),
+        legend.justification = c(0, 0),
+        legend.box = "horizontal",
+        legend.direction = "vertical",
+        legend.background = element_rect(fill = "transparent"))
 ```
 
-This plot is something of an exaggerated version of [the `microbenchmark` violin plot](#den-ana) from the previous section. Immediately we observe that fitting using the `rtdists` function is noticeably slower than fitting using the functions provided in `fddm`. Upon closer inspection, the means and medians of the benchmark times are shorter for the two small-time algorithms "fs_SWSE_17" and "fs_Gon_17" than for the other small-time algorithm or either of the algorithms that use both the small-time and large-time density functions. However, these two seemingly faster algorithms not only have much longer tails in their fitting times but also have more problematic data points in the optimization process. These longer tails and misfit points are likely due to the shortcomings of the approximation to the small-time density function, namely the poor support for large "effective response times" that we discussed in a [previous section](#den-ana) of this vignette.
+This plot is something of an exaggerated version of [the `microbenchmark` violin plot](#den-ana) from the previous section. Immediately we observe that fitting using the `rtdists` function is noticeably slower than fitting using the functions provided in `fddm`. Upon closer inspection, the means and medians of the benchmark times are shorter for the two small-time algorithms "fs_SWSE_17" and "fs_Gon_17" than for the other small-time algorithm or either of the algorithms that use both the small-time and large-time density functions. However, these two seemingly faster algorithms not only have much longer tails in their fitting times but also have more problematic data points in the optimization process. These longer tails and misfit points are likely due to the shortcomings of the approximation to the small-time density function, namely the poor support for large "effective response times" that we discussed in a [previous section](#den-ana) of this vignette. We also see that the two combined algorithms "fb_" both only show one case where the algorithm did not reach the optimum for one participant and starting value, but are stil quite fast. One fitting run takes on average less than 50 milliseconds on the system used for running the tests.
 
 The second plot will show the densities of the number of optimization iterations for each method.
 
