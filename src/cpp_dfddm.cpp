@@ -99,6 +99,30 @@ NumericVector cpp_dfddm(const NumericVector& rt,
   int Nmax = max({Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Neps});
 
   // input checking
+  if (Nrt < 1) {
+    stop("dfddm error: model input 'rt' is empty");
+  }
+  if (Nres < 1) {
+    stop("dfddm error: model input 'response' is empty");
+  }
+  if (Na < 1) {
+    stop("dfddm error: model parameter 'a' is empty");
+  }
+  if (Nv < 1) {
+    stop("dfddm error: model parameter 'v' is empty");
+  }
+  if (Nt0 < 1) {
+    stop("dfddm error: model parameter 't0' is empty");
+  }
+  if (Nw < 1) {
+    stop("dfddm error: model parameter 'w' is empty");
+  }
+  if (Nsv < 1) {
+    stop("dfddm error: model parameter 'sv' is empty");
+  }
+  if (Neps < 1) {
+    stop("dfddm error: model parameter 'err_tol' is empty");
+  }
   for (int i = 0; i < Na; i++) {
     if (a[i] < 0) {
       stop("dfddm error: model parameter 'a' < 0 at index %i.", i+1);

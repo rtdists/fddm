@@ -13,6 +13,7 @@ sqrt(.Machine$double.eps)
 rt <- seq(1,3,by=0.5)
 eps <- 1e-6
 dfddm(rt, 1, 1, 0.4, 0, 0.5, 0, T, "Gondan", "2017", "small", eps)
+dfddm(rt = numeric(), response = "lower", a = 1, v = -2, t0 = 0.3)
 
 
 
