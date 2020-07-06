@@ -8,7 +8,7 @@ output:
     css: stile.css
     toc: false
     fig_width: 8
-    fig_height: 6
+    fig_height: 7
 vignette: >
   %\VignetteIndexEntry{Benchmark Testing}
   %\VignetteEngine{knitr::rmarkdown}
@@ -357,7 +357,7 @@ The first step in analyzing the benchmark data is a rough visualization of the r
 
 For this visualization we will use the benchmark data where the response times were handed over as a a vector to each `fddm` call. As discussed above, running the benchmark on individuals RTs is considerably slower as the loop over RTs resides in R and not in C++.
 
-```{r bm-violin, eval=TRUE}
+```{r bm-violin, eval=TRUE, fig.height=5}
 library("reshape2")
 library("ggplot2")
 
@@ -397,7 +397,8 @@ ggplot(mbm_vec, aes(x = FuncName, y = time,
        theme(panel.border = element_blank(),
              plot.title = element_text(size = 23),
              plot.subtitle = element_text(size = 16),
-             axis.text.x = element_text(size = 16, angle = 90),
+             axis.text.x = element_text(size = 16, angle = 90,
+                                        vjust = 0.5, hjust = 1),
              axis.text.y = element_text(size = 16),
              axis.title.x = element_text(size = 20),
              axis.title.y = element_text(size = 20),
@@ -468,7 +469,7 @@ ggplot(mbm_meq, aes(x = RTAA, y = time,
   facet_wrap(~ factor(FuncName, levels = Names_meq), scales = "free_y")
 ```
 
-This plot confirms that the aptly named small-time and large-time density functions are generally more efficient at calculating the density for small response times and large response times, respectively. Of the three methods used from the literature, the `RWiener` and `rtdists` functions use a switching mechanism between the small-time and large-time density functions, and the Gondan algorithm only uses the small-time density function. Importantly, the methods that utilize a switching mechanism between the small-time and large-time density functions have much flatter plots and generally perform well across the $\frac{rt}{a^2}$ parameter space with only a small uptick towards the right. Somewhat suprisingly, this plot suggests that for individual response time as used here, `RWiener` might be slightly faster than all `fddm` method. This contrasts with the clearly faster performance when entering RTs as a vector.
+This plot confirms that the aptly named small-time and large-time density functions are generally more efficient at calculating the density for small response times and large response times, respectively. Of the three methods used from the literature, the `RWiener` and `rtdists` functions use a switching mechanism between the small-time and large-time density functions, and the Gondan algorithm only uses the small-time density function. Importantly, the methods that utilize a switching mechanism between the small-time and large-time density functions have much flatter plots and generally perform well across the $\frac{rt}{a^2}$ parameter space with only a small uptick towards the right.
 
 As above, this code chunk plots the effect on the median benchmark time but instead for the model parameter $w$, the relative starting point.
 
@@ -1016,9 +1017,12 @@ fit_prep <- function(fit) {
   fit$BmTime <- fit$BmTime/1e6 # convert to milliseconds
 
   eps <- 1e-4
-  fit$Obj_diff[fit$Obj_diff < eps] <- NA
-  fit$Diff_cat <- ifelse(fit$Obj_diff > 2, "> 2", "< 2")
-  # fit$Obj_diff <- fit$Obj_diff / eps # prep for alpha values
+  
+  fit[fit$Obj_diff < eps, "Obj_diff"] <- 0
+  fit[(fit$Obj_diff >= eps & fit$Obj_diff <= 2), "Obj_diff"] <- 1
+  fit[fit$Obj_diff > 2, "Obj_diff"] <- 3
+  
+  fit$Convergence <- ifelse(fit$Convergence < 1, 0, 1)
 
   return(fit)
 }
@@ -1032,21 +1036,22 @@ Names <- c("fs_SWSE_17", "fs_Gon_17", "fs_Nav_17",
 Color <- c("#9900cc", "#006699", "#336600",
            "#c2a500", "#e68a00", "#990000")
 Shape <- c(21, 25)
-eps <- 1e-4
-max_alpha <- max(fit$Obj_diff)
+Sizes <- c(0, 3, 3)
+Stroke <- c(0, 1, 1)
+Fills <- c("#ffffff00", "#ffffff00", "#80808099")
 ```
 
-We will now present three plots to illustrate how the various methods perform when used in fitting Ratcliff's DDM to real-world data. The measures of interest for each method are the median `microbenchmark` timings, the number of optimization iterations, and the number of function evaluations in the optimization process; each one of the three plots will focus on one of these measures. Each plot will show a distribution of values of this measure in terms of violin plots and box plots. The distribution shown is the distribution across participants and starting values for each of the different methods of approximating the diffusion model; that is, for each of the `r length(unique(fit$ID))` participants, we present results based on the 11 different starting values for each method (the starting values are constant across methods). 
+We will now present three plots to illustrate how the various methods perform when used in fitting Ratcliff's DDM to real-world data. The measures of interest for each method are the median `microbenchmark` timings and the number of function evaluations in the optimization process; each one of the three plots will focus on one of these measures. Each plot will show a distribution of values of this measure in terms of violin plots and box plots. The distribution shown is the distribution across participants and starting values for each of the different methods of approximating the diffusion model; that is, for each of the `r length(unique(fit$ID))` participants, we present results based on the 11 different starting values for each method (the starting values are constant across methods). 
 
 
-To help explain problematic fits, the plots will show any data point that represents an optimization run for which the objective difference is greater than our predefined tolerance of $\epsilon = 0.0001$. More specifically, for the points shown in grey, the objective difference is comparatively small (i.e., smaller than 2 on the log-likelihood scale) and poitns shown with a grey background have a difference from the optimum of larger than 2 points on the log-likelihood scale. Data point with objective difference smaller than $\epsilon$ will not be shown on the plot. In addition, each of these visible data points will have a shape to indicate its convergence code: a round point for successful convergence, and  a triangle for failed convergence. 
+To help explain problematic fits, the plots will show any data point that represents an optimization run for which the objective difference is greater than our predefined tolerance of $\epsilon = 0.0001$. More specifically, for the points shown in grey, the objective difference is comparatively small (i.e., smaller than 2 on the log-likelihood scale) and points shown with a grey background have a difference from the optimum of larger than 2 points on the log-likelihood scale. Data point with objective difference smaller than $\epsilon$ will not be shown on the plot. In addition, each of these visible data points will have a shape to indicate its convergence code: a round point for successful convergence, and  a triangle for failed convergence. 
 
 The first plot will show the densities of the `microbenchmark` timings for each method.
 
-```{r fit-mbm, eval=TRUE}
-fit_mbm <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff", "Diff_cat"),
-                measure.vars = "BmTime", value.name = "BmTime")
-fit_mbm$Convergence <- ifelse(is.na(fit_mbm$Diff_cat), NA, fit_mbm$Convergence)
+```{r fit-mbm, eval=TRUE, fig.height=6}
+fit_mbm <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
+                measure.vars = "BmTime", value.name = "BmTime")[,-4]
+ma <- max(fit_mbm[fit_mbm$Algorithm != "fs_SWSE_17", "BmTime"]) # weird point
 
 ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
                     y = BmTime)) +
@@ -1056,152 +1061,129 @@ ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
   geom_boxplot(width = 0.2, outlier.shape = NA,
                fill = "white", alpha = 0.4,
                aes(color = factor(Algorithm, levels = Names))) +
-  scale_fill_manual("Algorithm", values = Color, guide = FALSE) +
-  ggnewscale::new_scale_fill() +
-  geom_point(aes(color = factor(Algorithm, levels = Names),
-                 shape = factor(Convergence, levels = c(0,1)), 
-                 fill = Diff_cat), size = 3) +
-  scale_fill_manual(name = "Difference",
-                    values = c("> 2" = "grey", "< 2" = "transparent"), 
-                    na.translate = FALSE, guide = FALSE) +
+  stat_summary(fun = mean, geom = "errorbar",
+               aes(ymax = ..y.., ymin = ..y..),
+               width = .5, linetype = "dashed",
+               color = Color) +
   scale_color_manual(values = Color, guide = FALSE) +
   scale_shape_manual(values = Shape,
                      name = "Convergence Code",
                      breaks = c(0, 1),
                      labels = c("Success", "Failure")) +
-  stat_summary(fun = mean, geom = "errorbar",
-               aes(ymax = ..y.., ymin = ..y..),
-               width = .5, linetype = "dashed",
-               color = Color) +
+  scale_size_manual(values = Sizes, guide = FALSE) +
+  scale_discrete_manual(aesthetics = "stroke", values = Stroke, guide = FALSE) +
+  scale_fill_manual(values = Color, guide = FALSE) +
+  ggnewscale::new_scale_fill() +
+  scale_fill_manual(values = Fills,
+                    name = "Objective Difference",
+                    breaks = c(1, 3),
+                    labels = c("< 2", "> 2")) +
+  geom_point(aes(color = factor(Algorithm, levels = Names),
+                 shape = factor(Convergence, levels = c(0, 1)),
+                 size = factor(Obj_diff, levels = c(0, 1, 3)),
+                 stroke = factor(Obj_diff, levels = c(0, 1, 3)),
+                 fill = factor(Obj_diff, levels = c(0, 1, 3)))) +
+  coord_cartesian(ylim = c(0, ma)) +
   labs(title = "Median microbenchmark times for data fitting",
-       subtitle = "Dashed lines represent mean benchmark times;\nOpaque points have an objective difference greater than 1e-4",
+       subtitle = paste("Dashed lines represent mean benchmark times;",
+                        "Visible points have an objective difference greater than 1e-4",
+                        sep = "\n"),
        x = "Method", y = "Time (milliseconds)") +
-  guides(shape = guide_legend(order = 2)) +
+  guides(shape = guide_legend(order = 1,
+                              override.aes = list(size = Sizes[c(2, 3)])),
+         fill = guide_legend(order = 2,
+                             override.aes = list(size = Sizes[c(2, 3)],
+                                                 shape = c(21, 21),
+                                                 fill = Fills[c(2, 3)]))) +
   theme_bw() +
   theme(panel.border = element_blank(),
         plot.title = element_text(size = 23),
         plot.subtitle = element_text(size = 16,
-                                     margin = margin(5, 5, 85, 5, "pt")),
-        axis.text.x = element_text(size = 16, angle = 90),
+                                     margin = margin(5, 5, 10, 5, "pt")),
+        axis.text.x = element_text(size = 16, angle = 90,
+                                   vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
         axis.title.x = element_text(size = 20),
-        axis.title.y = element_text(size = 20),
-        legend.position = c(0, 1),
-        legend.justification = c(0, 0),
-        legend.box = "horizontal",
+        axis.title.y = element_text(size = 20,
+                                    margin = margin(5, 10, 5, 5, "pt")),
+        legend.position = "right",
+        legend.box = "vertical",
         legend.direction = "vertical",
-        legend.background = element_rect(fill = "transparent"))
+        legend.background = element_rect(fill = "transparent"),
+        legend.title = element_text(size = 14),
+        legend.text = element_text(size = 13))
 ```
 
 This plot is something of an exaggerated version of [the `microbenchmark` violin plot](#den-ana) from the previous section. Immediately we observe that fitting using the `rtdists` function is noticeably slower than fitting using the functions provided in `fddm`. Upon closer inspection, the means and medians of the benchmark times are shorter for the two small-time algorithms "fs_SWSE_17" and "fs_Gon_17" than for the other small-time algorithm or either of the algorithms that use both the small-time and large-time density functions. However, these two seemingly faster algorithms not only have much longer tails in their fitting times but also have more problematic data points in the optimization process. These longer tails and misfit points are likely due to the shortcomings of the approximation to the small-time density function, namely the poor support for large "effective response times" that we discussed in a [previous section](#den-ana) of this vignette. We also see that the two combined algorithms "fb_" both only show one case where the algorithm did not reach the optimum for one participant and starting value, but are stil quite fast. One fitting run takes on average less than 50 milliseconds on the system used for running the tests.
 
-The second plot will show the distribution of the number of optimization iterations for each method.
+The second plot will show the distribution of the number of function evaluations in the optimization process for each method.
 
-```{r fit-ite, eval=TRUE}
-fit_ite <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
-                measure.vars = "Iterations", value.name = "Iterations")[,-4]
-
-ggplot(fit_ite, aes(x = factor(Algorithm, levels = Names),
-                    y = Iterations)) +
-       geom_violin(trim = TRUE, alpha = 0.5,
-                   aes(color = factor(Algorithm, levels = Names),
-                       fill = factor(Algorithm, levels = Names))) +
-       geom_boxplot(width = 0.2, outlier.shape = NA,
-                    fill = "white", alpha = 0.4,
-                    aes(color = factor(Algorithm, levels = Names))) +
-       geom_point(aes(color = factor(Algorithm, levels = Names),
-                      shape = factor(Convergence, levels = c(0,1)),
-                      alpha = Obj_diff), size = 3) +
-       scale_color_manual(values = Color, guide = FALSE) +
-       scale_fill_manual(values = Color, guide = FALSE) +
-       scale_shape_manual(values = Shape,
-                          name = "Convergence Code",
-                          breaks = c(0, 1),
-                          labels = c("Success", "Failure")) +
-       scale_alpha_continuous(range = c(0, max_alpha),
-                              name = "Objective Difference",
-                              breaks = c(0, max_alpha/2, max_alpha),
-                              labels = c(0, formatC(max_alpha*eps/2, format = "e", digits = 2), formatC(max_alpha*eps, format = "e", digits = 2))) +
-       stat_summary(fun = mean, geom = "errorbar",
-                    aes(ymax = ..y.., ymin = ..y..),
-                    width = .5, linetype = "dashed",
-                    color = Color) +
-       labs(title = "Optimization iterations for data fitting",
-            subtitle = "Dashed lines represent mean number of iterations;\nOpaque points have an objective difference greater than 1e-4",
-            x = "Method", y = "Number of optimization iterations") +
-       guides(alpha = guide_legend(order = 1),
-              shape = guide_legend(order = 2)) +
-       theme_bw() +
-       theme(panel.border = element_blank(),
-             plot.title = element_text(size = 23),
-             plot.subtitle = element_text(size = 16,
-                                          margin = margin(5, 5, 85, 5, "pt")),
-             axis.text.x = element_text(size = 16, angle = 90),
-             axis.text.y = element_text(size = 16),
-             axis.title.x = element_text(size = 20),
-             axis.title.y = element_text(size = 20),
-             legend.position = c(0, 1),
-             legend.justification = c(0, 0),
-             legend.box = "horizontal",
-             legend.direction = "vertical",
-             legend.background = element_rect(fill = "transparent"))
-```
-
-Here we see that the algorithms that implement both the small-time and large-time density functions appear to be the most stable. They have relatively short tails, suggesting that the optimization routine has little trouble in finding the optimum parameter estimates. Moreover, these algorthims have few data points where the objective difference is high or the convergence code indicates unsuccessful convergence.
-
-The third plot will show the distribution of the number of function evaluations in the optimization process for each method.
-
-```{r fit-fev, eval=TRUE}
+```{r fit-fev, eval=TRUE, fig.height=6}
 fit_fev <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
                 measure.vars = "FuncEvals", value.name = "FuncEvals")[,-4]
 
 ggplot(fit_fev, aes(x = factor(Algorithm, levels = Names),
                     y = FuncEvals)) +
-       geom_violin(trim = TRUE, alpha = 0.5,
-                   aes(color = factor(Algorithm, levels = Names),
-                       fill = factor(Algorithm, levels = Names))) +
-       geom_boxplot(width = 0.2, outlier.shape = NA,
-                    fill = "white", alpha = 0.4,
-                    aes(color = factor(Algorithm, levels = Names))) +
-       geom_point(aes(color = factor(Algorithm, levels = Names),
-                      shape = factor(Convergence, levels = c(0,1)),
-                      alpha = Obj_diff), size = 3) +
-       scale_color_manual(values = Color, guide = FALSE) +
-       scale_fill_manual(values = Color, guide = FALSE) +
-       scale_shape_manual(values = Shape,
-                          name = "Convergence Code",
-                          breaks = c(0, 1),
-                          labels = c("Success", "Failure")) +
-       scale_alpha_continuous(range = c(0, max_alpha),
-                              name = "Objective Difference",
-                              breaks = c(0, max_alpha/2, max_alpha),
-                              labels = c(0, formatC(max_alpha*eps/2, format = "e", digits = 2), formatC(max_alpha*eps, format = "e", digits = 2))) +
-       stat_summary(fun = mean, geom = "errorbar",
-                    aes(ymax = ..y.., ymin = ..y..),
-                    width = .5, linetype = "dashed",
-                    color = Color) +
-       labs(title = "Function evaluations for data fitting",
-            subtitle = "Dashed lines represent mean number of evaluations;\nOpaque points have an objective difference greater than 1e-4",
-            x = "Method", y = "Number of function evaluations") +
-       guides(alpha = guide_legend(order = 1),
-              shape = guide_legend(order = 2)) +
-       theme_bw() +
-       theme(panel.border = element_blank(),
-             plot.title = element_text(size = 23),
-             plot.subtitle = element_text(size = 16,
-                                          margin = margin(5, 5, 85, 5, "pt")),
-             axis.text.x = element_text(size = 16, angle = 90),
-             axis.text.y = element_text(size = 16),
-             axis.title.x = element_text(size = 20),
-             axis.title.y = element_text(size = 20),
-             legend.position = c(0, 1),
-             legend.justification = c(0, 0),
-             legend.box = "horizontal",
-             legend.direction = "vertical",
-             legend.background = element_rect(fill = "transparent"))
+  geom_violin(trim = TRUE, alpha = 0.5,
+              aes(color = factor(Algorithm, levels = Names),
+                  fill = factor(Algorithm, levels = Names))) +
+  geom_boxplot(width = 0.2, outlier.shape = NA,
+               fill = "white", alpha = 0.4,
+               aes(color = factor(Algorithm, levels = Names))) +
+  stat_summary(fun = mean, geom = "errorbar",
+               aes(ymax = ..y.., ymin = ..y..),
+               width = .5, linetype = "dashed",
+               color = Color) +
+  scale_color_manual(values = Color, guide = FALSE) +
+  scale_shape_manual(values = Shape,
+                     name = "Convergence Code",
+                     breaks = c(0, 1),
+                     labels = c("Success", "Failure")) +
+  scale_size_manual(values = Sizes, guide = FALSE) +
+  scale_discrete_manual(aesthetics = "stroke", values = Stroke, guide = FALSE) +
+  scale_fill_manual(values = Color, guide = FALSE) +
+  ggnewscale::new_scale_fill() +
+  scale_fill_manual(values = Fills,
+                    name = "Objective Difference",
+                    breaks = c(1, 3),
+                    labels = c("< 2", "> 2")) +
+  geom_point(aes(color = factor(Algorithm, levels = Names),
+                 shape = factor(Convergence, levels = c(0, 1)),
+                 size = factor(Obj_diff, levels = c(0, 1, 3)),
+                 stroke = factor(Obj_diff, levels = c(0, 1, 3)),
+                 fill = factor(Obj_diff, levels = c(0, 1, 3)))) +
+  coord_cartesian(ylim = c(0, ma)) +
+  labs(title = "Function evaluations for data fitting",
+       subtitle = paste("Dashed lines represent mean benchmark times;",
+                        "Visible points have an objective difference greater than 1e-4",
+                        sep = "\n"),
+       x = "Method", y = "Number of function evaluations") +
+  guides(shape = guide_legend(order = 1,
+                              override.aes = list(size = Sizes[c(2, 3)])),
+         fill = guide_legend(order = 2,
+                             override.aes = list(size = Sizes[c(2, 3)],
+                                                 shape = c(21, 21),
+                                                 fill = Fills[c(2, 3)]))) +
+  theme_bw() +
+  theme(panel.border = element_blank(),
+        plot.title = element_text(size = 23),
+        plot.subtitle = element_text(size = 16,
+                                     margin = margin(5, 5, 10, 5, "pt")),
+        axis.text.x = element_text(size = 16, angle = 90,
+                                   vjust = 0.5, hjust = 1),
+        axis.text.y = element_text(size = 16),
+        axis.title.x = element_text(size = 20),
+        axis.title.y = element_text(size = 20,
+                                    margin = margin(5, 10, 5, 5, "pt")),
+        legend.position = "right",
+        legend.box = "vertical",
+        legend.direction = "vertical",
+        legend.background = element_rect(fill = "transparent"),
+        legend.title = element_text(size = 14),
+        legend.text = element_text(size = 13))
 ```
 
-Again, the algorithms that implement both the small-time and large-time density functions are empirically the most stable. They have relatively short tails and relatively few data points where the objective difference is high or the convergence is unsuccessful.
+Here we see that the algorithms that implement both the small-time and large-time density functions appear to be the most stable. They have relatively short tails, suggesting that the optimization routine has little trouble in finding the optimum parameter estimates. Moreover, these algorthims have few data points where the objective difference is high or the convergence code indicates unsuccessful convergence.
 
 Overall the default method for `fddm`, "fb_Gon_17", appears to be the most generally stable method for fitting the DDM to real-world data. The optimization routine handles this algorithm consistently well in that there are no troublesome areas of the parameter space as there are when using the algorithms that only implement the small-time density function. The default method also outperforms its counterpart, "fb_Nav_17", because it is less reliant on the rather unstable approximation to the large-time density function. When comparing the algorithms for benchmark time, the two small-time algorithms have a faster mean and median than the default method, but their lengthy tails indicate potential stability issues in certain areas of the parameter space. On balance, the default method, "fb_Gon_17", provides the best compromise between speed and stability of the currently available algorithms for approximating the probability density functions of the diffusion decision model.
 
