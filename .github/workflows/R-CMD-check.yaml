@@ -51,6 +51,10 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
           restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
 
+      - name: Install gsl on macOS
+        if: runner.os == 'macOS'
+        run: brew install gsl
+
       - name: Install system dependencies
         if: runner.os == 'Linux'
         env:
