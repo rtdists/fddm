@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 [![R build status](https://github.com/rtdists/fddm/workflows/R-CMD-check/badge.svg)](https://github.com/rtdists/fddm/actions)
 <!-- badges: end -->
 
-`fddm` provides function Function `dfddm()` which evaluates the density function (or probability density function, PDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full PDF, which contains an infinite sum. Our implementation of the DDM has the following parameters: a in (0, infinity) (threshold separation), v in (-infinity, infinity) (drift rate), t0 in [0, infinity) (non-decision time/response time constant), w in (0, 1) (relative starting point), and sv in (0, infinity) (inter-trial-variability of drift).
+`fddm` provides function `dfddm()` which evaluates the density function (or probability density function, PDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full PDF, which contains an infinite sum. Our implementation of the DDM has the following parameters: \eqn{a} &#1013; \eqn{(0, &#8734;)} (threshold separation), v in (-infinity, infinity) (drift rate), t0 in [0, infinity) (non-decision time/response time constant), w in (0, 1) (relative starting point), and sv in (0, infinity) (inter-trial-variability of drift).
 
 ## Installation
 

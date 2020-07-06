@@ -22,20 +22,22 @@ dfddm(
 \arguments{
 \item{rt}{A vector of response times (in seconds). If a response time is
 non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-\eqn{-Inf} if log = TRUE.}
+\ifelse{html}{\out{<font size="+1">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.}
 
 \item{response}{Binary response(s) that correspond(s) to either the "lower"
 or "upper" threshold. This model parameter can either be a singular value
 or a vector. The value(s) in 'response' can be of the following data types:
-\itemize{ \item logicals (FALSE \ifelse{html}{\out{&#8594;}}{\eqn{\to}}
-"lower", TRUE \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper"); \item
-integers or doubles (\eqn{1} \ifelse{html}{\out{&#8594;}}{\eqn{\to}}
-"lower", \eqn{2} \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper"); \item
-strings (only the first character is checked, "L"
+\itemize{
+\item logicals (FALSE \ifelse{html}{\out{&#8594;}}{\eqn{\to}}
+"lower", TRUE \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper");
+\item integers or doubles (\eqn{1} \ifelse{html}{\out{&#8594;}}{\eqn{\to}}
+"lower", \eqn{2} \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper");
+\item strings (only the first character is checked, "L"
 \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "lower" or "U"
-\ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper", case insensitive); \item
-factors (the first level gets mapped to "lower", and the second level gets
-mapped to "upper"; any additional levels are ignored). }}
+\ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper", case insensitive);
+\item factors (the first level gets mapped to "lower", and the second level gets
+mapped to "upper"; any additional levels are ignored).
+}}
 
 \item{a}{Threshold separation. Amount of information that is considered for a
 decision. Large values indicate a conservative decisional style. Allowed
