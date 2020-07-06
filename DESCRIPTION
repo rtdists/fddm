@@ -25,7 +25,8 @@ Suggests:
     testthat,
     knitr,
     rmarkdown,
-    microbenchmark
+    microbenchmark,
+    ggnewscale
 SystemRequirements: C++11
 RoxygenNote: 7.1.1
 Encoding: UTF-8

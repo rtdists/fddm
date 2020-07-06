@@ -21,7 +21,7 @@ dfddm(rt = numeric(), response = "lower", a = 1, v = -2, t0 = 0.3)
 use_testthat()
 devtools::test()
 
-usethis::use_package("ggplot2", type = "Suggests")
+usethis::use_package("ggnewscale", type = "Suggests")
 
 usethis::use_build_ignore("development.R")
 usethis::use_build_ignore("examples/")

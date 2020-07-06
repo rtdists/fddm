@@ -1095,7 +1095,7 @@ ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
 
 This plot is something of an exaggerated version of [the `microbenchmark` violin plot](#den-ana) from the previous section. Immediately we observe that fitting using the `rtdists` function is noticeably slower than fitting using the functions provided in `fddm`. Upon closer inspection, the means and medians of the benchmark times are shorter for the two small-time algorithms "fs_SWSE_17" and "fs_Gon_17" than for the other small-time algorithm or either of the algorithms that use both the small-time and large-time density functions. However, these two seemingly faster algorithms not only have much longer tails in their fitting times but also have more problematic data points in the optimization process. These longer tails and misfit points are likely due to the shortcomings of the approximation to the small-time density function, namely the poor support for large "effective response times" that we discussed in a [previous section](#den-ana) of this vignette. We also see that the two combined algorithms "fb_" both only show one case where the algorithm did not reach the optimum for one participant and starting value, but are stil quite fast. One fitting run takes on average less than 50 milliseconds on the system used for running the tests.
 
-The second plot will show the densities of the number of optimization iterations for each method.
+The second plot will show the distribution of the number of optimization iterations for each method.
 
 ```{r fit-ite, eval=TRUE}
 fit_ite <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
@@ -1149,7 +1149,7 @@ ggplot(fit_ite, aes(x = factor(Algorithm, levels = Names),
 
 Here we see that the algorithms that implement both the small-time and large-time density functions appear to be the most stable. They have relatively short tails, suggesting that the optimization routine has little trouble in finding the optimum parameter estimates. Moreover, these algorthims have few data points where the objective difference is high or the convergence code indicates unsuccessful convergence.
 
-The third plot will show the densities of the number of function evaluations in the optimization process for each method.
+The third plot will show the distribution of the number of function evaluations in the optimization process for each method.
 
 ```{r fit-fev, eval=TRUE}
 fit_fev <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
