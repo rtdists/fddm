@@ -20,7 +20,7 @@ dfddm(rt, 1, 1, 0.4, 0, 0.5, 0, T, "Gondan", "2017", "small", eps)
 use_testthat()
 devtools::test()
 
-usethis::use_package("RWiener", type = "Suggests")
+usethis::use_package("ggplot2", type = "Suggests")
 
 usethis::use_build_ignore("development.R")
 usethis::use_build_ignore("examples/")
@@ -28,6 +28,7 @@ usethis::use_build_ignore("docs/")
 
 usethis::use_travis()
 usethis::use_readme_rmd()
+usethis::use_github_action_check_standard()
 
 use_vignette("Validity")
 devtools::build_vignettes()

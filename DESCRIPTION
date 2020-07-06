@@ -24,7 +24,8 @@ Suggests:
     reshape2,
     testthat,
     knitr,
-    rmarkdown
+    rmarkdown,
+    microbenchmark
 SystemRequirements: C++11
 RoxygenNote: 7.1.1
 Encoding: UTF-8

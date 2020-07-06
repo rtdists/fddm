@@ -63,7 +63,7 @@ Since the DDM is widely used in parameter estimation usually involving numerical
 # Benchmarking the Density Functions {#den}
 <hr class="sec1">
 
-We want to determine the performance of each method across a wide variety of parameters in order to identify any slow areas for individual methods. To achieve this rigor, we define an extensive parameter space (in a code chunk below) and loop through each combination of parameters. Throughout this vignette we will input the response times as a vector to each function instead of inputting individual response times for two reasons: first, this is the most common way to input the response time data, and second, this allows for the `R`-based method to exploit vectorization to make that method as fast as possible. For each combination of parameters, we run the `microbenchmark` function from the package [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) 100 times for each method and only save the median benchmark time of these 100. We will refer to these as the "median benchmark times" for the remainder of this vignette. Running the benchmark tests many times for each set of parameters generates a lot of benchmark data but takes a long time, so we only generate a small number of samples at each set of parameters. For benchmark tests with 10,000 samples at each point in an even more granular parameter space, see the full benchmark tests located in another `pkgdown` vignette elsewhere because the files are too big for an `rmarkdown::html_vignette`.
+We want to determine the performance of each method across a wide variety of parameters in order to identify any slow areas for individual methods. To achieve this rigor, we define an extensive parameter space (in a code chunk below) and loop through each combination of parameters. Throughout this vignette we will input the response times as a vector to each function instead of inputting individual response times for two reasons: first, this is the most common way to input the response time data, and second, this allows for the `R`-based method to exploit vectorization to make that method as fast as possible. For each combination of parameters, we run the `microbenchmark` function from the package [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) 100 times for each method and only save the median benchmark time of these 100. We will refer to these as the "median benchmark times" for the remainder of this vignette. Running the benchmark tests many times for each set of parameters generates a lot of benchmark data but takes a long time, so we only generate a small number of samples at each set of parameters. We are currently preparing a benchmark tests with 10,000 samples at each point in an even more granular parameter space. This additional benchmark will eventually be made available elsewhere.
 
 Upon collecting the benchmark data, we perform a preliminary analysis of the approximations' performance by showing the distributions of median benchmark times as side-by-side violin plots for each approximation. Then we cull the methods and only test further on the fastest and most widely used approximations. To elucidate the areas of the parameter space where the different methods excel and struggle, we plot the median benchmark times as a function of individual parameter values. These plots will reveal which model parameters affect the efficiency of each approximation and how those parameters can slow down the approximations.
 
@@ -80,7 +80,7 @@ In addition, we include two functions for benchmarking the performance of the ap
 
 At each point in this parameter space, we run the `microbenchmark` function 100 times for each approximation and save the median of these 100 benchmark times. Using the median of these data should reduce the number of outliers in the data while maintaining a truthful representation of the approximations' performance. The following code chunk defines the functions that we will use to benchmark the algorithms; we will be using the [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) package to time the evaluations.
 
-```{r bm-fun, eval=FALSE}
+```{r bm-fun, eval=TRUE}
 library("fddm")
 library("rtdists")
 library("RWiener")
@@ -303,9 +303,9 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
 }
 ```
 
-Since control loops in `R` have a lot of overhead and are very slow, we will only run the benchmark function that inputs the response times as a vector, `rt_benchmark_vec()` from the code chunk above. This function requires one fewer loop than the similar function that inputs the response times individually, `rt_benchmark_ind()`. We will load pre-run benchmark data for individually input response times as this takes too long to evaluate in this vignette. The following code chunk defines the parameter space to be explored throughout the benchmark testing and runs the vectorized benchmark function defined in the previous code chunk.
+Since control loops in `R` have a lot of overhead and are comparatively slow (e.g., compared to loops in C++), we will only run the benchmark function that inputs the response times as a vector, `rt_benchmark_vec()` from the code chunk above. This function requires one fewer loop than the similar function that inputs the response times individually, `rt_benchmark_ind()`. Instead, we will load pre-run benchmark data for individually input response times obtained through `rt_benchmark_ind()` as this takes too long to evaluate in this vignette. The following code chunk defines the parameter space to be explored throughout the benchmark testing and runs the vectorized benchmark function defined in the previous code chunk.
 
-```{r bm-run, eval=FALSE}
+```{r bm-run, eval=TRUE}
 # Define parameter space
 RT <- c(0.001, 0.1, 1, 2, 3, 4, 5, 10, 30)
 A <- c(0.25, 0.5, 1, 2.5, 5)
@@ -319,27 +319,41 @@ err_tol <- 1e-6 # this is the setting from rtdists
 bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                            W = W, SV = SV, err_tol = err_tol,
                            times = 100, unit = "us")
+## results of rt_benchmark_ind are pre-loaded nad not run here:
+# bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
+#                            W = W, SV = SV, err_tol = err_tol,
+#                            times = 100, unit = "us")
+```
+
+
+```{r bm-run-and-save, eval=FALSE, include=FALSE}
+# Run benchmark tests
+bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
+                           W = W, SV = SV, err_tol = err_tol,
+                           times = 100, unit = "us")
+save(bm_vec, file = "inst/extdata/bm_vec.Rds", compress = "bzip2")
+# load(system.file("extdata", "bm_vec.Rds", package = "fddm", mustWork = TRUE))
+# results of rt_benchmark_ind are pre-loaded nad not run here:
 bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                            W = W, SV = SV, err_tol = err_tol,
                            times = 100, unit = "us")
+save(bm_ind, file = "inst/extdata/bm_ind.Rds", compress = "bzip2")
 ```
-
 
 
 
 ## Analysis of Benchmark Results {#den-ana}
 
-The first step in analyzing the benchmark data is a rough visualization of the results in side-by-side violin plots that show the distribution of `microbenchmark` timings. We use the data that we just generated in the previous code chunk and plot a density violin for each method. For this visualization we will use the benchmark data where the response times are input as a vector to each function; this should help the the mainly `R`-based functions operate more efficiently by exploiting `R`'s use of vectorization. The following code chunk loads the pre-run benchmark data and outputs violin plots of the benchmark results (can take a short while).
+The first step in analyzing the benchmark data is a rough visualization of the results in side-by-side violin plots that show the distribution of `microbenchmark` timings. We use the data that we just generated in the previous code chunk and plot a density violin for each method. Each density violin is overlayed with a boxplot showing median and upper and lower quartile. We also add the mean as a dashed line. We also constrain the y-axis of the plot to focus on the area where most of the  `fddm` methdos lie.
+
+For this visualization we will use the benchmark data where the response times were handed over as a a vector to each `fddm` call. As discussed above, running the benchmark on individuals RTs is considerably slower as the loop over RTs resides in R and not in C++.
 
 ```{r bm-violin, eval=TRUE}
 library("reshape2")
 library("ggplot2")
 
-# load data, will be in the variable 'bm_vec'
-load(system.file("extdata", "bm_vec.Rds", package = "fddm", mustWork = TRUE))
-
 t_idx <- match("SV", colnames(bm_vec))
-bm_vec[, -seq_len(t_idx)] <- bm_vec[, -seq_len(t_idx)]/1000 # convert to ms
+bm_vec[, -seq_len(t_idx)] <- bm_vec[, -seq_len(t_idx)]/1000 # convert to microseconds
 mbm_vec <- melt(bm_vec, measure.vars = -seq_len(t_idx),
                 variable.name = "FuncName", value.name = "time")
 
@@ -368,7 +382,7 @@ ggplot(mbm_vec, aes(x = FuncName, y = time,
        coord_cartesian(ylim = c(mi, ma)) +
        labs(title = "Distribution of median benchmark times",
             subtitle = "Dashed lines represent mean benchmark times",
-            x = "Method", y = "Time (ms)",
+            x = "Method", y = "Time (microseconds)",
             color = "Method") +
        theme_bw() +
        theme(panel.border = element_blank(),
@@ -381,9 +395,11 @@ ggplot(mbm_vec, aes(x = FuncName, y = time,
              legend.position = "none")
 ```
 
-A simple density plot for each method reveals whether or not a method has troublesome parameter values, but not where these troubles are. To visualize the problem areas for each method, we plot that method's median benchmark times as a function of each individual parameter; this will allow us to see where in the parameter space each method is efficient and where it is inefficient. In each of the following plots, we will show the mean, 10% quantiles, and 90% quantiles of median benchmark times as we vary one model parameter. For each value of that parameter, we aggregate the benchmark data for all values of the other parameter to generate the statistics plotted. For example, in a plot illustrating the effect of varying $v$, the statistics plotted for the parameter value $v = 0$ will include the benchmark data for the full ranges of $rt$, $a$, $w$, and $sv$.
+Depending on your system, the results might differ from the ones shown here, but they should replicate the general pattern. The small-time methods ("fs_") have long tails due to very few outliers, but their central tendencies are rather fast. The methods combining small-time and large-time ("fb_") show an almost normal distribution with only a short tail; they also have the fastest central tendencies. From the `fddm` methods, the large-time approach ("fl_") is the slowest with a long tail. `Rwiener` which also combines small-time and large-time approach also  shows an almost normal distribution, but is shifted compared to `fddm`. The other two methdos are clearly slower with `rtdists` (which performs does quite a few computations in R) having the slowest central tendencies.
 
-To avoid too many repititious plots, we will only include nine of the methods from the previous plot that illustrate the different variations and implementations of the density functions. We include: all three small-time implementations in `dfddm`, the one large-time implementation of the large-time in `dfddm`, the two implementations in `dfddm` that combine the small-time and large-time, and the three methods from `R` packageds and the literature as [described above](#den-gen).
+To visualize the problem areas for each method, we plot that method's median benchmark times as a function of each individual parameter value; this will allow us to see where in the parameter space each method is efficient and where it is inefficient. In each of the following plots, we will show the mean median benchmark times, the 10% quantiles and 90% quantiles of the median benchmark times, as well as the minimum and maximum median benchmark times as we vary one model parameter. For each value of that parameter, we aggregate the benchmark data for all values of the other parameter to generate the statistics plotted. For example, in a plot illustrating the effect of varying $v$, the statistics plotted for the parameter value $v = 0$ will include the benchmark data for the full ranges of $rt$, $a$, $w$, and $sv$. In addition, because we also vary the response time, all of the following plots show the results based on the individual rts (i.e., `rt_benchmark_ind`).
+
+To avoid too many repititious plots, we will only include nine of the methods from the previous plot that illustrate the different variations and implementations of the density functions. We include: all three small-time implementations in `dfddm` ("fs_"), the one large-time implementation of the large-time in `dfddm` ("fl_"), the two implementations in `dfddm` that combine the small-time and large-time ("fb_"), and the three methods from `R` packageds and the literature as [described above](#den-gen).
 
 The following code chunk loads the pre-run benchmark data and prepares it for the subsequent plots that will be generated by the later code chunks.
 
@@ -394,7 +410,7 @@ bm_ind$RTAA <- bm_ind$RT / bm_ind$A / bm_ind$A
 bm_ind <- bm_ind[, c(1, 2, ncol(bm_ind), 3:(ncol(bm_ind)-1)) ]
 
 t_idx <- match("SV", colnames(bm_ind))
-bm_ind[,-seq_len(t_idx)] <- bm_ind[, -seq_len(t_idx)]/1000 # convert to ms
+bm_ind[,-seq_len(t_idx)] <- bm_ind[, -seq_len(t_idx)]/1000 # convert to microseconds
 mbm_ind <- melt(bm_ind, measure.vars = -seq_len(t_idx),
                 variable.name = "FuncName", value.name = "time")
 
@@ -425,7 +441,7 @@ ggplot(mbm_meq, aes(x = RTAA, y = time,
   labs(title = "Means of the median microbenchmark results",
        subtitle = "The shaded regions represent the 10% and 90% quantiles;\nThe lighter shaded regions represent the min and max times",
        x = bquote(frac(rt, a^2) ~ ", effective response time, " ~ log[10]),
-       y = "Time (ms)") +
+       y = "Time (microseconds)") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
@@ -443,7 +459,7 @@ ggplot(mbm_meq, aes(x = RTAA, y = time,
   facet_wrap(~ factor(FuncName, levels = Names_meq), scales = "free_y")
 ```
 
-This plot confirms that the aptly named small-time and large-time density functions are generally more efficient at calculating the density for small response times and large response times, respectively. Of the three methods used from the literature, the `RWiener` and `rtdists` functions use a switching mechanism between the small-time and large-time density functions, and the Gondan algorithm only uses the small-time density function. Importantly, the methods that utilize a switching mechanism between the small-time and large-time density functions have much flatter plots and generally perform well across the $\frac{rt}{a^2}$ parameter space.
+This plot confirms that the aptly named small-time and large-time density functions are generally more efficient at calculating the density for small response times and large response times, respectively. Of the three methods used from the literature, the `RWiener` and `rtdists` functions use a switching mechanism between the small-time and large-time density functions, and the Gondan algorithm only uses the small-time density function. Importantly, the methods that utilize a switching mechanism between the small-time and large-time density functions have much flatter plots and generally perform well across the $\frac{rt}{a^2}$ parameter space with only a small uptick towards the right. Somewhat suprisingly, this plot suggests that for individual response time as used here, `RWiener` might be slightly faster than all `fddm` method. This contrasts with the clearly faster performance when entering RTs as a vector.
 
 As above, this code chunk plots the effect on the median benchmark time but instead for the model parameter $w$, the relative starting point.
 
@@ -462,7 +478,7 @@ ggplot(mbm_meq, aes(x = W, y = time,
   labs(title = "Means of the median microbenchmark results",
        subtitle = "The shaded regions represent the 10% and 90% quantiles;\nThe lighter shaded regions represent the min and max times",
        x = "w, relative starting point (a priori bias)",
-       y = "Time (ms)") +
+       y = "Time (microseconds)") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
@@ -480,7 +496,7 @@ ggplot(mbm_meq, aes(x = W, y = time,
   facet_wrap(~ factor(FuncName, levels = Names_meq), scales = "free_y")
 ```
 
-The relative starting point $w$ has very little impact on the infinite sum, and thus we see that the means are relatively flat across the range of $w$. Whereas $w$ does appear in the Gondan method and the SWSE method for approximating the infinite sum, it ultimately has very little effect on the evaluation time when compared with other parameters such as the "effective response time".
+The relative starting point $w$ has very little impact on the infinite sum, and thus we see that the means and quantiles are relatively flat across the range of $w$. However, we see a rather clear dip around 0.5 for many methods. 
 
 Here we plot the effects of varying the parameter $v$, the drift rate, on the median benchmark time.
 
@@ -499,7 +515,7 @@ ggplot(mbm_meq, aes(x = V, y = time,
   labs(title = "Means of the median microbenchmark results",
        subtitle = "The shaded regions represent the 10% and 90% quantiles;\nThe lighter shaded regions represent the min and max times",
        x = "v, drift rate",
-       y = "Time (ms)") +
+       y = "Time (microseconds)") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
@@ -517,7 +533,7 @@ ggplot(mbm_meq, aes(x = V, y = time,
   facet_wrap(~ factor(FuncName, levels = Names_meq), scales = "free_y")
 ```
 
-The drift rate $v$ has nothing to do with the infinite sum, which is why we see overall flat means across the range of $v$.
+The drift rate $v$ has nothing to do with the infinite sum, which is why we see overall flat means across the range of $v$. The only pattern we see is a small bump for $v = 0$ of the small-time methods.
 
 Lastly we plot the effects of varying $sv$, the inter-trial variability in the drift rate, on the median benchmark time.
 
@@ -536,7 +552,7 @@ ggplot(mbm_meq, aes(x = SV, y = time,
   labs(title = "Means of the median microbenchmark results",
        subtitle = "The shaded regions represent the 10% and 90% quantiles;\nThe lighter shaded regions represent the min and max times",
        x = "sv, inter-trial variability in the drift rate",
-       y = "Time (ms)") +
+       y = "Time (microseconds)") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
@@ -597,7 +613,7 @@ library("microbenchmark")
 
 This code chunk defines the log-likelihood functions used in the optimization algorithm; all of the log-likelihood functions are the same as in the [Validity Vignette](validity.html#fit-gen-llf). The log-likelihood functions are fairly straightforward and split the responses and associated response times by the true item status (i.e., correct response lower versus upper boundary) to enable fitting distinct drift rates ($v_\ell$ for the items in which the correct response is the lower boundary and $v_u$ for the items for which the correct response is the upper boundary). In addition, the log-likelihood functions heavily penalize any approximations that return zero, negative, or otherwise invalid densities.
 
-```{r fit-loglik-fun, eval=FALSE}
+```{r fit-loglik-fun, eval=TRUE}
 ll_fs_SWSE_17 <- function(pars, rt, resp, truth, err_tol) {
   rtu <- rt[truth == "upper"]
   rtl <- rt[truth == "lower"]
@@ -733,11 +749,11 @@ ll_RTDists <- function(pars, rt, resp, truth) {
 
 We use a different set of initial parameter values for each combination of data set and method. In a real-life situation we would probably also do so using random initial parameter values to avoid local minima. Here we do this with a fixed set of initial parameter values to ensure that the different method produce the same results for different starting points. However, there are a couple of restrictions to these initial values that we must address (we would also have to do so if we picked the initial values randomly). The parameter $t_0$ must be less than the response time, so we set the initial values for $t_0$ to be strictly less than the minimum response time according to each individual in the input dataframe.
 
-The following code chunk defines the function that will run the optimization and produce the fitted parameter estimates for $v_u$, $v_\ell$, $a$, $w$, and $sv$. As [discussed above](#fit-gen), we only use a selection of methods from those available in `dfddm`. This fitting function will run the optimization for each set of initial parameter values and store the following results from the optimization: 1) resulting convergence code (either $0$ indicating successful convergence or $1$ indicating unsuccessful convergence); 2) minimized value of the objective log-likelihood function; 3) the number of iterations used by the optimizer during the optimization process; 4) the number of colls to the log-likelihood function during the optimization process; and 5) the median microbenchmark time of the optimization using each method.
+The following code chunk defines the function that will run the optimization and produce the fitted parameter estimates for $v_u$, $v_\ell$, $a$, $w$, and $sv$. As [discussed above](#fit-gen), we only use a selection of methods from those available in `dfddm`. This fitting function will run the optimization for each set of initial parameter values and store the following results from the optimization: 1) resulting convergence code (either $0$ indicating successful convergence or $1$ indicating unsuccessful convergence); 2) minimized value of the objective log-likelihood function; 3) the number of iterations used by the optimizer during the optimization process; 4) the number of calls to the log-likelihood function during the optimization process; and 5) the median microbenchmark time of the optimization using each method.
 
 As in the [previous section](#den-gen), we run the `microbenchmark` function 100 times for each approximation at each point in this parameter space and save the median of these 100 benchmark times. Using the median of these data should reduce the number of outliers in the data while maintaining a truthful representation of the approximations' performance. We will be using the [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) package to time the evaluations.
 
-```{r fit-fun, eval=FALSE}
+```{r fit-fun, eval=TRUE}
 rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                    truth_idx = NULL, response_upper = NULL, err_tol = 1e-6,
                    times = 100, unit = "us") {
@@ -945,10 +961,13 @@ Having set up the fitting functions in the above chunks of code, we could pass t
 data(med_dec, package = "fddm")
 med_dec <- med_dec[which(med_dec$rt >= 0),]
 fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
-              truth_idx = 5, response_upper = "blast", err_tol = 1e-6,
-              times = 100, unit = "us")
+              truth_idx = 5, response_upper = "blast", err_tol = 1e-8,
+              times = 6, unit = "us")
 ```
 
+```{r fit-run-save, eval=FALSE, include=FALSE}
+save(fit, file = "inst/extdata/bm_fit.Rds", compress = "bzip2")
+```
 
 
 
@@ -985,11 +1004,11 @@ fit_prep <- function(fit) {
     }
   }
 
-  fit$BmTime <- fit$BmTime/1e6 # convert to seconds
+  fit$BmTime <- fit$BmTime/1e6 # convert to milliseconds
 
   eps <- 1e-4
-  fit$Obj_diff[fit$Obj_diff > eps] <- eps
-  fit$Obj_diff <- fit$Obj_diff / eps # prep for alpha values
+  # fit$Obj_diff[fit$Obj_diff > eps] <- eps
+  # fit$Obj_diff <- fit$Obj_diff / eps # prep for alpha values
 
   return(fit)
 }
@@ -1035,14 +1054,17 @@ ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
        scale_alpha_continuous(range = c(0, max_alpha),
                               name = "Objective Difference",
                               breaks = c(0, max_alpha/2, max_alpha),
-                              labels = c(0, formatC(max_alpha*eps/2, format = "e", digits = 2), formatC(max_alpha*eps, format = "e", digits = 2))) +
+                              labels = 
+                                c(0, 
+                                  formatC(max_alpha*eps/2, format = "e", digits = 2),
+                                  formatC(max_alpha*eps, format = "e", digits = 2))) +
        stat_summary(fun = mean, geom = "errorbar",
                     aes(ymax = ..y.., ymin = ..y..),
                     width = .5, linetype = "dashed",
                     color = Color) +
        labs(title = "Median microbenchmark times for data fitting",
             subtitle = "Dashed lines represent mean benchmark times;\nOpaque points have an objective difference greater than 1e-4",
-            x = "Method", y = "Time (sec)") +
+            x = "Method", y = "Time (milliseconds)") +
        guides(alpha = guide_legend(order = 1),
               shape = guide_legend(order = 2)) +
        theme_bw() +
