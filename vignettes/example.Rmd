@@ -56,7 +56,7 @@ This vignette contains two examples of how to use `fddm`, in particular the `dfd
 
 # Simple Example Fitting {#ex-simp}
 
-As an example, we will fit data from one participant from the the `med_dec` data that comes with `fddm`. This data contains the accuracy condition reported in Trueblood et al. (2018) investigating medical decision making. Here we use one data set from one experienced medical professionals (pathologists). The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The data set contains 200 decision per participant, based on pictures of 100 true cancerous cells and pictures of 100 true non-cancerous cells. First we load the `fddm` package and prepare the data.
+As a preliminary example, we will fit data from one participant from the the `med_dec` data that comes with `fddm`. This data contains the accuracy condition reported in Trueblood et al. (2018) investigating medical decision making. The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The data set contains 200 decision per participant, based on pictures of 100 true cancerous cells and pictures of 100 true non-cancerous cells. Here we use the data collected from the trials one experienced medical professional (pathologist). First, we load the `fddm` package and remove any invalid responses from the data.
 
 ```{r load-pkg-data, eval=TRUE}
 library("fddm")
@@ -66,14 +66,14 @@ onep <- med_dec[ med_dec$id == "2" & med_dec$group == "experienced", ]
 str(onep)
 ```
 
-We then prepare the data by defining upper and lower responses and the correct response bounds. 
+We further prepare the data by defining upper and lower responses and the correct response bounds. 
 
 ```{r prep-data, eval=TRUE}
 onep$resp <- ifelse(onep$response == "blast", "upper", "lower")
 onep$truth <- ifelse(onep$classification == "blast", "upper", "lower")
 ```
 
-For fitting, we need a simple likelihood function; here we will use a straightforward sum of densities. A detailed explanation of the log-likelihood function is provided in the [next section](#ll-description). Note that this likelihood function returns the negative log-likelihood so we can simply minimize to get the maximum likelihood estimate.
+For fitting, we need a simple likelihood function; here we will use a straightforward sum of densities of the study responses and associated response times. A [detailed explanation](#ll-description) of the log-likelihood function is provided in the next example. Note that this likelihood function returns the negative log-likelihood as we can simply minimize this function to get the maximum likelihood estimate.
 
 ```{r simp-ll, eval=TRUE}
 ll_fun <- function(pars, rt, resp, truth) {
@@ -95,7 +95,7 @@ ll_fun <- function(pars, rt, resp, truth) {
 }
 ```
 
-We then pass the data and log-likelihood with the necessary additional arguments to an optimization function. As we are using the optimization function `nlminb` for this example, we must input the initial parameter values as the first argument. These are input in the order: *v<sub>u</sub>*, *v<sub>l</sub>*, *a*, *t0*, *w*, and *sv*; we also need to define upper and lower bounds for each parameters. Fitting the DDM to this data is basically instantaneous using this setup.
+We then pass the data and log-likelihood function with the necessary additional arguments to an optimization function. As we are using the optimization function `nlminb` for this example, we must input as the first argument the initial values of our DDM parameters that we want optimized. These are input in the order: *v<sub>u</sub>*, *v<sub>l</sub>*, *a*, *t<sub>0</sub>*, *w*, and *sv*; we also need to define upper and lower bounds for each parameters. Fitting the DDM to this data is basically instantaneous using this setup.
 
 ```{r show-simp-fit, eval=TRUE}
 fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun, 
@@ -119,14 +119,14 @@ As an example data set, we use the `med_dec` data that comes with `fddm`. This d
 library("fddm")
 ```
 
+<a id="ll-description"></a>
 Our approach will be a straightforward maximum likelihood estimation (MLE). Since we will be using the optimization function `nlminb`, we must write an objective function for it to optimize. By default `nlminb` finds the minimum of the objective function instead of the maximum, so we will simply negate our likelihood function. In addition, we will employ the common practice of using the log-likelihood as this tends to be more stable while still maintaining the same minima (negated maxima) as the regular likelihood function.
 
 We are going to be fitting the parameters $v$, $a$, $t_0$, $w$, and $sv$; however, we want to fit two distinct drift rates, one for the upper boundary ($v_u$) and one for the lower boundary ($v_\ell$). In order to make this distinction, we require the input of the truthful classification of each decision (i.e. what the *correct* response is for each entry). Note that our log-likelihood function depends on the number of response times, the number of responses, and the number of truthful classifications all being equal.
 
-The first argument to our log-likelihood function needs to be a vector of the six parameters that are being optimized: $v_u$, $v_\ell$, $a$, $t_0$, $w$, and $sv$. The rest of the arguments will be the other necessary inputs to `dfddm` that are not optimized: the vector of response times, the vector of responses, the vector of the truthful classifications, and the allowable error tolerance for the density function (optional). Details on all of these inputs can be found in the `dfddm` documentation.
+As we are using the optimization function `nlminb`, the first argument to our log-likelihood function needs to be a vector of the initial values of the six parameters that are being optimized: $v_u$, $v_\ell$, $a$, $t_0$, $w$, and $sv$. The rest of the arguments will be the other necessary inputs to `dfddm` that are not optimized: the vector of response times, the vector of responses, the vector of the truthful classifications, and the allowable error tolerance for the density function (optional). Details on all of these inputs can be found in the `dfddm` documentation.
 
-<a id="ll-description"></a>
-Upon being called, the log-likelihood function first separates the input response times and responses by their truthful classification to yield two new response time vectors and two new response vectors. The response times and responses are then input into separate density functions using a separate $v$ parameter, $v_u$ or $v_\ell$. These separate densities are then combined, and the log-likelihood function heavily penalizes any combination of parameters that returns a log-density of $-\infty$ (equivalent to a regular density of $0$). Lastly, the actual log-likelihood is returned as the negative of the sum of all of the densities.
+Upon being called, the log-likelihood function first separates the input response times and responses by their truthful classification to yield two new response time vectors and two new response vectors. The response times and responses are then input into separate density functions using a separate $v$ parameter, $v_u$ or $v_\ell$. These separate densities are then combined, and the log-likelihood function heavily penalizes any combination of parameters that returns a log-density of $-\infty$ (equivalent to a regular density of $0$). Lastly, the actual log-likelihood is returned as the negative of the sum of all of the log-densities.
 
 ```{r log-likelihood, eval=TRUE}
 ll_fun <- function(pars, rt, resp, truth, err_tol) {
@@ -154,7 +154,7 @@ ll_fun <- function(pars, rt, resp, truth, err_tol) {
 
 Next we will define a function to run the data fitting for us; we want it to output a dataframe containing the parameter estimates for each individual in the data. The inputs will be the dataset, the allowable error tolerance for the density function, how the "upper" response is presented in the dataset, and indices of the columns in the dataset containing: identification of the individuals in the dataset, the response times, the responses, and the truthful classifications.
 
-Ater some data checking, the fitting function will extract the unique individuals from the dataset and run the parameter optimization for the responses and response times for each one. The optimizations themselves are initialized with random initial parameter values to aid the avoidance of local minima in favor of global minima. Moreover, the optimization will run 5 times for each individual, with 5 different sets of random initial parameter values. The value of the minimized log-likelihood function will be compared across all 5 runs, and the smallest such value will indicate the best fit. The parameter estimates, convergence code, and minimized value of the log-likelihood function produced by this best fit will be saved for that individual.
+After some data checking, the fitting function will extract the unique individuals from the dataset and run the parameter optimization for the responses and response times for each individual. The optimizations themselves are initialized with random initial parameter values to aid in the avoidance of local minima in favor of global minima. Moreover, the optimization will run 5 times for each individual, with 5 different sets of random initial parameter values. The value of the minimized log-likelihood function will be compared across all 5 runs, and the smallest such value will indicate the best fit. The parameter estimates, convergence code, and minimized value of the log-likelihood function produced by this best fit will be saved for that individual.
 
 ```{r fitting-fun, eval=TRUE}
 rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
@@ -305,9 +305,9 @@ ggplot(fitp, aes(x = factor(ID, levels = c("novice", "inexperienced", "experienc
         legend.text = element_text(size = 16))
 ```
 
-From this plot we notice two things. First, the drift rate corresponding to the upper threshold should always be positive, and the drift rate corresponding to the lower threshold should always be negative. Since there are a few fitted values that switch this convention, the novice participants show evidence of consistently responding incorrectly to the stimulus. In contrast, both the inexperienced and experienced participants show a clean division of drift rates around zero.
+Before we begin analysis of this plot, note that the drift rate corresponding to the upper threshold should always be positive, and the drift rate corresponding to the lower threshold should always be negative. Since there are a few fitted values that switch this convention, the novice participants show evidence of consistently responding incorrectly to the stimulus. In contrast, both the inexperienced and experienced participants show a clean division of drift rates around zero.
 
-Second, we notice that the more experienced participants tend to have higher fitted drift rates in absolute value. A more extreme drift rate means that the participant receives information more efficiently than a more mild drift rate. The overall pattern is that the novices are on average the worst at receiving information, the experienced participants are the best, and the inexperienced participants are somewhere in the middle. This pattern indicates that experienced professionals are indeed better at their job than untrained undergraduate students!
+In addition, we notice that the more experienced participants tend to have higher fitted drift rates in absolute value. A more extreme drift rate means that the participant receives and processes information more efficiently than a more mild drift rate. The overall pattern is that the novices are on average the worst at receiving information, the experienced professionals are the best, and the inexperienced professionals are somewhere in the middle. This pattern indicates that experienced professionals are indeed better at their job than untrained undergraduate students!
 
 
 

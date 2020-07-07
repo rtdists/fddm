@@ -43,22 +43,23 @@ devtools::install_github("rtdists/fddm")
 
 ## Example
 
-As an example, we will fit data from one participant from the the
-`med_dec` data that comes with `fddm`. This data contains the accuracy
-condition reported in Trueblood et al. (2018) investigating medical
-decision making. Here we use one data set from one experienced medical
-professionals (pathologists). The task of participants was to judge
-whether pictures of blood cells show cancerous cells (i.e., blast cells)
-or non-cancerous cells (i.e., non-blast cells). The data set contains
-200 decision per participant, based on pictures of 100 true cancerous
-cells and pictures of 100 true non-cancerous cells. First we load the
-`fddm` package and prepare the data.
+As a preliminary example, we will fit data from one participant from the
+the `med_dec` data that comes with `fddm`. This data contains the
+accuracy condition reported in Trueblood et al. (2018) investigating
+medical decision making. The task of participants was to judge whether
+pictures of blood cells show cancerous cells (i.e., blast cells) or
+non-cancerous cells (i.e., non-blast cells). The data set contains 200
+decision per participant, based on pictures of 100 true cancerous cells
+and pictures of 100 true non-cancerous cells. Here we use the data
+collected from the trials one experienced medical professional
+(pathologist). First, we load the `fddm` package and remove any invalid
+responses from the data.
 
 ``` r
 library("fddm")
 data(med_dec, package = "fddm")
 med_dec <- med_dec[which(med_dec$rt >= 0),]
-onep <- med_dec[ med_dec$id == "2" & med_dec$group == "experienced",  ]
+onep <- med_dec[ med_dec$id == "2" & med_dec$group == "experienced", ]
 str(onep)
 #> 'data.frame':    200 obs. of  9 variables:
 #>  $ id            : int  2 2 2 2 2 2 2 2 2 2 ...
@@ -72,8 +73,8 @@ str(onep)
 #>  $ stimulus      : chr  "blastEasy/BL_10166384.jpg" "nonBlastEasy/16258001115A_069.jpg" "nonBlastHard/BL_11504083.jpg" "nonBlastHard/MY_9455143.jpg" ...
 ```
 
-We then prepare the data by defining upper and lower responses and the
-correct response bounds.
+We further prepare the data by defining upper and lower responses and
+the correct response bounds.
 
 ``` r
 onep$resp <- ifelse(onep$response == "blast", "upper", "lower")
@@ -81,11 +82,11 @@ onep$truth <- ifelse(onep$classification == "blast", "upper", "lower")
 ```
 
 For fitting, we need a simple likelihood function; here we will use a
-straightforward sum of densities. A detailed explanation of the function
-is provided in the Example Vignette (`vignette("example", package =
-"fddm")`). Note that this likelihood function returns the negative
-log-likelihood so we can simply minimize to get the maximum likelihood
-estimate.
+straightforward sum of densities of the study responses and associated
+response times. A detailed explanation of the log-likelihood function is
+provided in the [Example Vignette](example.html#ex-more). Note that this
+likelihood function returns the negative log-likelihood as we can simply
+minimize this function to get the maximum likelihood estimate.
 
 ``` r
 ll_fun <- function(pars, rt, resp, truth) {
@@ -107,14 +108,14 @@ ll_fun <- function(pars, rt, resp, truth) {
 }
 ```
 
-We then pass the data and log-likelihood with the necessary additional
-arguments to an optimization function. As we are using the optimization
-function `nlminb` for this example, we must input the initial parameter
-values as the first argument. These are input in the order:
-*v<sub>u</sub>*, *v<sub>l</sub>*, *a*, *t<sub>0</sub>*, *w*, and *sv*;
-we also need to define upper and lower bounds for each parameters.
-Fitting the DDM to this data is basically instantaneous using this
-setup.
+We then pass the data and log-likelihood function with the necessary
+additional arguments to an optimization function. As we are using the
+optimization function `nlminb` for this example, we must input as the
+first argument the initial values of our DDM parameters that we want
+optimized. These are input in the order: *v<sub>u</sub>*,
+*v<sub>l</sub>*, *a*, *t<sub>0</sub>*, *w*, and *sv*; we also need to
+define upper and lower bounds for each parameters. Fitting the DDM to
+this data is basically instantaneous using this setup.
 
 ``` r
 fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun, 
