@@ -11,15 +11,17 @@ status](https://travis-ci.org/rtdists/fddm.svg?branch=master)](https://travis-ci
 status](https://github.com/rtdists/fddm/workflows/R-CMD-check/badge.svg)](https://github.com/rtdists/fddm/actions)
 <!-- badges: end -->
 
-`fddm` provides function Function `dfddm()` which evaluates the density
-function (or probability density function, PDF) for the Ratcliff
-diffusion decision model (DDM) using different methods for approximating
-the full PDF, which contains an infinite sum. Our implementation of the
-DDM has the following parameters: a in (0, infinity) (threshold
-separation), v in (-infinity, infinity) (drift rate), t0 in \[0,
-infinity) (non-decision time/response time constant), w in (0, 1)
-(relative starting point), and sv in (0, infinity)
-(inter-trial-variability of drift).
+`fddm` provides function `dfddm()` which evaluates the density function
+(or probability density function, PDF) for the Ratcliff diffusion
+decision model (DDM) using different methods for approximating the full
+PDF, which contains an infinite sum. Our implementation of the DDM has
+the following parameters: *a ϵ (0, <sub><font size="+2">∞</font></sub>)*
+(threshold separation), *v ϵ (-<sub><font size="+2">∞</font></sub>,
+<sub><font size="+2">∞</font></sub>)* (drift rate), *t<sub>0</sub> ϵ
+\[0, <sub><font size="+2">∞</font></sub>)* (non-decision time/response
+time constant), *w ϵ (0, 1)* (relative starting point), and *sv ϵ (0,
+<sub><font size="+2">∞</font></sub>)* (inter-trial-variability of
+drift).
 
 ## Installation
 
@@ -74,10 +76,12 @@ onep$resp <- ifelse(onep$response == "blast", "upper", "lower")
 onep$truth <- ifelse(onep$classification == "blast", "upper", "lower")
 ```
 
-For fitting, we need a simple likelihood function. A detailed
-explanation of the function are provided in the example vignette. Note
-that it returns the negative log-likelihood so we can simply minimze to
-get the maximum likelihood estimate.
+For fitting, we need a simple likelihood function; here we will use a
+straightforward sum of densities. A detailed explanation of the function
+is provided in the Example Vignette (`vignette("example", package =
+"fddm")`). Note that this likelihood function returns the negative
+log-likelihood so we can simply minimize to get the maximum likelihood
+estimate.
 
 ``` r
 ll_fun <- function(pars, rt, resp, truth) {
@@ -99,11 +103,13 @@ ll_fun <- function(pars, rt, resp, truth) {
 }
 ```
 
-We then pass the data and log-likelihood and the additional argument
-needed to an optimisation function. Here, we use `nlminb`. Note that the
-first argument are the starting values. We also need to define upper and
-lower bounds of the parameters, which are in order, vu, vl, a, t0, w,
-and sv. Fitting this is basically instanteneous.
+We then pass the data and log-likelihood with the necessary additional
+arguments to an optimization function. As we are using the optimization
+function `nlminb` for this example, we must input the initial parameter
+values as the first argument. These are input in the order:
+*v<sub>u</sub>*, *v<sub>l</sub>*, *a*, *t0*, *w*, and *sv*; we also need
+to define upper and lower bounds for each parameters. Fitting the DDM to
+this data is basically instantaneous using this setup.
 
 ``` r
 fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun, 
