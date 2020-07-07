@@ -43,22 +43,34 @@ devtools::install_github("rtdists/fddm")
 
 ## Example
 
+As an example data set, we use the `med_dec` data that comes with
+`fddm`. This data contains the accuracy condition reported in
+@trueblood\_impact\_2018 investigating medical decision making among
+medical professionals (pathologists) and novices (i.e., undergraduate
+students). The task of participants was to judge whether pictures of
+blood cells show cancerous cells (i.e., blast cells) or non-cancerous
+cells (i.e., non-blast cells). The data set contains 200 decision per
+participant, based on pictures of 100 true cancerous cells and pictures
+of 100 true non-cancerous cells.
+
 As a preliminary example, we will fit data from one participant from the
-the `med_dec` data that comes with `fddm`. This data contains the
-accuracy condition reported in Trueblood et al. (2018) investigating
-medical decision making. The task of participants was to judge whether
-pictures of blood cells show cancerous cells (i.e., blast cells) or
-non-cancerous cells (i.e., non-blast cells). The data set contains 200
-decision per participant, based on pictures of 100 true cancerous cells
-and pictures of 100 true non-cancerous cells. Here we use the data
+`med_dec` data that comes with `fddm`. This data contains the accuracy
+condition reported in Trueblood et al. (2018) investigating medical
+decision making among medical professionals (pathologists) and novices
+(i.e., undergraduate students). The task of participants was to judge
+whether pictures of blood cells show cancerous cells (i.e., blast cells)
+or non-cancerous cells (i.e., non-blast cells). The data set contains
+200 decision per participant, based on pictures of 100 true cancerous
+cells and pictures of 100 true non-cancerous cells. Here we use the data
 collected from the trials one experienced medical professional
-(pathologist). First, we load the `fddm` package and remove any invalid
-responses from the data.
+(pathologist). First, we load the `fddm` package, remove any invalid
+responses from the data, and select the individual whose data we will
+use for fitting.
 
 ``` r
 library("fddm")
 data(med_dec, package = "fddm")
-med_dec <- med_dec[which(med_dec$rt >= 0),]
+med_dec <- med_dec[which(med_dec$rt >= 0), ]
 onep <- med_dec[ med_dec$id == "2" & med_dec$group == "experienced", ]
 str(onep)
 #> 'data.frame':    200 obs. of  9 variables:
@@ -84,9 +96,9 @@ onep$truth <- ifelse(onep$classification == "blast", "upper", "lower")
 For fitting, we need a simple likelihood function; here we will use a
 straightforward sum of densities of the study responses and associated
 response times. A detailed explanation of the log-likelihood function is
-provided in the [Example Vignette](example.html#ex-more). Note that this
-likelihood function returns the negative log-likelihood as we can simply
-minimize this function to get the maximum likelihood estimate.
+provided in the [Example Vignette](example.html#ex-ll-fun). Note that
+this likelihood function returns the negative log-likelihood as we can
+simply minimize this function to get the maximum likelihood estimate.
 
 ``` r
 ll_fun <- function(pars, rt, resp, truth) {

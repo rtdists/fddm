@@ -26,8 +26,12 @@ knitr::opts_chunk$set(
 <div id="TOC">
 <ul>
 <li><a href="#intro">Introduction</a></li>
-<li><a href="#ex-simp">Simple Example Fitting</a></li>
-<li><a href="#ex-more">More Involved Example Fitting</a></li>
+<li><a href="#ex">Example Fitting</a>
+<ul>
+<li><a href="#ex-ll-fun">Log-likelihood Function</a></li>
+<li><a href="#ex-simple">Simple Fitting Routine</a></li>
+<li><a href="#ex-data">Fitting the Entire Dataset</a></li>
+</ul></li>
 <li><a href="#references">References</a></li>
 </ul>
 </div>
@@ -48,78 +52,27 @@ Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ 
 # Introduction {#intro}
 <hr class="sec1">
 
-This vignette contains two examples of how to use `fddm`, in particular the `dfddm` function, in fitting the DDM to real-world data. We will load a dataset that is included in the `fddm` package and fit the Ratcliff DDM to the response time data contained within the dataset. In the [first example](#ex-simp), we will show a simple fitting procedure for estimating the DDM parameter values for only a single individual in the study. The [second example](#ex-more) demonstrates a more involved fitting procedure that includes DDM parameter estimation for all of the individuals in the study. After running this more involved optimization, we provide a rudimentary analysis of the fitted parameter estimates that groups the parameter estimates by the expertise of the study's participants.
+This vignette contains two examples of how to use `fddm`, in particular the `dfddm` function, in fitting the DDM to real-world data. We will load a dataset that is included in the `fddm` package and fit the Ratcliff DDM to the response time data contained within the dataset. We will show a [simple fitting procedure](#ex-simple) for estimating the DDM parameter values for only a single individual in the study in addition to a [more involved fitting procedure](#ex-data) that includes DDM parameter estimation for all of the individuals in the study. After running this more involved optimization, we provide a rudimentary analysis of the fitted parameter estimates that groups the parameter estimates by the expertise of the study's participants.
 
 
 
 
 
-# Simple Example Fitting {#ex-simp}
+# Example Fitting {#ex}
+<hr class="sec1">
 
-As a preliminary example, we will fit data from one participant from the the `med_dec` data that comes with `fddm`. This data contains the accuracy condition reported in Trueblood et al. (2018) investigating medical decision making. The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The data set contains 200 decision per participant, based on pictures of 100 true cancerous cells and pictures of 100 true non-cancerous cells. Here we use the data collected from the trials one experienced medical professional (pathologist). First, we load the `fddm` package and remove any invalid responses from the data.
+In this example, we will fit to the `med_dec` data that comes with `fddm`. This data contains the accuracy condition reported in @trueblood_impact_2018 investigating medical decision making among medical professionals (pathologists) and novices (i.e., undergraduate students). The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The data set contains 200 decision per participant, based on pictures of 100 true cancerous cells and pictures of 100 true non-cancerous cells. We load the `fddm` package, read the data, and remove any invalid responses from the data.
 
 ```{r load-pkg-data, eval=TRUE}
 library("fddm")
 data(med_dec, package = "fddm")
-med_dec <- med_dec[which(med_dec$rt >= 0),]
-onep <- med_dec[ med_dec$id == "2" & med_dec$group == "experienced", ]
-str(onep)
-```
-
-We further prepare the data by defining upper and lower responses and the correct response bounds. 
-
-```{r prep-data, eval=TRUE}
-onep$resp <- ifelse(onep$response == "blast", "upper", "lower")
-onep$truth <- ifelse(onep$classification == "blast", "upper", "lower")
-```
-
-For fitting, we need a simple likelihood function; here we will use a straightforward sum of densities of the study responses and associated response times. A [detailed explanation](#ll-description) of the log-likelihood function is provided in the next example. Note that this likelihood function returns the negative log-likelihood as we can simply minimize this function to get the maximum likelihood estimate.
-
-```{r simp-ll, eval=TRUE}
-ll_fun <- function(pars, rt, resp, truth) {
-  rtu <- rt[truth == "upper"]
-  rtl <- rt[truth == "lower"]
-  respu <- resp[truth == "upper"]
-  respl <- resp[truth == "lower"]
-
-  # the truth is "upper" so use vu
-  densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE)
-  # the truth is "lower" so use vl
-  densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE)
-
-  densities <- c(densu, densl)
-  if (any(!is.finite(densities))) return(1e6)
-  return(-sum(densities))
-}
-```
-
-We then pass the data and log-likelihood function with the necessary additional arguments to an optimization function. As we are using the optimization function `nlminb` for this example, we must input as the first argument the initial values of our DDM parameters that we want optimized. These are input in the order: *v<sub>u</sub>*, *v<sub>l</sub>*, *a*, *t<sub>0</sub>*, *w*, and *sv*; we also need to define upper and lower bounds for each parameters. Fitting the DDM to this data is basically instantaneous using this setup.
-
-```{r show-simp-fit, eval=TRUE}
-fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun, 
-              rt = onep$rt, resp = onep$resp, truth = onep$truth, 
-              # limits:   vu,   vl,   a,  t0, w,  sv
-              lower = c(-Inf, -Inf,   0,   0, 0,   0),
-              upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
-fit
+med_dec <- med_dec[which(med_dec$rt >= 0), ]
 ```
 
 
 
 
-
-# More Involved Example Fitting {#ex-more}
-<hr class="sec1">
-
-As an example data set, we use the `med_dec` data that comes with `fddm`. This data contains the accuracy condition reported in @trueblood_impact_2018 investigating medical decision making among medical professionals (pathologists) and novices (i.e., undergraduate students). The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The data set contains 200 decision per participant, based on pictures of 100 true cancerous cells and pictures of 100 true non-cancerous cells. First we load the `fddm` package.
-
-```{r load-pkg, eval=TRUE}
-library("fddm")
-```
-
-<a id="ll-description"></a>
+## Log-likelihood Function {#ex-ll-fun}
 Our approach will be a straightforward maximum likelihood estimation (MLE). Since we will be using the optimization function `nlminb`, we must write an objective function for it to optimize. By default `nlminb` finds the minimum of the objective function instead of the maximum, so we will simply negate our likelihood function. In addition, we will employ the common practice of using the log-likelihood as this tends to be more stable while still maintaining the same minima (negated maxima) as the regular likelihood function.
 
 We are going to be fitting the parameters $v$, $a$, $t_0$, $w$, and $sv$; however, we want to fit two distinct drift rates, one for the upper boundary ($v_u$) and one for the lower boundary ($v_\ell$). In order to make this distinction, we require the input of the truthful classification of each decision (i.e. what the *correct* response is for each entry). Note that our log-likelihood function depends on the number of response times, the number of responses, and the number of truthful classifications all being equal.
@@ -152,7 +105,37 @@ ll_fun <- function(pars, rt, resp, truth, err_tol) {
 }
 ```
 
-Next we will define a function to run the data fitting for us; we want it to output a dataframe containing the parameter estimates for each individual in the data. The inputs will be the dataset, the allowable error tolerance for the density function, how the "upper" response is presented in the dataset, and indices of the columns in the dataset containing: identification of the individuals in the dataset, the response times, the responses, and the truthful classifications.
+
+
+
+## Simple Fitting Routine {#ex-simple}
+
+As an intermediate step, we will fit the DDM to only one participant from the `med_dec` data. We select the individual whose data we will use for fitting before preparing the data by defining upper and lower responses and the correct response bounds. 
+
+```{r prep-simp-data, eval=TRUE}
+onep <- med_dec[ med_dec$id == "2" & med_dec$group == "experienced", ]
+onep$resp <- ifelse(onep$response == "blast", "upper", "lower")
+onep$truth <- ifelse(onep$classification == "blast", "upper", "lower")
+str(onep)
+```
+
+We then pass the data and log-likelihood function with the necessary additional arguments to an optimization function. As we are using the optimization function `nlminb` for this example, we must input as the first argument the initial values of our DDM parameters that we want optimized. These are input in the order: $v_u$, $v_\ell$, $a$, $t_0$, $w$, and $sv$; we also need to define upper and lower bounds for each parameters. Fitting the DDM to this data is basically instantaneous using this setup.
+
+```{r show-simp-fit, eval=TRUE}
+fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun, 
+              rt = onep$rt, resp = onep$resp, truth = onep$truth, 
+              # limits:   vu,   vl,   a,  t0, w,  sv
+              lower = c(-Inf, -Inf,   0,   0, 0,   0),
+              upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
+fit
+```
+
+
+
+
+## Fitting the Entire Dataset {#ex-data}
+
+Here we will run a more rigorous fitting on the entire `med_dec` datset to obtain parameter estimates for each participant in the study. To do this, we define a function to run the data fitting for us; we want it to output a dataframe containing the parameter estimates for each individual in the data. The inputs will be the dataset, the allowable error tolerance for the density function, how the "upper" response is presented in the dataset, and indices of the columns in the dataset containing: identification of the individuals in the dataset, the response times, the responses, and the truthful classifications.
 
 After some data checking, the fitting function will extract the unique individuals from the dataset and run the parameter optimization for the responses and response times for each individual. The optimizations themselves are initialized with random initial parameter values to aid in the avoidance of local minima in favor of global minima. Moreover, the optimization will run 5 times for each individual, with 5 different sets of random initial parameter values. The value of the minimized log-likelihood function will be compared across all 5 runs, and the smallest such value will indicate the best fit. The parameter estimates, convergence code, and minimized value of the log-likelihood function produced by this best fit will be saved for that individual.
 
@@ -252,7 +235,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
 }
 ```
 
-We load the dataset, remove any invalid rows from the dataset, and run the fitting; the dataframe of the fitting results is output as well.
+We load the dataset, remove any invalid rows from the dataset, and run the fitting; the dataframe of the fitting results is output below.
 
 ```{r fitting-run, eval=TRUE}
 data(med_dec, package = "fddm")
@@ -262,7 +245,11 @@ fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
 fit
 ```
 
-To show the results of our fitting, we will plot the fitted values of $v_u$ and $v_\ell$ to show how they differ among novices, inexperienced professionals, and experienced professionals.
+
+
+### Rudimentary Analysis
+
+To show some basic results of our fitting, we will plot the fitted values of $v_u$ and $v_\ell$ grouped by the experience level of the participant to demonstrate how these parameters differ among novices, inexperienced professionals, and experienced professionals.
 
 ```{r plot, eval=TRUE}
 library("reshape2")
