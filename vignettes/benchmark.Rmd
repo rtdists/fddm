@@ -54,7 +54,7 @@ Function `dfddm` evaluates the density function (or probability density function
 # Introduction {#intro}
 <hr class="sec1">
 
-Since the DDM is widely used in parameter estimation usually involving numerical optimization, a lot of effort has been put into making the evaluation of its density as fast as possible. However, the density function for the DDM is notorious for containing an unavoidable infinite sum; hence the literature has produced a few different methods of approximating the density. This vignette is designed to compare the speed of the currently available algorithms that calculate the lower probability density of the DDM. To this aim, we present benchmark data of currently available methods from the literature, our streamlined implementations of those methods, and our own novel methods. The [first section](#den) will record the benchmark data of the density function approximations themselves and show the results through a series of visualizations. The [second section](#fit) will record the benchmark data of parameter estimation that uses the density function approximations in the optimization process for fitting to real-world data; this section will also include visualizations to illustrate the differences among the density function approximations. Please note that we will not be testing the functions for accuracy or consistency in this vignette, as that is covered in the [Validity Vignette](validity.html).
+Since the DDM is widely used in parameter estimation usually involving numerical optimization, a lot of effort has been put into making the evaluation of its density as fast as possible. However, the density function for the DDM is notorious for containing an unavoidable infinite sum; hence, the literature has produced a few different methods of approximating the density. This vignette is designed to compare the speed of the currently available algorithms that calculate the lower probability density of the DDM. To this aim, we present benchmark data of currently available methods from the literature, our streamlined implementations of those methods, and our own novel methods. The [first section](#den) will record the benchmark data of the density function approximations themselves and show the results through a series of visualizations. The [second section](#fit) will record the benchmark data of parameter estimation that uses the density function approximations in the optimization process for fitting to real-world data; this section will also include visualizations to illustrate the differences among the density function approximations. Please note that we will not be testing the functions for accuracy or consistency in this vignette, as that is covered in the [Validity Vignette](validity.html).
 
 
 
@@ -63,7 +63,7 @@ Since the DDM is widely used in parameter estimation usually involving numerical
 # Benchmarking the Density Functions {#den}
 <hr class="sec1">
 
-We want to determine the performance of each method across a wide variety of parameters in order to identify any slow areas for individual methods. To achieve this rigor, we define an extensive parameter space (in a code chunk below) and loop through each combination of parameters. Throughout this vignette we will input the response times as a vector to each function instead of inputting individual response times for two reasons: first, this is the most common way to input the response time data, and second, this allows for the `R`-based method to exploit vectorization to make that method as fast as possible. For each combination of parameters, we run the `microbenchmark` function from the package [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) 100 times for each method and only save the median benchmark time of these 100. We will refer to these as the "median benchmark times" for the remainder of this vignette. Running the benchmark tests many times for each set of parameters generates a lot of benchmark data but takes a long time, so we only generate a small number of samples at each set of parameters. We are currently preparing a benchmark tests with an even more granular parameter space. This additional benchmark will eventually be made available elsewhere.
+We want to determine the performance of each method across a wide variety of parameters in order to identify any slow areas for individual methods. To achieve this rigor, we define an extensive parameter space (in [a code chunk below](#par-space)) and loop through each combination of parameters. Throughout this vignette we will input the response times as a vector to each function instead of inputting individual response times for two reasons: first, this is the most common way to input the response time data; and second, this allows for the `R`-based method to exploit vectorization to make that method as fast as possible. For each combination of parameters, we run the `microbenchmark` function from the package [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) 100 times for each method and only save the median benchmark time of these 100. We will refer to these as the "median benchmark times" for the remainder of this vignette. Running the benchmark tests this many times for each set of parameters generates a sufficient amount of benchmark data so that the median of these times is unlikely to be an outlier, either faster or slower than a typical run time.
 
 Upon collecting the benchmark data, we perform a preliminary analysis of the approximations' performance by showing the distributions of median benchmark times as side-by-side violin plots for each approximation. Then we cull the methods and only test further on the fastest and most widely used approximations. To elucidate the areas of the parameter space where the different methods excel and struggle, we plot the median benchmark times as a function of individual parameter values. These plots will reveal which model parameters affect the efficiency of each approximation and how those parameters can slow down the approximations.
 
@@ -72,9 +72,9 @@ Upon collecting the benchmark data, we perform a preliminary analysis of the app
 
 ## Generating Benchmark Data {#den-gen}
 
-Before analyzing how the different density function approximations perform, we must first generate the benchmark data. In addition to testing all of the methods available in `dfddm`, we also include three functions that are considered to be current and widely used. First we include the function `ddiffusion` from the package [`rtdists`](https://cran.r-project.org/package=rtdists) as it is well known for being not only user friendly and feature-rich but also designed specifically for handling data with regard to distributions for response time models. Second we also test the `dwiener` function from the [`RWiener`](https://cran.r-project.org/package=RWiener) package, which is mainly aimed at providing an `R` language interface to calculate various functions from the Wiener process. Third we include some raw `R` code that is bundled with the paper written by @gondan2014even about improving the approximation to the density function. As this code was not yet available in an `R` package, it is part of `fddm` and can be accessed after running `source` on the corresponding file as shown below.
+Before analyzing how the different density function approximations perform, we must first generate the benchmark data. In addition to testing all of the methods available in `dfddm`, we also include three functions that are considered to be current and widely used. First, we include the function `ddiffusion` from the package [`rtdists`](https://cran.r-project.org/package=rtdists) as it is well known for being not only user friendly and feature-rich but also designed specifically for handling data with regard to distributions for response time models. Second, we also test the `dwiener` function from the [`RWiener`](https://cran.r-project.org/package=RWiener) package, which is mainly aimed at providing an `R` language interface to calculate various functions from the Wiener process. Third, we include some raw `R` code that is bundled with the paper written by @gondan2014even about improving the approximation to the density function. As this code was not yet available in an `R` package, it is part of `fddm` and can be accessed after running `source` on the corresponding file as shown below.
 
-To capture the behavior of the the density function approximations, we test each one in a granular parameter space that includes the parameter values most likely used in practice. This parameter space can be found fully defined in the code chunk later in this section. Note that we are only testing the "lower" density function as the conversion from the "lower" density function to the "upper" density function involves only the mappings $v \to -v$ and $w \to 1-w$. Since our parameter space includes negative values of $v$ and the complements of all values of $w$, testing both the "lower" and "upper" density functions would be redundant.
+To capture the behavior of the density function approximations, we test each one in a granular parameter space that includes the parameter values most likely used in practice. This parameter space can be found fully defined in the code chunk later in this section. Note that we are only testing the "lower" density function as the conversion from the "lower" density function to the "upper" density function involves only the mappings $v \to -v$ and $w \to 1-w$. Since our parameter space includes negative values of $v$ and the complements of all values of $w$, testing both the "lower" and "upper" density functions would be redundant.
 
 In addition, we include two functions for benchmarking the performance of the approximations: one where the response times are input as a vector, and one where the response times are input one at a time to the density function. Inputting the response times as a vector is the most common way of inputting data to the density function and allows the Gondan `R` code to exploit `R`'s powerful vectorization, operating at its most efficient. We also include a benchmark function that inputs the response times individually as this allows us to see the impact that the size of the response time has on the evaluation time of the density function approximations.
 
@@ -88,7 +88,7 @@ source(system.file("extdata", "Gondan_et_al_density.R", package = "fddm", mustWo
 library("microbenchmark")
 
 rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
-                             err_tol = 1e-6, times = 100, unit = "us") {
+                             err_tol = 1e-6, times = 100, unit = "ns") {
 
   fnames <- c("fs_SWSE_17", "fs_SWSE_14",
               "fs_Gon_17", "fs_Gon_14", "fs_Nav_17", "fs_Nav_14",
@@ -194,7 +194,7 @@ rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
 }
 
 rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
-                             err_tol = 1e-6, times = 100, unit = "us") {
+                             err_tol = 1e-6, times = 100, unit = "ns") {
 
   fnames <- c("fs_SWSE_17", "fs_SWSE_14",
               "fs_Gon_17", "fs_Gon_14", "fs_Nav_17", "fs_Nav_14",
@@ -303,8 +303,10 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
 }
 ```
 
+<a id="r-loops"></a>
 Since control loops in `R` have a lot of overhead and are comparatively slow (e.g., compared to loops in C++), we will only run the benchmark function that inputs the response times as a vector, `rt_benchmark_vec()` from the code chunk above. This function requires one fewer loop than the similar function that inputs the response times individually, `rt_benchmark_ind()`. Instead, we will load pre-run benchmark data for individually input response times obtained through `rt_benchmark_ind()` as this takes too long to evaluate in this vignette. The following code chunk defines the parameter space to be explored throughout the benchmark testing and runs the vectorized benchmark function defined in the previous code chunk.
 
+<a id="par-space"></a>
 ```{r bm-run, eval=TRUE}
 # Define parameter space
 RT <- c(0.001, 0.1, 1, 2, 3, 4, 5, 10, 30)
@@ -318,13 +320,12 @@ err_tol <- 1e-6 # this is the setting from rtdists
 # Run benchmark tests
 bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                            W = W, SV = SV, err_tol = err_tol,
-                           times = 100, unit = "us")
+                           times = 100, unit = "ns")
 ## results of rt_benchmark_ind are pre-loaded nad not run here:
 # bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
 #                            W = W, SV = SV, err_tol = err_tol,
-#                            times = 100, unit = "us")
+#                            times = 100, unit = "ns")
 ```
-
 
 ```{r bm-run-and-save, eval=FALSE, include=FALSE}
 # Define parameter space
@@ -339,23 +340,24 @@ err_tol <- 1e-6 # this is the setting from rtdists
 # Run benchmark tests
 bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                            W = W, SV = SV, err_tol = err_tol,
-                           times = 100, unit = "us")
-save(bm_vec, file = "inst/extdata/bm_vec.Rds", compress = "bzip2")
+                           times = 100, unit = "ns")
+save(bm_vec, file = "inst/extdata/bm_vec.Rds", compress = "xz")
 # load(system.file("extdata", "bm_vec.Rds", package = "fddm", mustWork = TRUE))
 # results of rt_benchmark_ind are pre-loaded nad not run here:
 bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                            W = W, SV = SV, err_tol = err_tol,
-                           times = 100, unit = "us")
-save(bm_ind, file = "inst/extdata/bm_ind.Rds", compress = "bzip2")
+                           times = 100, unit = "ns")
+save(bm_ind, file = "inst/extdata/bm_ind.Rds", compress = "xz")
 ```
+
 
 
 
 ## Analysis of Benchmark Results {#den-ana}
 
-The first step in analyzing the benchmark data is a rough visualization of the results in side-by-side violin plots that show the distribution of `microbenchmark` timings. We use the data that we just generated in the previous code chunk and plot a density violin for each method. Each density violin is overlayed with a boxplot showing median and upper and lower quartile. We also add the mean as a dashed line. We also constrain the y-axis of the plot to focus on the area where most of the  `fddm` methdos lie.
+The first step in analyzing the benchmark data is a rough visualization of the results in side-by-side violin plots that show the distribution of `microbenchmark` timings. We use the data that we just generated in the previous code chunk and plot a density violin for each method. Each density violin is overlaid with a boxplot showing the median and the first and third quartiles, in addition to a dashed line representing the mean. We also constrain the vertical axis of the plot to focus on the area where most of the `fddm` methods lie.
 
-For this visualization we will use the benchmark data where the response times were handed over as a a vector to each `fddm` call. As discussed above, running the benchmark on individuals RTs is considerably slower as the loop over RTs resides in R and not in C++.
+For this visualization we will use the benchmark data where the response times were handed over as a vector to each `fddm` call. As {discussed above}(#r-loops), running the benchmark on individual response times is considerably slower as the loop over the response times resides in `R` and not in `C++`.
 
 ```{r bm-violin, eval=TRUE, fig.height=5}
 library("reshape2")
@@ -405,11 +407,11 @@ ggplot(mbm_vec, aes(x = FuncName, y = time,
              legend.position = "none")
 ```
 
-Depending on your system, the results might differ from the ones shown here, but they should replicate the general pattern. The small-time methods ("fs_") have long tails due to very few outliers, but their central tendencies are rather fast. The methods combining small-time and large-time ("fb_") show an almost normal distribution with only a short tail; they also have the fastest central tendencies. From the `fddm` methods, the large-time approach ("fl_") is the slowest with a long tail. `Rwiener` which also combines small-time and large-time approach also  shows an almost normal distribution, but is shifted compared to `fddm`. The other two methdos are clearly slower with `rtdists` (which performs does quite a few computations in R) having the slowest central tendencies.
+Depending on your system, the results might differ from the ones shown here, but they should replicate the general pattern. The small-time methods ("fs_") have long tails due to very few outliers, but their central tendencies are rather fast. The methods combining small-time and large-time ("fb_") show an almost normal distribution with only a short tail; they also have the fastest central tendencies. Of the `fddm` methods, the large-time approach ("fl_") is the slowest with a long tail. The function from the `Rwiener` package combines small-time and large-time approach and also shows an almost normal distribution, but its distribution of median benchmark times is shifted higher compared to those of `fddm`. The other two methods are clearly slower; the function provided by @gondan2014even is purely in `R` so it is constrained by the speed of `R`'s vectorization. Similarly constrained by `R`, the function from the `rtdists` package performs quite a few computations in `R` that make it very user-friendly, but at the cost of having the slowest central tendencies.
 
-To visualize the problem areas for each method, we plot that method's median benchmark times as a function of each individual parameter value; this will allow us to see where in the parameter space each method is efficient and where it is inefficient. In each of the following plots, we will show the mean median benchmark times, the 10% quantiles and 90% quantiles of the median benchmark times, as well as the minimum and maximum median benchmark times as we vary one model parameter. For each value of that parameter, we aggregate the benchmark data for all values of the other parameter to generate the statistics plotted. For example, in a plot illustrating the effect of varying $v$, the statistics plotted for the parameter value $v = 0$ will include the benchmark data for the full ranges of $rt$, $a$, $w$, and $sv$. In addition, because we also vary the response time, all of the following plots show the results based on the individual rts (i.e., `rt_benchmark_ind`).
+To visualize the problem areas for each method, we plot that method's median benchmark times as a function of each individual parameter value; this will allow us to see where in the parameter space each method is efficient and where it is inefficient. In each of the following plots, we will vary one model parameter and show the mean of the median benchmark times, the 10% quantiles and 90% quantiles of the median benchmark times, as well as the minimum and maximum median benchmark times. For each value of that parameter, we aggregate the benchmark data for all values of the other parameter to generate the statistics plotted. For example, in a plot illustrating the effect of varying $v$, the statistics plotted for the parameter value $v = 0$ will include the benchmark data for the full ranges of $rt$, $a$, $w$, and $sv$. In addition, because we also vary the response time, all of the following plots show the results based on the individual response times (i.e., `rt_benchmark_ind`).
 
-To avoid too many repititious plots, we will only include nine of the methods from the previous plot that illustrate the different variations and implementations of the density functions. We include: all three small-time implementations in `dfddm` ("fs_"), the one large-time implementation of the large-time in `dfddm` ("fl_"), the two implementations in `dfddm` that combine the small-time and large-time ("fb_"), and the three methods from `R` packageds and the literature as [described above](#den-gen).
+To avoid too many repetitious plots, we will only include nine of the methods from the previous plot that illustrate the different variations and implementations of the density functions. We include: all three small-time implementations in `dfddm` ("fs_"), the one large-time implementation of the large-time in `dfddm` ("fl_"), the two implementations in `dfddm` that combine the small-time and large-time ("fb_"), and the three methods from `R` packages and the literature as [described above](#den-gen).
 
 The following code chunk loads the pre-run benchmark data and prepares it for the subsequent plots that will be generated by the later code chunks.
 
@@ -433,7 +435,7 @@ Color_meq <- c("#9900cc", "#006699", "#336600",
 mbm_meq <- subset(mbm_ind, FuncName %in% Names_meq)
 ```
 
-We first investigate how the response times affect the performance of each method. When calculating the density, the main culprit of longer evaluation times is the approximation of the infinite sum. Since the response time, $rt$, is always scaled by the threshold separation, $a$, in the infinite sum, we combine these model parameters and instead examine the "effective response time", defined as $\frac{rt}{a^2}$. This code chunk will generate a plot shouwing the effects that varying the "effective response time" has on the median benchmark time of the approximations.
+We first investigate how the response times affect the performance of each method. When calculating the density, the main culprit of longer evaluation times is the approximation of the infinite sum. Since the response time, $rt$, is always scaled by the threshold separation, $a$, in the infinite sum, we combine these model parameters and instead examine the "effective response time", defined as $\frac{rt}{a^2}$. This code chunk will generate a plot showing how varying the "effective response time" can affect the median benchmark time of the approximations.
 
 ```{r bm-meq-rtaa, eval=TRUE}
 ggplot(mbm_meq, aes(x = RTAA, y = time,
@@ -471,7 +473,7 @@ ggplot(mbm_meq, aes(x = RTAA, y = time,
 
 This plot confirms that the aptly named small-time and large-time density functions are generally more efficient at calculating the density for small response times and large response times, respectively. Of the three methods used from the literature, the `RWiener` and `rtdists` functions use a switching mechanism between the small-time and large-time density functions, and the Gondan algorithm only uses the small-time density function. Importantly, the methods that utilize a switching mechanism between the small-time and large-time density functions have much flatter plots and generally perform well across the $\frac{rt}{a^2}$ parameter space with only a small uptick towards the right.
 
-As above, this code chunk plots the effect on the median benchmark time but instead for the model parameter $w$, the relative starting point.
+Similarly to the previous plot, this code chunk plots the effect on the median benchmark time; but this time we will instead vary the model parameter $w$, the relative starting point.
 
 ```{r bm-meq-w, eval=TRUE}
 ggplot(mbm_meq, aes(x = W, y = time,
@@ -593,13 +595,11 @@ The other three figures vary $w$, $v$, and $sv$, and do not reveal any meaningfu
 # Benchmarking Model Fitting to Real-World Data {#fit}
 <hr class="sec1">
 
-Having shown the performance of each approximation to the Ratcliff DDM density functions, we now examine how these methods compare in practice. To determine how each method behaves in a practical setting, we will use each density approximation as the basis for fitting the DDM to real-world data. The primary analysis of the methods' performance will come from benchmarking the time taken for the parameter estimation using the different methods. In addition, a secondary analysis will compare the performance of the different methods by using the number of iterations and function evaluations used by the optimizer during the optimization process.
+Having shown the performance of each approximation to the Ratcliff DDM density functions, we now examine how these methods compare in practice. To determine how each method behaves in a practical setting, we will use each density approximation as the basis for fitting the DDM to real-world data. The primary analysis of the methods' performance will come from benchmarking the time taken for the parameter estimation using the different methods. In addition, a secondary analysis will compare the performance of the different methods by using the number of function evaluations used by the optimizer during the optimization process.
 
 The parameters that we will fit are one $a$ (threshold separation), one $w$ (relative starting point), and one $sv$ (inter-trial-variability of drift). Since the example data we are using consists of two different item types that each require a different correct response (i.e., for one item type the correct response is mapped to the lower boundary and for the other item type the correct response is mapped to the upper boundary), the model includes two different versions of $v$ (drift rate): $v_\ell$ for fitting to the truthful lower boundary, and $v_u$ for fitting to the truthful upper boundary. As many of the approximations in `dfddm` have different styles, we only test a subset of all the available methods in `dfddm` to avoid unnecessary testing.
 
 We will not test for accuracy or consistency in this vignette because that has already been covered in the [Validity Vignette](validity.html#fit) and the optimization is deterministic so it will return the same result.
-
-Give a brief overview of the plots that will appear from the analysis section.
 
 
 
@@ -608,7 +608,7 @@ Give a brief overview of the plots that will appear from the analysis section.
 
 The following subsections will define all of the functions used to generate the fittings and store the benchmark results and provide the code to run the full fitting. Since running the full fitting for all of the individuals in the data takes a long time, we will forgo running the fitting and instead read pre-fit parameter estimates that used the provided code.
 
-To avoid too many repititious plots, we will only include six of the methods from the [previous section](#den-gen) that illustrate the different variations and implementations of the density functions. We include: all three small-time implementations in `dfddm`, the two implementations in `dfddm` that combine the small-time and large-time, and the one method available in the `rtdists` package. We only use a selection of the methods available in `dfddm` to avoid redundancy in our testing since most of the methods have multiple sibling approximations that are confirmed to be extremely similar. Moreover we do not require the `RWiener` package nor the Gondan raw `R` code because the associated density function approximations do not include an option for variability in drift rate. While we can convert the constant drift rate density to the variable drift rate density using a multiplicative factor, the densities are still potentially calculated incorrectly. For more details on the differences between the constant drift rate density functions and their variable drift rate counterparts, see the [Math Vignette](math.html#mathematical-background).
+To avoid too many repetitious plots, we will only include six of the methods from the [previous section](#den-gen) that illustrate the different variations and implementations of the density functions. We include: all three small-time implementations in `dfddm`, the two implementations in `dfddm` that combine the small-time and large-time, and the one method available in the `rtdists` package. We only use a selection of the methods available in `dfddm` to avoid redundancy in our testing since most of the methods have multiple sibling approximations that are confirmed to be extremely similar. Moreover we do not require the `RWiener` package nor the Gondan raw `R` code because the associated density function approximations do not include an option for variability in drift rate. While we can convert the constant drift rate density to the variable drift rate density using a multiplicative factor, the densities are still potentially calculated incorrectly. For more details on the differences between the constant drift rate density functions and their variable drift rate counterparts, see the [Math Vignette](math.html#mathematical-background).
 
 First we load the necessary packages.
 
@@ -617,6 +617,7 @@ library("fddm")
 library("rtdists")
 library("microbenchmark")
 ```
+
 
 
 ### Log-Likelihood Functions {#fit-gen-llf}
@@ -759,14 +760,14 @@ ll_RTDists <- function(pars, rt, resp, truth) {
 
 We use a different set of initial parameter values for each combination of data set and method. In a real-life situation we would probably also do so using random initial parameter values to avoid local minima. Here we do this with a fixed set of initial parameter values to ensure that the different method produce the same results for different starting points. However, there are a couple of restrictions to these initial values that we must address (we would also have to do so if we picked the initial values randomly). The parameter $t_0$ must be less than the response time, so we set the initial values for $t_0$ to be strictly less than the minimum response time according to each individual in the input dataframe.
 
-The following code chunk defines the function that will run the optimization and produce the fitted parameter estimates for $v_u$, $v_\ell$, $a$, $w$, and $sv$. As [discussed above](#fit-gen), we only use a selection of methods from those available in `dfddm`. This fitting function will run the optimization for each set of initial parameter values and store the following results from the optimization: 1) resulting convergence code (either $0$ indicating successful convergence or $1$ indicating unsuccessful convergence); 2) minimized value of the objective log-likelihood function; 3) the number of iterations used by the optimizer during the optimization process; 4) the number of calls to the log-likelihood function during the optimization process; and 5) the median microbenchmark time of the optimization using each method.
+The following code chunk defines the function that will run the optimization and produce the fitted parameter estimates for $v_u$, $v_\ell$, $a$, $w$, and $sv$. As [discussed above](#fit-gen), we only use a selection of methods from those available in `dfddm`. This fitting function will run the optimization for each set of initial parameter values and store the following results from the optimization: 1) resulting convergence code (either $0$ indicating successful convergence or $1$ indicating unsuccessful convergence); 2) minimized value of the objective log-likelihood function; 3) the number of iterations used by the optimizer during the optimization process; 4) the number of calls to the log-likelihood function during the optimization process; and 5) the median benchmark time of the optimization using each method.
 
-As in the [previous section](#den-gen), we run the `microbenchmark` function multiple times for each approximation at each point in this parameter space and save the median of these benchmark times. However, because a full optimisation run entails several calls to the density function, we only use a smaller num of repetitions here. Using the median of these data should reduce the number of outliers in the data while maintaining a truthful representation of the approximations' performance. We will be using the [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) package to time the evaluations.
+As in the [previous section](#den-gen), we run the `microbenchmark` function multiple times for each approximation at each point in this parameter space and save the median of these benchmark times. However, we only use a smaller number of repetitions here because a full optimization run entails several calls to the density function. Using the median of these data should reduce the number of outliers in the data while maintaining a truthful representation of the approximations' performance. We will be using the [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) package to time the evaluations.
 
 ```{r fit-fun, eval=TRUE}
 rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                    truth_idx = NULL, response_upper = NULL, err_tol = 1e-6,
-                   times = 100, unit = "us") {
+                   times = 100, unit = "ns") {
 
   # Format data for fitting
   if (all(is.null(id_idx), is.null(rt_idx), is.null(response_idx),
@@ -972,12 +973,13 @@ data(med_dec, package = "fddm")
 med_dec <- med_dec[which(med_dec$rt >= 0),]
 fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
               truth_idx = 5, response_upper = "blast", err_tol = 1e-6,
-              times = 6, unit = "us")
+              times = 6, unit = "ns")
 ```
 
 ```{r fit-run-save, eval=FALSE, include=FALSE}
 save(fit, file = "inst/extdata/bm_fit.Rds", compress = "bzip2")
 ```
+
 
 
 
@@ -1042,7 +1044,6 @@ Fills <- c("#ffffff00", "#ffffff00", "#80808099")
 ```
 
 We will now present three plots to illustrate how the various methods perform when used in fitting Ratcliff's DDM to real-world data. The measures of interest for each method are the median `microbenchmark` timings and the number of function evaluations in the optimization process; each one of the three plots will focus on one of these measures. Each plot will show a distribution of values of this measure in terms of violin plots and box plots. The distribution shown is the distribution across participants and starting values for each of the different methods of approximating the diffusion model; that is, for each of the `r length(unique(fit$ID))` participants, we present results based on the 11 different starting values for each method (the starting values are constant across methods). 
-
 
 To help explain problematic fits, the plots will show any data point that represents an optimization run for which the objective difference is greater than our predefined tolerance of $\epsilon = 0.0001$. More specifically, for the points shown in grey, the objective difference is comparatively small (i.e., smaller than 2 on the log-likelihood scale) and points shown with a grey background have a difference from the optimum of larger than 2 points on the log-likelihood scale. Data point with objective difference smaller than $\epsilon$ will not be shown on the plot. In addition, each of these visible data points will have a shape to indicate its convergence code: a round point for successful convergence, and  a triangle for failed convergence. 
 
