@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 [![R build status](https://github.com/rtdists/fddm/workflows/R-CMD-check/badge.svg)](https://github.com/rtdists/fddm/actions)
 <!-- badges: end -->
 
-`fddm` provides function `dfddm()` which evaluates the density function (or probability density function, PDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full PDF, which contains an infinite sum. Our implementation of the DDM has the following parameters: *a &#1013; (0, <sub><font size="+2">&#8734;</font></sub>)* (threshold separation), *v &#1013; (-<sub><font size="+2">&#8734;</font></sub>, <sub><font size="+2">&#8734;</font></sub>)* (drift rate), *t<sub>0</sub> &#1013; [0, <sub><font size="+2">&#8734;</font></sub>)* (non-decision time/response time constant), *w &#1013; (0, 1)* (relative starting point), and *sv &#1013; (0, <sub><font size="+2">&#8734;</font></sub>)* (inter-trial-variability of drift).
+`fddm` provides function `dfddm()` which evaluates the density function (or probability density function, PDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full PDF, which contains an infinite sum. Our implementation of the DDM has the following parameters: *a &#1013; (0, <font style="vertical-align: middle;" size="5em">&#8734;</font>)* (threshold separation), *v &#1013; (-<font style="vertical-align: middle;" size="5em">&#8734;</font>, <font style="vertical-align: middle;" size="5em">&#8734;</font>)* (drift rate), *t<sub>0</sub> &#1013; [0, <font style="vertical-align: middle;" size="5em">&#8734;</font>)* (non-decision time/response time constant), *w &#1013; (0, 1)* (relative starting point), and *sv &#1013; (0, <font style="vertical-align: middle;" size="5em">&#8734;</font>)* (inter-trial-variability of drift).
 
 ## Installation
 
@@ -77,7 +77,7 @@ ll_fun <- function(pars, rt, resp, truth) {
 }
 ```
 
-We then pass the data and log-likelihood with the necessary additional arguments to an optimization function. As we are using the optimization function `nlminb` for this example, we must input the initial parameter values as the first argument. These are input in the order: *v<sub>u</sub>*, *v<sub>l</sub>*, *a*, *t0*, *w*, and *sv*; we also need to define upper and lower bounds for each parameters. Fitting the DDM to this data is basically instantaneous using this setup.
+We then pass the data and log-likelihood with the necessary additional arguments to an optimization function. As we are using the optimization function `nlminb` for this example, we must input the initial parameter values as the first argument. These are input in the order: *v<sub>u</sub>*, *v<sub>l</sub>*, *a*, *t<sub>0</sub>*, *w*, and *sv*; we also need to define upper and lower bounds for each parameters. Fitting the DDM to this data is basically instantaneous using this setup.
 
 ```{r}
 fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun, 

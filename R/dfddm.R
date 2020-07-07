@@ -9,7 +9,7 @@
 #'
 #' @param rt A vector of response times (in seconds). If a response time is
 #'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-#'   \ifelse{html}{\out{-<sub><font size="+2">&#8734;</font></sub>}}{\eqn{-\infty}}
+#'   \ifelse{html}{\out{-<font style="vertical-align: middle;" size="5em">&#8734;</font>}}{\eqn{-\infty}}
 #'    if log = TRUE.
 #'
 #' @param response Binary response(s) that correspond(s) to either the "lower"

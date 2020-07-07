@@ -73,7 +73,7 @@ onep$resp <- ifelse(onep$response == "blast", "upper", "lower")
 onep$truth <- ifelse(onep$classification == "blast", "upper", "lower")
 ```
 
-For fitting, we need a simple likelihood function; here we will use a straightforward sum of densities. A detailed explanation of the function is provided in the Example Vignette (`vignette("example", package = "fddm")`). Note that this likelihood function returns the negative log-likelihood so we can simply minimize to get the maximum likelihood estimate.
+For fitting, we need a simple likelihood function; here we will use a straightforward sum of densities. A detailed explanation of the log-likelihood function is provided in the [next section](#ll-description). Note that this likelihood function returns the negative log-likelihood so we can simply minimize to get the maximum likelihood estimate.
 
 ```{r simp-ll, eval=TRUE}
 ll_fun <- function(pars, rt, resp, truth) {
@@ -125,6 +125,7 @@ We are going to be fitting the parameters $v$, $a$, $t_0$, $w$, and $sv$; howeve
 
 The first argument to our log-likelihood function needs to be a vector of the six parameters that are being optimized: $v_u$, $v_\ell$, $a$, $t_0$, $w$, and $sv$. The rest of the arguments will be the other necessary inputs to `dfddm` that are not optimized: the vector of response times, the vector of responses, the vector of the truthful classifications, and the allowable error tolerance for the density function (optional). Details on all of these inputs can be found in the `dfddm` documentation.
 
+<a id="ll-description"></a>
 Upon being called, the log-likelihood function first separates the input response times and responses by their truthful classification to yield two new response time vectors and two new response vectors. The response times and responses are then input into separate density functions using a separate $v$ parameter, $v_u$ or $v_\ell$. These separate densities are then combined, and the log-likelihood function heavily penalizes any combination of parameters that returns a log-density of $-\infty$ (equivalent to a regular density of $0$). Lastly, the actual log-likelihood is returned as the negative of the sum of all of the densities.
 
 ```{r log-likelihood, eval=TRUE}

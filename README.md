@@ -15,13 +15,17 @@ status](https://github.com/rtdists/fddm/workflows/R-CMD-check/badge.svg)](https:
 (or probability density function, PDF) for the Ratcliff diffusion
 decision model (DDM) using different methods for approximating the full
 PDF, which contains an infinite sum. Our implementation of the DDM has
-the following parameters: *a ϵ (0, <sub><font size="+2">∞</font></sub>)*
-(threshold separation), *v ϵ (-<sub><font size="+2">∞</font></sub>,
-<sub><font size="+2">∞</font></sub>)* (drift rate), *t<sub>0</sub> ϵ
-\[0, <sub><font size="+2">∞</font></sub>)* (non-decision time/response
-time constant), *w ϵ (0, 1)* (relative starting point), and *sv ϵ (0,
-<sub><font size="+2">∞</font></sub>)* (inter-trial-variability of
-drift).
+the following parameters: *a ϵ (0,
+<font style="vertical-align: middle;" size="5em">∞</font>)* (threshold
+separation), *v ϵ
+(-<font style="vertical-align: middle;" size="5em">∞</font>,
+<font style="vertical-align: middle;" size="5em">∞</font>)* (drift
+rate), *t<sub>0</sub> ϵ \[0,
+<font style="vertical-align: middle;" size="5em">∞</font>)*
+(non-decision time/response time constant), *w ϵ (0, 1)* (relative
+starting point), and *sv ϵ (0,
+<font style="vertical-align: middle;" size="5em">∞</font>)*
+(inter-trial-variability of drift).
 
 ## Installation
 
@@ -107,9 +111,10 @@ We then pass the data and log-likelihood with the necessary additional
 arguments to an optimization function. As we are using the optimization
 function `nlminb` for this example, we must input the initial parameter
 values as the first argument. These are input in the order:
-*v<sub>u</sub>*, *v<sub>l</sub>*, *a*, *t0*, *w*, and *sv*; we also need
-to define upper and lower bounds for each parameters. Fitting the DDM to
-this data is basically instantaneous using this setup.
+*v<sub>u</sub>*, *v<sub>l</sub>*, *a*, *t<sub>0</sub>*, *w*, and *sv*;
+we also need to define upper and lower bounds for each parameters.
+Fitting the DDM to this data is basically instantaneous using this
+setup.
 
 ``` r
 fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun, 
