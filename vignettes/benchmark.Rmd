@@ -471,7 +471,7 @@ ggplot(mbm_meq, aes(x = RTAA, y = time,
   facet_wrap(~ factor(FuncName, levels = Names_meq), scales = "free_y")
 ```
 
-This plot confirms that the aptly named small-time and large-time density functions are generally more efficient at calculating the density for small response times and large response times, respectively. Of the three methods used from the literature, the `RWiener` and `rtdists` functions use a switching mechanism between the small-time and large-time density functions, and the Gondan algorithm only uses the small-time density function. Importantly, the methods that utilize a switching mechanism between the small-time and large-time density functions have much flatter plots and generally perform well across the $\frac{rt}{a^2}$ parameter space with only a small uptick towards the right.
+This plot confirms that the aptly named small-time and large-time density functions are generally more efficient at calculating the density for small response times and large response times, respectively. Of the three methods used from the literature, the `RWiener` and `rtdists` functions use a switching mechanism between the small-time and large-time density functions, and the Gondan algorithm only uses the small-time density function. Importantly, the methods that utilize a switching mechanism between the small-time and large-time density functions have much flatter plots and generally perform well across the $\frac{rt}{a^2}$ parameter space.
 
 Similarly to the previous plot, this code chunk plots the effect on the median benchmark time; but this time we will instead vary the model parameter $w$, the relative starting point.
 
@@ -508,7 +508,7 @@ ggplot(mbm_meq, aes(x = W, y = time,
   facet_wrap(~ factor(FuncName, levels = Names_meq), scales = "free_y")
 ```
 
-The relative starting point $w$ has very little impact on the infinite sum, and thus we see that the means and quantiles are relatively flat across the range of $w$. However, we see a rather clear dip around 0.5 for many methods. 
+The relative starting point $w$ has very little impact on the infinite sum, and thus we see that the means and quantiles are relatively flat across the range of $w$. However, we see a rather clear dip around 0.5 for the maximum times of many methods. 
 
 Here we plot the effects of varying the parameter $v$, the drift rate, on the median benchmark time.
 
@@ -1043,11 +1043,11 @@ Stroke <- c(0, 1, 1)
 Fills <- c("#ffffff00", "#ffffff00", "#80808099")
 ```
 
-We will now present three plots to illustrate how the various methods perform when used in fitting Ratcliff's DDM to real-world data. The measures of interest for each method are the median `microbenchmark` timings and the number of function evaluations in the optimization process; each one of the three plots will focus on one of these measures. Each plot will show a distribution of values of this measure in terms of violin plots and box plots. The distribution shown is the distribution across participants and starting values for each of the different methods of approximating the diffusion model; that is, for each of the `r length(unique(fit$ID))` participants, we present results based on the 11 different starting values for each method (the starting values are constant across methods). 
+We will now present two plots to illustrate how the various methods perform when used in fitting Ratcliff's DDM to real-world data. The measures of interest for each method are the median `microbenchmark` timings and the number of function evaluations in the optimization process; each one of the two plots will focus on one of these measures. Each plot will show a distribution of values of this measure in terms of violin plots and box plots. The distribution shown is the distribution across participants and starting values for each of the different methods of approximating the diffusion model; that is, for each of the `r length(unique(fit$ID))` participants, we present results based on the 11 different starting values for each method (the starting values are constant across methods). 
 
-To help explain problematic fits, the plots will show any data point that represents an optimization run for which the objective difference is greater than our predefined tolerance of $\epsilon = 0.0001$. More specifically, for the points shown in grey, the objective difference is comparatively small (i.e., smaller than 2 on the log-likelihood scale) and points shown with a grey background have a difference from the optimum of larger than 2 points on the log-likelihood scale. Data point with objective difference smaller than $\epsilon$ will not be shown on the plot. In addition, each of these visible data points will have a shape to indicate its convergence code: a round point for successful convergence, and  a triangle for failed convergence. 
+To help explain problematic fits, the plots will show any data point that represents an optimization run for which the objective difference is greater than our predefined tolerance of $\epsilon = 0.0001$. More specifically, for the points shown in grey, the objective difference is comparatively small (i.e., smaller than 2 on the log-likelihood scale) and points shown with a grey background have a difference from the optimum of larger than 2 points on the log-likelihood scale (2 points on the log-likelihood scale corresponds to 1 point on the deviance scale). Data point with objective difference smaller than $\epsilon$ will not be shown on the plot. In addition, each of these visible data points will have a shape to indicate its convergence code: a round point for successful convergence, and  a triangle for failed convergence. 
 
-The first plot will show the densities of the `microbenchmark` timings for each method.
+The first plot will show the densities of the `microbenchmark` timings for each method. Note that we have zoomed in and have removed one outlier time from the "fs_SWSE_17" method which takes around 330 millisecodns to finish (and did not converge succesfully on the maximum-likelihood estimate).
 
 ```{r fit-mbm, eval=TRUE, fig.height=6}
 fit_mbm <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
