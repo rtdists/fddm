@@ -247,7 +247,7 @@ fit
 
 
 
-### Rudimentary Analysis
+### Rudimentary Analysis {#ex-data-ana}
 
 To show some basic results of our fitting, we will plot the fitted values of $v_u$ and $v_\ell$ grouped by the experience level of the participant to demonstrate how these parameters differ among novices, inexperienced professionals, and experienced professionals.
 
