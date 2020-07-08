@@ -96,9 +96,10 @@ onep$truth <- ifelse(onep$classification == "blast", "upper", "lower")
 For fitting, we need a simple likelihood function; here we will use a
 straightforward sum of densities of the study responses and associated
 response times. A detailed explanation of the log-likelihood function is
-provided in the [Example Vignette](example.html#ex-ll-fun). Note that
-this likelihood function returns the negative log-likelihood as we can
-simply minimize this function to get the maximum likelihood estimate.
+provided in the Example Vignette (`vignette("example", package =
+"fddm")`). Note that this likelihood function returns the negative
+log-likelihood as we can simply minimize this function to get the
+maximum likelihood estimate.
 
 ``` r
 ll_fun <- function(pars, rt, resp, truth) {
