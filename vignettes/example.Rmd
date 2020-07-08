@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
   error = TRUE,
   comment = "#>"
 )
-options(width = 100, digits = 4)
+op <- options(width = 100, digits = 4)
 ```
 
 <div id="TOC">
@@ -304,6 +304,9 @@ In addition, we notice that the more experienced participants tend to have highe
 sessionInfo()
 ```
 
+```{r reset-options, include=FALSE}
+options(op)  # reset options
+```
 
 
 # References

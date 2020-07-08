@@ -14,7 +14,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-options(width = 100)
+op <- options(width = 100)
 knitr::opts_chunk$set(
   collapse = TRUE,
   error = TRUE, # ensures compilation even if testthat checks fail
@@ -855,6 +855,8 @@ We can see that it is mostly the small time methods that have occasional issues 
 sessionInfo()
 ```
 
-
+```{r reset-options, include=FALSE}
+options(op)  # reset options
+```
 
 # References
