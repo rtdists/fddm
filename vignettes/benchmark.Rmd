@@ -121,7 +121,7 @@ rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                              summation_small = "2017", scale = "small",
                              err_tol = err_tol),
           fs_SWSE_14 = dfddm(rt = RT, response = resp, a = A[a],
-                            v = V[v], t0 = t0, w = W[w],
+                             v = V[v], t0 = t0, w = W[w],
                              log = FALSE, n_terms_small = "SWSE",
                              summation_small = "2014", scale = "small",
                              err_tol = err_tol),
@@ -511,7 +511,7 @@ ggplot(mbm_meq, aes(x = W, y = time,
   facet_wrap(~ factor(FuncName, levels = Names_meq), scales = "free_y")
 ```
 
-The relative starting point $w$ has very little impact on the infinite sum, and thus we see that the means and quantiles are relatively flat across the range of $w$. However, we see a rather clear dip around 0.5 for the maximum times of many methods. 
+The relative starting point $w$ has very little impact on the infinite sum, and thus we see that the means and quantiles are relatively flat across the range of $w$. However, we see a rather clear dip around 0.5 for the maximum times of many methods.
 
 Here we plot the effects of varying the parameter $v$, the drift rate, on the median benchmark time.
 
@@ -1024,11 +1024,11 @@ fit_prep <- function(fit) {
   fit$BmTime <- fit$BmTime/1e6 # convert to milliseconds
 
   eps <- 1e-4
-  
+
   fit[fit$Obj_diff < eps, "Obj_diff"] <- 0
   fit[(fit$Obj_diff >= eps & fit$Obj_diff <= 2), "Obj_diff"] <- 1
   fit[fit$Obj_diff > 2, "Obj_diff"] <- 3
-  
+
   fit$Convergence <- ifelse(fit$Convergence < 1, 0, 1)
 
   return(fit)
@@ -1048,9 +1048,9 @@ Stroke <- c(0, 1, 1)
 Fills <- c("#ffffff00", "#ffffff00", "#80808099")
 ```
 
-We will now present two plots to illustrate how the various methods perform when used in fitting Ratcliff's DDM to real-world data. The measures of interest for each method are the median `microbenchmark` timings and the number of function evaluations in the optimization process. Each one of the two plots will focus on one of these measures by showing a distribution of values of this measure in terms of violin plots and box plots. The distribution shown is the distribution across participants and starting values for each of the different methods of approximating the diffusion model; that is, for each of the `r length(unique(fit$ID))` participants, we present results based on the $11$ different starting values for each method (the starting values are constant across methods). 
+We will now present two plots to illustrate how the various methods perform when used in fitting Ratcliff's DDM to real-world data. The measures of interest for each method are the median `microbenchmark` timings and the number of function evaluations in the optimization process. Each one of the two plots will focus on one of these measures by showing a distribution of values of this measure in terms of violin plots and box plots. The distribution shown is the distribution across participants and starting values for each of the different methods of approximating the diffusion model; that is, for each of the `r length(unique(fit$ID))` participants, we present results based on the $11$ different starting values for each method (the starting values are constant across methods).
 
-To help explain problematic fits, the plots will show any data point that represents an optimization run for which the objective difference is greater than our predefined tolerance of $\epsilon = 0.0001$. More specifically, the objective difference is comparatively small (i.e., smaller than 2 on the log-likelihood scale)for the points shown with a completely transparent fill color; contrastingly, points shown with a gray fill color have a difference from the optimum of larger than 2 points on the log-likelihood scale (2 points on the log-likelihood scale corresponds to 1 point on the deviance scale). Data points with objective difference smaller than $\epsilon$ will not be shown on the plot. In addition, each of these visible data points will have a shape to indicate its convergence code: a round point for successful convergence, and  a triangle for failed convergence. 
+To help explain problematic fits, the plots will show any data point that represents an optimization run for which the objective difference is greater than our predefined tolerance of $\epsilon = 0.0001$. More specifically, the objective difference is comparatively small (i.e., smaller than 2 on the log-likelihood scale)for the points shown with a completely transparent fill color; contrastingly, points shown with a gray fill color have a difference from the optimum of larger than 2 points on the log-likelihood scale (2 points on the log-likelihood scale corresponds to 1 point on the deviance scale). Data points with objective difference smaller than $\epsilon$ will not be shown on the plot. In addition, each of these visible data points will have a shape to indicate its convergence code: a round point for successful convergence, and  a triangle for failed convergence.
 
 The first plot will show the densities of the `microbenchmark` timings for each method. Note that we have zoomed in and have removed one outlier time from the "fs_SWSE_17" method which takes around 330 milliseconds to finish and did not converge successfully on the maximum-likelihood estimate.
 
