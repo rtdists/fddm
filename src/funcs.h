@@ -62,6 +62,9 @@ double large_sum_Nav(const double& t, const double& a, const double& w,
 double ff(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& eps,
           NummFunc numm, SummFunc summ);
+double fc(const double& t, const double& a, const double& v,
+          const double& w, const double& sv, const double& eps,
+          NummFunc numm, SummFunc summ);
 double ff_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& eps,
               NummFunc numm, SummFunc summ);

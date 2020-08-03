@@ -204,7 +204,13 @@ NumericVector cpp_dfddm(const NumericVector& rt,
   } else { // calculate regular probability
     rt0 = 0;
     if (n_terms_small0 == 'S' || n_terms_small0 == 's') { // SWSE method
-      dens = &ff;
+      if (scale0 == 'b' || scale0 == 'B') { // both
+        dens = &fc;
+      } else if (scale0 == 's' || scale0 == 'S'){ // small
+        dens = &ff;
+      } else {
+        stop("dfddm error: invalid function parameter 'scale': %s", scale);
+      }
       numm = NULL;
       if (summation_small0 == '7') { // 2017
         summ = &small_sum_eps_17;

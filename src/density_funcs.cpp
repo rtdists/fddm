@@ -43,6 +43,35 @@ double ff_log(const double& t, const double& a, const double& v,
   return mult + log(summ(t, a, w, 0, eps / exp(mult)));
 }
 
+double fc(const double& t, const double& a, const double& v,
+          const double& w, const double& sv, const double& eps,
+          NummFunc numm, SummFunc summ)
+{
+  // note: numm is not used
+  double mult;
+
+  // calculate large time multiplier to check number of terms
+  if (sv < SV_THRESH) { // no sv
+    mult = exp(-v * a * w - v*v * t / 2) / (a*a);
+  } else { // sv
+    mult = exp((sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
+               / (2 + 2 * sv*sv * t)) / (a*a * sqrt(1 + sv*sv * t));
+  }
+  int kl = kl_Nav(t / (a*a), w, eps / mult);
+
+  if (kl <= 3) { // use large time
+    return M_PI * mult * large_sum_Nav(t, a, w, kl, 0.0);
+  } else { // use small time
+    if (sv < SV_THRESH) { // no sv
+      mult = a * exp(-v * a * w - v * v * t / 2) / (t * SQRT_2PI * sqrt(t));
+    } else { // sv
+      mult = a * exp((sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
+            / (2 + 2 * sv*sv * t)) / (t * SQRT_2PI * sqrt(t + sv*sv * t*t));
+    }
+    return mult * summ(t, a, w, 0, eps / mult);
+  }
+}
+
 // Kesselmeier and Navarro
 double fs(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& eps,
