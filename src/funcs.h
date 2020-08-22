@@ -31,7 +31,7 @@ typedef double (*SummFunc)(const double&, const double&, const double&,
                            const int&, const double&);
 typedef double (*DensFunc)(const double&, const double&, const double&,
                            const double&, const double&, const double&,
-                           NummFunc, SummFunc);
+                           const int&, NummFunc, SummFunc);
 
 
 
@@ -61,28 +61,31 @@ double large_sum_Nav(const double& t, const double& a, const double& w,
 // Density Functions
 double ff(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& eps,
-          NummFunc numm, SummFunc summ);
-double fc(const double& t, const double& a, const double& v,
-          const double& w, const double& sv, const double& eps,
-          NummFunc numm, SummFunc summ);
+          const int& max_terms_large, NummFunc numm, SummFunc summ);
 double ff_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& eps,
-              NummFunc numm, SummFunc summ);
+              const int& max_terms_large, NummFunc numm, SummFunc summ);
 double fs(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& eps,
-          NummFunc numm, SummFunc summ);
+          const int& max_terms_large, NummFunc numm, SummFunc summ);
 double fs_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& eps,
-              NummFunc numm, SummFunc summ);
+              const int& max_terms_large, NummFunc numm, SummFunc summ);
 double fl(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& eps,
-          NummFunc numm, SummFunc summ);
+          const int& max_terms_large, NummFunc numm, SummFunc summ);
 double fl_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& eps,
-              NummFunc numm, SummFunc summ);
+              const int& max_terms_large, NummFunc numm, SummFunc summ);
 double fb(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& eps,
-          NummFunc numm, SummFunc summ);
+          const int& max_terms_large, NummFunc numm, SummFunc summ);
 double fb_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& eps,
-              NummFunc numm, SummFunc summ);
+              const int& max_terms_large, NummFunc numm, SummFunc summ);
+double fc(const double& t, const double& a, const double& v,
+          const double& w, const double& sv, const double& eps,
+          const int& max_terms_large, NummFunc numm, SummFunc summ);
+double fc_log(const double& t, const double& a, const double& v,
+              const double& w, const double& sv, const double& eps,
+              const int& max_terms_large, NummFunc numm, SummFunc summ);

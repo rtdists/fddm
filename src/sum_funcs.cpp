@@ -54,28 +54,33 @@ double small_sum_eps_17(const double& t, const double& a, const double& w,
   double rj = 1 - w;
   double term = rj * exp(gamma * rj*rj);
   int j = 0;
+  int odd = 1;
   while (j <= minterms) { // capture increasing terms
     j++;
-    if (j % 2 == 1) { // j is odd
+    if (odd) { // j is odd
       rj = j + 1 - w;
       term = rj * exp(gamma * rj*rj);
       sum -= term;
+      odd--;
     } else { // j is even
       rj = j + w;
       term = rj * exp(gamma * rj*rj);
       sum += term;
+      odd++;
     }
   }
   while (fabs(term) > eps) { // at this point, odd (negative) term is greater
     j++;
-    if (j % 2 == 1) { // j is odd
+    if (odd) { // j is odd
       rj = j + 1 - w;
       term = rj * exp(gamma * rj*rj);
       sum -= term;
+      odd--;
     } else { // j is even
       rj = j + w;
       term = rj * exp(gamma * rj*rj);
       sum += term;
+      odd++;
     }
   }
   return sum;

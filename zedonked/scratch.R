@@ -97,8 +97,12 @@ factor(rep(1:5, each = 2))
 
 
 
-
-
+mbm <- microbenchmark(
+  ks_1 = ks_eps_17(1, 1, 0.5, 1e-3),
+  ks_2 = ks_eps_172(1, 1, 0.5, 1e-3),
+  times = 100000
+)
+summary(mbm)
 
 
 
@@ -109,7 +113,7 @@ w <- seq(0, 1, by = 0.1)
 
 FuncNames <- c("t", "eps", "w",
                "kb_S4", "kb_S7", "kb_G", "kb_N",
-               "ks_S4, ks_S7, ks_G, ks_N, kl_N")
+               "ks_S4", "ks_S7", "ks_G", "ks_N", "kl_N")
 kb <- data.frame(matrix(nrow = length(t)*length(eps)*length(w),
                         ncol = length(FuncNames)))
 colnames(kb) <- FuncNames
@@ -147,12 +151,19 @@ summary(kb$kb_N)
 length(which(kb[["ks_S7"]] <  kb[["ks_S4"]]))
 length(which(kb[["ks_S7"]] == kb[["ks_S4"]]))
 length(which(kb[["ks_S7"]] >  kb[["ks_S4"]]))
+t[81]
+eps[6]
+w[1]
+max(kb[kb[["ks_S7"]] >  kb[["ks_G"]], ]$eps)
+
 
 kN <- 6
 length(-floor((kN-1)/2):ceiling((kN-1)/2))
 
 
 library("ggplot2")
+ggplot(kb) +
+  geom_tile(aes(x = t, y = eps, fill = w))
 
 ggplot(subset(kb, w == 6)) +
   geom_tile(aes(x = t, y = eps, fill = kb_N - kb_G))

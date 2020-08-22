@@ -8,7 +8,8 @@ library("microbenchmark")
 rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                              err_tol = 1e-6, times = 100, unit = "ns") {
 
-  fnames <- c("fc_SWSE_17", "fb_Gon_17")
+  fnames <- c("fc_SWSE_17", "fb_Gon_17", "fb_Nav_17",
+              "fs_SWSE_17", "fs_Gon_17", "fs_Nav_17")
   nf <- length(fnames) # number of functions being benchmarked
   nV <- length(V)
   nA <- length(A)
@@ -27,16 +28,36 @@ rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
       for (w in 1:nW) {
         for (sv in 1:nSV) {
           mbm <- microbenchmark(
-          fc_SWSE_17 = dfddm(rt = RT, response = resp, a = A[a],
-                             v = V[v], t0 = t0, w = W[w],
-                             log = FALSE, n_terms_small = "SWSE",
-                             summation_small = "2017", scale = "both",
-                             err_tol = err_tol),
-          fb_Gon_17 = dfddm(rt = RT, response = resp, a = A[a],
-                            v = V[v], t0 = t0, w = W[w],
-                            log = FALSE, n_terms_small = "Gondan",
-                            summation_small = "2017", scale = "both",
-                            err_tol = err_tol),
+            fc_SWSE_17 = dfddm(rt = RT, response = resp, a = A[a],
+                               v = V[v], t0 = t0, w = W[w],
+                               log = FALSE, n_terms_small = "SWSE",
+                               summation_small = "2017", scale = "both",
+                               err_tol = err_tol),
+            fb_Gon_17 = dfddm(rt = RT, response = resp, a = A[a],
+                              v = V[v], t0 = t0, w = W[w],
+                              log = FALSE, n_terms_small = "Gondan",
+                              summation_small = "2017", scale = "both",
+                              err_tol = err_tol),
+            fb_Nav_17 = dfddm(rt = RT, response = resp, a = A[a],
+                              v = V[v], t0 = t0, w = W[w],
+                              log = FALSE, n_terms_small = "Navarro",
+                              summation_small = "2017", scale = "both",
+                              err_tol = err_tol),
+            fs_SWSE_17 = dfddm(rt = RT, response = resp, a = A[a],
+                               v = V[v], t0 = t0, w = W[w],
+                               log = FALSE, n_terms_small = "SWSE",
+                               summation_small = "2017", scale = "small",
+                               err_tol = err_tol),
+            fs_Gon_17 = dfddm(rt = RT, response = resp, a = A[a],
+                              v = V[v], t0 = t0, w = W[w],
+                              log = FALSE, n_terms_small = "Gondan",
+                              summation_small = "2017", scale = "small",
+                              err_tol = err_tol),
+            fs_Nav_17 = dfddm(rt = RT, response = resp, a = A[a],
+                              v = V[v], t0 = t0, w = W[w],
+                              log = FALSE, n_terms_small = "Navarro",
+                              summation_small = "2017", scale = "small",
+                              err_tol = err_tol),
           times = times, unit = unit)
         # add the v, a, and w values to the dataframe
         mbm_res[row_idx, 1] <- V[v]
@@ -59,7 +80,8 @@ rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
 rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                              err_tol = 1e-6, times = 100, unit = "ns") {
 
-  fnames <- c("fc_SWSE_17", "fb_Gon_17")
+  fnames <- c("fc_SWSE_17", "fb_Gon_17", "fb_Nav_17",
+              "fs_SWSE_17", "fs_Gon_17", "fs_Nav_17")
   nf <- length(fnames) # number of functions being benchmarked
   nRT <- length(RT)
   nV <- length(V)
@@ -79,29 +101,49 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
         for (w in 1:nW) {
           for (sv in 1:nSV) {
             mbm <- microbenchmark(
-            fc_SWSE_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "SWSE",
-                              summation_small = "2017", scale = "both",
-                              err_tol = err_tol),
-            fb_Gon_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Gondan",
-                              summation_small = "2017", scale = "both",
-                              err_tol = err_tol),
+              fc_SWSE_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                                 v = V[v], t0 = t0, w = W[w],
+                                 log = FALSE, n_terms_small = "SWSE",
+                                 summation_small = "2017", scale = "both",
+                                 err_tol = err_tol),
+              fb_Gon_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                                v = V[v], t0 = t0, w = W[w],
+                                log = FALSE, n_terms_small = "Gondan",
+                                summation_small = "2017", scale = "both",
+                                err_tol = err_tol),
+              fb_Nav_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                                v = V[v], t0 = t0, w = W[w],
+                                log = FALSE, n_terms_small = "Navarro",
+                                summation_small = "2017", scale = "both",
+                                err_tol = err_tol),
+              fs_SWSE_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                                 v = V[v], t0 = t0, w = W[w],
+                                 log = FALSE, n_terms_small = "SWSE",
+                                 summation_small = "2017", scale = "small",
+                                 err_tol = err_tol),
+              fs_Gon_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                                v = V[v], t0 = t0, w = W[w],
+                                log = FALSE, n_terms_small = "Gondan",
+                                summation_small = "2017", scale = "small",
+                                err_tol = err_tol),
+              fs_Nav_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                                v = V[v], t0 = t0, w = W[w],
+                                log = FALSE, n_terms_small = "Navarro",
+                                summation_small = "2017", scale = "small",
+                                err_tol = err_tol),
             times = times, unit = unit)
-          # add the v, a, and w values to the dataframe
-          mbm_res[row_idx, 1] <- RT[rt]
-          mbm_res[row_idx, 2] <- V[v]
-          mbm_res[row_idx, 3] <- A[a]
-          mbm_res[row_idx, 4] <- W[w]
-          mbm_res[row_idx, 5] <- SV[sv]
-          # add the median microbenchmark results to the dataframe
-          for (i in 1:nf) {
-            mbm_res[row_idx, 5+i] <- median(mbm[mbm[,1] == fnames[i],2])
-          }
-          # iterate start value
-          row_idx = row_idx + 1
+            # add the v, a, and w values to the dataframe
+            mbm_res[row_idx, 1] <- RT[rt]
+            mbm_res[row_idx, 2] <- V[v]
+            mbm_res[row_idx, 3] <- A[a]
+            mbm_res[row_idx, 4] <- W[w]
+            mbm_res[row_idx, 5] <- SV[sv]
+            # add the median microbenchmark results to the dataframe
+            for (i in 1:nf) {
+              mbm_res[row_idx, 5+i] <- median(mbm[mbm[,1] == fnames[i],2])
+            }
+            # iterate start value
+            row_idx = row_idx + 1
           }
         }
       }
@@ -141,8 +183,10 @@ bm_vec[, -seq_len(t_idx)] <- bm_vec[, -seq_len(t_idx)]/1000 # convert to microse
 mbm_vec <- melt(bm_vec, measure.vars = -seq_len(t_idx),
                 variable.name = "FuncName", value.name = "time")
 
-Names_vec <- c("fc_SWSE_17", "fb_Gon_17")
-Color_vec <- c("#9900cc", "#c2a500")
+Names_vec <- c("fc_SWSE_17", "fb_Gon_17", "fb_Nav_17",
+               "fs_SWSE_17", "fs_Gon_17", "fs_Nav_17")
+Color_vec <- c("#ff99fa", "#c2a500", "#e68a00",
+               "#9900cc", "#006699", "#336600")
 
 mi <- min(bm_vec[, -seq_len(t_idx)])
 ma <- max(bm_vec[, -seq_len(t_idx)])
@@ -185,8 +229,10 @@ bm_ind[,-seq_len(t_idx)] <- bm_ind[, -seq_len(t_idx)]/1000 # convert to microsec
 mbm_ind <- melt(bm_ind, measure.vars = -seq_len(t_idx),
                 variable.name = "FuncName", value.name = "time")
 
-Names_meq <- c("fc_SWSE_17", "fb_Gon_17")
-Color_meq <- c("#9900cc", "#c2a500")
+Names_meq <- c("fc_SWSE_17", "fb_Gon_17", "fb_Nav_17",
+               "fs_SWSE_17", "fs_Gon_17", "fs_Nav_17")
+Color_meq <- c("#ff99fa", "#c2a500", "#e68a00",
+               "#9900cc", "#006699", "#336600")
 mbm_meq <- subset(mbm_ind, FuncName %in% Names_meq)
 
 ggplot(mbm_meq, aes(x = RTAA, y = time,

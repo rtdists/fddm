@@ -81,6 +81,12 @@
 #'   \eqn{*}\code{a}\eqn{) < 0.009}). See Details for more information. Default
 #'   is \code{"both"}.
 #'
+#' @param max_terms_large Maximum number of terms to use for the "large-time"
+#'   variant when \code{n_terms_small = "SWSE", scale = "both"}. Allowed values
+#'   are any non-negative integer. \code{max_terms_large = 0} indicates that the
+#'   "small-time" variant will always be used instead of the "large-time"
+#'   variant. Default is \eqn{3}.
+#'
 #' @param err_tol Allowed error tolerance of the density function. Since the
 #'   density function contains an infinite sum, this parameter defines the
 #'   precision of the approximation to that infinite sum. Default is \eqn{1e-6}.
@@ -174,8 +180,10 @@ dfddm <- function(rt, response,
                   n_terms_small = "Gondan",
                   summation_small = "2017",
                   scale = "both",
+                  max_terms_large = 3,
                   err_tol = 0.000001)
 {
   return(cpp_dfddm(rt, response, a, v, t0, w, sv, log,
-                   n_terms_small, summation_small, scale, err_tol))
+                   n_terms_small, summation_small, scale, max_terms_large,
+                   err_tol))
 }
