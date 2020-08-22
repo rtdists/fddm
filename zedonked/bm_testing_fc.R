@@ -143,12 +143,12 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
 
 
 
-RT <- c(0.001, 0.1, 10, 30)
-A <- c(0.5, 1)
-V <- c(-2, 0, 2)
+RT <- c(0.001, 0.1, 1, 2, 3, 4, 5, 10, 30)
+A <- c(0.25, 0.5, 1, 2.5, 5)
+V <- c(-5, -2, 0, 2, 5)
 t0 <- 1e-4 # must be nonzero for RWiener
 W <- c(0.2, 0.5, 0.8)
-SV <- c(0, 1.5)
+SV <- c(0, 0.5, 1, 1.5)
 err_tol <- 1e-6 # this is the setting from rtdists
 
 
