@@ -153,7 +153,7 @@ double fb(const double& t, const double& a, const double& v,
   if (ks < kl) { // small-time is better
     return mult_s * summ(t, a, w, ks, 0.0);
   } else { // large-time is better
-    return mult_l * large_sum_Nav(t, a, w, kl, 0.0);
+    return -mult_l * large_sum_Nav(t, a, w, kl, 0.0);
   }
 }
 
@@ -201,7 +201,7 @@ double fc(const double& t, const double& a, const double& v,
   int kl = kl_Nav(t / (a*a), w, eps / mult);
 
   if (kl <= max_terms_large) { // use large time
-    return M_PI * mult * large_sum_Nav(t, a, w, kl, 0.0);
+    return -M_PI * mult * large_sum_Nav(t, a, w, kl, 0.0);
   } else { // use small time
     if (sv < SV_THRESH) { // no sv
       mult = a * exp(-v * a * w - v * v * t / 2) / (t * SQRT_2PI * sqrt(t));

@@ -166,7 +166,7 @@ ggplot(kb) +
   geom_tile(aes(x = t, y = eps, fill = w))
 
 ggplot(subset(kb, w == 6)) +
-  geom_tile(aes(x = t, y = eps, fill = kb_N - kb_G))
+  geom_tile(aes(x = t, y = eps, fill = kb_S7))
 
 
 
