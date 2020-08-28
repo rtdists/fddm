@@ -85,7 +85,7 @@
 #'   variant when \code{n_terms_small = "SWSE", scale = "both"}. Allowed values
 #'   are any non-negative integer. \code{max_terms_large = 0} indicates that the
 #'   "small-time" variant will always be used instead of the "large-time"
-#'   variant. Default is \eqn{3}.
+#'   variant. Default is \eqn{2}.
 #'
 #' @param err_tol Allowed error tolerance of the density function. Since the
 #'   density function contains an infinite sum, this parameter defines the
@@ -100,7 +100,7 @@
 #'   or as a vector of values. If input as a vector of values, then the standard
 #'   \code{R} input wrapping will occur.
 #'
-#'   The default settings of \code{n_terms_small = "Gondan"},
+#'   The default settings of \code{n_terms_small = "SWSE"},
 #'   code{summation_small = "2017"}, \code{scale = "both"} produce the fastest
 #'   and most accurate results, as shown in our associated paper.
 #'
@@ -141,8 +141,8 @@
 #'   \code{n_terms_small} - The "small-time" variant also has three different
 #'   methods for how to truncate the infinite sum in the density function. These
 #'   different methods are discussed extensively in our associated paper, but
-#'   the key distinction is that \code{n_terms_small = "Foster"} uses a new
-#'   method of truncating the infinite sum. The \code{n_terms_small = "Gondan"}
+#'   the key distinction is that \code{n_terms_small = "SWSE"} uses a new
+#'   method of truncating the infinite sum. The \code{n_terms_small = "SWSE"}
 #'   method is currently recommended because it is the most stable algorithm
 #'   when used with \code{scale = "both"}.
 #'
@@ -177,10 +177,10 @@ dfddm <- function(rt, response,
                   a, v, t0, w = 0.5,
                   sv = -1,
                   log = FALSE,
-                  n_terms_small = "Gondan",
+                  n_terms_small = "SWSE",
                   summation_small = "2017",
                   scale = "both",
-                  max_terms_large = 3,
+                  max_terms_large = 2,
                   err_tol = 0.000001)
 {
   return(cpp_dfddm(rt, response, a, v, t0, w, sv, log,

@@ -13,9 +13,10 @@ dfddm(
   w = 0.5,
   sv = -1,
   log = FALSE,
-  n_terms_small = "Gondan",
+  n_terms_small = "SWSE",
   summation_small = "2017",
   scale = "both",
+  max_terms_large = 2,
   err_tol = 1e-06
 )
 }
@@ -94,6 +95,12 @@ unstable for small effective response times (\code{rt}\eqn{/(}\code{a}
 \eqn{*}\code{a}\eqn{) < 0.009}). See Details for more information. Default
 is \code{"both"}.}
 
+\item{max_terms_large}{Maximum number of terms to use for the "large-time"
+variant when \code{n_terms_small = "SWSE", scale = "both"}. Allowed values
+are any non-negative integer. \code{max_terms_large = 0} indicates that the
+"small-time" variant will always be used instead of the "large-time"
+variant. Default is \eqn{2}.}
+
 \item{err_tol}{Allowed error tolerance of the density function. Since the
 density function contains an infinite sum, this parameter defines the
 precision of the approximation to that infinite sum. Default is \eqn{1e-6}.}
@@ -115,7 +122,7 @@ All of the model inputs and parameters (\code{rt}, response, \code{a},
   or as a vector of values. If input as a vector of values, then the standard
   \code{R} input wrapping will occur.
 
-  The default settings of \code{n_terms_small = "Gondan"},
+  The default settings of \code{n_terms_small = "SWSE"},
   code{summation_small = "2017"}, \code{scale = "both"} produce the fastest
   and most accurate results, as shown in our associated paper.
 
@@ -156,8 +163,8 @@ All of the model inputs and parameters (\code{rt}, response, \code{a},
   \code{n_terms_small} - The "small-time" variant also has three different
   methods for how to truncate the infinite sum in the density function. These
   different methods are discussed extensively in our associated paper, but
-  the key distinction is that \code{n_terms_small = "Foster"} uses a new
-  method of truncating the infinite sum. The \code{n_terms_small = "Gondan"}
+  the key distinction is that \code{n_terms_small = "SWSE"} uses a new
+  method of truncating the infinite sum. The \code{n_terms_small = "SWSE"}
   method is currently recommended because it is the most stable algorithm
   when used with \code{scale = "both"}.
 }
@@ -170,7 +177,7 @@ dfddm(rt = c(3, 2.75, 1.4, 2, 2.3, 1.8),
       response = c("lower", "upper", "upper", "lower", "upper", "lower"),
       a = 1, v = -2, t0 = 0.3, w = 0.4, sv = 0.1,
       log = TRUE, n_terms_small = "SWSE",
-      summation_small = "2017", scale = "small",
+      summation_small = "2017", scale = "both",
       err_tol = 1e-10)
 
 # example of mismatched input lengths
@@ -179,7 +186,7 @@ dfddm(rt = c(3, 2.75, 1.4, 2, 2.3, 1.8),
       a = c(1, 3), v = c(-2, 2, 2, -2, 2, -2),
       t0 = 0.3, w = c(0.4, 0.6, 0.5), sv = 0.1,
       log = FALSE, n_terms_small = "Navarro",
-      summation_small = "2017", scale = "both",
+      summation_small = "2017", scale = "large",
       err_tol = 1e-10)
 
 
@@ -190,7 +197,7 @@ resp_str <- c("lower", "upper", "upper", "lower", "upper", "lower")
 dfddm(rt = c(3, 2.75, 1.4, 2, 2.3, 1.8), response = resp_str,
       a = 1, v = -2, t0 = 0.3, w = 0.4, sv = 0.1,
       log = FALSE, n_terms_small = "SWSE",
-      summation_small = "2017", scale = "small",
+      summation_small = "2017", scale = "both",
       err_tol = 1e-10)
 
 # integer
@@ -198,7 +205,7 @@ resp_int <- as.integer(c(1, 2, 2, 1, 2, 1))
 dfddm(rt = c(3, 2.75, 1.4, 2, 2.3, 1.8), response = resp_int,
       a = 1, v = -2, t0 = 0.3, w = 0.4, sv = 0.1,
       log = FALSE, n_terms_small = "SWSE",
-      summation_small = "2017", scale = "small",
+      summation_small = "2017", scale = "both",
       err_tol = 1e-10)
 
 # double
@@ -206,7 +213,7 @@ resp_dbl <- as.double(c(1, 2, 2, 1, 2, 1))
 dfddm(rt = c(3, 2.75, 1.4, 2, 2.3, 1.8), response = resp_dbl,
       a = 1, v = -2, t0 = 0.3, w = 0.4, sv = 0.1,
       log = FALSE, n_terms_small = "SWSE",
-      summation_small = "2017", scale = "small",
+      summation_small = "2017", scale = "both",
       err_tol = 1e-10)
 
 # logical
@@ -214,7 +221,7 @@ resp_log <- c(FALSE, TRUE, TRUE, FALSE, TRUE, FALSE)
 dfddm(rt = c(3, 2.75, 1.4, 2, 2.3, 1.8), response = resp_log,
       a = 1, v = -2, t0 = 0.3, w = 0.4, sv = 0.1,
       log = FALSE, n_terms_small = "SWSE",
-      summation_small = "2017", scale = "small",
+      summation_small = "2017", scale = "both",
       err_tol = 1e-10)
 
 # factor (first level is mapped to "lower")
@@ -223,7 +230,7 @@ resp_fac <- factor(days, levels = c("Monday", "Friday"))
 dfddm(rt = c(3, 2.75, 1.4, 2, 2.3, 1.8), response = resp_fac,
       a = 1, v = -2, t0 = 0.3, w = 0.4, sv = 0.1,
       log = FALSE, n_terms_small = "SWSE",
-      summation_small = "2017", scale = "small",
+      summation_small = "2017", scale = "both",
       err_tol = 1e-10)
 }
 \references{

@@ -9,7 +9,7 @@ rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                              err_tol = 1e-6, times = 100, unit = "ns") {
 
   fnames <- c("fc_SWSE_L1", "fc_SWSE_L2", "fc_SWSE_L3",
-              "fc_SWSE_L4", "fc_SWSE_L5", "fb_Gon_17")
+              "fc_SWSE_L4", "fd_SWSE_25", "fb_Gon_17")
   nf <- length(fnames) # number of functions being benchmarked
   nV <- length(V)
   nA <- length(A)
@@ -48,10 +48,10 @@ rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                                log = FALSE, n_terms_small = "SWSE",
                                summation_small = "2017", scale = "both",
                                max_terms_large = 4, err_tol = err_tol),
-            fc_SWSE_L5 = dfddm(rt = RT, response = resp, a = A[a],
+            fd_SWSE_25 = dfddm(rt = RT, response = resp, a = A[a],
                                v = V[v], t0 = t0, w = W[w],
                                log = FALSE, n_terms_small = "SWSE",
-                               summation_small = "2017", scale = "both",
+                               summation_small = "2017", scale = "d",
                                max_terms_large = 5, err_tol = err_tol),
             fb_Gon_17 =  dfddm(rt = RT, response = resp, a = A[a],
                                v = V[v], t0 = t0, w = W[w],
@@ -81,7 +81,7 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                              err_tol = 1e-6, times = 100, unit = "ns") {
 
   fnames <- c("fc_SWSE_L1", "fc_SWSE_L2", "fc_SWSE_L3",
-              "fc_SWSE_L4", "fc_SWSE_L5", "fb_Gon_17")
+              "fc_SWSE_L4", "fd_SWSE_25", "fb_Gon_17")
   nf <- length(fnames) # number of functions being benchmarked
   nRT <- length(RT)
   nV <- length(V)
@@ -124,7 +124,7 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
               dfddm(rt = RT[rt], response = resp, a = A[a],
                     v = V[v], t0 = t0, w = W[w],
                     log = FALSE, n_terms_small = "SWSE",
-                    summation_small = "2017", scale = "both",
+                    summation_small = "2017", scale = "d",
                     max_terms_large = 5, err_tol = err_tol),
               dfddm(rt = RT[rt], response = resp, a = A[a],
                     v = V[v], t0 = t0, w = W[w],
@@ -153,10 +153,10 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                                  log = FALSE, n_terms_small = "SWSE",
                                  summation_small = "2017", scale = "both",
                                  max_terms_large = 4, err_tol = err_tol),
-              fc_SWSE_L5 = dfddm(rt = RT[rt], response = resp, a = A[a],
+              fd_SWSE_25 = dfddm(rt = RT[rt], response = resp, a = A[a],
                                  v = V[v], t0 = t0, w = W[w],
                                  log = FALSE, n_terms_small = "SWSE",
-                                 summation_small = "2017", scale = "both",
+                                 summation_small = "2017", scale = "d",
                                  max_terms_large = 5, err_tol = err_tol),
               fb_Gon_17 =  dfddm(rt = RT[rt], response = resp, a = A[a],
                                  v = V[v], t0 = t0, w = W[w],
@@ -216,6 +216,11 @@ load(file = "zedonked/results/bm_ind.Rds")
 library("reshape2")
 library("ggplot2")
 
+Names <- c("fc_SWSE_L1", "fc_SWSE_L2", "fc_SWSE_L3",
+           "fc_SWSE_L4", "fd_SWSE_25", "fb_Gon_17")
+Color <- c("#ff99fa", "#ff70f8", "#ff40f5",
+           "#ff1ff3", "#39ff14", "#c2a500")
+
 t_idx_vec <- match("SV", colnames(bm_vec))
 bm_vec[, -seq_len(t_idx_vec)] <- bm_vec[, -seq_len(t_idx_vec)]/1000 # convert to microseconds
 mbm_vec <- melt(bm_vec, measure.vars = -seq_len(t_idx_vec),
@@ -234,11 +239,6 @@ mbm_ind[["Scale"]] <- ifelse(mbm_ind[["time"]] < 0, 0, 1)
 mbm_ind[["time"]] <- abs(mbm_ind[["time"]])
 min_ind <- min(mbm_ind[["time"]])
 max_ind <- max(mbm_ind[["time"]])
-
-Names <- c("fc_SWSE_L1", "fc_SWSE_L2", "fc_SWSE_L3",
-           "fc_SWSE_L4", "fc_SWSE_L5", "fb_Gon_17")
-Color <- c("#ff99fa", "#ff70f8", "#ff40f5",
-           "#ff1ff3", "#ff00f1", "#c2a500")
 
 mbm_ind_tail <- data.frame(matrix(ncol = ncol(mbm_ind), nrow = 0))
 colnames(mbm_ind_tail) <- colnames(mbm_ind)
@@ -379,6 +379,7 @@ ggplot(mbm_ind, aes(x = RTAA, y = time,
                  color = factor(FuncName, levels = Names),
                  size = factor(Scale, levels = c(0, 1)),
                  shape = factor(Scale, levels = c(0, 1)))) +
+  geom_vline(xintercept = 0.25, color = "grey60", alpha = 0.5) +
   scale_x_log10() +
   scale_color_manual(values = Color, guide = FALSE) +
   scale_fill_manual(values = Color, guide = FALSE) +
@@ -417,6 +418,6 @@ ggplot(mbm_ind, aes(x = RTAA, y = time,
         legend.background = element_rect(fill = "transparent"),
         legend.title = element_text(size = 14),
         legend.text = element_text(size = 13)) +
-  facet_wrap(~ factor(FuncName, levels = Names), scales = "free_y")
+  facet_wrap(~ factor(FuncName, levels = Names))
 ggsave("zedonked/results/eff_rt_mean_quantiles.png",
        width = 16, height = 9)

@@ -1,7 +1,7 @@
 library("Rcpp")
 library("microbenchmark")
 
-Rcpp::sourceCpp(file = "scratch.cpp")
+Rcpp::sourceCpp(file = "zedonked/scratch.cpp")
 t <- 1
 a <- 1
 v <- -1
@@ -107,6 +107,7 @@ summary(mbm)
 
 
 t <- 10^(seq(-4, 2, by = 0.05))
+t <- seq(0, 1, length.out = 101)
 a <- 1
 eps <- 10^(-seq_len(12))
 w <- seq(0, 1, by = 0.1)
@@ -122,9 +123,9 @@ for (i in 1:length(t)) {
   for (j in 1:length(eps)) {
     for (k in 1:length(w)) {
       ijk <- (i-1)*length(eps)*length(w) + (j-1)*length(w) + k
-      kb$t[ijk] <- i
-      kb$eps[ijk] <- j
-      kb$w[ijk] <- k
+      kb$t[ijk] <- t[i]
+      kb$eps[ijk] <- eps[j]
+      kb$w[ijk] <- w[k]
       kb$kb_S4[ijk] <- min(ks_eps_14(t[i], a, w[k], eps[j]), kl_Nav(t[i]/a/a, w[k], eps[j]))
       kb$kb_S7[ijk] <- min(ks_eps_17(t[i], a, w[k], eps[j]), kl_Nav(t[i]/a/a, w[k], eps[j]))
       kb$kb_G[ijk] <- min(ks_Gon(t[i]/a/a, w[k], eps[j]), kl_Nav(t[i]/a/a, w[k], eps[j]))
@@ -164,10 +165,34 @@ length(-floor((kN-1)/2):ceiling((kN-1)/2))
 library("ggplot2")
 ggplot(kb) +
   geom_tile(aes(x = t, y = eps, fill = w))
+t[70]
+ggplot(subset(kb, w == 6 & t > 70 & t < 90)) +
+  geom_tile(aes(x = t, y = eps, fill = kl_N))
 
-ggplot(subset(kb, w == 6)) +
-  geom_tile(aes(x = t, y = eps, fill = kb_S7))
 
+
+
+ggplot() +
+  geom_point(data = subset(kb, kb$ks_S7 <= kb$kl_N & w > 0.45 & w < 0.55),
+             aes(x = t, y = eps), color = "blue", alpha = 0.3) +
+  geom_point(data = subset(kb, kb$ks_S7 >= kb$kl_N & w > 0.45 & w < 0.55),
+             aes(x = t, y = eps), color = "red", alpha = 0.3) +
+  scale_y_log10()
+ggsave(file = "zedonked/results/smallvslarge/1.png", width = 16, height = 9)
+
+max(subset(kb, kb$ks_S7 >= kb$kl_N & w > 0.45 & w < 0.55)$kl_N)
+ggplot(subset(kb, kb$ks_S7 <= kb$kl_N & w > 0.45 & w < 0.55)) +
+  geom_point(aes(x = t, y = eps, color = ks_S7), alpha = 0.3) +
+  scale_y_log10()
+
+
+
+ggplot() +
+  geom_point(data = subset(kb, kb$ks_G <= kb$kl_N & w == 0.1),
+             aes(x = t, y = eps), color = "blue", alpha = 0.3) +
+  geom_point(data = subset(kb, kb$ks_G >= kb$kl_N & w == 0.9),
+             aes(x = t, y = eps), color = "red", alpha = 0.3) +
+  scale_y_log10()
 
 
 
