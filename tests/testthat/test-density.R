@@ -333,7 +333,7 @@ test_that("Log-Consistency of established packages", {
 #
 # 1) Both RWiener and Gondan_R divide the error tolerance by the multiplicative
 #    term outside of the summation. Since the outside term is different when
-#    $sv > 0$, the approximation uses the incorrect error tolerance for
+#    $sv > 0$, the approximations use the incorrect error tolerance for
 #    $sv > 0$. This affects the number of terms required in the summation to
 #    achieve the desired precision, thus not actually achieving that desired
 #    precision. This issue is fixed in our implementation of the Gondan method,

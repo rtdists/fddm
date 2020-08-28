@@ -26,14 +26,14 @@ op <- options(width = 100, digits = 4)
 
 <div id="TOC">
 <ul>
-<li><a href="#intro">Introduction</a></li>
-<li><a href="#ex">Example Fitting</a>
-<ul>
-<li><a href="#ex-ll-fun">Log-likelihood Function</a></li>
-<li><a href="#ex-simple">Simple Fitting Routine</a></li>
-<li><a href="#ex-data">Fitting the Entire Dataset</a></li>
-</ul></li>
-<li><a href="#references">References</a></li>
+  <li><a href="#intro">Introduction</a></li>
+  <li><a href="#ex">Example Fitting</a>
+  <ul>
+    <li><a href="#ex-ll-fun">Log-likelihood Function</a></li>
+    <li><a href="#ex-simple">Simple Fitting Routine</a></li>
+    <li><a href="#ex-data">Fitting the Entire Dataset</a></li>
+  </ul></li>
+  <li><a href="#references">References</a></li>
 </ul>
 </div>
 
@@ -67,7 +67,7 @@ In this example, we will fit to the `med_dec` data that comes with `fddm`. This 
 ```{r load-pkg-data, eval=TRUE}
 library("fddm")
 data(med_dec, package = "fddm")
-med_dec <- med_dec[which(med_dec$rt >= 0), ]
+med_dec <- med_dec[which(med_dec[["rt"]] >= 0), ]
 ```
 
 
@@ -107,20 +107,20 @@ ll_fun <- function(pars, rt, resp, truth) {
 
 ## Simple Fitting Routine {#ex-simple}
 
-As an intermediate step, we will fit the DDM to only one participant from the `med_dec` data. We select the individual whose data we will use for fitting before preparing the data by defining upper and lower responses and the correct response bounds. 
+As an intermediate step, we will fit the DDM to only one participant from the `med_dec` data. We select the individual whose data we will use for fitting before preparing the data by defining upper and lower responses and the correct response bounds.
 
 ```{r prep-simp-data, eval=TRUE}
-onep <- med_dec[ med_dec$id == "2" & med_dec$group == "experienced", ]
-onep$resp <- ifelse(onep$response == "blast", "upper", "lower")
-onep$truth <- ifelse(onep$classification == "blast", "upper", "lower")
+onep <- med_dec[ med_dec[["id"]] == "2" & med_dec[["group"]] == "experienced", ]
+onep[["resp"]] <- ifelse(onep[["response"]] == "blast", "upper", "lower")
+onep[["truth"]] <- ifelse(onep[["classification"]] == "blast", "upper", "lower")
 str(onep)
 ```
 
 We then pass the data and log-likelihood function with the necessary additional arguments to an optimization function. As we are using the optimization function `nlminb` for this example, we must input as the first argument the initial values of our DDM parameters that we want optimized. These are input in the order: $v_u$, $v_\ell$, $a$, $t_0$, $w$, and $sv$; we also need to define upper and lower bounds for each parameters. Fitting the DDM to this data is basically instantaneous using this setup.
 
-```{r show-simp-fit, eval=TRUE}
-fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun, 
-              rt = onep$rt, resp = onep$resp, truth = onep$truth, 
+```{r show-simp-fit, eval=TRUE, warning=FALSE}
+fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun,
+              rt = onep[["rt"]], resp = onep[["resp"]], truth = onep[["truth"]],
               # limits:   vu,   vl,   a,  t0, w,  sv
               lower = c(-Inf, -Inf,   0,   0, 0,   0),
               upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
@@ -132,7 +132,7 @@ fit
 
 ## Fitting the Entire Dataset {#ex-data}
 
-Here we will run a more rigorous fitting on the entire `med_dec` datset to obtain parameter estimates for each participant in the study. To do this, we define a function to run the data fitting for us; we want it to output a dataframe containing the parameter estimates for each individual in the data. The inputs will be the dataset, the allowable error tolerance for the density function, how the "upper" response is presented in the dataset, and indices of the columns in the dataset containing: identification of the individuals in the dataset, the response times, the responses, and the truthful classifications.
+Here we will run a more rigorous fitting on the entire `med_dec` dataset to obtain parameter estimates for each participant in the study. To do this, we define a function to run the data fitting for us; we want it to output a dataframe containing the parameter estimates for each individual in the data. The inputs will be the dataset, the allowable error tolerance for the density function, how the "upper" response is presented in the dataset, and indices of the columns in the dataset containing: identification of the individuals in the dataset, the response times, the responses, and the truthful classifications.
 
 After some data checking, the fitting function will extract the unique individuals from the dataset and run the parameter optimization for the responses and response times for each individual. The optimizations themselves are initialized with random initial parameter values to aid in the avoidance of local minima in favor of global minima. Moreover, the optimization will run 5 times for each individual, with 5 different sets of random initial parameter values. The value of the minimized log-likelihood function will be compared across all 5 runs, and the smallest such value will indicate the best fit. The parameter estimates, convergence code, and minimized value of the log-likelihood function produced by this best fit will be saved for that individual.
 
@@ -163,23 +163,24 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
       for (i in 1:length(id_idx)) {
         idi <- unique(data[,id_idx[i]])
         for (j in 1:length(idi)) {
-          df$id[data[,id_idx[i]] == idi[j]] <- paste(df$id[data[,id_idx[i]] == idi[j]], idi[j], sep = " ")
+          df[["id"]][data[,id_idx[i]] == idi[j]] <- paste(
+            df[["id"]][data[,id_idx[i]] == idi[j]], idi[j], sep = " ")
         }
       }
-      df$id <- trimws(df$id, which = "left")
+      df[["id"]] <- trimws(df[["id"]], which = "left")
     }
 
-    df$rt <- as.double(data[,rt_idx])
+    df[["rt"]] <- as.double(data[,rt_idx])
 
-    df$response <- "lower"
-    df$response[data[,response_idx] == response_upper] <- "upper"
+    df[["response"]] <- "lower"
+    df[["response"]][data[,response_idx] == response_upper] <- "upper"
 
-    df$truth <- "lower"
-    df$truth[data[,truth_idx] == response_upper] <- "upper"
+    df[["truth"]] <- "lower"
+    df[["truth"]][data[,truth_idx] == response_upper] <- "upper"
   }
 
   # Preliminaries
-  ids <- unique(df$id)
+  ids <- unique(df[["id"]])
   nids <- max(length(ids), 1) # if inds is null, there is only one individual
   ninit_vals <- 5
 
@@ -193,13 +194,13 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
   # Loop through each individual and starting values
   for (i in 1:nids) {
-    out$ID[i] <- ids[i]
+    out[["ID"]][i] <- ids[i]
 
     # extract data for id i
-    dfi <- df[df$id == ids[i],]
-    rti <- dfi$rt
-    respi <- dfi$response
-    truthi <- dfi$truth
+    dfi <- df[df[["id"]] == ids[i],]
+    rti <- dfi[["rt"]]
+    respi <- dfi[["response"]]
+    truthi <- dfi[["truh"]]
 
     # starting value for t0 must be smaller than the smallest rt
     min_rti <- min(rti)
@@ -219,13 +220,13 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      # limits:   vu,   vl,   a,  t0, w,  sv
                      lower = c(-Inf, -Inf,   0,   0, 0,   0),
                      upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
-      temp$Convergence[j] <- mres$convergence
-      temp$Objective[j] <- mres$objective
-      temp[j, -c(1, 2)] <- mres$par
+      temp[["Convergence"]][j] <- mres[["convergence"]]
+      temp[["Objective"]][j] <- mres[["objective"]]
+      temp[j, -c(1, 2)] <- mres[["par"]]
     }
 
     # determine best fit for the individual
-    min_idx <- which.min(temp$Objective)
+    min_idx <- which.min(temp[["Objective"]])
     out[i, -1] <- temp[min_idx,]
   }
   return(out)
@@ -234,9 +235,9 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
 We load the dataset, remove any invalid rows from the dataset, and run the fitting; the dataframe of the fitting results is output below.
 
-```{r fitting-run, eval=TRUE}
+```{r fitting-run, eval=TRUE, warning=FALSE}
 data(med_dec, package = "fddm")
-med_dec <- med_dec[which(med_dec$rt >= 0),]
+med_dec <- med_dec[which(med_dec[["rt"]] >= 0),]
 fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
               truth_idx = 5, response_upper = "blast")
 fit
@@ -255,14 +256,14 @@ library("ggplot2")
 fitp <- data.frame(fit[, c(1, 4, 5)]) # make a copy to manipulate for plotting
 colnames(fitp)[-1] <- c("vu", "vl")
 
-for (i in 1:length(unique(fitp$ID))) {
-  first <- substr(fitp$ID[i], 1, 1)
+for (i in 1:length(unique(fitp[["ID"]]))) {
+  first <- substr(fitp[["ID"]][i], 1, 1)
   if (first == "n") {
-    fitp$ID[i] <- "novice"
+    fitp[["ID"]][i] <- "novice"
   } else if (first == "i") {
-    fitp$ID[i] <- "inexperienced"
+    fitp[["ID"]][i] <- "inexperienced"
   } else {
-    fitp$ID[i] <- "experienced"
+    fitp[["ID"]][i] <- "experienced"
   }
 }
 
