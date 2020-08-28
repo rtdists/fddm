@@ -25,18 +25,18 @@ knitr::opts_chunk$set(
 
 <div id="TOC">
 <ul>
-<li><a href="#intro">Introduction</a></li>
-<li><a href="#den">Benchmarking the Density Functions</a>
-<ul>
-<li><a href="#den-gen">Generating Benchmark Data</a></li>
-<li><a href="#den-ana">Analysis of Benchmark Results</a></li>
-</ul></li>
-<li><a href="#fit">Benchmarking Model Fitting to Real-World Data</a>
-<ul>
-<li><a href="#fit-gen">Generating Benchmark Data for Parameter Estimation</a></li>
-<li><a href="#fit-ana">Analysis of Benchmark Results</a></li>
-</ul></li>
-<li><a href="#references">References</a></li>
+  <li><a href="#intro">Introduction</a></li>
+  <li><a href="#den">Benchmarking the Density Functions</a>
+  <ul>
+    <li><a href="#den-gen">Generating Benchmark Data</a></li>
+    <li><a href="#den-ana">Analysis of Benchmark Results</a></li>
+  </ul></li>
+  <li><a href="#fit">Benchmarking Model Fitting to Real-World Data</a>
+  <ul>
+    <li><a href="#fit-gen">Generating Benchmark Data for Parameter Estimation</a></li>
+    <li><a href="#fit-ana">Analysis of Benchmark Results</a></li>
+  </ul></li>
+  <li><a href="#references">References</a></li>
 </ul>
 </div>
 
@@ -80,7 +80,7 @@ To capture the behavior of the density function approximations, we test each one
 
 In addition, we include two functions for benchmarking the performance of the approximations: one where the response times are input as a vector, and one where the response times are input one at a time to the density function. Inputting the response times as a vector is the most common way of inputting data to the density function and allows the `R` code from @gondan2014even to exploit `R`'s powerful vectorization, operating at its most efficient. We also include a benchmark function that inputs the response times individually as this allows us to see the impact that the size of the response time has on the evaluation time of the density function approximations.
 
-At each point in this parameter space, we run the `microbenchmark` function $100$ times for each approximation and save the median of these 100 benchmark times. Using the median of these data should reduce the number of outliers in the data while maintaining a truthful representation of the approximations' performance. The following code chunk defines the functions that we will use to benchmark the algorithms; we will be using the [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) package to time the evaluations.
+At each point in this parameter space, we run the `microbenchmark` function 100 times for each approximation and save the median of these 100 benchmark times. Using the median of these data should reduce the number of outliers in the data while maintaining a truthful representation of the approximations' performance. The following code chunk defines the functions that we will use to benchmark the algorithms; we will be using the [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) package to time the evaluations.
 
 <a id="gon-r-code"></a><a id="bm-funcs"></a>
 ```{r bm-fun, eval=TRUE}
@@ -93,9 +93,9 @@ library("microbenchmark")
 rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                              err_tol = 1e-6, times = 100, unit = "ns") {
 
-  fnames <- c("fs_SWSE_17", "fs_SWSE_14",
-              "fs_Gon_17", "fs_Gon_14", "fs_Nav_17", "fs_Nav_14",
-              "fb_Gon_17", "fb_Gon_14", "fb_Nav_17", "fb_Nav_14",
+  fnames <- c("fs_SWSE_17", "fs_SWSE_14", "fb_SWSE_17", "fb_SWSE_14",
+              "fs_Gon_17", "fs_Gon_14", "fb_Gon_17", "fb_Gon_14",
+              "fs_Nav_17", "fs_Nav_14", "fb_Nav_17", "fb_Nav_14",
               "fl_Nav_09", "RWiener", "Gondan", "rtdists")
   nf <- length(fnames) # number of functions being benchmarked
   nV <- length(V)
@@ -125,6 +125,16 @@ rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                              log = FALSE, n_terms_small = "SWSE",
                              summation_small = "2014", scale = "small",
                              err_tol = err_tol),
+          fb_SWSE_17 = dfddm(rt = RT, response = resp, a = A[a],
+                             v = V[v], t0 = t0, w = W[w],
+                             log = FALSE, n_terms_small = "SWSE",
+                             summation_small = "2017", scale = "both",
+                             err_tol = err_tol),
+          fb_SWSE_14 = dfddm(rt = RT, response = resp, a = A[a],
+                             v = V[v], t0 = t0, w = W[w],
+                             log = FALSE, n_terms_small = "SWSE",
+                             summation_small = "2014", scale = "both",
+                             err_tol = err_tol),
           fs_Gon_17 = dfddm(rt = RT, response = resp, a = A[a],
                             v = V[v], t0 = t0, w = W[w],
                             log = FALSE, n_terms_small = "Gondan",
@@ -133,16 +143,6 @@ rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
           fs_Gon_14 = dfddm(rt = RT, response = resp, a = A[a],
                             v = V[v], t0 = t0, w = W[w],
                             log = FALSE, n_terms_small = "Gondan",
-                            summation_small = "2014", scale = "small",
-                            err_tol = err_tol),
-          fs_Nav_17 = dfddm(rt = RT, response = resp, a = A[a],
-                            v = V[v], t0 = t0, w = W[w],
-                            log = FALSE, n_terms_small = "Navarro",
-                            summation_small = "2017", scale = "small",
-                            err_tol = err_tol),
-          fs_Nav_14 = dfddm(rt = RT, response = resp, a = A[a],
-                            v = V[v], t0 = t0, w = W[w],
-                            log = FALSE, n_terms_small = "Navarro",
                             summation_small = "2014", scale = "small",
                             err_tol = err_tol),
           fb_Gon_17 = dfddm(rt = RT, response = resp, a = A[a],
@@ -154,6 +154,16 @@ rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                             v = V[v], t0 = t0, w = W[w],
                             log = FALSE, n_terms_small = "Gondan",
                             summation_small = "2014", scale = "both",
+                            err_tol = err_tol),
+          fs_Nav_17 = dfddm(rt = RT, response = resp, a = A[a],
+                            v = V[v], t0 = t0, w = W[w],
+                            log = FALSE, n_terms_small = "Navarro",
+                            summation_small = "2017", scale = "small",
+                            err_tol = err_tol),
+          fs_Nav_14 = dfddm(rt = RT, response = resp, a = A[a],
+                            v = V[v], t0 = t0, w = W[w],
+                            log = FALSE, n_terms_small = "Navarro",
+                            summation_small = "2014", scale = "small",
                             err_tol = err_tol),
           fb_Nav_17 = dfddm(rt = RT, response = resp, a = A[a],
                             v = V[v], t0 = t0, w = W[w],
@@ -198,10 +208,9 @@ rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
 
 rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                              err_tol = 1e-6, times = 100, unit = "ns") {
-
-  fnames <- c("fs_SWSE_17", "fs_SWSE_14",
-              "fs_Gon_17", "fs_Gon_14", "fs_Nav_17", "fs_Nav_14",
-              "fb_Gon_17", "fb_Gon_14", "fb_Nav_17", "fb_Nav_14",
+  fnames <- c("fs_SWSE_17", "fs_SWSE_14", "fb_SWSE_17", "fb_SWSE_14",
+              "fs_Gon_17", "fs_Gon_14", "fb_Gon_17", "fb_Gon_14",
+              "fs_Nav_17", "fs_Nav_14", "fb_Nav_17", "fb_Nav_14",
               "fl_Nav_09", "RWiener", "Gondan", "rtdists")
   nf <- length(fnames) # number of functions being benchmarked
   nRT <- length(RT)
@@ -232,6 +241,16 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                               log = FALSE, n_terms_small = "SWSE",
                               summation_small = "2014", scale = "small",
                               err_tol = err_tol),
+            fb_SWSE_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                              v = V[v], t0 = t0, w = W[w],
+                              log = FALSE, n_terms_small = "SWSE",
+                              summation_small = "2017", scale = "both",
+                              err_tol = err_tol),
+            fb_SWSE_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                              v = V[v], t0 = t0, w = W[w],
+                              log = FALSE, n_terms_small = "SWSE",
+                              summation_small = "2014", scale = "both",
+                              err_tol = err_tol),
             fs_Gon_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
                               v = V[v], t0 = t0, w = W[w],
                               log = FALSE, n_terms_small = "Gondan",
@@ -240,16 +259,6 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
             fs_Gon_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
                               v = V[v], t0 = t0, w = W[w],
                               log = FALSE, n_terms_small = "Gondan",
-                              summation_small = "2014", scale = "small",
-                              err_tol = err_tol),
-            fs_Nav_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Navarro",
-                              summation_small = "2017", scale = "small",
-                              err_tol = err_tol),
-            fs_Nav_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Navarro",
                               summation_small = "2014", scale = "small",
                               err_tol = err_tol),
             fb_Gon_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
@@ -261,6 +270,16 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                               v = V[v], t0 = t0, w = W[w],
                               log = FALSE, n_terms_small = "Gondan",
                               summation_small = "2014", scale = "both",
+                              err_tol = err_tol),
+            fs_Nav_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                              v = V[v], t0 = t0, w = W[w],
+                              log = FALSE, n_terms_small = "Navarro",
+                              summation_small = "2017", scale = "small",
+                              err_tol = err_tol),
+            fs_Nav_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                              v = V[v], t0 = t0, w = W[w],
+                              log = FALSE, n_terms_small = "Navarro",
+                              summation_small = "2014", scale = "small",
                               err_tol = err_tol),
             fb_Nav_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
                               v = V[v], t0 = t0, w = W[w],
@@ -371,13 +390,13 @@ bm_vec[, -seq_len(t_idx)] <- bm_vec[, -seq_len(t_idx)]/1000 # convert to microse
 mbm_vec <- melt(bm_vec, measure.vars = -seq_len(t_idx),
                 variable.name = "FuncName", value.name = "time")
 
-Names_vec <- c("fs_SWSE_17", "fs_SWSE_14",
+Names_vec <- c("fb_SWSE_17", "fb_SWSE_14", "fb_Gon_17", "fb_Gon_14",
+               "fb_Nav_17", "fb_Nav_14", "fs_SWSE_17", "fs_SWSE_14",
                "fs_Gon_17", "fs_Gon_14", "fs_Nav_17", "fs_Nav_14",
-               "fb_Gon_17", "fb_Gon_14", "fb_Nav_17", "fb_Nav_14",
                "fl_Nav_09", "RWiener", "Gondan", "rtdists")
-Color_vec <- c("#9900cc", "#cc99ff",
-               "#006699", "#66ccff", "#336600", "#33cc33",
-               "#c2a500", "#d7db42", "#e68a00", "#ffb366",
+Color_vec <- c("#e000b4", "#ff99eb", "#e68a00", "#ffb366",
+               "#006699", "#66ccff", "#9900cc", "#cc99ff",
+               "#c2a500", "#d7db42", "#336600", "#33cc33",
                "#996633", "#ff9999", "#ff5050", "#990000")
 
 mi <- min(bm_vec[, -seq_len(t_idx)])
