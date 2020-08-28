@@ -715,7 +715,8 @@ fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
 
 
 ```{r fitting-run-internal, eval=FALSE, include=FALSE}
-save(fit, file = "inst/extdata/valid_fit.Rds", compress = "xz")
+save(fit, compress = "xz", compression_level = 9,
+     file = "inst/extdata/valid_fit.Rds")
 ```
 
 
@@ -785,7 +786,7 @@ out[, -c(1:2)] <- zapsmall(out[, -c(1:2)])
 out
 ```
 
-We can see that each method occasionally has issues with data fitting, but these issues are easily circumvented by using an assortment of initial parameter values. The default method of `dfddm` is "fb_SWSE_17", and this combines the large-time approximation of Navarro with the novel small-time approximation introduced in this package to provide a quite stable algorithm. Using this method, there are two offending fitted parameters whose difference from the best fits are not smaller than our given error tolerance. These results suggest that the most stable method is the default option for `dfddm` (`scale = "both", n_terms_small = "SWSE"`).
+We can see that each method occasionally has issues with data fitting, but these issues are easily circumvented by using an assortment of initial parameter values. The default method of `dfddm` is "fb_SWSE_17", and this combines the large-time approximation of Navarro with the novel small-time approximation introduced in this package to provide a quite stable algorithm. Using this method, there are two instances of fits whose differences from the best fits are greater than our given error tolerance. However, these issues can taken care of by running a set of fits with properly randomized initial parameter values and subsequently selecting the best fit from this set. These results suggest that the most stable method is the default option for `dfddm` (`scale = "both", n_terms_small = "SWSE"`).
 
 
 
