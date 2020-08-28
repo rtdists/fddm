@@ -449,7 +449,7 @@ mbm_ind <- melt(bm_ind, measure.vars = -seq_len(t_idx),
                 variable.name = "FuncName", value.name = "time")
 
 Names_meq <- c("fb_SWSE_17", "fs_SWSE_14", "fl_Nav_09",
-               "e000b4", "Gondan", "rtdists")
+               "RWiener", "Gondan", "rtdists")
 Color_meq <- c("#9900cc", "#cc99ff", "#996633",
                "#ff9999", "#ff5050", "#990000")
 mbm_meq <- subset(mbm_ind, FuncName %in% Names_meq)
@@ -515,8 +515,6 @@ ggplot(mbm_meq, aes(x = W, y = time,
          "The shaded regions represent the 10% and 90% quantiles",
          "The lighter shaded regions represent the min and max times",
          sep = ";\n"),
-  labs(title = "Means of the median microbenchmark results",
-       subtitle = "The shaded regions represent the 10% and 90% quantiles;\nThe lighter shaded regions represent the min and max times",
        x = "w, relative starting point (a priori bias)",
        y = "Time (microseconds)") +
   theme_bw() +
