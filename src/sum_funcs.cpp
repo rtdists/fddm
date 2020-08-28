@@ -62,7 +62,7 @@ double small_sum_eps_14(const double& t, const double& a, const double& w,
   double gamma = -a*a / (2 * t);
   double sum = w * exp(gamma * w*w); // start at j=0 term
   double minterms = sqrt(t) / (2 * a) - w / 2; // minimum number of terms
-  double pterm = 0;
+  double pterm = sum;
   double nterm = sum;
   int j = 0;
   while (j < minterms) { // capture increasing terms
@@ -71,7 +71,7 @@ double small_sum_eps_14(const double& t, const double& a, const double& w,
     nterm = (w - 2 * j) * exp(gamma * (w - 2 * j) * (w - 2 * j));
     sum += pterm + nterm;
   }
-  while (fabs(nterm) > eps) { // at this point, the negative term is greater
+  while (pterm > eps) { // at this point, the negative term is greater
     j++;
     pterm = (w + 2 * j) * exp(gamma * (w + 2 * j) * (w + 2 * j));
     nterm = (w - 2 * j) * exp(gamma * (w - 2 * j) * (w - 2 * j));
