@@ -24,20 +24,20 @@ knitr::opts_chunk$set(
 
 <div id="TOC">
 <ul>
-<li><a href="#background">Background</a></li>
-<li><a href="#den">Validating the Density Functions</a>
-<ul>
-<li><a href="#den-gen">Generating Data</a></li>
-<li><a href="#den-test">Testing the Density Functions</a></li>
-<li><a href="#den-ke">Known Errors</a></li>
-</ul></li>
-<li><a href="#fit">Validating Fitting Using the Density Functions</a>
-<ul>
-<li><a href="#fit-gen">Generating Parameter Estimates</a></li>
-<li><a href="#fit-test">Testing the Parameter Estimates</a></li>
-<li><a href="#fit-ke">Known Errors</a></li>
-</ul></li>
-<li><a href="#references">References</a></li>
+  <li><a href="#background">Background</a></li>
+  <li><a href="#den">Validating the Density Functions</a>
+  <ul>
+    <li><a href="#den-gen">Generating Data</a></li>
+    <li><a href="#den-test">Testing the Density Functions</a></li>
+    <li><a href="#den-ke">Known Errors</a></li>
+  </ul></li>
+  <li><a href="#fit">Validating Fitting Using the Density Functions</a>
+  <ul>
+    <li><a href="#fit-gen">Generating Parameter Estimates</a></li>
+    <li><a href="#fit-test">Testing the Parameter Estimates</a></li>
+    <li><a href="#fit-ke">Known Errors</a></li>
+  </ul></li>
+  <li><a href="#references">References</a></li>
 </ul>
 </div>
 
