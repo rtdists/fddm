@@ -8,6 +8,7 @@
 
 ## Other Changes
 * If input response times is an empty vector, then an empty vector is returned with a warning.
+* Fine-tuned the summation functions used with the SWSE method
 
 
 

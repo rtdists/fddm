@@ -402,7 +402,7 @@ Color_vec <- c("#e000b4", "#ff99eb", "#e68a00", "#ffb366",
 mi <- min(bm_vec[, -seq_len(t_idx)])
 ma <- max(bm_vec[, (t_idx+1):(ncol(bm_vec)-4)])
 
-ggplot(mbm_vec, aes(x = FuncName, y = time,
+ggplot(mbm_vec, aes(x = factor(FuncName, levels = Names_vec), y = time,
                     color = factor(FuncName, levels = Names_vec),
                     fill = factor(FuncName, levels = Names_vec))) +
        geom_violin(trim = TRUE, alpha = 0.5) +
