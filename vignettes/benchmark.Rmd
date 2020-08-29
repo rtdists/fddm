@@ -363,13 +363,15 @@ err_tol <- 1e-6 # this is the setting from rtdists
 bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                            W = W, SV = SV, err_tol = err_tol,
                            times = 100, unit = "ns")
-save(bm_vec, file = "inst/extdata/bm_vec.Rds", compress = "xz")
+save(bm_vec, compress = "xz", compression_level = 9,
+     file = "inst/extdata/bm_vec.Rds")
 # load(system.file("extdata", "bm_vec.Rds", package = "fddm", mustWork = TRUE))
 # results of rt_benchmark_ind are pre-loaded nad not run here:
 bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                            W = W, SV = SV, err_tol = err_tol,
                            times = 100, unit = "ns")
-save(bm_ind, file = "inst/extdata/bm_ind.Rds", compress = "xz")
+save(bm_ind, compress = "xz", compression_level = 9,
+     file = "inst/extdata/bm_ind.Rds")
 ```
 
 
@@ -440,7 +442,7 @@ The following code chunk loads the pre-run benchmark data and prepares it for th
 ```{r bm-meq-prep, eval=TRUE}
 # load data, will be in the variable 'bm_ind'
 load(system.file("extdata", "bm_ind.Rds", package = "fddm", mustWork = TRUE))
-bm_ind$RTAA <- bm_ind$RT / bm_ind$A / bm_ind$A
+bm_ind[["RTAA"]] <- bm_ind[["RT"]] / bm_ind[["A"]] / bm_ind[["A"]]
 bm_ind <- bm_ind[, c(1, 2, ncol(bm_ind), 3:(ncol(bm_ind)-1)) ]
 
 t_idx <- match("SV", colnames(bm_ind))
