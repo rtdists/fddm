@@ -70,8 +70,8 @@ use for fitting.
 ``` r
 library("fddm")
 data(med_dec, package = "fddm")
-med_dec <- med_dec[which(med_dec$rt >= 0), ]
-onep <- med_dec[ med_dec$id == "2" & med_dec$group == "experienced", ]
+med_dec <- med_dec[which(med_dec[["rt"]] >= 0), ]
+onep <- med_dec[ med_dec[["id"]] == "2" & med_dec[["group"]] == "experienced", ]
 str(onep)
 #> 'data.frame':    200 obs. of  9 variables:
 #>  $ id            : int  2 2 2 2 2 2 2 2 2 2 ...
@@ -89,8 +89,8 @@ We further prepare the data by defining upper and lower responses and
 the correct response bounds.
 
 ``` r
-onep$resp <- ifelse(onep$response == "blast", "upper", "lower")
-onep$truth <- ifelse(onep$classification == "blast", "upper", "lower")
+onep[["resp"]] <- ifelse(onep[["response"]] == "blast", "upper", "lower")
+onep[["truth"]] <- ifelse(onep[["classification"]] == "blast", "upper", "lower")
 ```
 
 For fitting, we need a simple likelihood function; here we will use a
@@ -131,14 +131,14 @@ define upper and lower bounds for each parameters. Fitting the DDM to
 this data is basically instantaneous using this setup.
 
 ``` r
-fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun, 
-              rt = onep$rt, resp = onep$resp, truth = onep$truth, 
+fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun,
+              rt = onep[["rt"]], resp = onep[["resp"]], truth = onep[["truth"]],
               # limits:   vu,   vl,   a,  t0, w,  sv
               lower = c(-Inf, -Inf,   0,   0, 0,   0),
               upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
 fit
 #> $par
-#> [1]  5.6813024 -2.1886620  2.7909111  0.3764465  0.4010116  2.2812989
+#> [1]  5.6813035 -2.1886603  2.7909118  0.3764465  0.4010116  2.2812988
 #> 
 #> $objective
 #> [1] 42.47181
@@ -151,7 +151,7 @@ fit
 #> 
 #> $evaluations
 #> function gradient 
-#>       60      301 
+#>       60      299 
 #> 
 #> $message
 #> [1] "relative convergence (4)"

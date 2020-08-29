@@ -17,32 +17,40 @@ double small_sum_eps_17(const double& t, const double& a, const double& w,
   // note: ks is not used
   double gamma = -a*a / (2 * t);
   double sum = w * exp(gamma * w*w); // start at j=0 term
-  double minterms = sqrt(t) / (2 * a) - w / 2; // minimum number of terms
+  double minterms = sqrt(t) / a; // minimum number of terms
   double rj = 1 - w;
-  double oterm = rj * exp(gamma * rj*rj);
-  double eterm = 0;
+  double term = rj * exp(gamma * rj*rj);
   int j = 0;
-  while (j < minterms) { // capture increasing terms
+  int odd = 1;
+  while (j <= minterms) { // capture increasing terms
     j++;
-    rj = j + 1 - w; // j is odd
-    oterm = rj * exp(gamma * rj*rj);
-    sum -= oterm;
-    j++;
-    rj = j + w; // j is even
-    eterm = rj * exp(gamma * rj*rj);
-    sum += eterm;
+    if (odd) { // j is odd
+      rj = j + 1 - w;
+      term = rj * exp(gamma * rj*rj);
+      sum -= term;
+      odd--;
+    } else { // j is even
+      rj = j + w;
+      term = rj * exp(gamma * rj*rj);
+      sum += term;
+      odd++;
+    }
   }
-  while (fabs(oterm) > eps) { // at this point, odd (negative) term is greater
+  while (fabs(term) > eps) {
     j++;
-    rj = j + 1 - w; // j is odd
-    oterm = rj * exp(gamma * rj*rj);
-    sum -= oterm;
-    j++;
-    rj = j + w; // j is even
-    eterm = rj * exp(gamma * rj*rj);
-    sum += eterm;
+    if (odd) { // j is odd
+      rj = j + 1 - w;
+      term = rj * exp(gamma * rj*rj);
+      sum -= term;
+      odd--;
+    } else { // j is even
+      rj = j + w;
+      term = rj * exp(gamma * rj*rj);
+      sum += term;
+      odd++;
+    }
   }
-  return sum;
+  return (sum > 0) ? sum : 0; // if result is negative, return 0 instead
 }
 
 
@@ -54,7 +62,7 @@ double small_sum_eps_14(const double& t, const double& a, const double& w,
   double gamma = -a*a / (2 * t);
   double sum = w * exp(gamma * w*w); // start at j=0 term
   double minterms = sqrt(t) / (2 * a) - w / 2; // minimum number of terms
-  double pterm = 0;
+  double pterm = sum;
   double nterm = sum;
   int j = 0;
   while (j < minterms) { // capture increasing terms
@@ -63,13 +71,13 @@ double small_sum_eps_14(const double& t, const double& a, const double& w,
     nterm = (w - 2 * j) * exp(gamma * (w - 2 * j) * (w - 2 * j));
     sum += pterm + nterm;
   }
-  while (fabs(nterm) > eps) { // at this point, the negative term is greater
+  while (pterm > eps) { // at this point, the negative term is greater
     j++;
     pterm = (w + 2 * j) * exp(gamma * (w + 2 * j) * (w + 2 * j));
     nterm = (w - 2 * j) * exp(gamma * (w - 2 * j) * (w - 2 * j));
     sum += pterm + nterm;
   }
-  return sum;
+  return (sum > 0) ? sum : 0; // if result is negative, return 0 instead
 }
 
 
@@ -90,7 +98,7 @@ double small_sum_2017(const double& t, const double& a, const double& w,
     sum += rj * exp(gamma * rj*rj);
     j++;
   }
-  return sum;
+  return (sum > 0) ? sum : 0; // if result is negative, return 0 instead
 }
 
 
@@ -105,7 +113,7 @@ double small_sum_2014(const double& t, const double& a, const double& w,
     sum += (2 * j + w) * exp(gamma * (2 * j + w) * (2 * j + w))
          - (2 * j - w) * exp(gamma * (2 * j - w) * (2 * j - w));
   }
-  return sum;
+  return (sum > 0) ? sum : 0; // if result is negative, return 0 instead
 }
 
 
@@ -125,5 +133,5 @@ double large_sum_Nav(const double& t, const double& a, const double& w,
   for (int j = 1; j <= kl; j++) {
     sum += j * sin(j * w * M_PI) * exp(gamma * j*j);
   }
-  return sum;
+  return (sum > 0) ? sum : 0; // if result is negative, return 0 instead
 }

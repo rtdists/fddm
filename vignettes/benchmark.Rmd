@@ -25,18 +25,18 @@ knitr::opts_chunk$set(
 
 <div id="TOC">
 <ul>
-<li><a href="#intro">Introduction</a></li>
-<li><a href="#den">Benchmarking the Density Functions</a>
-<ul>
-<li><a href="#den-gen">Generating Benchmark Data</a></li>
-<li><a href="#den-ana">Analysis of Benchmark Results</a></li>
-</ul></li>
-<li><a href="#fit">Benchmarking Model Fitting to Real-World Data</a>
-<ul>
-<li><a href="#fit-gen">Generating Benchmark Data for Parameter Estimation</a></li>
-<li><a href="#fit-ana">Analysis of Benchmark Results</a></li>
-</ul></li>
-<li><a href="#references">References</a></li>
+  <li><a href="#intro">Introduction</a></li>
+  <li><a href="#den">Benchmarking the Density Functions</a>
+  <ul>
+    <li><a href="#den-gen">Generating Benchmark Data</a></li>
+    <li><a href="#den-ana">Analysis of Benchmark Results</a></li>
+  </ul></li>
+  <li><a href="#fit">Benchmarking Model Fitting to Real-World Data</a>
+  <ul>
+    <li><a href="#fit-gen">Generating Benchmark Data for Parameter Estimation</a></li>
+    <li><a href="#fit-ana">Analysis of Benchmark Results</a></li>
+  </ul></li>
+  <li><a href="#references">References</a></li>
 </ul>
 </div>
 
@@ -80,7 +80,7 @@ To capture the behavior of the density function approximations, we test each one
 
 In addition, we include two functions for benchmarking the performance of the approximations: one where the response times are input as a vector, and one where the response times are input one at a time to the density function. Inputting the response times as a vector is the most common way of inputting data to the density function and allows the `R` code from @gondan2014even to exploit `R`'s powerful vectorization, operating at its most efficient. We also include a benchmark function that inputs the response times individually as this allows us to see the impact that the size of the response time has on the evaluation time of the density function approximations.
 
-At each point in this parameter space, we run the `microbenchmark` function $100$ times for each approximation and save the median of these 100 benchmark times. Using the median of these data should reduce the number of outliers in the data while maintaining a truthful representation of the approximations' performance. The following code chunk defines the functions that we will use to benchmark the algorithms; we will be using the [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) package to time the evaluations.
+At each point in this parameter space, we run the `microbenchmark` function 100 times for each approximation and save the median of these 100 benchmark times. Using the median of these data should reduce the number of outliers in the data while maintaining a truthful representation of the approximations' performance. The following code chunk defines the functions that we will use to benchmark the algorithms; we will be using the [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) package to time the evaluations.
 
 <a id="gon-r-code"></a><a id="bm-funcs"></a>
 ```{r bm-fun, eval=TRUE}
@@ -93,9 +93,9 @@ library("microbenchmark")
 rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                              err_tol = 1e-6, times = 100, unit = "ns") {
 
-  fnames <- c("fs_SWSE_17", "fs_SWSE_14",
-              "fs_Gon_17", "fs_Gon_14", "fs_Nav_17", "fs_Nav_14",
-              "fb_Gon_17", "fb_Gon_14", "fb_Nav_17", "fb_Nav_14",
+  fnames <- c("fs_SWSE_17", "fs_SWSE_14", "fb_SWSE_17", "fb_SWSE_14",
+              "fs_Gon_17", "fs_Gon_14", "fb_Gon_17", "fb_Gon_14",
+              "fs_Nav_17", "fs_Nav_14", "fb_Nav_17", "fb_Nav_14",
               "fl_Nav_09", "RWiener", "Gondan", "rtdists")
   nf <- length(fnames) # number of functions being benchmarked
   nV <- length(V)
@@ -125,6 +125,16 @@ rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                              log = FALSE, n_terms_small = "SWSE",
                              summation_small = "2014", scale = "small",
                              err_tol = err_tol),
+          fb_SWSE_17 = dfddm(rt = RT, response = resp, a = A[a],
+                             v = V[v], t0 = t0, w = W[w],
+                             log = FALSE, n_terms_small = "SWSE",
+                             summation_small = "2017", scale = "both",
+                             err_tol = err_tol),
+          fb_SWSE_14 = dfddm(rt = RT, response = resp, a = A[a],
+                             v = V[v], t0 = t0, w = W[w],
+                             log = FALSE, n_terms_small = "SWSE",
+                             summation_small = "2014", scale = "both",
+                             err_tol = err_tol),
           fs_Gon_17 = dfddm(rt = RT, response = resp, a = A[a],
                             v = V[v], t0 = t0, w = W[w],
                             log = FALSE, n_terms_small = "Gondan",
@@ -133,16 +143,6 @@ rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
           fs_Gon_14 = dfddm(rt = RT, response = resp, a = A[a],
                             v = V[v], t0 = t0, w = W[w],
                             log = FALSE, n_terms_small = "Gondan",
-                            summation_small = "2014", scale = "small",
-                            err_tol = err_tol),
-          fs_Nav_17 = dfddm(rt = RT, response = resp, a = A[a],
-                            v = V[v], t0 = t0, w = W[w],
-                            log = FALSE, n_terms_small = "Navarro",
-                            summation_small = "2017", scale = "small",
-                            err_tol = err_tol),
-          fs_Nav_14 = dfddm(rt = RT, response = resp, a = A[a],
-                            v = V[v], t0 = t0, w = W[w],
-                            log = FALSE, n_terms_small = "Navarro",
                             summation_small = "2014", scale = "small",
                             err_tol = err_tol),
           fb_Gon_17 = dfddm(rt = RT, response = resp, a = A[a],
@@ -154,6 +154,16 @@ rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                             v = V[v], t0 = t0, w = W[w],
                             log = FALSE, n_terms_small = "Gondan",
                             summation_small = "2014", scale = "both",
+                            err_tol = err_tol),
+          fs_Nav_17 = dfddm(rt = RT, response = resp, a = A[a],
+                            v = V[v], t0 = t0, w = W[w],
+                            log = FALSE, n_terms_small = "Navarro",
+                            summation_small = "2017", scale = "small",
+                            err_tol = err_tol),
+          fs_Nav_14 = dfddm(rt = RT, response = resp, a = A[a],
+                            v = V[v], t0 = t0, w = W[w],
+                            log = FALSE, n_terms_small = "Navarro",
+                            summation_small = "2014", scale = "small",
                             err_tol = err_tol),
           fb_Nav_17 = dfddm(rt = RT, response = resp, a = A[a],
                             v = V[v], t0 = t0, w = W[w],
@@ -198,10 +208,9 @@ rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
 
 rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                              err_tol = 1e-6, times = 100, unit = "ns") {
-
-  fnames <- c("fs_SWSE_17", "fs_SWSE_14",
-              "fs_Gon_17", "fs_Gon_14", "fs_Nav_17", "fs_Nav_14",
-              "fb_Gon_17", "fb_Gon_14", "fb_Nav_17", "fb_Nav_14",
+  fnames <- c("fs_SWSE_17", "fs_SWSE_14", "fb_SWSE_17", "fb_SWSE_14",
+              "fs_Gon_17", "fs_Gon_14", "fb_Gon_17", "fb_Gon_14",
+              "fs_Nav_17", "fs_Nav_14", "fb_Nav_17", "fb_Nav_14",
               "fl_Nav_09", "RWiener", "Gondan", "rtdists")
   nf <- length(fnames) # number of functions being benchmarked
   nRT <- length(RT)
@@ -232,6 +241,16 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                               log = FALSE, n_terms_small = "SWSE",
                               summation_small = "2014", scale = "small",
                               err_tol = err_tol),
+            fb_SWSE_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                              v = V[v], t0 = t0, w = W[w],
+                              log = FALSE, n_terms_small = "SWSE",
+                              summation_small = "2017", scale = "both",
+                              err_tol = err_tol),
+            fb_SWSE_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                              v = V[v], t0 = t0, w = W[w],
+                              log = FALSE, n_terms_small = "SWSE",
+                              summation_small = "2014", scale = "both",
+                              err_tol = err_tol),
             fs_Gon_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
                               v = V[v], t0 = t0, w = W[w],
                               log = FALSE, n_terms_small = "Gondan",
@@ -240,16 +259,6 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
             fs_Gon_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
                               v = V[v], t0 = t0, w = W[w],
                               log = FALSE, n_terms_small = "Gondan",
-                              summation_small = "2014", scale = "small",
-                              err_tol = err_tol),
-            fs_Nav_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Navarro",
-                              summation_small = "2017", scale = "small",
-                              err_tol = err_tol),
-            fs_Nav_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Navarro",
                               summation_small = "2014", scale = "small",
                               err_tol = err_tol),
             fb_Gon_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
@@ -261,6 +270,16 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                               v = V[v], t0 = t0, w = W[w],
                               log = FALSE, n_terms_small = "Gondan",
                               summation_small = "2014", scale = "both",
+                              err_tol = err_tol),
+            fs_Nav_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                              v = V[v], t0 = t0, w = W[w],
+                              log = FALSE, n_terms_small = "Navarro",
+                              summation_small = "2017", scale = "small",
+                              err_tol = err_tol),
+            fs_Nav_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                              v = V[v], t0 = t0, w = W[w],
+                              log = FALSE, n_terms_small = "Navarro",
+                              summation_small = "2014", scale = "small",
                               err_tol = err_tol),
             fb_Nav_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
                               v = V[v], t0 = t0, w = W[w],
@@ -344,13 +363,15 @@ err_tol <- 1e-6 # this is the setting from rtdists
 bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                            W = W, SV = SV, err_tol = err_tol,
                            times = 100, unit = "ns")
-save(bm_vec, file = "inst/extdata/bm_vec.Rds", compress = "xz")
+save(bm_vec, compress = "xz", compression_level = 9,
+     file = "inst/extdata/bm_vec.Rds")
 # load(system.file("extdata", "bm_vec.Rds", package = "fddm", mustWork = TRUE))
 # results of rt_benchmark_ind are pre-loaded nad not run here:
 bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                            W = W, SV = SV, err_tol = err_tol,
                            times = 100, unit = "ns")
-save(bm_ind, file = "inst/extdata/bm_ind.Rds", compress = "xz")
+save(bm_ind, compress = "xz", compression_level = 9,
+     file = "inst/extdata/bm_ind.Rds")
 ```
 
 
@@ -371,19 +392,19 @@ bm_vec[, -seq_len(t_idx)] <- bm_vec[, -seq_len(t_idx)]/1000 # convert to microse
 mbm_vec <- melt(bm_vec, measure.vars = -seq_len(t_idx),
                 variable.name = "FuncName", value.name = "time")
 
-Names_vec <- c("fs_SWSE_17", "fs_SWSE_14",
+Names_vec <- c("fb_SWSE_17", "fb_SWSE_14", "fb_Gon_17", "fb_Gon_14",
+               "fb_Nav_17", "fb_Nav_14", "fs_SWSE_17", "fs_SWSE_14",
                "fs_Gon_17", "fs_Gon_14", "fs_Nav_17", "fs_Nav_14",
-               "fb_Gon_17", "fb_Gon_14", "fb_Nav_17", "fb_Nav_14",
                "fl_Nav_09", "RWiener", "Gondan", "rtdists")
-Color_vec <- c("#9900cc", "#cc99ff",
-               "#006699", "#66ccff", "#336600", "#33cc33",
-               "#c2a500", "#d7db42", "#e68a00", "#ffb366",
+Color_vec <- c("#e000b4", "#ff99eb", "#e68a00", "#ffb366",
+               "#006699", "#66ccff", "#9900cc", "#cc99ff",
+               "#c2a500", "#d7db42", "#336600", "#33cc33",
                "#996633", "#ff9999", "#ff5050", "#990000")
 
 mi <- min(bm_vec[, -seq_len(t_idx)])
 ma <- max(bm_vec[, (t_idx+1):(ncol(bm_vec)-4)])
 
-ggplot(mbm_vec, aes(x = FuncName, y = time,
+ggplot(mbm_vec, aes(x = factor(FuncName, levels = Names_vec), y = time,
                     color = factor(FuncName, levels = Names_vec),
                     fill = factor(FuncName, levels = Names_vec))) +
        geom_violin(trim = TRUE, alpha = 0.5) +
@@ -414,14 +435,14 @@ Depending on your system, the results might differ from the ones shown here, but
 
 To visualize the problem areas for each method, we plot that method's median benchmark times as a function of each individual parameter value; this will allow us to see where in the parameter space each method is efficient and where it is inefficient. In each of the following plots, we will vary one model parameter and show the mean of the median benchmark times, the 10% quantiles and 90% quantiles of the median benchmark times, as well as the minimum and maximum median benchmark times. For each value of that parameter, we aggregate the benchmark data for all values of the other parameter to generate the statistics plotted. For example, in a plot illustrating the effect of varying $v$, the statistics plotted for the parameter value $v = 0$ will include the benchmark data for the full ranges of $rt$, $a$, $w$, and $sv$. Note that because we also vary the response time in these plots, all of the following plots show the results based on the individual response times (i.e., [`rt_benchmark_ind`](#bm-funcs)). As this benchmark function records the evaluation time of approximating the density for only one response time in contrast to a vector of response times, we expect the typical benchmark times produced by [`rt_benchmark_ind`](#bm-funcs) to be faster than that of [`rt_benchmark_vec`](#bm-funcs).
 
-To avoid too many repetitious plots, we will only include nine of the methods from the previous plot that illustrate the different variations and implementations of the density functions. We include: all three small-time implementations in `dfddm` ("fs_"), the one large-time implementation of the large-time in `dfddm` ("fl_"), the two implementations in `dfddm` that combine the small-time and large-time ("fb_"), and the three methods from `R` packages and the literature as [described above](#den-gen).
+To avoid too many repetitious plots, we will only include six of the methods from the previous plot that illustrate the different variations and implementations of the density functions. We include: the fastest small-time implementation in `dfddm` ("fs_SWSE_17"), the one large-time implementation of the large-time in `dfddm` ("fl_Nav_09"), the fastest implementation in `dfddm` that combines the small-time and large-time ("fb_SWSE_17"), and the three methods from `R` packages and the literature as [described above](#den-gen).
 
 The following code chunk loads the pre-run benchmark data and prepares it for the subsequent plots that will be generated by the later code chunks.
 
 ```{r bm-meq-prep, eval=TRUE}
 # load data, will be in the variable 'bm_ind'
 load(system.file("extdata", "bm_ind.Rds", package = "fddm", mustWork = TRUE))
-bm_ind$RTAA <- bm_ind$RT / bm_ind$A / bm_ind$A
+bm_ind[["RTAA"]] <- bm_ind[["RT"]] / bm_ind[["A"]] / bm_ind[["A"]]
 bm_ind <- bm_ind[, c(1, 2, ncol(bm_ind), 3:(ncol(bm_ind)-1)) ]
 
 t_idx <- match("SV", colnames(bm_ind))
@@ -429,11 +450,9 @@ bm_ind[,-seq_len(t_idx)] <- bm_ind[, -seq_len(t_idx)]/1000 # convert to microsec
 mbm_ind <- melt(bm_ind, measure.vars = -seq_len(t_idx),
                 variable.name = "FuncName", value.name = "time")
 
-Names_meq <- c("fs_SWSE_17", "fs_Gon_17", "fs_Nav_17",
-               "fl_Nav_09", "fb_Gon_17", "fb_Nav_17",
+Names_meq <- c("fb_SWSE_17", "fs_SWSE_17", "fl_Nav_09",
                "RWiener", "Gondan", "rtdists")
-Color_meq <- c("#9900cc", "#006699", "#336600",
-               "#996633", "#c2a500", "#e68a00",
+Color_meq <- c("#9900cc", "#9900cc", "#996633",
                "#ff9999", "#ff5050", "#990000")
 mbm_meq <- subset(mbm_ind, FuncName %in% Names_meq)
 ```
@@ -454,7 +473,10 @@ ggplot(mbm_meq, aes(x = RTAA, y = time,
   scale_color_manual(values = Color_meq) +
   scale_fill_manual(values = Color_meq) +
   labs(title = "Means of the median microbenchmark results",
-       subtitle = "The shaded regions represent the 10% and 90% quantiles;\nThe lighter shaded regions represent the min and max times",
+       subtitle = paste(
+         "The shaded regions represent the 10% and 90% quantiles",
+         "The lighter shaded regions represent the min and max times",
+         sep = ";\n"),
        x = bquote(frac(rt, a^2) ~ ", effective response time, " ~ log[10]),
        y = "Time (microseconds)") +
   theme_bw() +
@@ -462,7 +484,7 @@ ggplot(mbm_meq, aes(x = RTAA, y = time,
         panel.border = element_blank(),
         plot.title = element_text(size = 20),
         plot.subtitle = element_text(size = 16,
-                                     margin = margin(5,5,15,5, "pt")),
+                                     margin = margin(5, 5, 15, 5, "pt")),
         axis.text.x = element_text(size = 16, angle = 90,
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
@@ -491,7 +513,10 @@ ggplot(mbm_meq, aes(x = W, y = time,
   scale_color_manual(values = Color_meq) +
   scale_fill_manual(values = Color_meq) +
   labs(title = "Means of the median microbenchmark results",
-       subtitle = "The shaded regions represent the 10% and 90% quantiles;\nThe lighter shaded regions represent the min and max times",
+       subtitle = paste(
+         "The shaded regions represent the 10% and 90% quantiles",
+         "The lighter shaded regions represent the min and max times",
+         sep = ";\n"),
        x = "w, relative starting point (a priori bias)",
        y = "Time (microseconds)") +
   theme_bw() +
@@ -499,7 +524,7 @@ ggplot(mbm_meq, aes(x = W, y = time,
         panel.border = element_blank(),
         plot.title = element_text(size = 20),
         plot.subtitle = element_text(size = 16,
-                                     margin = margin(5,5,15,5, "pt")),
+                                     margin = margin(5, 5, 15, 5, "pt")),
         axis.text.x = element_text(size = 16, angle = 90,
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
@@ -528,7 +553,10 @@ ggplot(mbm_meq, aes(x = V, y = time,
   scale_color_manual(values = Color_meq) +
   scale_fill_manual(values = Color_meq) +
   labs(title = "Means of the median microbenchmark results",
-       subtitle = "The shaded regions represent the 10% and 90% quantiles;\nThe lighter shaded regions represent the min and max times",
+       subtitle = paste(
+         "The shaded regions represent the 10% and 90% quantiles",
+         "The lighter shaded regions represent the min and max times",
+         sep = ";\n"),
        x = "v, drift rate",
        y = "Time (microseconds)") +
   theme_bw() +
@@ -536,7 +564,7 @@ ggplot(mbm_meq, aes(x = V, y = time,
         panel.border = element_blank(),
         plot.title = element_text(size = 20),
         plot.subtitle = element_text(size = 16,
-                                     margin = margin(5,5,15,5, "pt")),
+                                     margin = margin(5, 5, 15, 5, "pt")),
         axis.text.x = element_text(size = 16, angle = 90,
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
@@ -548,7 +576,7 @@ ggplot(mbm_meq, aes(x = V, y = time,
   facet_wrap(~ factor(FuncName, levels = Names_meq), scales = "free_y")
 ```
 
-The drift rate $v$ has nothing to do with the infinite sum, which is why we see overall flat means across the range of $v$. The only pattern we see is a small bump for $v = 0$ of the small-time methods.
+The drift rate $v$ has nothing to do with the infinite sum, which is why we see overall flat means across the range of $v$. The only pattern we see is a small bump for $v = 0$ of the small-time method.
 
 Lastly we plot the effects of varying $sv$, the inter-trial variability in the drift rate, on the median benchmark time.
 
@@ -565,7 +593,10 @@ ggplot(mbm_meq, aes(x = SV, y = time,
   scale_color_manual(values = Color_meq) +
   scale_fill_manual(values = Color_meq) +
   labs(title = "Means of the median microbenchmark results",
-       subtitle = "The shaded regions represent the 10% and 90% quantiles;\nThe lighter shaded regions represent the min and max times",
+       subtitle = paste(
+         "The shaded regions represent the 10% and 90% quantiles",
+         "The lighter shaded regions represent the min and max times",
+         sep = ";\n"),
        x = "sv, inter-trial variability in the drift rate",
        y = "Time (microseconds)") +
   theme_bw() +
@@ -573,7 +604,7 @@ ggplot(mbm_meq, aes(x = SV, y = time,
         panel.border = element_blank(),
         plot.title = element_text(size = 20),
         plot.subtitle = element_text(size = 16,
-                                     margin = margin(5,5,15,5, "pt")),
+                                     margin = margin(5, 5, 15, 5, "pt")),
         axis.text.x = element_text(size = 16, angle = 90,
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
@@ -587,9 +618,9 @@ ggplot(mbm_meq, aes(x = SV, y = time,
 
 The inter-trial variability in the drift rate, $sv$, affects the evaluation times similarly to its related parameter $v$. Neither one of these parameters is integral to the approximation of the infinite sum, and that insignificance is shown by the flat means across the range of $sv$.
 
-Overall, these plots show the unsurprising conclusion that the small-time densities generally struggled for large "effective response times" and the large-time density is very inefficient for small "effective response times". We see that the methods that combined the two density functions were noticeably more consistent across the entire range of "effective response times," confirming that using a combination of both methods results in a very stable algorithm.
+Overall, these plots reveal the unsurprising conclusion that the small-time density approximation generally struggled for large "effective response times" and the large-time density approximation is very inefficient for small "effective response times". We see that the methods that combined the two density functions were noticeably more consistent across the entire range of "effective response times," confirming that using a combination of both methods results in a very stable algorithm.
 
-The other three figures vary $w$, $v$, and $sv$, and do not reveal any meaningful patterns. Both $v$ and $sv$ have nothing to do with the infinite sum, and $w$ only has a minimal role in the infinite sum; thus we do not expect any great contributions to slowdowns in evaluation times of either the small-time or large-time density functions.
+The other three figures that vary $w$, $v$, and $sv$ do not reveal any meaningful patterns. Both $v$ and $sv$ have nothing to do with the infinite sum, and $w$ only has a minimal role in the infinite sum; thus we do not expect any great contributions to slowdowns in evaluation times of either the small-time or large-time density functions.
 
 
 
@@ -611,7 +642,7 @@ We will not test for accuracy or consistency in this vignette because that has a
 
 The following subsections will define all of the functions used to generate the fittings and store the benchmark results and provide the code to run the full fitting. Since running the full fitting for all of the individuals in the data takes a long time, we will forgo running the fitting in this vignette and instead read pre-fit parameter estimates that used the provided code.
 
-To avoid too many repetitious plots, we will only include six of the methods from the [previous section](#den-gen) that illustrate the different variations and implementations of the density functions. We include: all three small-time implementations in `dfddm`, the two implementations in `dfddm` that combine the small-time and large-time, and the one method available in the `rtdists` package. We only use a selection of the methods available in `dfddm` to avoid redundancy in our testing since most of the methods have multiple sibling approximations that are extremely similar. Moreover, we do not require the `RWiener` package nor the Gondan raw `R` code because the associated density function approximations do not include an option for variability in drift rate. While we can convert the constant drift rate density to the variable drift rate density using a multiplicative factor, the densities are still [potentially calculated incorrectly](#gon-m). For more details on the differences between the constant drift rate density functions and their variable drift rate counterparts, see the [Math Vignette](math.html#mathematical-background).
+To avoid too many repetitious plots, we will only include six of the methods from the [previous section](#den-gen) that illustrate the variability in the different density function approximations. We include: the two fastest implementations in `dfddm` that combine the small-time and large-time ("fb_SWSE_17" and "fb_Gon_17"), the two fastest strictly small-time implementations in `dfddm` ("fs_SWSE_17" and "fs_Gon_17"), the one large-time implementation in `dfddm` ("fl_Nav_09"), as well as the one method available in the `rtdists` package ("rtdists"). We only use a selection of the methods available in `dfddm` to avoid redundancy in our testing since most of the methods have multiple sibling approximations that are extremely similar. Moreover, we do not require the `RWiener` package nor the Gondan raw `R` code because the associated density function approximations do not include an option for variability in drift rate. While we can convert the constant drift rate density to the variable drift rate density using a multiplicative factor, the densities are still [potentially calculated incorrectly](#gon-m). For more details on the differences between the constant drift rate density functions and their variable drift rate counterparts, see the [Math Vignette](math.html#mathematical-background).
 
 First we load the necessary packages.
 
@@ -628,6 +659,50 @@ library("microbenchmark")
 This code chunk defines the log-likelihood functions used in the optimization algorithm; all of the log-likelihood functions are the same as in the [Validity Vignette](validity.html#fit-gen-llf). The log-likelihood functions are fairly straightforward and split the responses and associated response times by the true item status (i.e., the correct response) to enable fitting distinct drift rates ($v_\ell$ for the items in which the correct response is the lower boundary and $v_u$ for the items for which the correct response is the upper boundary). In addition, the log-likelihood functions heavily penalize any combination of parameters that returns a log-density of $-\infty$ (equivalent to a regular density of $0$).
 
 ```{r fit-loglik-fun, eval=TRUE}
+ll_fb_SWSE_17 <- function(pars, rt, resp, truth, err_tol) {
+  rtu <- rt[truth == "upper"]
+  rtl <- rt[truth == "lower"]
+  respu <- resp[truth == "upper"]
+  respl <- resp[truth == "lower"]
+
+  # the truth is "upper" so use vu
+  densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
+                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                 n_terms_small = "SWSE", summation_small = "2017",
+                 scale = "both", err_tol = err_tol)
+  # the truth is "lower" so use vl
+  densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
+                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                 n_terms_small = "SWSE", summation_small = "2017",
+                 scale = "both", err_tol = err_tol)
+
+  densities <- c(densu, densl)
+  if (any(!is.finite(densities))) return(1e6)
+  return(-sum(densities))
+}
+
+ll_fb_Gon_17 <- function(pars, rt, resp, truth, err_tol) {
+  rtu <- rt[truth == "upper"]
+  rtl <- rt[truth == "lower"]
+  respu <- resp[truth == "upper"]
+  respl <- resp[truth == "lower"]
+
+  # the truth is "upper" so use vu
+  densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
+                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                 n_terms_small = "Gondan", summation_small = "2017",
+                 scale = "both", err_tol = err_tol)
+  # the truth is "lower" so use vl
+  densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
+                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                 n_terms_small = "Gondan", summation_small = "2017",
+                 scale = "both", err_tol = err_tol)
+
+  densities <- c(densu, densl)
+  if (any(!is.finite(densities))) return(1e6)
+  return(-sum(densities))
+}
+
 ll_fs_SWSE_17 <- function(pars, rt, resp, truth, err_tol) {
   rtu <- rt[truth == "upper"]
   rtl <- rt[truth == "lower"]
@@ -672,7 +747,7 @@ ll_fs_Gon_17 <- function(pars, rt, resp, truth, err_tol) {
   return(-sum(densities))
 }
 
-ll_fs_Nav_17 <- function(pars, rt, resp, truth, err_tol) {
+ll_fl_Nav_09 <- function(pars, rt, resp, truth, err_tol) {
   rtu <- rt[truth == "upper"]
   rtl <- rt[truth == "lower"]
   respu <- resp[truth == "upper"]
@@ -681,57 +756,13 @@ ll_fs_Nav_17 <- function(pars, rt, resp, truth, err_tol) {
   # the truth is "upper" so use vu
   densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
                  t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Navarro", summation_small = "2017",
-                 scale = "small", err_tol = err_tol)
+                 n_terms_small = "Navarro", summation_small = "",
+                 scale = "large", err_tol = err_tol)
   # the truth is "lower" so use vl
   densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
                  t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Navarro", summation_small = "2017",
-                 scale = "small", err_tol = err_tol)
-
-  densities <- c(densu, densl)
-  if (any(!is.finite(densities))) return(1e6)
-  return(-sum(densities))
-}
-
-ll_fb_Gon_17 <- function(pars, rt, resp, truth, err_tol) {
-  rtu <- rt[truth == "upper"]
-  rtl <- rt[truth == "lower"]
-  respu <- resp[truth == "upper"]
-  respl <- resp[truth == "lower"]
-
-  # the truth is "upper" so use vu
-  densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Gondan", summation_small = "2017",
-                 scale = "both", err_tol = err_tol)
-  # the truth is "lower" so use vl
-  densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Gondan", summation_small = "2017",
-                 scale = "both", err_tol = err_tol)
-
-  densities <- c(densu, densl)
-  if (any(!is.finite(densities))) return(1e6)
-  return(-sum(densities))
-}
-
-ll_fb_Nav_17 <- function(pars, rt, resp, truth, err_tol) {
-  rtu <- rt[truth == "upper"]
-  rtl <- rt[truth == "lower"]
-  respu <- resp[truth == "upper"]
-  respl <- resp[truth == "lower"]
-
-  # the truth is "upper" so use vu
-  densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Navarro", summation_small = "2017",
-                 scale = "both", err_tol = err_tol)
-  # the truth is "lower" so use vl
-  densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Navarro", summation_small = "2017",
-                 scale = "both", err_tol = err_tol)
+                 n_terms_small = "Navarro", summation_small = "",
+                 scale = "large", err_tol = err_tol)
 
   densities <- c(densu, densl)
   if (any(!is.finite(densities))) return(1e6)
@@ -761,9 +792,9 @@ ll_RTDists <- function(pars, rt, resp, truth) {
 
 ### Fitting Function {#fit-gen-fun}
 
-We use a different set of initial parameter values for each combination of data set and method. In a real-life situation we would probably do so using random initial parameter values to avoid local minima. Here we do this with a fixed set of initial parameter values to ensure that the different method produce the same results for different starting points. However, there are a couple of restrictions to these initial values that we must address (we would also have to do so if we picked the initial values randomly). The parameter $t_0$ must be less than the response time, so we set the initial values for $t_0$ to be strictly less than the minimum response time according to each individual in the input data.frame.
+We use a different set of initial parameter values for each combination of data set and method. In a real-life situation we would probably do so using random initial parameter values to avoid local minima. Here we do this with a fixed set of initial parameter values to ensure that the different method produce the same results for different starting points. However, there are a couple of restrictions to these initial values that we must address (we would also have to do so if we picked the initial values randomly). The parameter $t_0$ must be less than the response time, so we set the initial values for $t_0$ to be strictly less than the minimum response time according to each individual in the input data frame.
 
-Furthermore, we must place a lower bound on $a$ because the optimization algorithm occasionally evaluates the log-likelihood functions (and thus the underlying density function approximations) using values of $a$ that are very close to zero in an effort to fully explore the parameter space. In these cases, the small-time approximations struggle because $a$ inversely scales the input response time and effectively changes the input response time into a very large one. In particular, an extremely small value of $a$ can cause the "SWSE" small-time density approximation to run for a very long time; to prevent this, we bound $a$ below by $0.05$ as it is a very small value such that anything less would be of no psychological significance to the model. In common use this is not an issue because very small values of $a$ do not make any sense with regard to the psychological interpretation of the parameter, but this issue can arise in an exploratory optimization environment.
+Furthermore, we must place a lower bound on $a$ that is necessarily greater than zero because the optimization algorithm occasionally evaluates the log-likelihood functions (and thus the underlying density function approximations) using values of $a$ equal to its bounds. In the case where optimization algorithm evaluates using $a = 0$, the density function from the `rtdists` package does not evaluate. In common use this is not an issue because very small values of $a$ do not make any sense with regard to the psychological interpretation of the parameter, but this issue can arise in an exploratory optimization environment.
 
 The following code chunk defines the function that will run the optimization and produce the fitted parameter estimates for $v_u$, $v_\ell$, $a$, $t_0$, $w$, and $sv$. As [discussed above](#fit-gen), we only use a selection of methods from those available in `dfddm`. This fitting function will run the optimization for each set of initial parameter values and store the following results from the optimization: 1) resulting convergence code (either $0$ indicating successful convergence or $1$ indicating unsuccessful convergence); 2) minimized value of the objective log-likelihood function; 3) the number of iterations used by the optimizer during the optimization process; 4) the number of calls to the log-likelihood function during the optimization process; and 5) the median benchmark time of the optimization using each method.
 
@@ -797,23 +828,24 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
       for (i in 1:length(id_idx)) {
         idi <- unique(data[,id_idx[i]])
         for (j in 1:length(idi)) {
-          df$id[data[,id_idx[i]] == idi[j]] <- paste(df$id[data[,id_idx[i]] == idi[j]], idi[j], sep = " ")
+          df[["id"]][data[,id_idx[i]] == idi[j]] <- paste(
+            df[["id"]][data[,id_idx[i]] == idi[j]], idi[j], sep = " ")
         }
       }
-      df$id <- trimws(df$id, which = "left")
+      df[["id"]] <- trimws(df[["id"]], which = "left")
     }
 
-    df$rt <- as.double(data[,rt_idx])
+    df[["rt"]] <- as.double(data[,rt_idx])
 
-    df$response <- "lower"
-    df$response[data[,response_idx] == response_upper] <- "upper"
+    df[["response"]] <- "lower"
+    df[["response"]][data[,response_idx] == response_upper] <- "upper"
 
-    df$truth <- "lower"
-    df$truth[data[,truth_idx] == response_upper] <- "upper"
+    df[["truth"]] <- "lower"
+    df[["truth"]][data[,truth_idx] == response_upper] <- "upper"
   }
 
   # Preliminaries
-  ids <- unique(df$id)
+  ids <- unique(df[["id"]])
   nids <- max(length(ids), 1) # if inds is null, there is only one individual
 
   init_vals <- data.frame(v1 = c( 0,  10, -.5,  0,  0,  0,  0,  0,  0,   0,  0),
@@ -824,8 +856,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                           sv = c( 1,   1,   1,  1,  1,  1,  1,  1,  1, .05,  5))
   ninit_vals <- nrow(init_vals)
 
-  algo_names <- c("fs_SWSE_17", "fs_Gon_17", "fs_Nav_17",
-                  "fb_Gon_17", "fb_Nav_17","rtdists")
+  algo_names <- c("fb_SWSE_17", "fb_Gon_17", "fs_SWSE_17",
+                  "fs_Gon_17", "fl_Nav_09", "rtdists")
   nalgos <- length(algo_names)
   ni <- nalgos*ninit_vals
 
@@ -836,124 +868,121 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
   colnames(res) <- cnames
 
   # label the result dataframe
-  algo_col <- c()
-  for (n in 1:nalgos) {
-    algo_col <- c(algo_col, rep(algo_names[n], ninit_vals))
-  }
-  res$Algorithm <- algo_col # label algorithms
+  res[["Algorithm"]] <- rep(algo_names, each = ninit_vals) # label algorithms
 
   # Loop through each individual
   for (i in 1:nids) {
     # extract data for id i
-    dfi <- df[df$id == ids[i],]
-    rti <- dfi$rt
-    respi <- dfi$response
-    truthi <- dfi$truth
+    dfi <- df[df[["id"]] == ids[i], ]
+    rti <- dfi[["rt"]]
+    respi <- dfi[["response"]]
+    truthi <- dfi[["truth"]]
 
     # starting value for t0 must be smaller than the smallest rt
     min_rti <- min(rti)
     t0_lo <- 0.01*min_rti
     t0_me <- 0.50*min_rti
     t0_hi <- 0.99*min_rti
+    init_vals[["t0"]] <- c(rep(t0_me, 5), t0_lo, t0_hi, rep(t0_me, 4))
 
     # label the result dataframe
-    res$ID[((i-1)*ni+1):(i*ni)] <- ids[i] # label individuals
+    res[["ID"]][((i-1)*ni+1):(i*ni)] <- ids[i] # label individuals
 
     # loop through all of the starting values
     for (j in 1:ninit_vals) {
       # get number of evaluations
-      temp <- nlminb(init_vals[j,], ll_fs_SWSE_17, err_tol = err_tol,
-                     rt = rti, resp = respi, truth = truthi,
-                     # limits:   vu,   vl,   a,  t0, w,  sv
-                     lower = c(-Inf, -Inf, .05,   0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
-      res$Convergence[(i-1)*ni+0*ninit_vals+j] <- temp$convergence
-      res$Objective[(i-1)*ni+0*ninit_vals+j] <- temp$objective
-      res$Iterations[(i-1)*ni+0*ninit_vals+j] <- temp$iterations
-      res$FuncEvals[(i-1)*ni+0*ninit_vals+j] <- temp$evaluations[[1]]
+      temp <- nlminb(init_vals[j, ], ll_fb_SWSE_17,
+                     rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
+                     # limits:   vu,   vl,   a,      t0, w,  sv
+                     lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+      res[["Convergence"]][(i-1)*ni+0*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+0*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+0*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
-      temp <- nlminb(init_vals[j,], ll_fs_Gon_17, err_tol = err_tol,
-                     rt = rti, resp = respi, truth = truthi,
-                     # limits:   vu,   vl,   a,  t0, w,  sv
-                     lower = c(-Inf, -Inf, .05,   0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
-      res$Convergence[(i-1)*ni+1*ninit_vals+j] <- temp$convergence
-      res$Objective[(i-1)*ni+1*ninit_vals+j] <- temp$objective
-      res$Iterations[(i-1)*ni+1*ninit_vals+j] <- temp$iterations
-      res$FuncEvals[(i-1)*ni+1*ninit_vals+j] <- temp$evaluations[[1]]
+      temp <- nlminb(init_vals[j, ], ll_fb_Gon_17,
+                     rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
+                     # limits:   vu,   vl,   a,      t0, w,  sv
+                     lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+      res[["Convergence"]][(i-1)*ni+1*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+1*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+1*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+1*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
-      temp <- nlminb(init_vals[j,], ll_fs_Nav_17, err_tol = err_tol,
-                     rt = rti, resp = respi, truth = truthi,
-                     # limits:   vu,   vl,   a,  t0, w,  sv
-                     lower = c(-Inf, -Inf, .05,   0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
-      res$Convergence[(i-1)*ni+2*ninit_vals+j] <- temp$convergence
-      res$Objective[(i-1)*ni+2*ninit_vals+j] <- temp$objective
-      res$Iterations[(i-1)*ni+2*ninit_vals+j] <- temp$iterations
-      res$FuncEvals[(i-1)*ni+2*ninit_vals+j] <- temp$evaluations[[1]]
+      temp <- nlminb(init_vals[j, ], ll_fs_SWSE_17,
+                     rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
+                     # limits:   vu,   vl,   a,      t0, w,  sv
+                     lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+      res[["Convergence"]][(i-1)*ni+2*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+2*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+2*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+2*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
-      temp <- nlminb(init_vals[j,], ll_fb_Gon_17, err_tol = err_tol,
-                     rt = rti, resp = respi, truth = truthi,
-                     # limits:   vu,   vl,   a,  t0, w,  sv
-                     lower = c(-Inf, -Inf, .05,   0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
-      res$Convergence[(i-1)*ni+3*ninit_vals+j] <- temp$convergence
-      res$Objective[(i-1)*ni+3*ninit_vals+j] <- temp$objective
-      res$Iterations[(i-1)*ni+3*ninit_vals+j] <- temp$iterations
-      res$FuncEvals[(i-1)*ni+3*ninit_vals+j] <- temp$evaluations[[1]]
+      temp <- nlminb(init_vals[j, ], ll_fs_Gon_17,
+                     rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
+                     # limits:   vu,   vl,   a,      t0, w,  sv
+                     lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+      res[["Convergence"]][(i-1)*ni+3*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+3*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+3*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+3*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
-      temp <- nlminb(init_vals[j,], ll_fb_Nav_17, err_tol = err_tol,
-                     rt = rti, resp = respi, truth = truthi,
-                     # limits:   vu,   vl,   a,  t0, w,  sv
-                     lower = c(-Inf, -Inf, .05,   0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
-      res$Convergence[(i-1)*ni+4*ninit_vals+j] <- temp$convergence
-      res$Objective[(i-1)*ni+4*ninit_vals+j] <- temp$objective
-      res$Iterations[(i-1)*ni+4*ninit_vals+j] <- temp$iterations
-      res$FuncEvals[(i-1)*ni+4*ninit_vals+j] <- temp$evaluations[[1]]
+      temp <- nlminb(init_vals[j, ], ll_fl_Nav_09,
+                     rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
+                     # limits:   vu,   vl,   a,      t0, w,  sv
+                     lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+      res[["Convergence"]][(i-1)*ni+4*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+4*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+4*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+4*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
-      temp <- nlminb(init_vals[j,], ll_RTDists,
+      temp <- nlminb(init_vals[j, ], ll_RTDists,
                      rt = rti, resp = respi, truth = truthi,
-                     # limits:   vu,   vl,   a,  t0, w,  sv
-                     lower = c(-Inf, -Inf, .05,   0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
-      res$Convergence[(i-1)*ni+5*ninit_vals+j] <- temp$convergence
-      res$Objective[(i-1)*ni+5*ninit_vals+j] <- temp$objective
-      res$Iterations[(i-1)*ni+5*ninit_vals+j] <- temp$iterations
-      res$FuncEvals[(i-1)*ni+5*ninit_vals+j] <- temp$evaluations[[1]]
+                     # limits:   vu,   vl,   a,      t0, w,  sv
+                     lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+      res[["Convergence"]][(i-1)*ni+5*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+5*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+5*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+5*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
       # microbenchmark
       mbm <- microbenchmark(
-        fs_SWSE_17 = nlminb(init_vals[j,], ll_fs_SWSE_17, err_tol = err_tol,
+        fb_SWSE_17 = nlminb(init_vals[j,], ll_fb_SWSE_17, err_tol = err_tol,
                             rt = rti, resp = respi, truth = truthi,
-                            # limits:   vu,   vl,   a,  t0, w,  sv
-                            lower = c(-Inf, -Inf, .05,   0, 0,   0),
-                            upper = c( Inf,  Inf, Inf, Inf, 1, Inf)),
-        fs_Gon_17 = nlminb(init_vals[j,], ll_fs_Gon_17, err_tol = err_tol,
-                           rt = rti, resp = respi, truth = truthi,
-                           # limits:   vu,   vl,   a,  t0, w,  sv
-                           lower = c(-Inf, -Inf, .05,   0, 0,   0),
-                           upper = c( Inf,  Inf, Inf, Inf, 1, Inf)),
-        fs_Nav_17 = nlminb(init_vals[j,], ll_fs_Nav_17, err_tol = err_tol,
-                           rt = rti, resp = respi, truth = truthi,
-                           # limits:   vu,   vl,   a,  t0, w,  sv
-                           lower = c(-Inf, -Inf, .05,   0, 0,   0),
-                           upper = c( Inf,  Inf, Inf, Inf, 1, Inf)),
+                            # limits:   vu,   vl,   a,      t0, w,  sv
+                            lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                            upper = c( Inf,  Inf, Inf, min_rti, 1, Inf)),
         fb_Gon_17 = nlminb(init_vals[j,], ll_fb_Gon_17, err_tol = err_tol,
                            rt = rti, resp = respi, truth = truthi,
-                           # limits:   vu,   vl,   a,  t0, w,  sv
-                           lower = c(-Inf, -Inf, .05,   0, 0,   0),
-                           upper = c( Inf,  Inf, Inf, Inf, 1, Inf)),
-        fb_Nav_17 = nlminb(init_vals[j,], ll_fs_Nav_17, err_tol = err_tol,
+                           # limits:   vu,   vl,   a,      t0, w,  sv
+                           lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                           upper = c( Inf,  Inf, Inf, min_rti, 1, Inf)),
+        fs_SWSE_17 = nlminb(init_vals[j,], ll_fs_SWSE_17, err_tol = err_tol,
+                            rt = rti, resp = respi, truth = truthi,
+                            # limits:   vu,   vl,   a,      t0, w,  sv
+                            lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                            upper = c( Inf,  Inf, Inf, min_rti, 1, Inf)),
+        fs_Gon_17 = nlminb(init_vals[j,], ll_fs_Gon_17, err_tol = err_tol,
                            rt = rti, resp = respi, truth = truthi,
-                           # limits:   vu,   vl,   a,  t0, w,  sv
-                           lower = c(-Inf, -Inf, .05,   0, 0,   0),
-                           upper = c( Inf,  Inf, Inf, Inf, 1, Inf)),
+                           # limits:   vu,   vl,   a,      t0, w,  sv
+                           lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                           upper = c( Inf,  Inf, Inf, min_rti, 1, Inf)),
+        fl_Nav_09 = nlminb(init_vals[j,], ll_fl_Nav_09, err_tol = err_tol,
+                           rt = rti, resp = respi, truth = truthi,
+                           # limits:   vu,   vl,   a,      t0, w,  sv
+                           lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                           upper = c( Inf,  Inf, Inf, min_rti, 1, Inf)),
         rtdists = nlminb(init_vals[j,], ll_RTDists,
                          rt = rti, resp = respi, truth = truthi,
-                         # limits:   vu,   vl,   a,  t0, w,  sv
-                         lower = c(-Inf, -Inf, .05,   0, 0,   0),
-                         upper = c( Inf,  Inf, Inf, Inf, 1, Inf)),
+                         # limits:   vu,   vl,   a,      t0, w,  sv
+                         lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                         upper = c( Inf,  Inf, Inf, min_rti, 1, Inf)),
         times = times, unit = unit
       )
       for (k in 1:nalgos) {
@@ -982,7 +1011,8 @@ fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
 ```
 
 ```{r fit-run-save, eval=FALSE, include=FALSE}
-save(fit, file = "inst/extdata/bm_fit.Rds", compress = "bzip2")
+save(fit, compress = "xz", compression_level = 9,
+     file = "inst/extdata/bm_fit.Rds")
 ```
 
 
@@ -1002,17 +1032,18 @@ Before visualizing the results of the data fitting benchmark tests, we need to p
 ```{r fitting-prep, eval=TRUE}
 fit_prep <- function(fit) {
   nr <- nrow(fit)
-  fit$Obj_diff <- rep(0, nr)
+  fit[["Obj_diff"]] <- rep(0, nr)
 
-  ids <- unique(fit$ID)
+  ids <- unique(fit[["ID"]])
   nids <- length(ids)
-  algos <- unique(fit$Algorithm)
+  algos <- unique(fit[["Algorithm"]])
   nalgos <- length(algos)
 
-  ninit <- nrow(subset(fit, ID == ids[1] & Algorithm == algos[1]))
+  ninit <- nrow(fit[fit[["ID"]] == ids[1] & fit[["Algorithm"]] == algos[1], ])
   for (i in 1:nids) {
     for (j in 1:ninit) {
-      min_obj <- min(fit[seq((i-1)*ninit*nalgos+j, i*ninit*nalgos, by = ninit), 4])
+      min_obj <- min(fit[seq((i-1)*ninit*nalgos+j,
+                             i*ninit*nalgos, by = ninit), 4])
       for (k in 0:(nalgos-1)) {
         fit[(i-1)*(ninit*nalgos) + k*ninit + j, 8] <-
           fit[(i-1)*(ninit*nalgos) + k*ninit + j, 4] - min_obj
@@ -1021,15 +1052,15 @@ fit_prep <- function(fit) {
     }
   }
 
-  fit$BmTime <- fit$BmTime/1e6 # convert to milliseconds
+  fit[["BmTime"]] <- fit[["BmTime"]]/1e6 # convert to milliseconds
 
   eps <- 1e-4
 
-  fit[fit$Obj_diff < eps, "Obj_diff"] <- 0
-  fit[(fit$Obj_diff >= eps & fit$Obj_diff <= 2), "Obj_diff"] <- 1
-  fit[fit$Obj_diff > 2, "Obj_diff"] <- 3
+  fit[fit[["Obj_diff"]] < eps, "Obj_diff"] <- 0
+  fit[(fit[["Obj_diff"]] >= eps & fit[["Obj_diff"]] <= 2), "Obj_diff"] <- 1
+  fit[fit[["Obj_diff"]] > 2, "Obj_diff"] <- 3
 
-  fit$Convergence <- ifelse(fit$Convergence < 1, 0, 1)
+  fit[["Convergence"]] <- ifelse(fit[["Convergence"]] < 1, 0, 1)
 
   return(fit)
 }
@@ -1038,26 +1069,28 @@ fit_prep <- function(fit) {
 load(system.file("extdata", "bm_fit.Rds", package = "fddm", mustWork = TRUE))
 fit <- fit_prep(fit)
 
-Names <- c("fs_SWSE_17", "fs_Gon_17", "fs_Nav_17",
-           "fb_Gon_17", "fb_Nav_17", "rtdists")
-Color <- c("#9900cc", "#006699", "#336600",
-           "#c2a500", "#e68a00", "#990000")
+Names <- c("fb_SWSE_17", "fb_Gon_17", "fs_SWSE_17",
+           "fs_Gon_17", "fl_Nav_09", "rtdists")
+Color <- c("#e000b4", "#e68a00", "#9900cc",
+          "#c2a500", "#996633", "#990000")
 Shape <- c(21, 25)
 Sizes <- c(0, 3, 3)
 Stroke <- c(0, 1, 1)
 Fills <- c("#ffffff00", "#ffffff00", "#80808099")
 ```
 
-We will now present two plots to illustrate how the various methods perform when used in fitting Ratcliff's DDM to real-world data. The measures of interest for each method are the median `microbenchmark` timings and the number of function evaluations in the optimization process. Each one of the two plots will focus on one of these measures by showing a distribution of values of this measure in terms of violin plots and box plots. The distribution shown is the distribution across participants and starting values for each of the different methods of approximating the diffusion model; that is, for each of the `r length(unique(fit$ID))` participants, we present results based on the $11$ different starting values for each method (the starting values are constant across methods).
+We will now present two plots to illustrate how the various methods perform when used in fitting Ratcliff's DDM to real-world data. The measures of interest for each method are the median `microbenchmark` timings and the number of function evaluations in the optimization process. Each one of the two plots will focus on one of these measures by showing a distribution of values of this measure in terms of violin plots and box plots. The distribution shown is the distribution across participants and starting values for each of the different methods of approximating the diffusion model; that is, for each of the `r length(unique(fit[["ID"]]))` participants, we present results based on the 11 different starting values for each method (the starting values are constant across methods).
 
-To help explain problematic fits, the plots will show any data point that represents an optimization run for which the objective difference is greater than our predefined tolerance of $\epsilon = 0.0001$. More specifically, the objective difference is comparatively small (i.e., smaller than 2 on the log-likelihood scale)for the points shown with a completely transparent fill color; contrastingly, points shown with a gray fill color have a difference from the optimum of larger than 2 points on the log-likelihood scale (2 points on the log-likelihood scale corresponds to 1 point on the deviance scale). Data points with objective difference smaller than $\epsilon$ will not be shown on the plot. In addition, each of these visible data points will have a shape to indicate its convergence code: a round point for successful convergence, and  a triangle for failed convergence.
+To help explain problematic fits, the plots will show any data point that represents an optimization run for which the objective difference is greater than our predefined tolerance of $\epsilon = 0.0001$. More specifically, the objective difference is comparatively small (i.e., smaller than 2 on the log-likelihood scale)for the points shown with a completely transparent fill color; contrastingly, points shown with a gray fill color have a difference from the optimum of larger than 2 points on the log-likelihood scale (2 points on the log-likelihood scale corresponds to 1 point on the deviance scale). Data points with objective difference smaller than $\epsilon$ will not be shown on the plot. In addition, each of these visible data points will have a shape to indicate its convergence code: a round point for successful convergence, and a triangle for failed convergence.
 
-The first plot will show the densities of the `microbenchmark` timings for each method. Note that we have zoomed in and have removed one outlier time from the "fs_SWSE_17" method which takes around 330 milliseconds to finish and did not converge successfully on the maximum-likelihood estimate.
+The first plot will show the densities of the `microbenchmark` timings for each method.
 
 ```{r fit-mbm, eval=TRUE, fig.height=6}
 fit_mbm <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
                 measure.vars = "BmTime", value.name = "BmTime")[,-4]
-ma <- max(fit_mbm[fit_mbm$Algorithm != "fs_SWSE_17", "BmTime"]) # weird point
+
+mibm <- min(fit[fit[["Algorithm"]] != "rtdists", "BmTime"])
+mabm <- max(fit[fit[["Algorithm"]] != "rtdists", "BmTime"])
 
 ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
                     y = BmTime)) +
@@ -1089,11 +1122,12 @@ ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
                  size = factor(Obj_diff, levels = c(0, 1, 3)),
                  stroke = factor(Obj_diff, levels = c(0, 1, 3)),
                  fill = factor(Obj_diff, levels = c(0, 1, 3)))) +
-  coord_cartesian(ylim = c(0, ma)) +
+  coord_cartesian(ylim = c(mibm, mabm)) +
   labs(title = "Median microbenchmark times for data fitting",
-       subtitle = paste("Dashed lines represent mean benchmark times;",
-                        "Visible points have an objective difference greater than 1e-4",
-                        sep = "\n"),
+       subtitle = paste(
+         "Dashed lines represent mean benchmark times",
+         "Visible points have an objective difference greater than 1e-4",
+         sep = ";\n"),
        x = "Method", y = "Time (milliseconds)") +
   guides(shape = guide_legend(order = 1,
                               override.aes = list(size = Sizes[c(2, 3)])),
@@ -1120,13 +1154,16 @@ ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
         legend.text = element_text(size = 13))
 ```
 
-This plot is something of an exaggerated version of [the `microbenchmark` violin plot](#den-ana) from the previous section. Immediately we observe that fitting using the `rtdists` function is noticeably slower than fitting using the functions provided in `fddm`. Upon closer inspection, the means and medians of the benchmark times are shorter for the two small-time algorithms "fs_SWSE_17" and "fs_Gon_17" than for the other small-time algorithm or either of the algorithms that use both the small-time and large-time density functions. However, these two seemingly faster algorithms not only have much longer tails in their fitting times but also have more problematic data points in the optimization process. These longer tails and misfit points are likely due to the shortcomings of the approximation to the small-time density function, namely the poor support for large "effective response times" that we discussed in a [previous section](#den-ana) of this vignette. We also see that the two combined algorithms "fb_" both only show one case where the algorithm did not reach the optimum for one participant and starting value, but are still quite fast. One fitting run takes on average less than 50 milliseconds on the system used for running the tests.
+This plot vaguely resembles [the `microbenchmark` violin plot](#den-ana) from the previous section. Immediately we observe that fitting using the `rtdists` function is noticeably slower than fitting using the functions provided in `fddm`. The large-time approximation has many problematic data points, further emphasizing its shortcomings when handling smaller response times. Upon closer inspection, the means and medians of the benchmark times are slightly lower for the two small-time algorithms, "fs_SWSE_17" and "fs_Gon_17", than for either of the algorithms that combine both the small-time and large-time density functions, "fb_SWSE_17" and "fb_Gon_17". However, these two seemingly faster small-time algorithms have more problematic data points in the optimization process, likely due to the poor support for large "effective response times" that we discussed in a [previous section](#den-ana) of this vignette. We also see that the two combined-time algorithms both only show one case where the algorithm did not reach the optimum for one participant and starting value, but are still quite fast. If the data is known to contain only small response times, then using one of the small-time approximations should yield fast and unproblematic fitting results. However, if there may be some larger response times in the data, then the algorithms that combine the timescales should be used. One fitting run using these algorithms takes on average 25 milliseconds on the system used for running the tests.
 
 The second plot will show the distribution of the number of function evaluations in the optimization process for each method.
 
 ```{r fit-fev, eval=TRUE, fig.height=6}
 fit_fev <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
                 measure.vars = "FuncEvals", value.name = "FuncEvals")[,-4]
+
+mife <- min(fit[fit[["Algorithm"]] != "rtdists", "FuncEvals"])
+mafe <- max(fit[fit[["Algorithm"]] != "rtdists", "FuncEvals"])
 
 ggplot(fit_fev, aes(x = factor(Algorithm, levels = Names),
                     y = FuncEvals)) +
@@ -1158,11 +1195,12 @@ ggplot(fit_fev, aes(x = factor(Algorithm, levels = Names),
                  size = factor(Obj_diff, levels = c(0, 1, 3)),
                  stroke = factor(Obj_diff, levels = c(0, 1, 3)),
                  fill = factor(Obj_diff, levels = c(0, 1, 3)))) +
-  coord_cartesian(ylim = c(0, ma)) +
+  coord_cartesian(ylim = c(mife, mafe)) +
   labs(title = "Function evaluations for data fitting",
-       subtitle = paste("Dashed lines represent mean benchmark times;",
-                        "Visible points have an objective difference greater than 1e-4",
-                        sep = "\n"),
+       subtitle = paste(
+         "Dashed lines represent mean benchmark times",
+         "Visible points have an objective difference greater than 1e-4",
+         sep = ";\n"),
        x = "Method", y = "Number of function evaluations") +
   guides(shape = guide_legend(order = 1,
                               override.aes = list(size = Sizes[c(2, 3)])),
@@ -1189,9 +1227,9 @@ ggplot(fit_fev, aes(x = factor(Algorithm, levels = Names),
         legend.text = element_text(size = 13))
 ```
 
-Here we see that the algorithms that implement both the small-time and large-time density functions appear to be the most stable. They have relatively short tails, suggesting that the optimization routine has little trouble in finding the optimum parameter estimates. Moreover, these algorithms have few data points where the objective difference is high or the convergence code indicates unsuccessful convergence.
+Here we see that the algorithms that implement both the small-time and large-time density functions appear to be the most stable. They have relatively short tails, suggesting that the optimization routine has little trouble in finding the optimum parameter estimates. Moreover, these algorithms have few data points where the objective difference is high or the convergence code indicates unsuccessful convergence. In contrast, the large-time approximation suffers greatly from its inability to handle smaller response times. The `rtdists` function performs very well in this test, but it is still hindered by much longer benchmark times
 
-Overall the default method for `fddm`, "fb_Gon_17", appears to be the most generally stable method for fitting the DDM to real-world data. The optimization routine handles this algorithm consistently well in that there are no troublesome areas of the parameter space as there are when using the algorithms that only implement the small-time density function. The default method also outperforms its counterpart, "fb_Nav_17", because it is less reliant on the rather unstable approximation to the large-time density function. When comparing the algorithms for benchmark time, the two small-time algorithms have a faster mean and median than the default method, but their lengthy tails indicate potential stability issues in certain areas of the parameter space. On balance, the default method, "fb_Gon_17", provides the best compromise between speed and stability of the currently available algorithms for approximating the probability density functions of the diffusion decision model. For more information about the default method, see its section in the [Math Vignette](math.html#dens-bt-gon).
+In addition to being the fastest approximation available, the default method for `fddm`, "fb_SWSE_17", appears to be a generally stable method for fitting the DDM to real-world data. The optimization routine handles this algorithm consistently well in that there are very few troublesome areas of the parameter space compared to that of the algorithms which only implement the small-time density function. The default method also outperforms its counterparts, "fb_Gon_17" and "fb_Nav_17", because it is less reliant on the rather unstable approximation to the large-time density function. When comparing the algorithms for benchmark time, the two small-time algorithms have a faster mean and median than the default method, but their lengthy tails indicate potential stability issues in certain areas of the parameter space. On balance, the default method, "fb_SWSE_17", provides the best compromise between speed and stability of the currently available algorithms for approximating the probability density functions of the diffusion decision model. For more information about the default method, see its section in the [Math Vignette](math.html#dens-bt-swse).
 
 
 

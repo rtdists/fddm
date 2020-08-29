@@ -22,7 +22,7 @@ body {
   clear: both;
   margin: 0 0 10px 10px;
   padding: 4px;
-  width: 400px;
+  max-width: 400px;
   border: 1px solid #CCCCCC;
   border-radius: 5px;
 
@@ -39,14 +39,23 @@ body {
   #TOC ul {
     padding-left: 40px;
     margin-left: -1.5em;
-    margin-top: 5px;
-    margin-bottom: 5px;
+    margin-top: .25em;
+    margin-bottom: .25em;
   }
   #TOC ul ul {
     margin-left: -2em;
+    margin-top: 0px;
+    margin-bottom: 6px;
   }
   #TOC li {
-    line-height: 16px;
+    list-style: disk outside;
+    line-height: 1.4;
+    margin-bottom: 5px;
+  }
+  #TOC li li {
+    list-style: circle outside;
+    line-height: 1.2;
+    margin-bottom: 0px;
   }
 
 table {
@@ -79,7 +88,7 @@ p {
   margin: 0.5em 0;
 }
 
-p.method { 
+p.method {
   background-color: #fcfcfc;
   margin-left: 2em;
   margin-right: 2em;
@@ -131,10 +140,13 @@ ul {
   margin-top: 0;
 }
   ul li {
-    list-style: circle outside;
+    list-style: disk outside;
   }
   ul ul {
     margin-bottom: 0;
+  }
+  ul ul li {
+    list-style: circle outside;
   }
 
 pre, code {

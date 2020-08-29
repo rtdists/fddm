@@ -2,6 +2,7 @@
 
 #include "funcs.h"
 
+using Rcpp::warning;
 using Rcpp::stop;
 using std::vector;
 using std::string;
@@ -18,6 +19,7 @@ NumericVector cpp_dfddm(const NumericVector& rt,
                         const std::string& n_terms_small,
                         const std::string& summation_small,
                         const std::string& scale,
+                        const int& max_terms_large,
                         const NumericVector& eps)
 {
   // convert responses to false (0, lower) and true (1, upper)
@@ -100,7 +102,9 @@ NumericVector cpp_dfddm(const NumericVector& rt,
 
   // input checking
   if (Nrt < 1) {
-    stop("dfddm error: model input 'rt' is empty");
+    warning("dfddm warning: model input 'rt' is empty, empty vector returned\n");
+    NumericVector empty_out(0);
+    return empty_out;
   }
   if (Nres < 1) {
     stop("dfddm error: model input 'response' is empty");
@@ -160,7 +164,13 @@ NumericVector cpp_dfddm(const NumericVector& rt,
   if (log_prob) { // calculate log(probability)
     rt0 = -std::numeric_limits<double>::infinity();
     if (n_terms_small0 == 'S' || n_terms_small0 == 's') { // SWSE method
-      dens = &ff_log;
+      if (scale0 == 'b' || scale0 == 'B') { // both
+        dens = &fc_log;
+      } else if (scale0 == 's' || scale0 == 'S'){ // small
+        dens = &ff_log;
+      } else {
+        stop("dfddm error: invalid function parameter 'scale': %s", scale);
+      }
       numm = NULL;
       if (summation_small0 == '7') { // 2017
         summ = &small_sum_eps_17;
@@ -204,7 +214,13 @@ NumericVector cpp_dfddm(const NumericVector& rt,
   } else { // calculate regular probability
     rt0 = 0;
     if (n_terms_small0 == 'S' || n_terms_small0 == 's') { // SWSE method
-      dens = &ff;
+      if (scale0 == 'b' || scale0 == 'B') { // both
+        dens = &fc;
+      } else if (scale0 == 's' || scale0 == 'S'){ // small
+        dens = &ff;
+      } else {
+        stop("dfddm error: invalid function parameter 'scale': %s", scale);
+      }
       numm = NULL;
       if (summation_small0 == '7') { // 2017
         summ = &small_sum_eps_17;
@@ -260,10 +276,10 @@ NumericVector cpp_dfddm(const NumericVector& rt,
     }
     if (resp[i % Nres]) { // response is "upper" so use alternate parameters
       out[i] = dens(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw], sv[i % Nsv],
-                    eps[i % Neps], numm, summ);
+                    eps[i % Neps], max_terms_large, numm, summ);
     } else { // response is "lower" so use unchanged parameters
       out[i] = dens(t, a[i % Na], v[i % Nv], w[i % Nw], sv[i % Nsv],
-                    eps[i % Neps], numm, summ);
+                    eps[i % Neps], max_terms_large, numm, summ);
     }
   }
 

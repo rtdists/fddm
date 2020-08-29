@@ -12,7 +12,7 @@
 // Foster
 double ff(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& eps,
-          NummFunc numm, SummFunc summ)
+          const int& max_terms_large, NummFunc numm, SummFunc summ)
 {
   // note: numm is not used
   double mult;
@@ -28,7 +28,7 @@ double ff(const double& t, const double& a, const double& v,
 
 double ff_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& eps,
-              NummFunc numm, SummFunc summ)
+              const int& max_terms_large, NummFunc numm, SummFunc summ)
 {
   // note: numm is not used
   double mult;
@@ -46,7 +46,7 @@ double ff_log(const double& t, const double& a, const double& v,
 // Kesselmeier and Navarro
 double fs(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& eps,
-          NummFunc numm, SummFunc summ)
+          const int& max_terms_large, NummFunc numm, SummFunc summ)
 {
   double mult_s;
   int ks;
@@ -64,7 +64,7 @@ double fs(const double& t, const double& a, const double& v,
 
 double fs_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& eps,
-              NummFunc numm, SummFunc summ)
+              const int& max_terms_large, NummFunc numm, SummFunc summ)
 {
   double mult_s;
   int ks;
@@ -88,7 +88,7 @@ double fs_log(const double& t, const double& a, const double& v,
 
 double fl(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& eps,
-          NummFunc numm, SummFunc summ)
+          const int& max_terms_large, NummFunc numm, SummFunc summ)
 {
   // note: neither numm nor summ is used because there is only one option each
   double mult_l;
@@ -107,7 +107,7 @@ double fl(const double& t, const double& a, const double& v,
 
 double fl_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& eps,
-              NummFunc numm, SummFunc summ)
+              const int& max_terms_large, NummFunc numm, SummFunc summ)
 {
   // note: neither numm nor summ is used because there is only one option each
   double mult_l;
@@ -132,7 +132,7 @@ double fl_log(const double& t, const double& a, const double& v,
 
 double fb(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& eps,
-          NummFunc numm, SummFunc summ)
+          const int& max_terms_large, NummFunc numm, SummFunc summ)
 {
   double mult_s, mult_l;
   int ks, kl;
@@ -159,7 +159,7 @@ double fb(const double& t, const double& a, const double& v,
 
 double fb_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& eps,
-              NummFunc numm, SummFunc summ)
+              const int& max_terms_large, NummFunc numm, SummFunc summ)
 {
   double mult_s, mult_l;
   int ks, kl;
@@ -181,5 +181,64 @@ double fb_log(const double& t, const double& a, const double& v,
     return mult_s + log(summ(t, a, w, ks, 0.0));
   } else { // large-time is better
     return mult_l + log(large_sum_Nav(t, a, w, kl, 0.0));
+  }
+}
+
+double fc(const double& t, const double& a, const double& v,
+          const double& w, const double& sv, const double& eps,
+          const int& max_terms_large, NummFunc numm, SummFunc summ)
+{
+  // note: numm is not used
+  double mult;
+
+  // calculate large time multiplier to check number of terms
+  if (sv < SV_THRESH) { // no sv
+    mult = exp(-v * a * w - v*v * t / 2) / (a*a);
+  } else { // sv
+    mult = exp((sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
+               / (2 + 2 * sv*sv * t)) / (a*a * sqrt(1 + sv*sv * t));
+  }
+  int kl = kl_Nav(t / (a*a), w, eps / mult);
+
+  if (kl <= max_terms_large) { // use large time
+    return M_PI * mult * large_sum_Nav(t, a, w, kl, 0.0);
+  } else { // use small time
+    if (sv < SV_THRESH) { // no sv
+      mult = a * exp(-v * a * w - v * v * t / 2) / (t * SQRT_2PI * sqrt(t));
+    } else { // sv
+      mult = a * exp((sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
+            / (2 + 2 * sv*sv * t)) / (t * SQRT_2PI * sqrt(t + sv*sv * t*t));
+    }
+    return mult * summ(t, a, w, 0, eps / mult);
+  }
+}
+
+double fc_log(const double& t, const double& a, const double& v,
+              const double& w, const double& sv, const double& eps,
+              const int& max_terms_large, NummFunc numm, SummFunc summ)
+{
+  // note: numm is not used
+  double mult;
+
+  // calculate large time multiplier to check number of terms
+  if (sv < SV_THRESH) { // no sv
+    mult = - v * a * w - v * v * t / 2 - 2 * log(a);
+  } else { // sv
+    mult = (sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
+           / (2 + 2 * sv*sv * t) - 0.5 * log(1 + sv*sv * t) - 2 * log(a);
+  }
+  int kl = kl_Nav(t / (a*a), w, eps / exp(mult));
+
+  if (kl <= max_terms_large) { // use large time
+    return LOG_PI + mult + log(large_sum_Nav(t, a, w, kl, 0.0));
+  } else { // use small time
+    if (sv < SV_THRESH) { // no sv
+      mult = log(a) - LOG_2PI_2 - 1.5 * log(t) - v * a * w - v*v * t / 2;
+    } else { // sv
+      mult = log(a) - 1.5 * log(t) - LOG_2PI_2 - 0.5 * log(1 + sv*sv * t)
+            + (sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
+            / (2 + 2 * sv*sv * t);
+    }
+    return mult + log(summ(t, a, w, 0, eps / exp(mult)));
   }
 }

@@ -29,14 +29,14 @@ MathJax.Hub.Config({
 
 <div id="TOC">
 <ul>
-<li><a href="#background">Mathematical Background</a></li>
-<li><a href="#dens">The Density Functions</a>
-<ul>
-<li><a href="#dens-lt">Large Time</a></li>
-<li><a href="#dens-st">Small Time</a></li>
-<li><a href="#dens-bt">Combining Large and Small Time</a></li>
-</ul></li>
-<li><a href="#references">References</a></li>
+  <li><a href="#background">Mathematical Background</a></li>
+  <li><a href="#dens">The Density Functions</a>
+  <ul>
+    <li><a href="#dens-lt">Large-Time</a></li>
+    <li><a href="#dens-st">Small-Time</a></li>
+    <li><a href="#dens-bt">Combining Large-Time and Small-Time</a></li>
+  </ul></li>
+  <li><a href="#references">References</a></li>
 </ul>
 </div>
 
@@ -110,13 +110,13 @@ Immediately of note is that the infinite summation for each time scale is the sa
 
 The main issue of these families of density functions is that they all contain an infinite sum that must be approximated. Since there is no closed form analytical solution to this infinite sum, we instead calculate only a partial sum by truncating the sequence of terms after a certain point. We cannot actually calculate the true value of the density function, but we can mathematically prove that we can get arbitrarily close to the true value; the proof of this fact is provided in the paper accompanying the `fddm` package. The nature of this truncation has been the topic of many papers in the literature, but the underlying idea supporting all of the methods is the same: the user specifies an allowable error tolerance, and the algorithm calculates terms of the infinite sum until the result is within the allowed error tolerance of the true value.
 
-The methods in the literature pre-calculate the number of terms required for the infinite sum to converge within the allowed error tolerance, and this number of terms is referred to as $k_\ell$ and $k_s$ for the large-time and small-time infinite sums, respectively. @navarro2009fast include a method for calculating $k_b$, the number of required terms for the infinite sum when combining the density functions of the two time scales. In addition to these existing methods, we add a new combination of large-time and small-time density functions and also provide a novel method that does not perform this pre-calculation. Note that in each method that pre-calculates the number of terms, the response time $t$ is scaled inversely by $a^2$, that is $t' := \tfrac{t}{a^2}$. Also note that for the rest of this vignette, the ceiling function will be denoted by $\lceil \cdot \rceil$.
+The methods in the literature pre-calculate the number of terms required for the infinite sum to converge within the allowed error tolerance, and this number of terms is referred to as $k_\ell$ and $k_s$ for the large-time and small-time infinite sums, respectively. @navarro2009fast include a method for calculating $k_b$, the number of required terms for the infinite sum when combining the density functions of the two time scales. In addition to these existing methods, we add a novel method that does not perform this pre-calculation and also provide two new combinations of large-time and small-time density functions. Note that in each method that pre-calculates the number of terms, the response time $t$ is scaled inversely by $a^2$, that is $t' := \tfrac{t}{a^2}$. Also note that for the rest of this vignette, the ceiling function will be denoted by $\lceil \cdot \rceil$.
 
 
 
 
 <div class="indent2">
-## Large Time {#dens-lt}
+## Large-Time {#dens-lt}
 
 The large-time density functions, Equations <span class="math inline eqref">\(\eqref{eq:con-l}\)</span> and <span class="math inline eqref">\(\eqref{eq:var-l}\)</span>, have an infinite sum that runs for all of the positive integers. For a given error tolerance $\epsilon$, @navarro2009fast provide an expression for $k_\ell$, the number of terms required for the large-time infinite sum to be within $\epsilon$ of the true value of the density function. Thus the infinite sum becomes finite:
 \begin{equation} \label{eq:kl}
@@ -136,7 +136,7 @@ This method is often viewed as the most inefficient of the available options in 
 
 
 
-## Small Time {#dens-st}
+## Small-Time {#dens-st}
 
 The small-time approximations, Equations <span class="math inline eqref">\(\eqref{eq:con-s}\)</span> and <span class="math inline eqref">\(\eqref{eq:var-s}\)</span>, also have an infinite sum, but this one runs over all of the integers &ndash; from negative infinity to positive infinity. Given this infinite nature in both directions, it is impossible to rigorously define the number of terms required to achieve the $\epsilon$-accuracy because we don't know where to start counting the terms. To solve this issue, we rearrange the terms in the sum into the sequence $\left\{ b_0, b_{-1}, b_1, \dots, b_{-j}, b_j, b_{-(j+1)}, b_{j+1}, \dots \right\}$; this allows us not only to count the terms in a sensible manner but also to define $k_s$ as the index of the sequence where the truncation should occur. Then we can write the truncated version of the sum:
 \begin{equation} \label{eq:ks}
@@ -189,11 +189,11 @@ To use this method, set `n_terms_small = "SWSE"` and keep `scale = "small"` in t
 
 
 
-## Combining Large and Small Time {#dens-bt}
+## Combining Large-Time and Small-Time {#dens-bt}
 
 A sensible next approach to approximating the density of the DDM is to use some combination of the large-time and small-time density functions. As their names suggest, each density function approximation has a section of the parameter space where it outperforms the other one. Essentially these methods involve calculating the number of terms required for both the large-time and small-time density functions, then using whichever approximation requires fewer terms. The goal is to use each approximation where it is efficient and avoid the areas of the parameter space where it is horribly inefficient.
 
-To use this method of evaluating the PDF, set the optional parameter `scale = "both"` in the function call. These methods include similar options to the small-time approximations from the previous section, and thus it is possible to set the optional parameters in a similar fashion to above. The value of `summation_small` triggers the same effect as above since it only affects the small-time approximation to the PDF; we recommend ignoring this parameter so it assumes its default value of "2017" that evaluates slightly faster than its counterpart. The final parameter, `n_terms_small`, will be discussed in the following two subsections. Note that there is no "SWSE" option for `scale = "both"`, and setting `n_terms_small = "SWSE"` will override the `scale = "both"` setting. As there is only one option for the large time approximation, there are no optional parameters to set for this part of the combined time scale approximation.
+To use this method of evaluating the PDF, set the optional parameter `scale = "both"` in the function call. These methods include similar options to the small-time approximations from the previous section, and thus it is possible to set the optional parameters in a similar fashion to above. The value of `summation_small` triggers the same effect as above since it only affects the small-time approximation to the PDF; we recommend ignoring this parameter so it assumes its default value of "2017" that evaluates slightly faster than its counterpart. The final parameter, `n_terms_small`, will be discussed in the following three subsections. As there is only one option for the large-time approximation, there are no optional parameters to set for this part of the combined time scale approximation.
 
 
 
@@ -211,8 +211,6 @@ To use this method, set `n_terms_small = "Navarro"` and keep `scale = "both"` in
 </p>
 
 
-<a id="default-method"></a>
-
 ### Gondan Small & Navarro Large {#dens-bt-gon}
 
 This combination of methods has not been explored in the literature before, but it works very similarly to the combination above. The only difference is that we use the @gondan2014even approximation for the small-time instead of the one provided by @navarro2009fast. Since $k_s^\text{Gon} \leq k_s^\text{Nav}$, this method will give approximations at least as fast as the above combination.
@@ -223,6 +221,17 @@ This combination of methods has not been explored in the literature before, but 
 
 <p class="method">
 To use this method, set `n_terms_small = "Gondan"` and keep `scale = "both"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
+</p>
+
+
+<a id="default-method"></a>
+
+### Stop When Small Enough (SWSE) Small & Navarro Large {#dens-bt-swse}
+
+This method uses the novel SWSE approximation to the small-time density function in conjunction with the Navarro large-time approximation to achieve consistent performance across the parameter space. Since the SWSE approximation to the small-time density function does not explicitly calculate $k_s$, we only calculate $k_\ell^{\text{Nav}}$ and compare it to the new optional parameter `max_terms_large`. If $k_\ell^{\text{Nav}} \leq $ `max_terms_large`, then the Navarro large-time approximation is used. On the other hand, if $k_\ell^{\text{Nav}} > $ `max_terms_large`, then the SWSE small-time approximation is used. The user can set the optional parameter `max_terms_large` to any non-negative integer to alter the behavior of this method; the default value for this parameter is $2$. Again, the validity of this method is proven in the paper that accompanies the `fddm` package.
+
+<p class="method">
+Since this is the default method, all three of the optional parameters (`n_terms_small`, `scale`, and `summation_small`) can be ignored. For completeness, set `n_terms_small = "SWSE"` and keep `scale = "both"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance. This method uses a fourth optional parameter, `max_terms_large`, and we recommend ignoring this parameter so that it retains its default value.
 </p>
 </div>
 

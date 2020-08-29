@@ -1,4 +1,14 @@
+########## Do the following for every package update!!!
+devtools::document()
+devtools::build_vignettes()
+# knit README.Rmd
+devtools::install()
+# run R CMD check
 
+
+
+
+###
 library("devtools")
 devtools::load_all(recompile = TRUE)
 library("fddm")
