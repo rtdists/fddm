@@ -1079,13 +1079,16 @@ Fills <- c("#ffffff00", "#ffffff00", "#80808099")
 
 We will now present two plots to illustrate how the various methods perform when used in fitting Ratcliff's DDM to real-world data. The measures of interest for each method are the median `microbenchmark` timings and the number of function evaluations in the optimization process. Each one of the two plots will focus on one of these measures by showing a distribution of values of this measure in terms of violin plots and box plots. The distribution shown is the distribution across participants and starting values for each of the different methods of approximating the diffusion model; that is, for each of the `r length(unique(fit[["ID"]]))` participants, we present results based on the 11 different starting values for each method (the starting values are constant across methods).
 
-To help explain problematic fits, the plots will show any data point that represents an optimization run for which the objective difference is greater than our predefined tolerance of $\epsilon = 0.0001$. More specifically, the objective difference is comparatively small (i.e., smaller than 2 on the log-likelihood scale)for the points shown with a completely transparent fill color; contrastingly, points shown with a gray fill color have a difference from the optimum of larger than 2 points on the log-likelihood scale (2 points on the log-likelihood scale corresponds to 1 point on the deviance scale). Data points with objective difference smaller than $\epsilon$ will not be shown on the plot. In addition, each of these visible data points will have a shape to indicate its convergence code: a round point for successful convergence, and  a triangle for failed convergence.
+To help explain problematic fits, the plots will show any data point that represents an optimization run for which the objective difference is greater than our predefined tolerance of $\epsilon = 0.0001$. More specifically, the objective difference is comparatively small (i.e., smaller than 2 on the log-likelihood scale)for the points shown with a completely transparent fill color; contrastingly, points shown with a gray fill color have a difference from the optimum of larger than 2 points on the log-likelihood scale (2 points on the log-likelihood scale corresponds to 1 point on the deviance scale). Data points with objective difference smaller than $\epsilon$ will not be shown on the plot. In addition, each of these visible data points will have a shape to indicate its convergence code: a round point for successful convergence, and a triangle for failed convergence.
 
 The first plot will show the densities of the `microbenchmark` timings for each method.
 
 ```{r fit-mbm, eval=TRUE, fig.height=6}
 fit_mbm <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
                 measure.vars = "BmTime", value.name = "BmTime")[,-4]
+
+mibm <- min(fit[fit[["Algorithm"]] != "rtdists", "BmTime"])
+mabm <- max(fit[fit[["Algorithm"]] != "rtdists", "BmTime"])
 
 ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
                     y = BmTime)) +
@@ -1117,7 +1120,7 @@ ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
                  size = factor(Obj_diff, levels = c(0, 1, 3)),
                  stroke = factor(Obj_diff, levels = c(0, 1, 3)),
                  fill = factor(Obj_diff, levels = c(0, 1, 3)))) +
-  coord_cartesian(ylim = c(0, ma)) +
+  coord_cartesian(ylim = c(mibm, mabm)) +
   labs(title = "Median microbenchmark times for data fitting",
        subtitle = paste(
          "Dashed lines represent mean benchmark times",
@@ -1149,13 +1152,16 @@ ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
         legend.text = element_text(size = 13))
 ```
 
-This plot is something of an exaggerated version of [the `microbenchmark` violin plot](#den-ana) from the previous section. Immediately we observe that fitting using the `rtdists` function is noticeably slower than fitting using the functions provided in `fddm`. Upon closer inspection, the means and medians of the benchmark times are shorter for the two small-time algorithms "fs_SWSE_17" and "fs_Gon_17" than for the other small-time algorithm or either of the algorithms that use both the small-time and large-time density functions. However, these two seemingly faster algorithms not only have much longer tails in their fitting times but also have more problematic data points in the optimization process. These longer tails and misfit points are likely due to the shortcomings of the approximation to the small-time density function, namely the poor support for large "effective response times" that we discussed in a [previous section](#den-ana) of this vignette. We also see that the two combined algorithms "fb_" both only show one case where the algorithm did not reach the optimum for one participant and starting value, but are still quite fast. One fitting run takes on average less than 50 milliseconds on the system used for running the tests.
+This plot vaguely resembles [the `microbenchmark` violin plot](#den-ana) from the previous section. Immediately we observe that fitting using the `rtdists` function is noticeably slower than fitting using the functions provided in `fddm`. The large-time approximation has many problematic data points, further emphasizing its shortcomings when handling smaller response times. Upon closer inspection, the means and medians of the benchmark times are slightly lower for the two small-time algorithms, "fs_SWSE_17" and "fs_Gon_17", than for either of the algorithms that combine both the small-time and large-time density functions, "fb_SWSE_17" and "fb_Gon_17". However, these two seemingly faster small-time algorithms have more problematic data points in the optimization process, likely due to the poor support for large "effective response times" that we discussed in a [previous section](#den-ana) of this vignette. We also see that the two combined-time algorithms both only show one case where the algorithm did not reach the optimum for one participant and starting value, but are still quite fast. If the data is known to contain only small response times, then using one of the small-time approximations should yield fast and unproblematic fitting results. However, if there may be some larger response times in the data, then the algorithms that combine the timescales should be used. One fitting run using these algorithms takes on average 25 milliseconds on the system used for running the tests.
 
 The second plot will show the distribution of the number of function evaluations in the optimization process for each method.
 
 ```{r fit-fev, eval=TRUE, fig.height=6}
 fit_fev <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
                 measure.vars = "FuncEvals", value.name = "FuncEvals")[,-4]
+
+mife <- min(fit[fit[["Algorithm"]] != "rtdists", "FuncEvals"])
+mafe <- max(fit[fit[["Algorithm"]] != "rtdists", "FuncEvals"])
 
 ggplot(fit_fev, aes(x = factor(Algorithm, levels = Names),
                     y = FuncEvals)) +
@@ -1187,7 +1193,7 @@ ggplot(fit_fev, aes(x = factor(Algorithm, levels = Names),
                  size = factor(Obj_diff, levels = c(0, 1, 3)),
                  stroke = factor(Obj_diff, levels = c(0, 1, 3)),
                  fill = factor(Obj_diff, levels = c(0, 1, 3)))) +
-  coord_cartesian(ylim = c(0, ma)) +
+  coord_cartesian(ylim = c(mife, mafe)) +
   labs(title = "Function evaluations for data fitting",
        subtitle = paste(
          "Dashed lines represent mean benchmark times",
@@ -1219,9 +1225,9 @@ ggplot(fit_fev, aes(x = factor(Algorithm, levels = Names),
         legend.text = element_text(size = 13))
 ```
 
-Here we see that the algorithms that implement both the small-time and large-time density functions appear to be the most stable. They have relatively short tails, suggesting that the optimization routine has little trouble in finding the optimum parameter estimates. Moreover, these algorithms have few data points where the objective difference is high or the convergence code indicates unsuccessful convergence.
+Here we see that the algorithms that implement both the small-time and large-time density functions appear to be the most stable. They have relatively short tails, suggesting that the optimization routine has little trouble in finding the optimum parameter estimates. Moreover, these algorithms have few data points where the objective difference is high or the convergence code indicates unsuccessful convergence. In contrast, the large-time approximation suffers greatly from its inability to handle smaller response times. The `rtdists` function performs very well in this test, but it is still hindered by much longer benchmark times
 
-In addition to being the fastest approximation available, the default method for `fddm`, "fb_SWSE_17", appears to be the most generally stable method for fitting the DDM to real-world data. The optimization routine handles this algorithm consistently well in that there are no troublesome areas of the parameter space as there are when using the algorithms that only implement the small-time density function. The default method also outperforms its counterparts, "fb_Gon_17" and "fb_Nav_17", because it is less reliant on the rather unstable approximation to the large-time density function. When comparing the algorithms for benchmark time, the two small-time algorithms have a faster mean and median than the default method, but their lengthy tails indicate potential stability issues in certain areas of the parameter space. On balance, the default method, "fb_Gon_17", provides the best compromise between speed and stability of the currently available algorithms for approximating the probability density functions of the diffusion decision model. For more information about the default method, see its section in the [Math Vignette](math.html#dens-bt-gon).
+In addition to being the fastest approximation available, the default method for `fddm`, "fb_SWSE_17", appears to be a generally stable method for fitting the DDM to real-world data. The optimization routine handles this algorithm consistently well in that there are very few troublesome areas of the parameter space compared to that of the algorithms which only implement the small-time density function. The default method also outperforms its counterparts, "fb_Gon_17" and "fb_Nav_17", because it is less reliant on the rather unstable approximation to the large-time density function. When comparing the algorithms for benchmark time, the two small-time algorithms have a faster mean and median than the default method, but their lengthy tails indicate potential stability issues in certain areas of the parameter space. On balance, the default method, "fb_SWSE_17", provides the best compromise between speed and stability of the currently available algorithms for approximating the probability density functions of the diffusion decision model. For more information about the default method, see its section in the [Math Vignette](math.html#dens-bt-swse).
 
 
 
