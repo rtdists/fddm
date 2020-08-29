@@ -1005,7 +1005,7 @@ Having set up the fitting functions in the above chunks of code, we could pass t
 
 ```{r fit-run, eval=FALSE}
 data(med_dec, package = "fddm")
-med_dec <- med_dec[which(med_dec$rt >= 0), ]
+med_dec <- med_dec[which(med_dec[["rt"]] >= 0), ]
 fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
               truth_idx = 5, response_upper = "blast", err_tol = 1e-6,
               times = 6, unit = "ns")

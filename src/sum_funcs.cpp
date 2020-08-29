@@ -17,37 +17,56 @@ double small_sum_eps_17(const double& t, const double& a, const double& w,
   // note: ks is not used
   double gamma = -a*a / (2 * t);
   double sum = w * exp(gamma * w*w); // start at j=0 term
-  double minterms = sqrt(t) / a; // minimum number of terms
   double rj = 1 - w;
   double term = rj * exp(gamma * rj*rj);
+  int minterms = sqrt(t) / a; // minimum number of terms
   int j = 0;
-  int odd = 1;
-  while (j <= minterms) { // capture increasing terms
+  if ((minterms % 2) == 1) { // minterms is odd (and at least 1)
     j++;
-    if (odd) { // j is odd
-      rj = j + 1 - w;
-      term = rj * exp(gamma * rj*rj);
-      sum -= term;
-      odd--;
-    } else { // j is even
+    rj = j + 1 - w;
+    term = rj * exp(gamma * rj*rj);
+    sum -= term;
+    while (j < minterms) { // j is currently odd
+      j++;
       rj = j + w;
       term = rj * exp(gamma * rj*rj);
       sum += term;
-      odd++;
+      j++;
+      rj = j + 1 - w;
+      term = rj * exp(gamma * rj*rj);
+      sum -= term;
     }
-  }
-  while (fabs(term) > eps) {
-    j++;
-    if (odd) { // j is odd
-      rj = j + 1 - w;
-      term = rj * exp(gamma * rj*rj);
-      sum -= term;
-      odd--;
-    } else { // j is even
+    while (term > eps) { // j is currently odd
+      j++;
       rj = j + w;
       term = rj * exp(gamma * rj*rj);
       sum += term;
-      odd++;
+      if (term <= eps) break;
+      j++;
+      rj = j + 1 - w;
+      term = rj * exp(gamma * rj*rj);
+      sum -= term;
+    }
+  } else { // minterms is even (and at least 0)
+    while (j < minterms) { // j is currently even
+      j++;
+      rj = j + 1 - w;
+      sum -= rj * exp(gamma * rj*rj);
+      j++;
+      rj = j + w;
+      term = rj * exp(gamma * rj*rj);
+      sum += term;
+    }
+    while (term > eps) { // j is currently even
+      j++;
+      rj = j + 1 - w;
+      term = rj * exp(gamma * rj*rj);
+      sum -= term;
+      if (term <= eps) break;
+      j++;
+      rj = j + w;
+      term = rj * exp(gamma * rj*rj);
+      sum += term;
     }
   }
   return (sum > 0) ? sum : 0; // if result is negative, return 0 instead
