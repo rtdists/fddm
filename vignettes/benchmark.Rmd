@@ -408,8 +408,8 @@ ggplot(mbm_vec, aes(x = factor(FuncName, levels = Names_vec), y = time,
                     color = factor(FuncName, levels = Names_vec),
                     fill = factor(FuncName, levels = Names_vec))) +
        geom_violin(trim = TRUE, alpha = 0.5) +
-       scale_color_manual(values = Color_vec) +
-       scale_fill_manual(values = Color_vec) +
+       scale_color_manual(values = Color_vec, guide = FALSE) +
+       scale_fill_manual(values = Color_vec, guide = FALSE) +
        geom_boxplot(width = 0.15, fill = "white", alpha = 0.5) +
        stat_summary(fun = mean, geom = "errorbar",
                     aes(ymax = ..y.., ymin = ..y..),
