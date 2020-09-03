@@ -2,7 +2,6 @@
 
 #include "funcs.h"
 
-using Rcpp::warning;
 using Rcpp::stop;
 using std::vector;
 using std::string;
@@ -102,7 +101,6 @@ NumericVector cpp_dfddm(const NumericVector& rt,
 
   // input checking
   if (Nrt < 1) {
-    warning("dfddm warning: model input 'rt' is empty, empty vector returned\n");
     NumericVector empty_out(0);
     return empty_out;
   }
