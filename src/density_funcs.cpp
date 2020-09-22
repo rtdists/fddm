@@ -59,7 +59,7 @@ double fs(const double& t, const double& a, const double& v,
   }
   ks = numm(t / (a*a), w, eps * a*a / mult_s);
   mult_s *= a / (t * SQRT_2PI * sqrt(t));
-  return mult_s * summ(t, a, w, ks, 0.0);
+  return mult_s * summ(t, a, w, ks, eps);
 }
 
 double fs_log(const double& t, const double& a, const double& v,
@@ -77,7 +77,7 @@ double fs_log(const double& t, const double& a, const double& v,
   }
   ks = numm(t / (a*a), w, eps * a*a / exp(mult_s));
   mult_s += log(a) - LOG_2PI_2 - 1.5 * log(t);
-  return mult_s + log(summ(t, a, w, ks, 0.0));
+  return mult_s + log(summ(t, a, w, ks, eps));
 }
 
 
@@ -102,7 +102,7 @@ double fl(const double& t, const double& a, const double& v,
   }
   kl = kl_Nav(t / (a*a), w, eps / mult_l);
   mult_l *= M_PI;
-  return mult_l * large_sum_Nav(t, a, w, kl, 0.0);
+  return mult_l * large_sum_Nav(t, a, w, kl, eps);
 }
 
 double fl_log(const double& t, const double& a, const double& v,
@@ -121,7 +121,7 @@ double fl_log(const double& t, const double& a, const double& v,
   }
   kl = kl_Nav(t / (a*a), w, eps / exp(mult_l));
   mult_l += LOG_PI;
-  return mult_l + log(large_sum_Nav(t, a, w, kl, 0.0));
+  return mult_l + log(large_sum_Nav(t, a, w, kl, eps));
 }
 
 
@@ -151,9 +151,9 @@ double fb(const double& t, const double& a, const double& v,
   kl = kl_Nav(t / (a*a), w, eps / mult_l);
   mult_l *= M_PI;
   if (ks < kl) { // small-time is better
-    return mult_s * summ(t, a, w, ks, 0.0);
+    return mult_s * summ(t, a, w, ks, eps);
   } else { // large-time is better
-    return mult_l * large_sum_Nav(t, a, w, kl, 0.0);
+    return mult_l * large_sum_Nav(t, a, w, kl, eps);
   }
 }
 
@@ -178,9 +178,9 @@ double fb_log(const double& t, const double& a, const double& v,
   mult_s += log(a) - LOG_2PI_2 - 1.5 * log(t);
   mult_l += LOG_PI;
   if (ks < kl) { // small-time is better
-    return mult_s + log(summ(t, a, w, ks, 0.0));
+    return mult_s + log(summ(t, a, w, ks, eps));
   } else { // large-time is better
-    return mult_l + log(large_sum_Nav(t, a, w, kl, 0.0));
+    return mult_l + log(large_sum_Nav(t, a, w, kl, eps));
   }
 }
 
@@ -201,7 +201,7 @@ double fc(const double& t, const double& a, const double& v,
   int kl = kl_Nav(t / (a*a), w, eps / mult);
 
   if (kl <= max_terms_large) { // use large time
-    return M_PI * mult * large_sum_Nav(t, a, w, kl, 0.0);
+    return M_PI * mult * large_sum_Nav(t, a, w, kl, eps);
   } else { // use small time
     if (sv < SV_THRESH) { // no sv
       mult = a * exp(-v * a * w - v * v * t / 2) / (t * SQRT_2PI * sqrt(t));
@@ -230,7 +230,7 @@ double fc_log(const double& t, const double& a, const double& v,
   int kl = kl_Nav(t / (a*a), w, eps / exp(mult));
 
   if (kl <= max_terms_large) { // use large time
-    return LOG_PI + mult + log(large_sum_Nav(t, a, w, kl, 0.0));
+    return LOG_PI + mult + log(large_sum_Nav(t, a, w, kl, eps));
   } else { // use small time
     if (sv < SV_THRESH) { // no sv
       mult = log(a) - LOG_2PI_2 - 1.5 * log(t) - v * a * w - v*v * t / 2;
