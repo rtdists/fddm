@@ -437,7 +437,7 @@ ks_9 <- ks(t/(a*a), w, eps/sv0_9) # = 5; but the summation needs 5 terms
 cat("the summation will only calculate", ks_0, "terms, but it needs", ks_9, "terms.")
 ```
 
-2) When calculating the log of the density, it is better to use the built-in log option (`log = TRUE`). For very small densities, simply calculating the density can cause rounding issues that result in a density of zero (thus the log of the density becomes `-Inf`). Using the built-in log option avoids some of these rounding issues by exploiting the algebraic properties of the logarithm. Also note that sometimes the densities are just too small (i.e. extremely negative) and the logarithm function returns a value of `-Inf`, so we discard the samples whose density is very small (less than $eps^2 = 1 \times 10^{-12}$).
+2) When calculating the log of the density, it is better to use the built-in log option (`log = TRUE`). For very small densities, simply calculating the density can cause rounding issues that result in a density of zero (thus the log of the density becomes `-Inf`). Using the built-in log option avoids some of these rounding issues by exploiting the algebraic properties of the logarithm. Also note that sometimes the densities are just too small (i.e. extremely negative) and the logarithm function returns a value of `-Inf`, so we discard the samples whose density is very small (less than $\epsilon^2 = 1 \times 10^{-12}$).
 
 
 
@@ -465,7 +465,7 @@ library("rtdists")
 
 ### Log-Likelihood Functions {#fit-gen-llf}
 
-This code chunk defines the log-likelihood functions used in the optimization algorithm. The log-likelihood functions are fairly straightforward and split the responses and associated response times by the true item status (i.e., the correct response) to enable fitting distinct drift rates ($v_\ell$ for the items in which the correct response is the lower boundary and $v_u$ for the items for which the correct response is the upper boundary). In addition, the log-likelihood functions heavily penalize any combination of parameters that returns a log-density of $-\infty$ (equivalent to a regular density of $0$).
+This code chunk defines the log-likelihood functions used in the optimization algorithm. The log-likelihood functions are fairly straightforward and split the responses and associated response times by the true item status (i.e., the correct response) to enable fitting distinct drift rates ($v_\ell$ for the items for which the correct response is the lower boundary and $v_u$ for the items for which the correct response is the upper boundary). In addition, the log-likelihood functions heavily penalize any combination of parameters that returns a log-density of $-\infty$ (equivalent to a regular density of $0$).
 
 ```{r loglik-fun, eval=TRUE}
 ll_fb_SWSE_17 <- function(pars, rt, resp, truth, err_tol) {
@@ -568,8 +568,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
   ids <- unique(df[["id"]])
   nids <- max(length(ids), 1) # if inds is null, there is only one individual
 
-  init_vals <- data.frame(v1 = c( 0,  10, -.5,  0,  0,  0,  0,  0,  0,   0,  0),
-                          v0 = c( 0, -10,  .5,  0,  0,  0,  0,  0,  0,   0,  0),
+  init_vals <- data.frame(vu = c( 0,  10, -.5,  0,  0,  0,  0,  0,  0,   0,  0),
+                          vl = c( 0, -10,  .5,  0,  0,  0,  0,  0,  0,   0,  0),
                           a  = c( 1,   1,   1, .5,  5,  1,  1,  1,  1,   1,  1),
                           t0 = c( 0,   0,   0,  0,  0,  0,  0,  0,  0,   0,  0),
                           w  = c(.5,  .5,  .5, .5, .5, .5, .5, .2, .8,  .5, .5),
@@ -680,7 +680,7 @@ save(fit, compress = "xz", compression_level = 9,
 
 
 ## Testing the Fitted Parameters {#fit-test}
-Now we test the consistency of the fitted parameters using the various density function approximations. As [discussed above](#fit-gen), we use an allowable error tolerance of $0.0001$ to account for the slight differences in the output of the different density approximations. First, we define a function to determine the differences in the objective value of the log-likelihood function and the parameter estimates. For each set of initial parameter values, there is one objective value corresponding to each algorithm; we take the minimum of these objective values and use the associated parameter estimates as the best estimates. Then we use this set of best estimates to compare against each set parameter estimates that use the same initial parameter values. At the end of this prep function, we subset the fitted data to remove those fits that used the Navarro small-time approximation with an initial value of $a \leq .75$ (see [Known Error 5](#fit-ke) below for more details). The following code chunk defines this function, which will be used next.
+Now we test the consistency of the fitted parameters using the various density function approximations. As [discussed above](#fit-gen), we use an allowable error tolerance of $0.0001$ to account for the slight differences in the output of the different density approximations. First, we define a function to determine the differences in the objective value of the log-likelihood function and the parameter estimates. For each set of initial parameter values, there is one objective value corresponding to each algorithm; we take the minimum of these objective values and use the associated parameter estimates as the best estimates. Then we use this set of best estimates to compare against each set parameter estimates that use the same initial parameter values. The following code chunk defines this function, which will be used next.
 
 ```{r fitting-prep, eval=TRUE}
 fit_prep <- function(fit) {
@@ -745,7 +745,7 @@ out[, -c(1:2)] <- zapsmall(out[, -c(1:2)])
 out
 ```
 
-We can see that each method occasionally has issues with data fitting, but these issues are easily circumvented by using an assortment of initial parameter values. The default method of `dfddm` is "fb_SWSE_17", and this combines the large-time approximation of Navarro with the novel small-time approximation introduced in this package to provide a quite stable algorithm. Using this method, there are two instances of fits whose differences from the best fits are greater than our given error tolerance. However, these issues can taken care of by running a set of fits with properly randomized initial parameter values and subsequently selecting the best fit from this set. These results suggest that the most stable method is the default option for `dfddm` (`scale = "both", n_terms_small = "SWSE"`).
+We can see that each method occasionally has issues with data fitting, but these issues are easily circumvented by using an assortment of initial parameter values. The default method of `dfddm` is "fb_SWSE_17", and this combines the large-time approximation of Navarro with the novel small-time approximation introduced in this package to provide a quite stable algorithm. Using this method, there is one instance of a fit whose difference from the best fit is greater than our given error tolerance. However, this issue can taken care of by running a set of fits with properly randomized initial parameter values and subsequently selecting the best fit from this set. These results suggest that the most stable method is the default option for `dfddm` (`scale = "both", n_terms_small = "SWSE"`).
 
 
 
