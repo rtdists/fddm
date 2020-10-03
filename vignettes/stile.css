@@ -195,6 +195,7 @@ img {
 
 h1 {
   margin-top: 0;
+  padding-top: 15px;
   font-size: 175%;
   line-height: 40px;
 }
