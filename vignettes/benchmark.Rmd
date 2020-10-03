@@ -326,10 +326,10 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
 ```
 
 <a id="r-loops"></a>
-Control loops in `R` have a lot of overhead and are comparatively slow compared to loops in `C++`; thus, we will not run [`rt_benchmark_vec()`](#bm-funcs) in this vignette, and we will load pre-run benchmark data instead. The pre-run data was collected using the same functions and parameter space as defined in this vignette. Since this benchmark function contains one fewer loop because of the vectorized response times, we increase the number of samples that the 'microbenchmark' function considers when timing the various algorithms. To show comparisons across the algorithms with respect to the input response time, we will again load pre-run benchmark data obtain through using [`rt_benchmark_ind()`](#bm-funcs) as this takes even longer to evaluate than the benchmark with vectorized response times. The following code chunk defines the parameter space to be explored throughout the benchmark testing and runs the vectorized benchmark function defined in the previous code chunk.
+Control loops in `R` have a lot of overhead and are comparatively slow compared to loops in `C++`; thus, we will not run [`rt_benchmark_vec()`](#bm-funcs) in this vignette, and we will load pre-run benchmark data instead. The pre-run data was collected using the same functions and parameter space as defined in this vignette. Since this benchmark function contains one fewer loop because of the vectorized response times, we increase the number of samples that the 'microbenchmark' function considers when timing the various algorithms. To show comparisons across the algorithms with respect to the input response time, we will again load pre-run benchmark data obtain through using [`rt_benchmark_ind()`](#bm-funcs) as this takes even longer to evaluate than the benchmark with vectorized response times. The following code chunk defines the parameter space to be explored throughout the benchmark testing and shows an example of how to run the benchmark functions defined in the previous code chunk.
 
 <a id="par-space"></a>
-```{r bm-run, eval=TRUE}
+```{r bm-run, eval=FALSE}
 # Define parameter space
 RT <- c(0.001, 0.1, 1, 2, 3, 4, 5, 10, 30)
 A <- c(0.25, 0.5, 1, 2.5, 5)
@@ -340,13 +340,12 @@ SV <- c(0, 0.5, 1, 1.5)
 err_tol <- 1e-6 # this is the setting from rtdists
 
 # Run benchmark tests
-# bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
-#                            W = W, SV = SV, err_tol = err_tol,
-#                            times = 1000, unit = "ns")
-# results of rt_benchmark_ind are pre-loaded and not run here:
-# bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
-#                            W = W, SV = SV, err_tol = err_tol,
-#                            times = 100, unit = "ns")
+bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
+                           W = W, SV = SV, err_tol = err_tol,
+                           times = 1000, unit = "ns")
+bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
+                           W = W, SV = SV, err_tol = err_tol,
+                           times = 100, unit = "ns")
 ```
 
 ```{r bm-run-and-save, eval=FALSE, include=FALSE}
