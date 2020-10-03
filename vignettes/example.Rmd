@@ -83,7 +83,7 @@ As we are using the optimization function `nlminb`, the first argument to our lo
 Upon being called, the log-likelihood function first separates the input response times and responses by their truthful classification to yield two new response time vectors and two new response vectors. The response times and responses are then input into separate density functions using a separate $v$ parameter, $v_u$ or $v_\ell$. These separate densities are then combined, and the log-likelihood function heavily penalizes any combination of parameters that returns a log-density of $-\infty$ (equivalent to a regular density of $0$). Lastly, the actual log-likelihood is returned as the negative of the sum of all of the log-densities.
 
 ```{r log-likelihood, eval=TRUE}
-ll_fun <- function(pars, rt, resp, truth) {
+ll_fun <- function(pars, rt, resp, truth, err_tol) {
   v <- numeric(length(rt))
 
   # the truth is "upper" so use vu
@@ -91,8 +91,8 @@ ll_fun <- function(pars, rt, resp, truth) {
   # the truth is "lower" so use vl
   v[truth == "lower"] <- pars[[2]]
 
-  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
-                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE)
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v, t0 = pars[[4]],
+                w = pars[[5]], sv = pars[[6]], log = TRUE, err_tol = 1e-6)
 
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }

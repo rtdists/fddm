@@ -40,7 +40,6 @@ double ff_log(const double& t, const double& a, const double& v,
     + (sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
     / (2 + 2 * sv*sv * t);
   }
-  // return mult + log(sumf(t, a, w, 0, eps / exp(mult)));
   double temp = sumf(t, a, w, 0, eps / exp(mult));
   if (temp > 0) {
     return mult + log(temp);
@@ -195,12 +194,6 @@ double fc_log(const double& t, const double& a, const double& v,
       / (2 + 2 * sv*sv * t);
     }
     return mult + log(sumf(t, a, w, 0, eps / exp(mult)));
-    // double temp = sumf(t, a, w, 0, eps / exp(mult));
-    // if (temp > 0) {
-    //   return mult + log(temp);
-    // } else{ // protect against -Inf
-    //   return log(eps) - LOG_100;
-    // }
   }
 }
 
