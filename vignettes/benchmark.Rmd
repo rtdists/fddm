@@ -366,12 +366,12 @@ bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
 save(bm_vec, compress = "xz", compression_level = 9,
      file = "inst/extdata/bm_vec.Rds")
 # load(system.file("extdata", "bm_vec.Rds", package = "fddm", mustWork = TRUE))
-# results of rt_benchmark_ind are pre-loaded nad not run here:
 bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                            W = W, SV = SV, err_tol = err_tol,
                            times = 100, unit = "ns")
 save(bm_ind, compress = "xz", compression_level = 9,
      file = "inst/extdata/bm_ind.Rds")
+# load(system.file("extdata", "bm_ind.Rds", package = "fddm", mustWork = TRUE))
 ```
 
 
@@ -660,131 +660,67 @@ This code chunk defines the log-likelihood functions used in the optimization al
 
 ```{r fit-loglik-fun, eval=TRUE}
 ll_fb_SWSE_17 <- function(pars, rt, resp, truth, err_tol) {
-  rtu <- rt[truth == "upper"]
-  rtl <- rt[truth == "lower"]
-  respu <- resp[truth == "upper"]
-  respl <- resp[truth == "lower"]
-
-  # the truth is "upper" so use vu
-  densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "SWSE", summation_small = "2017",
-                 scale = "both", err_tol = err_tol)
-  # the truth is "lower" so use vl
-  densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "SWSE", summation_small = "2017",
-                 scale = "both", err_tol = err_tol)
-
-  densities <- c(densu, densl)
-  if (any(!is.finite(densities))) return(1e6)
-  return(-sum(densities))
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                n_terms_small = "SWSE", summation_small = "2017",
+                scale = "both", err_tol = err_tol)
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
 ll_fb_Gon_17 <- function(pars, rt, resp, truth, err_tol) {
-  rtu <- rt[truth == "upper"]
-  rtl <- rt[truth == "lower"]
-  respu <- resp[truth == "upper"]
-  respl <- resp[truth == "lower"]
-
-  # the truth is "upper" so use vu
-  densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Gondan", summation_small = "2017",
-                 scale = "both", err_tol = err_tol)
-  # the truth is "lower" so use vl
-  densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Gondan", summation_small = "2017",
-                 scale = "both", err_tol = err_tol)
-
-  densities <- c(densu, densl)
-  if (any(!is.finite(densities))) return(1e6)
-  return(-sum(densities))
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                n_terms_small = "Gondan", summation_small = "2017",
+                scale = "both", err_tol = err_tol)
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
 ll_fs_SWSE_17 <- function(pars, rt, resp, truth, err_tol) {
-  rtu <- rt[truth == "upper"]
-  rtl <- rt[truth == "lower"]
-  respu <- resp[truth == "upper"]
-  respl <- resp[truth == "lower"]
-
-  # the truth is "upper" so use vu
-  densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "SWSE", summation_small = "2017",
-                 scale = "small", err_tol = err_tol)
-  # the truth is "lower" so use vl
-  densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "SWSE", summation_small = "2017",
-                 scale = "small", err_tol = err_tol)
-
-  densities <- c(densu, densl)
-  if (any(!is.finite(densities))) return(1e6)
-  return(-sum(densities))
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                n_terms_small = "SWSE", summation_small = "2017",
+                scale = "small", err_tol = err_tol)
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
 ll_fs_Gon_17 <- function(pars, rt, resp, truth, err_tol) {
-  rtu <- rt[truth == "upper"]
-  rtl <- rt[truth == "lower"]
-  respu <- resp[truth == "upper"]
-  respl <- resp[truth == "lower"]
-
-  # the truth is "upper" so use vu
-  densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Gondan", summation_small = "2017",
-                 scale = "small", err_tol = err_tol)
-  # the truth is "lower" so use vl
-  densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Gondan", summation_small = "2017",
-                 scale = "small", err_tol = err_tol)
-
-  densities <- c(densu, densl)
-  if (any(!is.finite(densities))) return(1e6)
-  return(-sum(densities))
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                n_terms_small = "Gondan", summation_small = "2017",
+                scale = "small", err_tol = err_tol)
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
 ll_fl_Nav_09 <- function(pars, rt, resp, truth, err_tol) {
-  rtu <- rt[truth == "upper"]
-  rtl <- rt[truth == "lower"]
-  respu <- resp[truth == "upper"]
-  respl <- resp[truth == "lower"]
-
-  # the truth is "upper" so use vu
-  densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Navarro", summation_small = "",
-                 scale = "large", err_tol = err_tol)
-  # the truth is "lower" so use vl
-  densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Navarro", summation_small = "",
-                 scale = "large", err_tol = err_tol)
-
-  densities <- c(densu, densl)
-  if (any(!is.finite(densities))) return(1e6)
-  return(-sum(densities))
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                n_terms_small = "Navarro", summation_small = "",
+                scale = "large", err_tol = err_tol)
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
 ll_RTDists <- function(pars, rt, resp, truth) {
-  rtu <- rt[truth == "upper"]
-  rtl <- rt[truth == "lower"]
-  respu <- resp[truth == "upper"]
-  respl <- resp[truth == "lower"]
-
-  # the truth is "upper" so use vu
-  densu <- ddiffusion(rtu, respu, a = pars[[3]], v = pars[[1]],
-                      z = pars[[5]]*pars[[3]], t0 = pars[[4]], sv = pars[[6]])
-  # the truth is "lower" so use vl
-  densl <- ddiffusion(rtl, respl, a = pars[[3]], v = pars[[2]],
-                      z = pars[[5]]*pars[[3]], t0 = pars[[4]], sv = pars[[6]])
-
-  densities <- c(densu, densl)
-  if (any(densities <= 0)) return(1e6)
-  return(-sum(log(densities)))
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- log(ddiffusion(rt, resp, a = pars[[3]], v = v, t0 = pars[[4]],
+                         z = pars[[5]]*pars[[3]], sv = pars[[6]]))
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 ```
 
@@ -868,6 +804,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
   colnames(res) <- cnames
 
   # label the result dataframe
+  res[["ID"]] <- rep(ids, each = ni) # label individuals
   res[["Algorithm"]] <- rep(algo_names, each = ninit_vals) # label algorithms
 
   # Loop through each individual
@@ -884,9 +821,6 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
     t0_me <- 0.50*min_rti
     t0_hi <- 0.99*min_rti
     init_vals[["t0"]] <- c(rep(t0_me, 5), t0_lo, t0_hi, rep(t0_me, 4))
-
-    # label the result dataframe
-    res[["ID"]][((i-1)*ni+1):(i*ni)] <- ids[i] # label individuals
 
     # loop through all of the starting values
     for (j in 1:ninit_vals) {
@@ -1008,7 +942,7 @@ data(med_dec, package = "fddm")
 med_dec <- med_dec[which(med_dec[["rt"]] >= 0), ]
 fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
               truth_idx = 5, response_upper = "blast", err_tol = 1e-6,
-              times = 6, unit = "ns")
+              times = 25, unit = "ns")
 ```
 
 ```{r fit-run-save, eval=FALSE, include=FALSE}
@@ -1031,7 +965,7 @@ library("ggplot2")
 Before visualizing the results of the data fitting benchmark tests, we need to provide some context for each set of parameter estimates since each run of the optimization does not necessarily converge. To add this context, we first find the minimum value of the objective function (i.e., the log-likelihood function) attained for each set of initial parameter values for each individual. Then we calculate how the objective value of each optimization run compares to that minimum; we will refer to this quantity as the objective difference. The following code chunk defines a function to perform this calculation and some other minor operations that will be helpful when plotting the results. This code chunk also applies this prep function to the pre-run benchmark data and defines some constants that we will use throughout the visualizations.
 
 ```{r fitting-prep, eval=TRUE}
-fit_prep <- function(fit) {
+fit_prep <- function(fit, eps = 1e-4) {
   nr <- nrow(fit)
   fit[["Obj_diff"]] <- rep(0, nr)
 
@@ -1043,24 +977,17 @@ fit_prep <- function(fit) {
   ninit <- nrow(fit[fit[["ID"]] == ids[1] & fit[["Algorithm"]] == algos[1], ])
   for (i in 1:nids) {
     for (j in 1:ninit) {
-      min_obj <- min(fit[seq((i-1)*ninit*nalgos+j,
-                             i*ninit*nalgos, by = ninit), 4])
-      for (k in 0:(nalgos-1)) {
-        fit[(i-1)*(ninit*nalgos) + k*ninit + j, 8] <-
-          fit[(i-1)*(ninit*nalgos) + k*ninit + j, 4] - min_obj
-
-      }
+      idx <- which(fit[["ID"]] == ids[i])[ninit*(0:(nalgos-1)) + j]
+      objs <- fit[idx, "Objective"]
+      min_obj <- min(objs)
+      abs_min_obj <- abs(min_obj)
+      obj_diffs <- objs - min(objs)
+      fit[idx, "Obj_diff"] <- ifelse(obj_diffs <= eps*abs_min_obj, 0,
+        ifelse(obj_diffs > eps*abs_min_obj & obj_diffs <= 2*abs_min_obj, 1, 3))
     }
   }
 
-  fit[["BmTime"]] <- fit[["BmTime"]]/1e6 # convert to milliseconds
-
-  eps <- 1e-4
-
-  fit[fit[["Obj_diff"]] < eps, "Obj_diff"] <- 0
-  fit[(fit[["Obj_diff"]] >= eps & fit[["Obj_diff"]] <= 2), "Obj_diff"] <- 1
-  fit[fit[["Obj_diff"]] > 2, "Obj_diff"] <- 3
-
+  fit[["BmTime"]] <- fit[["BmTime"]]*1e-6 # convert to milliseconds
   fit[["Convergence"]] <- ifelse(fit[["Convergence"]] < 1, 0, 1)
 
   return(fit)

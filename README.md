@@ -95,29 +95,28 @@ onep[["truth"]] <- ifelse(onep[["classification"]] == "blast", "upper", "lower")
 
 For fitting, we need a simple likelihood function; here we will use a
 straightforward sum of densities of the study responses and associated
-response times. A detailed explanation of the log-likelihood function is
-provided in the Example Vignette (`vignette("example", package =
-"fddm")`). Note that this likelihood function returns the negative
-log-likelihood as we can simply minimize this function to get the
-maximum likelihood estimate.
+response times. This likelihood function will fit the standard
+parameters in the DDM, but it will fit two versions of the drift rate
+*v*: one for when the correct response is `"blast"`, and another for
+when the correct response is `"non-blast"`. A detailed explanation of
+the log-likelihood function is provided in the Example Vignette
+(`vignette("example", package = "fddm")`). Note that this likelihood
+function returns the negative log-likelihood as we can simply minimize
+this function to get the maximum likelihood estimate.
 
 ``` r
 ll_fun <- function(pars, rt, resp, truth) {
-  rtu <- rt[truth == "upper"]
-  rtl <- rt[truth == "lower"]
-  respu <- resp[truth == "upper"]
-  respl <- resp[truth == "lower"]
+  v <- numeric(length(rt))
 
   # the truth is "upper" so use vu
-  densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE)
+  v[truth == "upper"] <- pars[[1]]
   # the truth is "lower" so use vl
-  densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE)
+  v[truth == "lower"] <- pars[[2]]
 
-  densities <- c(densu, densl)
-  if (any(!is.finite(densities))) return(1e6)
-  return(-sum(densities))
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE)
+
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 ```
 
@@ -134,7 +133,7 @@ this data is basically instantaneous using this setup.
 fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun,
               rt = onep[["rt"]], resp = onep[["resp"]], truth = onep[["truth"]],
               # limits:   vu,   vl,   a,  t0, w,  sv
-              lower = c(-Inf, -Inf,   0,   0, 0,   0),
+              lower = c(-Inf, -Inf, .01,   0, 0,   0),
               upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
 fit
 #> $par

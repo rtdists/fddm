@@ -300,7 +300,7 @@ test_that("Accuracy relative to established packages", {
   expect_true(all(rtdists[["dif"]] < 2*eps))
 })
 
-# Test consistency in log vs non-log
+# Test consistency in log vs non-log (see KE 2)
 test_that("Log-Consistency among internal methods", {
   expect_equal(SWSE_s[SWSE_s[["res"]] > eps*eps, "log_res"],
                log(SWSE_s[SWSE_s[["res"]] > eps*eps, "res"]))
@@ -319,6 +319,7 @@ test_that("Log-Consistency among internal methods", {
 })
 
 test_that("Log-Consistency of established packages", {
+  testthat::skip_on_cran()
   expect_equal(RWiener[RWiener[["res"]] > eps*eps, "log_res"],
                log(RWiener[RWiener[["res"]] > eps*eps, "res"]))
   expect_equal(Gondan_R[Gondan_R[["res"]] > eps*eps, "log_res"],
@@ -350,8 +351,8 @@ test_that("Log-Consistency of established packages", {
 # sv0 <- exp(-v*a*w - v*v*t/2) / (a*a) # for constant drift rate
 # sv0_9 <- exp((-2*v*a*w - v*v*t + sv*sv*a*a*w*w)/(2 + 2*sv*sv*t)) /
 #          (a*a*sqrt(1+sv*sv*t)) # for variable drift rate
-# ks14_R(t/(a*a), w, eps/sv0) # = 2; the summation will only calculate 2 terms
-# ks14_R(t/(a*a), w, eps/sv0_9) # = 5; but the summation actually needs 5 terms
+# ks(t/(a*a), w, eps/sv0) # = 2; the summation will only calculate 2 terms
+# ks(t/(a*a), w, eps/sv0_9) # = 5; but the summation actually needs 5 terms
 #
 # 2) When calculating the log of the density, it is better to use the built-in
 #    log option. For very small densities, simply calculating the density can

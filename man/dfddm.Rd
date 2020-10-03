@@ -16,7 +16,7 @@ dfddm(
   n_terms_small = "SWSE",
   summation_small = "2017",
   scale = "both",
-  max_terms_large = 2,
+  max_terms_large = 4,
   err_tol = 1e-06
 )
 }
@@ -57,8 +57,8 @@ range: \eqn{-5 <} \code{v} \eqn{< 5}.}
 \item{t0}{Non-decision time or response time constant (in seconds). Lower
 bound for the duration of all non-decisional processes (encoding and
 response execution). If this value is greater than \code{rt}, then the
-resulting density is returned as if \code{rt} \eqn{ \leq 0}. Allowed range:
-\eqn{0 <} \code{t0}. Typical range: \eqn{0.1 <} \code{t0} \eqn{< 0.5}.}
+resulting density is returned as if \code{rt} \eqn{ \le 0}. Allowed range:
+\eqn{0 \le} \code{t0}. Typical range: \eqn{0.1 <} \code{t0} \eqn{< 0.5}.}
 
 \item{w}{Relative starting point. Indicator of an a priori bias in decision
 making. When the relative starting point \code{w} deviates from \eqn{0.5},
@@ -99,7 +99,7 @@ is \code{"both"}.}
 variant when \code{n_terms_small = "SWSE", scale = "both"}. Allowed values
 are any non-negative integer. \code{max_terms_large = 0} indicates that the
 "small-time" variant will always be used instead of the "large-time"
-variant. Default is \eqn{2}.}
+variant. Default is \eqn{4}.}
 
 \item{err_tol}{Allowed error tolerance of the density function. Since the
 density function contains an infinite sum, this parameter defines the

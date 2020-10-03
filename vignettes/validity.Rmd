@@ -35,7 +35,6 @@ knitr::opts_chunk$set(
   <ul>
     <li><a href="#fit-gen">Generating Parameter Estimates</a></li>
     <li><a href="#fit-test">Testing the Parameter Estimates</a></li>
-    <li><a href="#fit-ke">Known Errors</a></li>
   </ul></li>
   <li><a href="#references">References</a></li>
 </ul>
@@ -438,6 +437,8 @@ ks_9 <- ks(t/(a*a), w, eps/sv0_9) # = 5; but the summation needs 5 terms
 cat("the summation will only calculate", ks_0, "terms, but it needs", ks_9, "terms.")
 ```
 
+2) When calculating the log of the density, it is better to use the built-in log option (`log = TRUE`). For very small densities, simply calculating the density can cause rounding issues that result in a density of zero (thus the log of the density becomes `-Inf`). Using the built-in log option avoids some of these rounding issues by exploiting the algebraic properties of the logarithm. Also note that sometimes the densities are just too small (i.e. extremely negative) and the logarithm function returns a value of `-Inf`, so we discard the samples whose density is very small (less than $eps^2 = 1 \times 10^{-12}$).
+
 
 
 
@@ -468,87 +469,45 @@ This code chunk defines the log-likelihood functions used in the optimization al
 
 ```{r loglik-fun, eval=TRUE}
 ll_fb_SWSE_17 <- function(pars, rt, resp, truth, err_tol) {
-  rtu <- rt[truth == "upper"]
-  rtl <- rt[truth == "lower"]
-  respu <- resp[truth == "upper"]
-  respl <- resp[truth == "lower"]
-
-  # the truth is "upper" so use vu
-  densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "SWSE", summation_small = "2017",
-                 scale = "both", err_tol = err_tol)
-  # the truth is "lower" so use vl
-  densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "SWSE", summation_small = "2017",
-                 scale = "both", err_tol = err_tol)
-
-  densities <- c(densu, densl)
-  if (any(!is.finite(densities))) return(1e6)
-  return(-sum(densities))
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                n_terms_small = "SWSE", summation_small = "2017",
+                scale = "both", err_tol = err_tol)
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
 ll_fb_Gon_17 <- function(pars, rt, resp, truth, err_tol) {
-  rtu <- rt[truth == "upper"]
-  rtl <- rt[truth == "lower"]
-  respu <- resp[truth == "upper"]
-  respl <- resp[truth == "lower"]
-
-  # the truth is "upper" so use vu
-  densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Gondan", summation_small = "2017",
-                 scale = "both", err_tol = err_tol)
-  # the truth is "lower" so use vl
-  densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Gondan", summation_small = "2017",
-                 scale = "both", err_tol = err_tol)
-
-  densities <- c(densu, densl)
-  if (any(!is.finite(densities))) return(1e6)
-  return(-sum(densities))
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                n_terms_small = "Gondan", summation_small = "2017",
+                scale = "both", err_tol = err_tol)
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
 ll_fb_Nav_17 <- function(pars, rt, resp, truth, err_tol) {
-  rtu <- rt[truth == "upper"]
-  rtl <- rt[truth == "lower"]
-  respu <- resp[truth == "upper"]
-  respl <- resp[truth == "lower"]
-
-  # the truth is "upper" so use vu
-  densu <- dfddm(rt = rtu, response = respu, a = pars[[3]], v = pars[[1]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Navarro", summation_small = "2017",
-                 scale = "both", err_tol = err_tol)
-  # the truth is "lower" so use vl
-  densl <- dfddm(rt = rtl, response = respl, a = pars[[3]], v = pars[[2]],
-                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                 n_terms_small = "Navarro", summation_small = "2017",
-                 scale = "both", err_tol = err_tol)
-
-  densities <- c(densu, densl)
-  if (any(!is.finite(densities))) return(1e6)
-  return(-sum(densities))
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                n_terms_small = "Navarro", summation_small = "2017",
+                scale = "both", err_tol = err_tol)
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
 ll_RTDists <- function(pars, rt, resp, truth) {
-  rtu <- rt[truth == "upper"]
-  rtl <- rt[truth == "lower"]
-  respu <- resp[truth == "upper"]
-  respl <- resp[truth == "lower"]
-
-  # the truth is "upper" so use vu
-  densu <- ddiffusion(rtu, respu, a = pars[[3]], v = pars[[1]],
-                      z = pars[[5]]*pars[[3]], t0 = pars[[4]], sv = pars[[6]])
-  # the truth is "lower" so use vl
-  densl <- ddiffusion(rtl, respl, a = pars[[3]], v = pars[[2]],
-                      z = pars[[5]]*pars[[3]], t0 = pars[[4]], sv = pars[[6]])
-
-  densities <- c(densu, densl)
-  if (any(densities <= 0)) return(1e6)
-  return(-sum(log(densities)))
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- log(ddiffusion(rt, resp, a = pars[[3]], v = v, t0 = pars[[4]],
+                         z = pars[[5]]*pars[[3]], sv = pars[[6]]))
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 ```
 
@@ -609,8 +568,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
   ids <- unique(df[["id"]])
   nids <- max(length(ids), 1) # if inds is null, there is only one individual
 
-  init_vals <- data.frame(vu = c( 0,  10, -.5,  0,  0,  0,  0,  0,  0,   0,  0),
-                          vl = c( 0, -10,  .5,  0,  0,  0,  0,  0,  0,   0,  0),
+  init_vals <- data.frame(v1 = c( 0,  10, -.5,  0,  0,  0,  0,  0,  0,   0,  0),
+                          v0 = c( 0, -10,  .5,  0,  0,  0,  0,  0,  0,   0,  0),
                           a  = c( 1,   1,   1, .5,  5,  1,  1,  1,  1,   1,  1),
                           t0 = c( 0,   0,   0,  0,  0,  0,  0,  0,  0,   0,  0),
                           w  = c(.5,  .5,  .5, .5, .5, .5, .5, .2, .8,  .5, .5),
@@ -629,6 +588,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
   colnames(res) <- cnames
 
   # label the result dataframe
+  res[["ID"]] <- rep(ids, each = ni) # label individuals
   res[["Algorithm"]] <- rep(algo_names, each = ninit_vals) # label algorithms
   res[["vu_init"]] <- init_vals[["vu"]] # label initial vu
   res[["vl_init"]] <- init_vals[["vl"]] # label initial vl
@@ -652,7 +612,6 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
     init_vals[["t0"]] <- c(rep(t0_me, 5), t0_lo, t0_hi, rep(t0_me, 4))
 
     # label the result dataframe
-    res[["ID"]][((i-1)*ni+1):(i*ni)] <- ids[i] # label individuals
     res[["t0_init"]][((i-1)*ni+1):(i*ni)] <- init_vals[["t0"]] # label initial t0
 
     # loop through all of the starting values
@@ -765,7 +724,7 @@ As previously mentioned, we will read the pre-fit data from file as the fits can
 load(system.file("extdata", "valid_fit.Rds", package = "fddm", mustWork = TRUE))
 fit <- fit_prep(fit)
 
-print("Results for ID = experienced 2")
+cat("Results for ID = experienced 2")
 fit[(0:3)*11+1, ]
 ```
 
