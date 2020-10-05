@@ -717,12 +717,19 @@ ll_fl_Nav_09 <- function(pars, rt, resp, truth, err_tol) {
 }
 
 ll_RTDists <- function(pars, rt, resp, truth) {
-  v <- numeric(length(rt))
-  v[truth == "upper"] <- pars[[1]]
-  v[truth == "lower"] <- pars[[2]]
-  dens <- log(ddiffusion(rt, resp, a = pars[[3]], v = v, t0 = pars[[4]],
-                         z = pars[[5]]*pars[[3]], sv = pars[[6]]))
-  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
+  rtu <- rt[truth == "upper"]
+  rtl <- rt[truth == "lower"]
+  respu <- resp[truth == "upper"]
+  respl <- resp[truth == "lower"]
+
+  densu <- ddiffusion(rtu, respu, a = pars[[3]], v = pars[[1]],
+                      z = pars[[5]]*pars[[3]], t0 = pars[[4]], sv = pars[[6]])
+  densl <- ddiffusion(rtl, respl, a = pars[[3]], v = pars[[2]],
+                      z = pars[[5]]*pars[[3]], t0 = pars[[4]], sv = pars[[6]])
+
+  densities <- c(densu, densl)
+  if (any(densities <= 0)) return(1e6)
+  return(-sum(log(densities)))
 }
 ```
 
