@@ -37,9 +37,7 @@ And the development version from [GitHub](https://github.com/) with:
 devtools::install_github("rtdists/fddm")
 ```
 ## Example
-As an example data set, we use the `med_dec` data that comes with `fddm`. This data contains the accuracy condition reported in @trueblood_impact_2018 investigating medical decision making among medical professionals (pathologists) and novices (i.e., undergraduate students). The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The data set contains 200 decision per participant, based on pictures of 100 true cancerous cells and pictures of 100 true non-cancerous cells.
-
-As a preliminary example, we will fit data from one participant from the `med_dec` data that comes with `fddm`. This data contains the accuracy condition reported in Trueblood et al. (2018) investigating medical decision making among medical professionals (pathologists) and novices (i.e., undergraduate students). The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The data set contains 200 decision per participant, based on pictures of 100 true cancerous cells and pictures of 100 true non-cancerous cells. Here we use the data collected from the trials one experienced medical professional (pathologist). First, we load the `fddm` package, remove any invalid responses from the data, and select the individual whose data we will use for fitting.
+As a preliminary example, we will fit the DDM to the data from one participant in the `med_dec` data that comes with `fddm`. This dataset contains the accuracy condition reported in @trueblood_impact_2018 investigating medical decision making among medical professionals (pathologists) and novices (i.e., undergraduate students). The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The data set contains 200 decisions per participant, based on pictures of 100 true cancerous cells and pictures of 100 true non-cancerous cells. Here we use the data collected from the trials of one experienced medical professional (pathologist). First, we load the `fddm` package, remove any invalid responses from the data, and select the individual whose data we will use for fitting.
 
 ```{r load-pkg-data, eval=TRUE}
 library("fddm")
@@ -56,7 +54,7 @@ onep[["resp"]] <- ifelse(onep[["response"]] == "blast", "upper", "lower")
 onep[["truth"]] <- ifelse(onep[["classification"]] == "blast", "upper", "lower")
 ```
 
-For fitting, we need a simple likelihood function; here we will use a straightforward sum of densities of the study responses and associated response times. This likelihood function will fit the standard parameters in the DDM, but it will fit two versions of the drift rate *v*: one for when the correct response is `"blast"`, and another for when the correct response is `"non-blast"`. A detailed explanation of the log-likelihood function is provided in the Example Vignette (`vignette("example", package = "fddm")`). Note that this likelihood function returns the negative log-likelihood as we can simply minimize this function to get the maximum likelihood estimate.
+For fitting, we need a simple likelihood function; here we will use a straightforward log of sum of densities of the study responses and associated response times. This log-likelihood function will fit the standard parameters in the DDM, but it will fit two versions of the drift rate *v*: one for when the correct response is `"blast"` (*v<sub>u</sub>*), and another for when the correct response is `"non-blast"` (*v<sub>l</sub>*). A detailed explanation of the log-likelihood function is provided in the Example Vignette (`vignette("example", package = "fddm")`). Note that this likelihood function returns the negative log-likelihood as we can simply minimize this function to get the maximum likelihood estimate.
 
 ```{r simp-ll, eval=TRUE}
 ll_fun <- function(pars, rt, resp, truth) {
@@ -74,13 +72,13 @@ ll_fun <- function(pars, rt, resp, truth) {
 }
 ```
 
-We then pass the data and log-likelihood function with the necessary additional arguments to an optimization function. As we are using the optimization function `nlminb` for this example, we must input as the first argument the initial values of our DDM parameters that we want optimized. These are input in the order: *v<sub>u</sub>*, *v<sub>l</sub>*, *a*, *t<sub>0</sub>*, *w*, and *sv*; we also need to define upper and lower bounds for each parameters. Fitting the DDM to this data is basically instantaneous using this setup.
+We then pass the data and log-likelihood function to an optimization function with the necessary additional arguments. As we are using the optimization function `nlminb` for this example, the first argument must be the initial values of our DDM parameters that we want optimized. These are input in the order: *v<sub>u</sub>*, *v<sub>l</sub>*, *a*, *t<sub>0</sub>*, *w*, and *sv*; we also need to define upper and lower bounds for each of the parameters. Fitting the DDM to this data is basically instantaneous using this setup.
 
 ```{r show-simp-fit, eval=TRUE, warning=FALSE}
 fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun,
               rt = onep[["rt"]], resp = onep[["resp"]], truth = onep[["truth"]],
               # limits:   vu,   vl,   a,  t0, w,  sv
               lower = c(-Inf, -Inf, .01,   0, 0,   0),
-              upper = c( Inf,  Inf, Inf, Inf, 1, Inf))
+              upper = c( Inf,  Inf, Inf, min(onep[["rt"]]), 1, Inf))
 fit
 ```
