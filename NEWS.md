@@ -1,4 +1,4 @@
-# fddm v0.1-2 (Release date: 2020-09-01)
+# fddm v0.1-2 (Release date: 2020-10-07)
 
 ## New Features
 * New default method, callable using the arguments `n_terms_small = "SWSE", scale = "both"`.
@@ -7,9 +7,9 @@
 * Density functions now return strictly non-negative values.
 
 ## Other Changes
-* If input response times is an empty vector, then an empty vector is returned with a warning.
+* If input response times is an empty vector, then an empty vector is returned.
 * Fine-tuned the summation functions used with the SWSE method
-
+* Added URLs to DESCRIPTION
 
 
 
