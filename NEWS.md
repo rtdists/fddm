@@ -1,4 +1,4 @@
-# fddm v0.1-2 (Release date: 2020-09-01)
+# fddm v0.1-2 (Release date: 2020-10-06)
 
 ## New Features
 * New default method, callable using the arguments `n_terms_small = "SWSE", scale = "both"`.
