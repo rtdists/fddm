@@ -27,6 +27,8 @@ Suggests:
     rmarkdown,
     microbenchmark,
     ggnewscale
+URL: https://github.com/rtdists/fddm
+BugReports: https://github.com/rtdists/fddm/issues    
 SystemRequirements: C++11
 RoxygenNote: 7.1.1
 Encoding: UTF-8
