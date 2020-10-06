@@ -62,7 +62,7 @@ This vignette contains two examples of how to use `fddm`, in particular the `dfd
 # Example Fitting {#ex}
 <hr class="sec1">
 
-In this example, we will fit to the `med_dec` data that comes with `fddm`. This data contains the accuracy condition reported in @trueblood_impact_2018 investigating medical decision making among medical professionals (pathologists) and novices (i.e., undergraduate students). The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The data set contains 200 decision per participant, based on pictures of 100 true cancerous cells and pictures of 100 true non-cancerous cells. We load the `fddm` package, read the data, and remove any invalid responses from the data.
+In this example, we will fit the DDM to the `med_dec` data that comes with `fddm`. This dataset contains the accuracy condition reported in @trueblood_impact_2018, which investigates medical decision making among medical professionals (pathologists) and novices (i.e., undergraduate students). The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The dataset contains 200 decisions per participant, based on pictures of 100 true cancerous cells and pictures of 100 true non-cancerous cells. We load the `fddm` package, read the data, and remove any invalid responses from the data.
 
 ```{r load-pkg-data, eval=TRUE}
 library("fddm")
@@ -112,7 +112,7 @@ onep[["truth"]] <- ifelse(onep[["classification"]] == "blast", "upper", "lower")
 str(onep)
 ```
 
-We then pass the data and log-likelihood function with the necessary additional arguments to an optimization function. As we are using the optimization function `nlminb` for this example, we must input as the first argument the initial values of our DDM parameters that we want optimized. These are input in the order: $v_u$, $v_\ell$, $a$, $t_0$, $w$, and $sv$; we also need to define upper and lower bounds for each parameters. Fitting the DDM to this data is basically instantaneous using this setup.
+We then pass the data and log-likelihood function with the necessary additional arguments to an optimization function. As we are using the optimization function `nlminb` for this example, we must input as the first argument the initial values of our DDM parameters that we want optimized. These are input in the order: $v_u$, $v_\ell$, $a$, $t_0$, $w$, and $sv$; we also need to define upper and lower bounds for each parameters. Fitting the DDM to this dataset is basically instantaneous using this setup.
 
 ```{r show-simp-fit, eval=TRUE, warning=FALSE}
 fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun,

@@ -326,7 +326,7 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
 ```
 
 <a id="r-loops"></a>
-Control loops in `R` have a lot of overhead and are comparatively slow compared to loops in `C++`; thus, we will not run [`rt_benchmark_vec()`](#bm-funcs) in this vignette, and we will load pre-run benchmark data instead. The pre-run data was collected using the same functions and parameter space as defined in this vignette. Since this benchmark function contains one fewer loop because of the vectorized response times, we increase the number of samples that the 'microbenchmark' function considers when timing the various algorithms. To show comparisons across the algorithms with respect to the input response time, we will again load pre-run benchmark data obtain through using [`rt_benchmark_ind()`](#bm-funcs) as this takes even longer to evaluate than the benchmark with vectorized response times. The following code chunk defines the parameter space to be explored throughout the benchmark testing and shows an example of how to run the benchmark functions defined in the previous code chunk.
+Control loops in `R` have a lot of overhead and are comparatively slow compared to loops in `C++`; thus, we will not run [`rt_benchmark_vec()`](#bm-funcs) in this vignette, and we will load pre-run benchmark data instead. The pre-run data was collected using the same functions and parameter space as defined in this vignette. Since this benchmark function contains one fewer loop because of the vectorized response times, we increase the number of samples that the 'microbenchmark' function considers when timing the various algorithms. To show comparisons across the algorithms with respect to the input response time, we will again load pre-run benchmark data obtained through using [`rt_benchmark_ind()`](#bm-funcs) as this takes even longer to evaluate than the benchmark with vectorized response times. The following code chunk defines the parameter space to be explored throughout the benchmark testing and shows an example of how to run the benchmark functions defined in the previous code chunk.
 
 <a id="par-space"></a>
 ```{r bm-run, eval=FALSE}
@@ -433,7 +433,7 @@ ggplot(mbm_vec, aes(x = factor(FuncName, levels = Names_vec), y = time,
              legend.position = "none")
 ```
 
-Depending on your system, the results might differ from the ones shown here, but they should replicate the general pattern. The small-time methods ("fs_") have long tails due to very few outliers, but their central tendencies are rather fast. The methods combining small-time and large-time ("fb_") show an almost normal distribution with only a short tail; they also have the fastest central tendencies. Of the `fddm` methods, the large-time approach ("fl_") is the slowest with a long tail. The function from the `Rwiener` package combines small-time and large-time approach and also shows an almost normal distribution, but its distribution of median benchmark times is shifted higher compared to those of `fddm`. The other two methods are clearly slower; the function provided by @gondan2014even is purely in `R` so it is constrained by the speed of `R`'s vectorization. Similarly constrained by `R`, the function from the `rtdists` package performs quite a few computations in `R` that make it very user-friendly, but at the cost of having the slowest central tendencies.
+Depending on your system, the results might differ from the ones shown here, but they should replicate the general pattern. The small-time methods ("fs_") have long tails due to very few outliers, but their central tendencies are rather fast. The methods combining small-time and large-time ("fb_") show an almost normal distribution with only a short tail; they also have the fastest central tendencies. Of the `fddm` methods, the large-time approach ("fl_") is the slowest with a long tail. The function from the `Rwiener` package combines small-time and large-time approach and also shows an almost normal distribution, but its distribution of median benchmark times is shifted higher compared to those of `fddm`. The other two methods are clearly slower; the function provided by @gondan2014even is purely in `R` so it is constrained by the speed of `R`'s vectorization. Similarly constrained by `R`, the function from the `rtdists` package performs quite a few computations in `R` that make it very user-friendly but at the cost of having the slowest central tendencies.
 
 To visualize the problem areas for each method, we plot that method's median benchmark times as a function of each individual parameter value; this will allow us to see where in the parameter space each method is efficient and where it is inefficient. In each of the following plots, we will vary one model parameter and show the mean of the median benchmark times, the 10% quantiles and 90% quantiles of the median benchmark times, as well as the minimum and maximum median benchmark times. For each value of that parameter, we aggregate the benchmark data for all values of the other parameter to generate the statistics plotted. For example, in a plot illustrating the effect of varying $v$, the statistics plotted for the parameter value $v = 0$ will include the benchmark data for the full ranges of $rt$, $a$, $w$, and $sv$. Note that because we also vary the response time in these plots, all of the following plots show the results based on the individual response times (i.e., [`rt_benchmark_ind`](#bm-funcs)). As this benchmark function records the evaluation time of approximating the density for only one response time in contrast to a vector of response times, we expect the typical benchmark times produced by [`rt_benchmark_ind`](#bm-funcs) to be faster than that of [`rt_benchmark_vec`](#bm-funcs).
 
@@ -458,6 +458,8 @@ Color_meq <- c("#e000b4", "#cc99ff", "#996633",
                "#ff9999", "#ff5050", "#990000")
 mbm_meq <- subset(mbm_ind, FuncName %in% Names_meq)
 ```
+
+### Effective Response Time {#den-ana-ert}
 
 We first investigate how the response times affect the performance of each method. When calculating the density, the main culprit of longer evaluation times is the approximation of the infinite sum. Since the response time, $rt$, is always scaled by the threshold separation, $a$, in the infinite sum, we combine these model parameters and instead examine the "effective response time", defined as $\frac{rt}{a^2}$. This code chunk will generate a plot showing how varying the "effective response time" can affect the median benchmark time of the approximations.
 
@@ -500,6 +502,8 @@ ggplot(mbm_meq, aes(x = RTAA, y = time,
 
 This plot confirms that the aptly named small-time and large-time density functions are generally more efficient at calculating the density for small response times and large response times, respectively. Of the three methods used from the literature, the `RWiener` and `rtdists` functions use a switching mechanism between the small-time and large-time density functions, and the algorithm from @gondan2014even only uses the small-time density function. Importantly, the methods that utilize a switching mechanism between the small-time and large-time density functions have much flatter plots and generally perform well across the $\frac{rt}{a^2}$ parameter space.
 
+### Relative Starting Point {#den-ana-w}
+
 Similarly to the previous plot, this code chunk plots the effect on the median benchmark time; but this time we will instead vary the model parameter $w$, the relative starting point.
 
 ```{r bm-meq-w, eval=TRUE}
@@ -540,6 +544,8 @@ ggplot(mbm_meq, aes(x = W, y = time,
 
 The relative starting point $w$ has very little impact on the infinite sum, and thus we see that the means and quantiles are relatively flat across the range of $w$. However, we see a rather clear dip around 0.5 for the maximum times of many methods.
 
+### Drift Rate {#den-ana-v}
+
 Here we plot the effects of varying the parameter $v$, the drift rate, on the median benchmark time.
 
 ```{r bm-meq-v, eval=TRUE}
@@ -579,6 +585,8 @@ ggplot(mbm_meq, aes(x = V, y = time,
 ```
 
 The drift rate $v$ has nothing to do with the infinite sum, which is why we see overall flat means across the range of $v$. The only pattern we see is a small bump for $v = 0$ of the small-time method.
+
+#### Inter-trial Variablity in the Drift Rate {#den-ana-sv}
 
 Lastly we plot the effects of varying $sv$, the inter-trial variability in the drift rate, on the median benchmark time.
 
@@ -622,7 +630,7 @@ The inter-trial variability in the drift rate, $sv$, affects the evaluation time
 
 Overall, these plots reveal the unsurprising conclusion that the small-time density approximation generally struggled for large "effective response times" and the large-time density approximation is very inefficient for small "effective response times". We see that the methods that combined the two density functions were noticeably more consistent across the entire range of "effective response times," confirming that using a combination of both methods results in a very stable algorithm.
 
-The other three figures that vary $w$, $v$, and $sv$ do not reveal any meaningful patterns. Both $v$ and $sv$ have nothing to do with the infinite sum, and $w$ only has a minimal role in the infinite sum; thus we do not expect any great contributions to slowdowns in evaluation times of either the small-time or large-time density functions.
+The other three figures that vary $w$, $v$, and $sv$ do not reveal any meaningful patterns. Both $v$ and $sv$ have nothing to do with the infinite sum, and $w$ only has a minimal role in the infinite sum; thus, we do not expect any great contributions to slowdowns in evaluation times of either the small-time or large-time density functions.
 
 
 
@@ -737,7 +745,7 @@ ll_RTDists <- function(pars, rt, resp, truth) {
 
 ### Fitting Function {#fit-gen-fun}
 
-We use a different set of initial parameter values for each combination of data set and method. In a real-life situation we would probably do so using random initial parameter values to avoid local minima. Here we do this with a fixed set of initial parameter values to ensure that the different methods produce the same results for different starting points. However, there are a couple of restrictions to these initial values that we must address (we would also have to do so if we picked the initial values randomly). The parameter $t_0$ must be less than the response time, so we set the initial values for $t_0$ to be strictly less than the minimum response time according to each individual in the input data frame.
+We use a different set of initial parameter values for each combination of dataset and method. In a real-life situation we would probably do so using random initial parameter values to avoid local minima. Here we do this with a fixed set of initial parameter values to ensure that the different methods produce the same results for different starting points. However, there are a couple of restrictions to these initial values that we must address (we would also have to do so if we picked the initial values randomly). The parameter $t_0$ must be less than the response time, so we set the initial values for $t_0$ to be strictly less than the minimum response time according to each individual in the input data frame.
 
 Furthermore, we must place a lower bound on $a$ that is necessarily greater than zero because the optimization algorithm occasionally evaluates the log-likelihood functions (and thus the underlying density function approximations) using values of $a$ equal to its bounds. In the case where optimization algorithm evaluates using $a = 0$, the density function from the `rtdists` package does not evaluate. In common use this is not an issue because very small values of $a$ do not make any sense with regard to the psychological interpretation of the parameter, but this issue can arise in an exploratory optimization environment.
 
@@ -942,9 +950,9 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
 
 ### Running the Fitting {#fit-run}
 
-As an example data set, we use the `med_dec` data that comes with `fddm`. This data contains the accuracy condition reported in @trueblood_impact_2018 investigating medical decision making among medical professionals (pathologists) and novices (i.e., undergraduate students). The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The data set contains 200 decision per participant, based on pictures of 100 true cancerous cells and pictures of 100 true non-cancerous cells. We remove the trials without response (indicated by rt < 0 in the data) before fitting.
+As an example dataset, we use the `med_dec` data that comes with `fddm`. This dataset contains the accuracy condition reported in @trueblood_impact_2018, which investigates medical decision making among medical professionals (pathologists) and novices (i.e., undergraduate students). The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The dataset contains 200 decision per participant, based on pictures of 100 true cancerous cells and pictures of 100 true non-cancerous cells. We remove the trials without response (indicated by rt < 0 in the data) before fitting.
 
-Having set up the fitting functions in the above chunks of code, we could pass the `med_dec` data to this function to get the parameter estimates. However, as this takes a relatively long time (around 30 minutes) we skip the fitting in this vignette and instead read the pre-fit parameter estimates in the next section.
+Having set up the fitting functions in the above chunks of code, we could pass the `med_dec` data to this function to get the parameter estimates. However, as this takes a relatively long time (around 30 minutes), we skip the fitting in this vignette and instead read the pre-fit parameter estimates in the next section.
 
 ```{r fit-run, eval=FALSE}
 data(med_dec, package = "fddm")
@@ -1091,7 +1099,7 @@ ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
         legend.text = element_text(size = 13))
 ```
 
-This plot vaguely resembles [the `microbenchmark` violin plot](#den-ana) from the previous section. Immediately we observe that fitting using the `rtdists` function is noticeably slower than fitting using the functions provided in `fddm`. The large-time approximation has many problematic data points, further emphasizing its shortcomings when handling smaller response times. Upon closer inspection, the means and medians of the benchmark times are slightly lower for the two small-time algorithms, "fs_SWSE_14" and "fs_Gon_17", than for either of the algorithms that combine both the small-time and large-time density functions, "fb_SWSE_17" and "fb_Gon_17". However, these two seemingly faster small-time algorithms have more problematic data points in the optimization process, likely due to the poor support for large "effective response times" that we discussed in a [previous section](#den-ana) of this vignette. We also see that the two combined-time algorithms both only show three total cases where the algorithm did not reach the optimum for one participant and starting value. These issues can be avoided by using multiple sets of initial values and choosing the best result from that set. Despite these few problematic fits, the two combined-time algorithms are quite stable and are still fast. If the data is known to contain only small response times, then using one of the small-time approximations may yield fast and unproblematic fitting results. However, instability may still arise from the optimization routine testing small values of $a$; this would create large "effective response times" and cause the small-time density function to reveal its vulnerability. One fitting run using these algorithms takes on average under 30 milliseconds on the system used for running the tests.
+This plot vaguely resembles [the `microbenchmark` violin plot](#den-ana) from the previous section. Immediately we observe that fitting to data using the `rtdists` function is noticeably slower than fitting to data using the functions provided in `fddm`. The large-time approximation has many problematic data points, further emphasizing its shortcomings when handling smaller response times. Upon closer inspection, the means and medians of the benchmark times are slightly lower for the two small-time algorithms, "fs_SWSE_14" and "fs_Gon_17", than for either of the algorithms that combine both the small-time and large-time density functions, "fb_SWSE_17" and "fb_Gon_17". However, these two seemingly faster small-time algorithms have more problematic data points in the optimization process, likely due to the poor support for large "effective response times" that we discussed in a [previous section](#den-ana) of this vignette. We also see that the two combined-time algorithms both only show three total cases where the algorithm did not reach the optimum for one participant and starting value. These issues can be avoided by using multiple sets of initial values and choosing the best result from that set. Despite these few problematic fits, the two combined-time algorithms are quite stable and are still fast. If the data is known to contain only small response times, then using one of the small-time approximations may yield fast and unproblematic fitting results. However, instability may still arise from the optimization routine testing small values of $a$; this would create large "effective response times" and cause the small-time density function to reveal its vulnerability. One fitting run using these algorithms takes on average under 30 milliseconds on the system used for running the tests.
 
 The second plot will show the distribution of the number of function evaluations in the optimization process for each method.
 
