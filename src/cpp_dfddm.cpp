@@ -151,9 +151,10 @@ NumericVector cpp_dfddm(const NumericVector& rt,
 
 
   // determine which method to use
-  char n_terms_small0 = n_terms_small[0];
-  char summation_small0 = summation_small[summation_small.length()-1];
-  char scale0 = scale[0];
+  char n_terms_small0 = (!n_terms_small.empty()) ? n_terms_small[0] : EMPTYCHAR;
+  char summation_small0 = (!summation_small.empty()) ?
+    summation_small[summation_small.length()-1] : EMPTYCHAR;
+  char scale0 = (!scale.empty()) ? scale[0] : EMPTYCHAR;
   NumFunc numf;
   SumFunc sumf;
   DenFunc denf;

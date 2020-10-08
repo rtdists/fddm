@@ -23,6 +23,7 @@ static const double LOG_100 = log(100);
 static const double LOG_PI = log(M_PI);
 static const double LOG_2PI_2 = 0.5 * log(2 * M_PI);
 static const double SQRT_2PI = sqrt(2 * M_PI);
+static const char EMPTYCHAR = '\0';
 
 
 
