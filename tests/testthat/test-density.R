@@ -122,8 +122,7 @@ for (rt in 1:nRT) {
           res[start+12,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
                                     log = FALSE, n_terms_small = "Navarro",
-                                    summation_small = "", scale = "large",
-                                    err_tol = eps)
+                                    scale = "large", err_tol = eps)
           res[start+13, 7] <- dwiener(RT[rt], resp = resp[rt], alpha = A[a],
                                       delta = V[v], tau = t0, beta = W[w],
                                       give_log = FALSE)
@@ -224,8 +223,7 @@ for (rt in 1:nRT) {
           res[start+12,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
                                     log = TRUE, n_terms_small = "Navarro",
-                                    summation_small = "", scale = "large",
-                                    err_tol = eps)
+                                    scale = "large", err_tol = eps)
           res[start+13, 9] <- dwiener(RT[rt], resp = resp[rt], alpha = A[a],
                                       delta = V[v], tau = t0, beta = W[w],
                                       give_log = TRUE)
