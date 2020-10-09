@@ -102,11 +102,12 @@ double small_sum_eps_14(const double& t, const double& a, const double& w,
 double small_sum_2017(const double& t, const double& a, const double& w,
                       const int& ks, const double& eps)
 { // note: eps is not used
+  int kss = (ks <= INT_MAX / 2) ? ks : INT_MAX / 2;
   double gamma = -a*a / (2 * t);
   double sum = w * exp(gamma * w*w); // start at j=0
   double rj;
   int j = 1;
-  while (j <= 2 * ks) { // start at j=1
+  while (j <= 2 * kss) { // start at j=1
     rj = j + 1 - w; // j is odd
     sum -= rj * exp(gamma * rj*rj);
     j++;
