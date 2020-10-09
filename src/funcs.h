@@ -5,12 +5,15 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+using std::vector;
+using std::string;
 using std::log;
 using std::exp;
 using std::sqrt;
 using std::min;
 using std::max;
 using std::ceil;
+using Rcpp::stop;
 using Rcpp::NumericVector;
 using Rcpp::LogicalVector;
 
@@ -23,7 +26,8 @@ static const double LOG_100 = log(100);
 static const double LOG_PI = log(M_PI);
 static const double LOG_2PI_2 = 0.5 * log(2 * M_PI);
 static const double SQRT_2PI = sqrt(2 * M_PI);
-static const char EMPTYCHAR = '\0';
+static const char EMPTYCHAR = '\0'; // literally, the empty character
+// INT_MAX is in num_funcs.cpp, maximum value of the int data type = 2147483647
 
 
 

@@ -2,10 +2,6 @@
 
 #include "funcs.h"
 
-using Rcpp::stop;
-using std::vector;
-using std::string;
-
 
 
 
