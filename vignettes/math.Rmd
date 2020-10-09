@@ -130,7 +130,7 @@ It remains to find the value of $k_\ell^\text{Nav}$ that ensures the truncated s
 \end{equation}
 
 <p class="method">
-This method is often viewed as the most inefficient of the available options in the literature; however, this method proves to be extremely efficient in particular areas of the parameter space (typically for large $t'$). The argument used to implement this method in `dfddm` is to set the parameter `scale = "large"` in the function call. In this case the other parameters, `n_terms_small` and `summation_small`, are ignored to avoid any potential clashes with overridden options.
+This method is often viewed as the most inefficient of the available options in the literature; however, this method proves to be extremely efficient in particular areas of the parameter space (typically for large $t'$). The argument used to implement this method in `dfddm` is to set the parameter `scale = "large"` in the function call. In this case the other parameters, `n_terms_small` and `summation_small`, must be set to any string that does not start with `S` or `s` to avoid any potential clashes with overridden options.
 </p>
 
 

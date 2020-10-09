@@ -177,8 +177,8 @@ rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                             err_tol = err_tol),
           fl_Nav_09 = dfddm(rt = RT, response = resp, a = A[a],
                             v = V[v], t0 = t0, w = W[w],
-                            log = FALSE, scale = "large",
-                            err_tol = err_tol),
+                            log = FALSE, n_terms_small = "Navarro",
+                            scale = "large", err_tol = err_tol),
           RWiener = dwiener(RT, resp = resp, alpha = A[a],
                             delta = V[v], tau = t0, beta = W[w],
                             give_log = FALSE),
@@ -292,9 +292,8 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                               err_tol = err_tol),
             fl_Nav_09 = dfddm(rt = RT[rt], response = resp, a = A[a],
                               v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "",
-                              summation_small = "", scale = "large",
-                              err_tol = err_tol),
+                              log = FALSE, n_terms_small = "Navarro",
+                              scale = "large", err_tol = err_tol),
             RWiener = dwiener(RT[rt], resp = resp, alpha = A[a],
                               delta = V[v], tau = t0, beta = W[w],
                               give_log = FALSE),
@@ -360,7 +359,7 @@ err_tol <- 1e-6 # this is the setting from rtdists
 # Run benchmark tests
 bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                            W = W, SV = SV, err_tol = err_tol,
-                           times = 100, unit = "ns")
+                           times = 1000, unit = "ns")
 save(bm_vec, compress = "xz", compression_level = 9,
      file = "inst/extdata/bm_vec.Rds")
 # load(system.file("extdata", "bm_vec.Rds", package = "fddm", mustWork = TRUE))
