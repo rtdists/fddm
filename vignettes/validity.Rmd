@@ -382,7 +382,7 @@ test_that("Accuracy relative to established packages", {
   expect_true(all(rtdists[["dif"]] < 2*eps))
 })
 
-# Test consistency in log vs non-log
+# Test consistency in log vs non-log (see KE 2)
 test_that("Log-Consistency among internal methods", {
   expect_equal(SWSE_s[SWSE_s[["res"]] > eps*eps, "log_res"],
                log(SWSE_s[SWSE_s[["res"]] > eps*eps, "res"]))
@@ -416,24 +416,25 @@ test_that("Log-Consistency of established packages", {
 ## Known Errors (KE) {#den-ke}
 
 <a id="gon-m"></a>
+
 1) Both the RWiener and Gondan_R approximations divide the error tolerance by the multiplicative term outside of the summation. Since the outside term is different when $sv > 0$, the approximations use the incorrect error tolerance for $sv > 0$. This affects the number of terms required in the summation to achieve the desired precision, thus not actually achieving that desired precision. This issue is fixed in our implementation of the Gondan method (`n_terms_small = "Gondan"`, `scale = "small"`). For an example of this discrepancy, see the following code:
 
-```{r known-errors, eval=TRUE}
-rt <- 1.5
-t <- rt - 1e-4
-a <- 0.5
-v <- 4.5
-w <- 0.5
-eps <- 1e-6
-sv <- 0.9
-sv0 <- exp(-v*a*w - v*v*t/2) / (a*a) # for constant drift rate
-sv0_9 <- exp((-2*v*a*w - v*v*t + sv*sv*a*a*w*w)/(2 + 2*sv*sv*t)) /
-         (a*a*sqrt(1+sv*sv*t)) # for variable drift rate
-ks_0 <- ks(t/(a*a), w, eps/sv0) # = 2; the summation will only calculate 2 terms
-ks_9 <- ks(t/(a*a), w, eps/sv0_9) # = 5; but the summation needs 5 terms
-
-cat("the summation will only calculate", ks_0, "terms, but it needs", ks_9, "terms.")
-```
+    ```{r known-errors, eval=TRUE}
+    rt <- 1.5
+    t <- rt - 1e-4
+    a <- 0.5
+    v <- 4.5
+    w <- 0.5
+    eps <- 1e-6
+    sv <- 0.9
+    sv0 <- exp(-v*a*w - v*v*t/2) / (a*a) # for constant drift rate
+    sv0_9 <- exp((-2*v*a*w - v*v*t + sv*sv*a*a*w*w)/(2 + 2*sv*sv*t)) /
+             (a*a*sqrt(1+sv*sv*t)) # for variable drift rate
+    ks_0 <- ks(t/(a*a), w, eps/sv0) # = 2; the summation will only calculate 2 terms
+    ks_9 <- ks(t/(a*a), w, eps/sv0_9) # = 5; but the summation needs 5 terms
+    
+    cat("the summation will only calculate", ks_0, "terms, but it needs", ks_9, "terms.")
+    ```
 
 2) When calculating the log of the density, it is better to use the built-in log option (`log = TRUE`). For very small densities, simply calculating the density can cause rounding issues that result in a density of zero (thus the log of the density becomes `-Inf`). Using the built-in log option avoids some of these rounding issues by exploiting the algebraic properties of the logarithm. Also note that sometimes the densities are just too small (i.e. extremely negative) and the logarithm function returns a value of `-Inf`, so we discard the samples whose density is very small (less than $\epsilon^2 = 1 \times 10^{-12}$).
 
