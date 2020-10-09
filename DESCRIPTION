@@ -1,23 +1,23 @@
 Package: fddm
 Type: Package
 Title: Fast Implementation of the Diffusion Decision Model
-Version: 0.1-2
+Version: 0.1-3
 Authors@R: c(person(given="Kendal B.", family="Foster", role=c("aut")),
              person(given="Henrik", family="Singmann", role=c("ctb", "cre"),
              email="singmann@gmail.com", comment=c(ORCID="0000-0002-4842-3657")))
-Description: Provides the probability density function (PDF) of the diffusion decision 
+Description: Provides the probability density function (PDF) of the diffusion decision
   model (DDM; e.g., Ratcliff & McKoon, 2008, <doi:10.1162/neco.2008.12-06-420>)
-  with across-trial variability in the drift rate. 
+  with across-trial variability in the drift rate.
   Because the PDF of the DDM contains an infinite sum, it needs to be
-  approximated. 'fddm' implements all published approximations (Navarro & Fuss, 2009, 
-  <doi:10.1016/j.jmp.2009.02.003>; Gondan, Blurton, & Kesselmeier, 2014, 
-  <doi:10.1016/j.jmp.2014.05.002>) plus new approximations. All approximations 
-  are implemented purely in 'C++' providing faster speed than existing packages. 
+  approximated. 'fddm' implements all published approximations (Navarro & Fuss, 2009,
+  <doi:10.1016/j.jmp.2009.02.003>; Gondan, Blurton, & Kesselmeier, 2014,
+  <doi:10.1016/j.jmp.2014.05.002>) plus new approximations. All approximations
+  are implemented purely in 'C++' providing faster speed than existing packages.
 License: GPL (>= 2)
 Imports: Rcpp (>= 1.0.1)
 LinkingTo: Rcpp
 Depends: R (>= 3.5.0)
-Suggests: 
+Suggests:
     rtdists,
     RWiener,
     ggplot2,
@@ -28,7 +28,7 @@ Suggests:
     microbenchmark,
     ggnewscale
 URL: https://github.com/rtdists/fddm
-BugReports: https://github.com/rtdists/fddm/issues    
+BugReports: https://github.com/rtdists/fddm/issues
 SystemRequirements: C++11
 RoxygenNote: 7.1.1
 Encoding: UTF-8

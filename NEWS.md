@@ -1,3 +1,12 @@
+# fddm v0.1-3 (Release date: 2020-10-09)
+
+## Bug Fixes
+* The num_funcs.cpp functions are now prevented from possible overflow.
+* Checks are now in place for empty strings as inputs to the parameters `n_terms_small`, `summation_small`, and `scale`.
+
+
+
+
 # fddm v0.1-2 (Release date: 2020-10-07)
 
 ## New Features
