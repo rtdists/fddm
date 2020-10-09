@@ -1,4 +1,4 @@
-# fddm v0.1-3 (Release date: 2020-10-09)
+# fddm v0.2-1 (Release date: 2020-10-09)
 
 ## Bug Fixes
 * The num_funcs.cpp functions are now prevented from possible overflow.
