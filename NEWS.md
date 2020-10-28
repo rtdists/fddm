@@ -1,3 +1,11 @@
+# fddm v0.2-2 (Release date: 2020-10-28)
+
+## Other Changes
+* Skipped two tests on Solaris
+
+
+
+
 # fddm v0.2-1 (Release date: 2020-10-09)
 
 ## Bug Fixes
