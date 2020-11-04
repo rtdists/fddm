@@ -1,7 +1,7 @@
-# fddm v0.2-2 (Release date: 2020-10-28)
+# fddm v0.2-2 (Release date: 2020-11-03)
 
 ## Other Changes
-* Skipped two tests on Solaris
+* Added warning about old 32-bit compilers exhibiting abnormal behavior for the large-time approximation.
 
 
 

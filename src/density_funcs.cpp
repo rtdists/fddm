@@ -14,7 +14,7 @@
 // Stop When Small Enough
 double ff(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& eps,
-          const int& max_terms_large, NumFunc numf, SumFunc sumf)
+          const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf)
 { // note: max_terms_large, numf are not used
   double mult;
 
@@ -29,7 +29,8 @@ double ff(const double& t, const double& a, const double& v,
 
 double ff_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& eps,
-              const int& max_terms_large, NumFunc numf, SumFunc sumf)
+              const int& max_terms_large,
+              const NumFunc& numf, const SumFunc& sumf)
 { // note: max_terms_large, numf are not used
   double mult;
 
@@ -52,7 +53,7 @@ double ff_log(const double& t, const double& a, const double& v,
 // Gondan et al and Navarro et al
 double fs(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& eps,
-          const int& max_terms_large, NumFunc numf, SumFunc sumf)
+          const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf)
 { // note: max_terms_large is not used
   double mult_s;
   int ks;
@@ -70,7 +71,8 @@ double fs(const double& t, const double& a, const double& v,
 
 double fs_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& eps,
-              const int& max_terms_large, NumFunc numf, SumFunc sumf)
+              const int& max_terms_large,
+              const NumFunc& numf, const SumFunc& sumf)
 { // note: max_terms_large is not used
   double mult_s;
   int ks;
@@ -98,7 +100,7 @@ double fs_log(const double& t, const double& a, const double& v,
 // Navarro et al
 double fl(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& eps,
-          const int& max_terms_large, NumFunc numf, SumFunc sumf)
+          const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf)
 { // note: max_terms_large, numf, sumf are not used
   double mult_l;
   int kl;
@@ -116,7 +118,8 @@ double fl(const double& t, const double& a, const double& v,
 
 double fl_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& eps,
-              const int& max_terms_large, NumFunc numf, SumFunc sumf)
+              const int& max_terms_large,
+              const NumFunc& numf, const SumFunc& sumf)
 { // note: max_terms_large, numf, sumf are not used
   double mult_l;
   int kl;
@@ -142,7 +145,7 @@ double fl_log(const double& t, const double& a, const double& v,
 // Stop When Small Enough
 double fc(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& eps,
-          const int& max_terms_large, NumFunc numf, SumFunc sumf)
+          const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf)
 { // note: numf is not used
   double mult;
 
@@ -170,7 +173,8 @@ double fc(const double& t, const double& a, const double& v,
 
 double fc_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& eps,
-              const int& max_terms_large, NumFunc numf, SumFunc sumf)
+              const int& max_terms_large,
+              const NumFunc& numf, const SumFunc& sumf)
 { // note: numf is not used
   double mult;
 
@@ -201,7 +205,7 @@ double fc_log(const double& t, const double& a, const double& v,
 // Gondan et al and Navarro et al
 double fb(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& eps,
-          const int& max_terms_large, NumFunc numf, SumFunc sumf)
+          const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf)
 { // note: max_terms_large is not used
   double mult_s, mult_l;
   int ks, kl;
@@ -228,7 +232,8 @@ double fb(const double& t, const double& a, const double& v,
 
 double fb_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& eps,
-              const int& max_terms_large, NumFunc numf, SumFunc sumf)
+              const int& max_terms_large,
+              const NumFunc& numf, const SumFunc& sumf)
 { // note: max_terms_large is not used
   double mult_s, mult_l;
   int ks, kl;

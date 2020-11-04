@@ -290,6 +290,10 @@ test_that("Consistency among internal methods", {
   expect_true(all(Navarro_s[["dif"]] < 2*eps))
   expect_true(all(Navarro_b[["dif"]] < 2*eps))
   testthat::skip_on_os("solaris")
+  testthat::skip_if(dfddm(rt = 0.001, response = "lower", 
+                          a = 5, v = -5, t0 = 1e-4, w = 0.8, sv = 1.5, 
+                          log = FALSE, n_terms_small = "Navarro",
+                          scale = "large", err_tol = 1e-6) > 1e-6)
   expect_true(all(Navarro_l[["dif"]] < 2*eps))
 })
 
@@ -297,6 +301,10 @@ test_that("Accuracy relative to established packages", {
   expect_true(all(RWiener[RWiener[["sv"]] < SV_THRESH, "dif"] < 2*eps)) # see KE 1
   expect_true(all(rtdists[["dif"]] < 2*eps))
   testthat::skip_on_os("solaris")
+  testthat::skip_if(dfddm(rt = 0.001, response = "lower", 
+                          a = 5, v = -5, t0 = 1e-4, w = 0.8, sv = 1.5, 
+                          log = FALSE, n_terms_small = "Navarro",
+                          scale = "large", err_tol = 1e-6) > 1e-6)
   expect_true(all(Gondan_R[Gondan_R[["sv"]] < SV_THRESH, "dif"] < 2*eps)) # see KE 1
 })
 

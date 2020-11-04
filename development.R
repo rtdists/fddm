@@ -2,6 +2,7 @@
 devtools::document()
 devtools::build_vignettes()
 # knit README.Rmd
+devtools::build()
 devtools::install()
 # run R CMD check
 
