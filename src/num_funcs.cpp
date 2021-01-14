@@ -42,7 +42,7 @@ int ks_Nav(const double& t, const double& w, const double& eps)
     float ks = 2 + sqrt(-2 * t * log(2 * eps * sqrt(2 * M_PI * t)));
     float bc = sqrt(t) + 1; // boundary conditions
     if (ks > INT_MAX || bc > INT_MAX) return INT_MAX;
-    return ceil(max(ks, bc)); // ensure boundary conditions are met
+    return ceil((max(ks, bc) - 1) / 2); // ensure boundary conditions are met
   }
   return 2; // else return minimal kappa for that case
 }
