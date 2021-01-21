@@ -10,7 +10,8 @@ NumericVector cpp_dfddm(const NumericVector& rt,
                         const SEXP& response,
                         const NumericVector& a, const NumericVector& v,
                         const NumericVector& t0, const NumericVector& w,
-                        const NumericVector& sv, const bool& log_prob,
+                        const NumericVector& sv, const NumericVector& sigma,
+                        const bool& log_prob,
                         const std::string& n_terms_small,
                         const std::string& summation_small,
                         const std::string& scale,
@@ -92,8 +93,9 @@ NumericVector cpp_dfddm(const NumericVector& rt,
   int Nt0  = t0.length();
   int Nw   = w.length();
   int Nsv  = sv.length();
+  int Nsig = sigma.length();
   int Neps = eps.length();
-  int Nmax = max({Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Neps});
+  int Nmax = max({Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Nsig, Neps});
 
   // input checking
   if (Nrt < 1) {
@@ -105,41 +107,60 @@ NumericVector cpp_dfddm(const NumericVector& rt,
   }
   if (Na < 1) {
     stop("dfddm error: model parameter 'a' is empty");
+  } else {
+    for (int i = 0; i < Na; i++) {
+      if (a[i] < 0) {
+        stop("dfddm error: model parameter 'a' < 0 at index %i.", i+1);
+      }
+    }
   }
   if (Nv < 1) {
     stop("dfddm error: model parameter 'v' is empty");
   }
   if (Nt0 < 1) {
     stop("dfddm error: model parameter 't0' is empty");
+  } else {
+    for (int i = 0; i < Nt0; i++) {
+      if (t0[i] < 0) {
+        stop("dfddm error: model parameter 't0' < 0 at index %i.", i+1);
+      }
+    }
   }
   if (Nw < 1) {
     stop("dfddm error: model parameter 'w' is empty");
+  } else {
+    for (int i = 0; i < Nw; i++) {
+      if (w[i] < 0 || w[i] > 1) {
+        stop("dfddm error: model parameter 'w' < 0 or 'w' > 1 at index %i.", i+1);
+      }
+    }
   }
   if (Nsv < 1) {
     stop("dfddm error: model parameter 'sv' is empty");
+  } else {
+    if (sv[0] != -1) {
+      for (int i = 0; i < Nsv; i++) {
+        if (sv[i] < 0) {
+          stop("dfddm error: model parameter 'sv' < 0 at index %i.", i+1);
+        }
+      }
+    }
+  }
+  if (Nsig < 1) {
+    stop("dfddm error: model parameter 'sigma' is empty");
+  } else {
+    for (int i = 0; i < Nsig; i++) {
+      if (sigma[i] < 0) {
+        stop("dfddm error: model parameter 'sigma' < 0 at index %i.", i+1);
+      }
+    }
   }
   if (Neps < 1) {
     stop("dfddm error: model parameter 'err_tol' is empty");
-  }
-  for (int i = 0; i < Na; i++) {
-    if (a[i] < 0) {
-      stop("dfddm error: model parameter 'a' < 0 at index %i.", i+1);
-    }
-  }
-  for (int i = 0; i < Nt0; i++) {
-    if (t0[i] < 0) {
-      stop("dfddm error: model parameter 't0' < 0 at index %i.", i+1);
-    }
-  }
-  for (int i = 0; i < Nw; i++) {
-    if (w[i] < 0 || w[i] > 1) {
-      stop("dfddm error: model parameter 'w' < 0 or 'w' > 1 at index %i.", i+1);
-    }
-  }
-  if (sv[0] != -1) {
-    for (int i = 0; i < Nsv; i++) {
-      if (sv[i] < 0) {
-        stop("dfddm error: model parameter 'sv' < 0 at index %i.", i+1);
+  } else {
+    for (int i = 0; i < Neps; i++) {
+      if (eps[i] < 0) {
+        stop("dfddm error: model parameter 'err_tol' < 0 at index %i.", i+1);
       }
     }
   }
@@ -263,20 +284,42 @@ NumericVector cpp_dfddm(const NumericVector& rt,
   // loop through all inputs
   NumericVector out(Nmax);
   double t;
-  for (int i = 0; i < Nmax; i++) {
-    t = rt[i % Nrt] - t0[i % Nt0]; // take non-decision time from response time
-    if (t <= 0) { // handle density outside of time bounds
-      out[i] = rt0;
-      continue;
+  if (Nsig == 1 && sigma[0] == 1) {
+    for (int i = 0; i < Nmax; i++) {
+      t = rt[i % Nrt] - t0[i % Nt0]; // take non-decision time from response time
+      if (t <= 0) { // handle density outside of time bounds
+        out[i] = rt0;
+        continue;
+      }
+      if (resp[i % Nres]) { // response is "upper" so use alternate parameters
+        out[i] = denf(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw], sv[i % Nsv],
+                      eps[i % Neps], max_terms_large, numf, sumf);
+      } else { // response is "lower" so use unchanged parameters
+        out[i] = denf(t, a[i % Na], v[i % Nv], w[i % Nw], sv[i % Nsv],
+                      eps[i % Neps], max_terms_large, numf, sumf);
+      }
     }
-    if (resp[i % Nres]) { // response is "upper" so use alternate parameters
-      out[i] = denf(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw], sv[i % Nsv],
-                    eps[i % Neps], max_terms_large, numf, sumf);
-    } else { // response is "lower" so use unchanged parameters
-      out[i] = denf(t, a[i % Na], v[i % Nv], w[i % Nw], sv[i % Nsv],
-                    eps[i % Neps], max_terms_large, numf, sumf);
+  } else {
+    for (int i = 0; i < Nmax; i++) {
+      t = rt[i % Nrt] - t0[i % Nt0]; // take non-decision time from response time
+      if (t <= 0) { // handle density outside of time bounds
+        out[i] = rt0;
+        continue;
+      }
+      if (resp[i % Nres]) { // response is "upper" so use alternate parameters
+        out[i] = denf(t, a[i % Na]/sigma[i % Nsig],
+                      -v[i % Nv]/sigma[i % Nsig], 1 - w[i % Nw],
+                      sv[i % Nsv]/sigma[i % Nsig], eps[i % Neps],
+                      max_terms_large, numf, sumf);
+      } else { // response is "lower" so use unchanged parameters
+        out[i] = denf(t, a[i % Na]/sigma[i % Nsig],
+                      v[i % Nv]/sigma[i % Nsig], w[i % Nw],
+                      sv[i % Nsv]/sigma[i % Nsig], eps[i % Neps],
+                      max_terms_large, numf, sumf);
+      }
     }
   }
+
 
 
   return out;

@@ -12,6 +12,7 @@ dfddm(
   t0,
   w = 0.5,
   sv = -1,
+  sigma = 1,
   log = FALSE,
   n_terms_small = "SWSE",
   summation_small = "2017",
@@ -23,23 +24,21 @@ dfddm(
 \arguments{
 \item{rt}{A vector of response times (in seconds). If a response time is
 non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-\ifelse{html}{\out{-<font style="vertical-align: middle;" size="5em">&#8734;</font>}}{\eqn{-\infty}}
- if log = TRUE.}
+\ifelse{html}{\out{-<font style="vertical-align: middle;"
+size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.}
 
 \item{response}{Binary response(s) that correspond(s) to either the "lower"
 or "upper" threshold. This model parameter can either be a singular value
 or a vector. The value(s) in 'response' can be of the following data types:
-\itemize{
-\item logicals (FALSE \ifelse{html}{\out{&#8594;}}{\eqn{\to}}
-"lower", TRUE \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper");
-\item integers or doubles (\eqn{1} \ifelse{html}{\out{&#8594;}}{\eqn{\to}}
-"lower", \eqn{2} \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper");
-\item strings (only the first character is checked, "L"
+\itemize{ \item logicals (FALSE \ifelse{html}{\out{&#8594;}}{\eqn{\to}}
+"lower", TRUE \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper"); \item
+integers or doubles (\eqn{1} \ifelse{html}{\out{&#8594;}}{\eqn{\to}}
+"lower", \eqn{2} \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper"); \item
+strings (only the first character is checked, "L"
 \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "lower" or "U"
-\ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper", case insensitive);
-\item factors (the first level gets mapped to "lower", and the second level gets
-mapped to "upper"; any additional levels are ignored).
-}}
+\ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper", case insensitive); \item
+factors (the first level gets mapped to "lower", and the second level gets
+mapped to "upper"; any additional levels are ignored). }}
 
 \item{a}{Threshold separation. Amount of information that is considered for a
 decision. Large values indicate a conservative decisional style. Allowed
@@ -63,15 +62,28 @@ resulting density is returned as if \code{rt} \eqn{ \le 0}. Allowed range:
 \item{w}{Relative starting point. Indicator of an a priori bias in decision
 making. When the relative starting point \code{w} deviates from \eqn{0.5},
 the amount of information necessary for a decision differs between response
-alternatives. Allowed range: \eqn{0 <} \code{w} \eqn{< 1}. Default is
+alternatives. Allowed range: \eqn{0 <} \code{w} \eqn{< 1}. Default value is
 \eqn{0.5} (i.e., no bias).}
 
 \item{sv}{Inter-trial-variability of drift rate. Standard deviation of a
 normal distribution with mean \code{v} describing the distribution of
 actual drift rates from specific trials. Values different from \eqn{0} can
 predict slow errors. Allowed range: \eqn{0 <} \code{sv}. Typical range:
-\eqn{0 <} \code{sv} \eqn{< 2}. Default is \eqn{-1}, which indicates no
-drift in the function call. See Details for more information.}
+\eqn{0 <} \code{sv} \eqn{< 2}. Default value is \eqn{-1}, which indicates
+no drift in the function call. See Details for more information.}
+
+\item{sigma}{Diffusion coefficient of the underlying Wiener process.
+Allowed range: \eqn{0 <} \code{sigma}. Default value is \eqn{1}. This
+parameter simply scales the parameters \code{a}, \code{v}, and \code{sv} as
+follows. See Details for more information.
+\itemize{
+  \item \code{a} \ifelse{html}{\out{&#8594;}}{\eqn{\to}} \code{a} \eqn{/}
+    \code{sigma}
+  \item \code{v} \ifelse{html}{\out{&#8594;}}{\eqn{\to}} \code{v} \eqn{/}
+    \code{sigma}
+  \item \code{sv} \ifelse{html}{\out{&#8594;}}{\eqn{\to}} \code{sv} \eqn{/}
+    \code{sigma}
+}}
 
 \item{log}{Logical; if \code{TRUE}, probabilities \eqn{p} are given as
 \eqn{log(p)}. Default is \code{FALSE}.}
@@ -99,7 +111,7 @@ is \code{"both"}.}
 variant when \code{n_terms_small = "SWSE", scale = "both"}. Allowed values
 are any non-negative integer. \code{max_terms_large = 0} indicates that the
 "small-time" variant will always be used instead of the "large-time"
-variant. Default is \eqn{4}.}
+variant. Default value is \eqn{4}.}
 
 \item{err_tol}{Allowed error tolerance of the density function. Since the
 density function contains an infinite sum, this parameter defines the
@@ -114,59 +126,69 @@ A vector containing the densities of the DDM with precision
 Density function for the Ratcliff diffusion decision model (DDM) with
 following parameters: \code{a} (threshold separation), \code{v} (drift rate),
 \code{t0} (non-decision time/response time constant), \code{w} (relative
-starting point), and \code{sv} (inter-trial variability of drift).
+starting point), \code{sv} (inter-trial variability of drift), and
+\code{sigma} (diffusion coefficient of underlying Wiener process).
 }
 \details{
-All of the model inputs and parameters (\code{rt}, response, \code{a},
-  \code{v}, \code{t0}, \code{w}, and \code{sv}) can be input as a single value
-  or as a vector of values. If input as a vector of values, then the standard
-  \code{R} input wrapping will occur.
+All of the model inputs and parameters (\code{rt}, \code{response}, \code{a},
+\code{v}, \code{t0}, \code{w}, \code{sv}, \code{sigma}) can be input as a
+single value or as a vector of values. If input as a vector of values, then
+the standard \code{R} input wrapping will occur.
 
-  The default settings of \code{n_terms_small = "SWSE"},
-  code{summation_small = "2017"}, \code{scale = "both"} produce the fastest
-  and most accurate results, as shown in our associated paper.
+The default settings of \code{n_terms_small = "SWSE"}, \code{summation_small
+= "2017"}, \code{scale = "both"} produce the fastest and most accurate
+results, as shown in our associated paper.
 
-  \code{scale} - The density function for the DDM has traditionally been
-  written in two forms: a "large-time" variant, and a "small-time" variant.
-  The parameter \code{scale} determines which of these variants will be used
-  in the calculation; \code{scale = "large"} uses the "large-time" variant,
-  and \code{scale = "small"} uses the "small-time" variant. The "large-time"
-  variant is unstable for small effective response times
-  (\code{rt}\eqn{/(}\code{a}\eqn{*}\code{a}\eqn{) < 0.009}) and produces
-  inaccurate densities; thus we do not recommend using only the \code{scale =
-  "large"} option if the inputs contain such small response times. To
-  circumvent this issue, the \code{scale = "both"} option utilizes both the
-  "small-time" and "large-time" variants by determining which variant is more
-  computationally efficient before calculating the density. Even though the
-  "large-time" density function is often significantly slower than the
-  "small-time" variant, it is extremely efficient in some areas of the
-  parameter space, and so the \code{scale = "both"} option is the fastest.
+\code{scale} - The density function for the DDM has traditionally been
+written in two forms: a "large-time" variant, and a "small-time" variant. The
+parameter \code{scale} determines which of these variants will be used in the
+calculation; \code{scale = "large"} uses the "large-time" variant, and
+\code{scale = "small"} uses the "small-time" variant. The "large-time"
+variant is unstable for small effective response times (\code{rt} \eqn{/ (}
+\code{a}\eqn{*}\code{a} \eqn{) < 0.009}) and produces inaccurate densities;
+thus we do not recommend using only the \code{scale = "large"} option if the
+inputs contain such small response times. To circumvent this issue, the
+\code{scale = "both"} option utilizes both the "small-time" and "large-time"
+variants by determining which variant is more computationally efficient
+before calculating the density. Even though the "large-time" density function
+is often significantly slower than the "small-time" variant, it is extremely
+efficient in some areas of the parameter space, and so the \code{scale =
+"both"} option is the fastest.
 
-  \code{sv} - Both the "small-time" and "large-time" variants of the density
-  function have two further variants: one with a constant drift rate \code{v}
-  (i.e., \code{sv} \eqn{= 0}), and one with a variable drift rate \code{v}
-  (i.e., \code{sv} \eqn{> 0}). The details of the differences between these
-  two density functions can be found in our associated paper. To use the
-  density function with a constant drift rate, leave the parameter \code{sv}
-  to its default value of \code{sv = -1}, as this will indicate no drift to
-  the function. To use the density function with a variable drift rate, set
-  the parameter \code{sv} to some positive value, e.g. \code{sv = .75}.
+\code{sv} - Both the "small-time" and "large-time" variants of the density
+function have two further variants: one with a constant drift rate \code{v}
+(i.e., \code{sv} \eqn{= 0}), and one with a variable drift rate \code{v}
+(i.e., \code{sv} \eqn{> 0}). The details of the differences between these two
+density functions can be found in our associated paper. To use the density
+function with a constant drift rate, leave the parameter \code{sv} to its
+default value of \code{sv = -1}, as this will indicate no drift to the
+function. To use the density function with a variable drift rate, set the
+parameter \code{sv} to some non-negative value, i.e., \code{sv} \eqn{\geq 0}.
+This has implications for optimization routines (e.g. parameter estimation)
+because with only the default value (\code{sv = -1}), \code{dfddm} will only
+ever execute the constant drift rate variant of the DDM.
 
-  \code{summation_small} - The "large-time" variant of the density function
-  does not have any further variants, but the "small-time" has more options
-  with respect to evaluating the infinite sum. There are two equivalent
-  styles of summation, \code{summation_small = "2017"} and
-  \code{summation_small = "2014"}, of which the \code{"2017"} version
-  evaluates slightly faster and thus earns our recommendation. These
-  different styles of summation are discussed in our associated paper.
+\code{sigma} - The default value of this parameter is \code{1} because it
+only scales the parameters \code{a}, \code{v}, and \code{sv}, as shown above.
+However, other formulations of the DDM may set \code{sigma = 0.1} (see
+Ratcliff (1978), the fourth reference), so care must be taken when comparing
+the results of different formulations.
 
-  \code{n_terms_small} - The "small-time" variant also has three different
-  methods for how to truncate the infinite sum in the density function. These
-  different methods are discussed extensively in our associated paper, but
-  the key distinction is that \code{n_terms_small = "SWSE"} uses a new
-  method of truncating the infinite sum. The \code{n_terms_small = "SWSE"}
-  method is currently recommended because it is the most stable algorithm
-  when used with \code{scale = "both"}.
+\code{summation_small} - The "large-time" variant of the density function
+does not have any further variants, but the "small-time" has more options
+with respect to evaluating the infinite sum. There are two equivalent styles
+of summation, \code{summation_small = "2017"} and \code{summation_small =
+"2014"}, of which the \code{"2017"} version evaluates slightly faster and
+thus earns our recommendation. These different styles of summation are
+discussed in our associated paper.
+
+\code{n_terms_small} - The "small-time" variant also has three different
+methods for how to truncate the infinite sum in the density function. These
+different methods are discussed extensively in our associated paper, but the
+key distinction is that \code{n_terms_small = "SWSE"} uses a new method of
+truncating the infinite sum. The \code{n_terms_small = "SWSE"} method is
+currently recommended because it is the fastest and most stable algorithm
+when used with \code{scale = "both"}.
 }
 \examples{
 # minimal example
@@ -245,4 +267,7 @@ Navarro, D. J., & Fuss, I. G. (2009). Fast and accurate
   Blurton, S. P., Kesselmeier, M., & Gondan, M. (2017). The first-passage
   time distribution for the diffusion model with variable drift. Journal of
   Mathematical Psychology, 76, 7-12.
+
+  Ratcliff, R. (1978). A theory of memory retrieval. Psychological review,
+  85(2), 59.
 }

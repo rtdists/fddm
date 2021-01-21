@@ -6,8 +6,8 @@
 using namespace Rcpp;
 
 // cpp_dfddm
-NumericVector cpp_dfddm(const NumericVector& rt, const SEXP& response, const NumericVector& a, const NumericVector& v, const NumericVector& t0, const NumericVector& w, const NumericVector& sv, const bool& log_prob, const std::string& n_terms_small, const std::string& summation_small, const std::string& scale, const int& max_terms_large, const NumericVector& eps);
-RcppExport SEXP _fddm_cpp_dfddm(SEXP rtSEXP, SEXP responseSEXP, SEXP aSEXP, SEXP vSEXP, SEXP t0SEXP, SEXP wSEXP, SEXP svSEXP, SEXP log_probSEXP, SEXP n_terms_smallSEXP, SEXP summation_smallSEXP, SEXP scaleSEXP, SEXP max_terms_largeSEXP, SEXP epsSEXP) {
+NumericVector cpp_dfddm(const NumericVector& rt, const SEXP& response, const NumericVector& a, const NumericVector& v, const NumericVector& t0, const NumericVector& w, const NumericVector& sv, const NumericVector& sigma, const bool& log_prob, const std::string& n_terms_small, const std::string& summation_small, const std::string& scale, const int& max_terms_large, const NumericVector& eps);
+RcppExport SEXP _fddm_cpp_dfddm(SEXP rtSEXP, SEXP responseSEXP, SEXP aSEXP, SEXP vSEXP, SEXP t0SEXP, SEXP wSEXP, SEXP svSEXP, SEXP sigmaSEXP, SEXP log_probSEXP, SEXP n_terms_smallSEXP, SEXP summation_smallSEXP, SEXP scaleSEXP, SEXP max_terms_largeSEXP, SEXP epsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -18,19 +18,20 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const NumericVector& >::type t0(t0SEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type w(wSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type sv(svSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type sigma(sigmaSEXP);
     Rcpp::traits::input_parameter< const bool& >::type log_prob(log_probSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type n_terms_small(n_terms_smallSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type summation_small(summation_smallSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type scale(scaleSEXP);
     Rcpp::traits::input_parameter< const int& >::type max_terms_large(max_terms_largeSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type eps(epsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_dfddm(rt, response, a, v, t0, w, sv, log_prob, n_terms_small, summation_small, scale, max_terms_large, eps));
+    rcpp_result_gen = Rcpp::wrap(cpp_dfddm(rt, response, a, v, t0, w, sv, sigma, log_prob, n_terms_small, summation_small, scale, max_terms_large, eps));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_fddm_cpp_dfddm", (DL_FUNC) &_fddm_cpp_dfddm, 13},
+    {"_fddm_cpp_dfddm", (DL_FUNC) &_fddm_cpp_dfddm, 14},
     {NULL, NULL, 0}
 };
 

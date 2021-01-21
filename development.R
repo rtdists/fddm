@@ -1,6 +1,7 @@
 ########## Do the following for every package update!!!
 devtools::document()
 devtools::build_vignettes()
+devtools::build_manual()
 # knit README.Rmd
 devtools::build()
 devtools::install()
