@@ -102,18 +102,22 @@ double small_sum_eps_14(const double& t, const double& a, const double& w,
 double small_sum_2017(const double& t, const double& a, const double& w,
                       const int& ks, const double& eps)
 { // note: eps is not used
-  int kss = (ks <= INT_MAX / 2) ? ks : INT_MAX / 2;
   double gamma = -a*a / (2 * t);
-  double sum = w * exp(gamma * w*w); // start at j=0
+  double sum = w * exp(gamma * w*w); // initialize with j = 0
   double rj;
-  int j = 1;
-  while (j <= 2 * kss) { // start at j=1
-    rj = j + 1 - w; // j is odd
+  int j = (ks > 1) ? ks - 1: 0; // check ks
+  if (j % 2) { // j is odd (i.e., ks - 1 is odd)
+    rj = j + 1 - w;
     sum -= rj * exp(gamma * rj*rj);
-    j++;
+    j--;
+  }
+  while (j > 0) { // start at j = ks - 1
     rj = j + w; // j is even
     sum += rj * exp(gamma * rj*rj);
-    j++;
+    j--;
+    rj = j + 1 - w; // j is odd
+    sum -= rj * exp(gamma * rj*rj);
+    j--;
   }
   return (sum > 0) ? sum : 0; // if result is negative, return 0 instead
 }
@@ -124,8 +128,8 @@ double small_sum_2014(const double& t, const double& a, const double& w,
                       const int& ks, const double& eps)
 { // note: eps is not used
   double gamma = -a*a / (2 * t);
-  double sum = w * exp(gamma * w*w); // start at j=0
-  for (int j = ks; j > 0; j--) { // iterate through all ks
+  double sum = w * exp(gamma * w*w); // initialize with j=0
+  for (int j = floor(ks/2); j > 0; j--) { // iterate through all ks
     sum += (2 * j + w) * exp(gamma * (2 * j + w) * (2 * j + w))
     - (2 * j - w) * exp(gamma * (2 * j - w) * (2 * j - w));
   }
