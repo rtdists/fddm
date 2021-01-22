@@ -211,6 +211,14 @@ dfddm(rt = c(3, 2.75, 1.4, 2, 2.3, 1.8),
       summation_small = "2017", scale = "large",
       err_tol = 1e-10)
 
+# example with Wiener diffusion coefficient (sigma) not equal to 1
+dfddm(rt = c(3, 2.75, 1.4, 2, 2.3, 1.8),
+      response = c("lower", "upper", "upper", "lower", "upper", "lower"),
+      a = 1, v = -2, t0 = 0.3, w = 0.4, sv = 0.1, sigma = 0.1,
+      log = TRUE, n_terms_small = "SWSE",
+      summation_small = "2017", scale = "both",
+      err_tol = 1e-10)
+
 
 ### examples of different response inputs
 

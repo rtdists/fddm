@@ -23,9 +23,11 @@ separation), *v ϵ
 rate), *t<sub>0</sub> ϵ \[0,
 <font style="vertical-align: middle;" size="5em">∞</font>)*
 (non-decision time/response time constant), *w ϵ (0, 1)* (relative
-starting point), and *sv ϵ (0,
+starting point), *sv ϵ (0,
 <font style="vertical-align: middle;" size="5em">∞</font>)*
-(inter-trial-variability of drift).
+(inter-trial-variability of drift), and *sigma ϵ (0,
+<font style="vertical-align: middle;" size="5em">∞</font>)* (diffusion
+coefficient of the underlying Wiener Process).
 
 ## Installation
 

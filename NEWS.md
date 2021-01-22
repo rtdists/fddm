@@ -1,3 +1,14 @@
+# fddm v0.3-1 (Release date: 2021-1-23)
+
+## New Features
+* Added new parameter `sigma` to denote the diffusion coefficient of the Wiener process that underlies the DDM.
+
+## Bug Fixes
+* Amended the required number of terms and summation functions.
+
+
+
+
 # fddm v0.2-2 (Release date: 2020-11-03)
 
 ## Other Changes
