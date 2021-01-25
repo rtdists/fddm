@@ -16,9 +16,9 @@ double small_sum_eps_17(const double& t, const double& a, const double& w,
 { // note: ks is not used
   double gamma = -a*a / (2 * t);
   double sum = w * exp(gamma * w*w); // initialize with j = 0 term
-  double rj = 1 - w;
-  double term = rj * exp(gamma * rj*rj);
-  int minterms = sqrt(t)/a - w + 1; // min number of terms, truncates toward 0
+  double term = sum;
+  double rj;
+  int minterms = sqrt(t)/a - w; // min number of terms, truncates toward 0
   int j = 0;
   if (minterms % 2) { // minterms is odd (and at least 1)
     j++;
