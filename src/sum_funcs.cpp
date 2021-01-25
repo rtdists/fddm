@@ -15,17 +15,17 @@ double small_sum_eps_17(const double& t, const double& a, const double& w,
                         const int& ks, const double& eps)
 { // note: ks is not used
   double gamma = -a*a / (2 * t);
-  double sum = w * exp(gamma * w*w); // start at j=0 term
+  double sum = w * exp(gamma * w*w); // initialize with j = 0 term
   double rj = 1 - w;
   double term = rj * exp(gamma * rj*rj);
-  int minterms = sqrt(t) / a; // minimum number of terms
+  int minterms = sqrt(t)/a - w + 1; // min number of terms, truncates toward 0
   int j = 0;
   if (minterms % 2) { // minterms is odd (and at least 1)
     j++;
     rj = j + 1 - w;
     term = rj * exp(gamma * rj*rj);
     sum -= term;
-    while (j < minterms) { // j is currently odd
+    while (j < minterms) { // j is currently 1
       j++;
       rj = j + w;
       sum += rj * exp(gamma * rj*rj);
@@ -46,7 +46,7 @@ double small_sum_eps_17(const double& t, const double& a, const double& w,
       sum -= term;
     }
   } else { // minterms is even (and at least 0)
-    while (j < minterms) { // j is currently even
+    while (j < minterms) { // j is currently 0
       j++;
       rj = j + 1 - w;
       sum -= rj * exp(gamma * rj*rj);
@@ -76,8 +76,8 @@ double small_sum_eps_14(const double& t, const double& a, const double& w,
                         const int& ks, const double& eps)
 { // note: ks is not used
   double gamma = -a*a / (2 * t);
-  double sum = w * exp(gamma * w*w); // start at j=0 term
-  int minterms = sqrt(t) / a / 2; // minimum number of terms
+  double sum = w * exp(gamma * w*w); // initialize with j=0 term
+  int minterms = sqrt(t)/a/2 - w/2; // min number of terms, truncates toward 0
   double term = sum;
   int j = 0;
   while (j < minterms) {
@@ -103,7 +103,7 @@ double small_sum_2017(const double& t, const double& a, const double& w,
                       const int& ks, const double& eps)
 { // note: eps is not used
   double gamma = -a*a / (2 * t);
-  double sum = w * exp(gamma * w*w); // initialize with j = 0
+  double sum = w * exp(gamma * w*w); // initialize with j = 0 term
   double rj;
   int j = (ks > 1) ? ks - 1: 0; // check ks
   if (j % 2) { // j is odd (i.e., ks - 1 is odd)
@@ -111,7 +111,7 @@ double small_sum_2017(const double& t, const double& a, const double& w,
     sum -= rj * exp(gamma * rj*rj);
     j--;
   }
-  while (j > 0) { // start at j = ks - 1
+  while (j > 0) { // iterate from j = ks-1 to j = 1
     rj = j + w; // j is even
     sum += rj * exp(gamma * rj*rj);
     j--;
@@ -128,7 +128,7 @@ double small_sum_2014(const double& t, const double& a, const double& w,
                       const int& ks, const double& eps)
 { // note: eps is not used
   double gamma = -a*a / (2 * t);
-  double sum = w * exp(gamma * w*w); // initialize with j=0
+  double sum = w * exp(gamma * w*w); // initialize with j = 0 term
   for (int j = floor(ks/2); j > 0; j--) { // iterate through all ks
     sum += (2 * j + w) * exp(gamma * (2 * j + w) * (2 * j + w))
     - (2 * j - w) * exp(gamma * (2 * j - w) * (2 * j - w));

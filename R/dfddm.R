@@ -121,8 +121,9 @@
 #' parameter \code{scale} determines which of these variants will be used in the
 #' calculation; \code{scale = "large"} uses the "large-time" variant, and
 #' \code{scale = "small"} uses the "small-time" variant. The "large-time"
-#' variant is unstable for small effective response times (\code{rt} \eqn{/ (}
-#' \code{a}\eqn{*}\code{a} \eqn{) < 0.009}) and produces inaccurate densities;
+#' variant is unstable for small effective response times (
+#' \eqn{(}\code{rt}\eqn{-}\code{t0}\eqn{)} \eqn{/
+#' (}\code{a}\eqn{*}\code{a}\eqn{) < 0.009} ) and produces inaccurate densities;
 #' thus we do not recommend using only the \code{scale = "large"} option if the
 #' inputs contain such small response times. To circumvent this issue, the
 #' \code{scale = "both"} option utilizes both the "small-time" and "large-time"

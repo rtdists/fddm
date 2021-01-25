@@ -294,21 +294,22 @@ test_that("Consistency among internal methods", {
                           a = 5, v = -5, t0 = 1e-4, w = 0.8, sv = 1.5, 
                           log = FALSE, n_terms_small = "Navarro",
                           scale = "large", err_tol = 1e-6) > 1e-6)
-  expect_true(all(Navarro_l[["dif"]] < 2*eps))
+  expect_true(all(Navarro_l[Navarro_l[["rt"]]/Navarro_l[["a"]]/Navarro_l[["a"]]
+                            >= 0.009, "dif"] < 2*eps)) # see KE 1
 })
 
 test_that("Accuracy relative to established packages", {
-  expect_true(all(RWiener[RWiener[["sv"]] < SV_THRESH, "dif"] < 2*eps)) # see KE 1
+  expect_true(all(RWiener[RWiener[["sv"]] < SV_THRESH, "dif"] < 2*eps)) # see KE 2
   expect_true(all(rtdists[["dif"]] < 2*eps))
   testthat::skip_on_os("solaris")
   testthat::skip_if(dfddm(rt = 0.001, response = "lower", 
                           a = 5, v = -5, t0 = 1e-4, w = 0.8, sv = 1.5, 
                           log = FALSE, n_terms_small = "Navarro",
                           scale = "large", err_tol = 1e-6) > 1e-6)
-  expect_true(all(Gondan_R[Gondan_R[["sv"]] < SV_THRESH, "dif"] < 2*eps)) # see KE 1
+  expect_true(all(Gondan_R[Gondan_R[["sv"]] < SV_THRESH, "dif"] < 2*eps)) # see KE 2
 })
 
-# Test consistency in log vs non-log (see KE 2)
+# Test consistency in log vs non-log (see KE 3)
 test_that("Log-Consistency among internal methods", {
   expect_equal(SWSE_s[SWSE_s[["res"]] > eps*eps, "log_res"],
                log(SWSE_s[SWSE_s[["res"]] > eps*eps, "res"]))
@@ -340,7 +341,10 @@ test_that("Log-Consistency of established packages", {
 
 ### Known Errors (KE) ###
 #
-# 1) Both RWiener and Gondan_R divide the error tolerance by the multiplicative
+# 1) The "large-time" variant is unstable for small effective response times
+#    ( (rt - t0) / (a*a) < 0.009 ) and produces inaccurate densities.
+#
+# 2) Both RWiener and Gondan_R divide the error tolerance by the multiplicative
 #    term outside of the summation. Since the outside term is different when
 #    $sv > 0$, the approximations use the incorrect error tolerance for
 #    $sv > 0$. This affects the number of terms required in the summation to
@@ -362,7 +366,7 @@ test_that("Log-Consistency of established packages", {
 # ks(t/(a*a), w, eps/sv0) # = 2; the summation will only calculate 2 terms
 # ks(t/(a*a), w, eps/sv0_9) # = 5; but the summation actually needs 5 terms
 #
-# 2) When calculating the log of the density, it is better to use the built-in
+# 3) When calculating the log of the density, it is better to use the built-in
 #    log option. For very small densities, simply calculating the density can
 #    cause rounding issues that result in a density of zero (thus the log of the
 #    density becomes -Inf). Using the built-in log option avoids some of these
