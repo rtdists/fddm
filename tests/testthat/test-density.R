@@ -9,6 +9,9 @@ source(system.file("extdata", "Gondan_et_al_density.R", package = "fddm", mustWo
 ### Evaluate densities for checking later ##
 # Define different parameter spaces
 if (identical(Sys.getenv("NOT_CRAN"), "true")) { # not on CRAN
+  # These take a while to run
+  #RT <- c(0.001, 0.01, seq(0.1, 10, by = 0.1), seq(15, 30, by = 5))
+  #A <- c(0.25, seq(0.5, 5, by = 0.5))
   RT <- c(0.001, 0.1, 1, 2, 3, 4, 5, 10, 30)
   A <- c(0.25, 0.5, 1, 2.5, 5)
   V <- c(-5, -2, 0, 2, 5)
@@ -290,8 +293,8 @@ test_that("Consistency among internal methods", {
   expect_true(all(Navarro_s[["dif"]] < 2*eps))
   expect_true(all(Navarro_b[["dif"]] < 2*eps))
   testthat::skip_on_os("solaris")
-  testthat::skip_if(dfddm(rt = 0.001, response = "lower", 
-                          a = 5, v = -5, t0 = 1e-4, w = 0.8, sv = 1.5, 
+  testthat::skip_if(dfddm(rt = 0.001, response = "lower",
+                          a = 5, v = -5, t0 = 1e-4, w = 0.8, sv = 1.5,
                           log = FALSE, n_terms_small = "Navarro",
                           scale = "large", err_tol = 1e-6) > 1e-6)
   expect_true(all(Navarro_l[Navarro_l[["rt"]]/Navarro_l[["a"]]/Navarro_l[["a"]]
@@ -302,8 +305,8 @@ test_that("Accuracy relative to established packages", {
   expect_true(all(RWiener[RWiener[["sv"]] < SV_THRESH, "dif"] < 2*eps)) # see KE 2
   expect_true(all(rtdists[["dif"]] < 2*eps))
   testthat::skip_on_os("solaris")
-  testthat::skip_if(dfddm(rt = 0.001, response = "lower", 
-                          a = 5, v = -5, t0 = 1e-4, w = 0.8, sv = 1.5, 
+  testthat::skip_if(dfddm(rt = 0.001, response = "lower",
+                          a = 5, v = -5, t0 = 1e-4, w = 0.8, sv = 1.5,
                           log = FALSE, n_terms_small = "Navarro",
                           scale = "large", err_tol = 1e-6) > 1e-6)
   expect_true(all(Gondan_R[Gondan_R[["sv"]] < SV_THRESH, "dif"] < 2*eps)) # see KE 2
