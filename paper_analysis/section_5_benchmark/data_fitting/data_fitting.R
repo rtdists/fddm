@@ -532,10 +532,14 @@ fit_prep <- function(fit, eps = 1e-4) {
 # load(paste0(save_dir, "bm_fit.Rds"))
 fit <- fit_prep(fit)
 
-Names <- c("fb_SWSE_17", "fb_Gon_17", "fs_SWSE_14",
-           "fs_Gon_17", "fl_Nav_09", "rtdists")
-Color <- c("#e000b4", "#e68a00", "#cc99ff",
-          "#c2a500", "#996633", "#990000")
+Names <- c("fb_SWSE_17", "fb_SWSE_14", "fb_Gon_17", "fb_Gon_14",
+           "fb_Nav_17", "fb_Nav_14", "fs_SWSE_17", "fs_SWSE_14",
+           "fs_Gon_17", "fs_Gon_14", "fs_Nav_17", "fs_Nav_14",
+           "fl_Nav_09", "rtdists")
+Color <- c("#e000b4", "#ff99eb", "#e68a00", "#ffb366",
+           "#006699", "#66ccff", "#9900cc", "#cc99ff",
+           "#c2a500", "#d7db42", "#336600", "#33cc33",
+           "#996633", "#990000")
 Shape <- c(21, 25)
 Sizes <- c(0, 3, 3)
 Stroke <- c(0, 1, 1)

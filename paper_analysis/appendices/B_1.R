@@ -155,7 +155,7 @@ save(bm_ind, compress = "xz", compression_level = 9,
 ##### Plot Benchmark Timing Results ############################################
 # uncomment the following line if loading pre-run benchmark data,
 # will load into variable named "bm_ind"
-# load("paper_analysis/section_5_benchmarking/raw_algorithms/bm_ind_0-2.Rds")
+# load("paper_analysis/section_5_benchmark/raw_algorithms/bm_ind_0-2.Rds")
 
 bm_ind[["RTAA"]] <- bm_ind[["RT"]] / bm_ind[["A"]] / bm_ind[["A"]]
 bm_ind <- bm_ind[, c(1, ncol(bm_ind), 2:(ncol(bm_ind)-1)) ]
