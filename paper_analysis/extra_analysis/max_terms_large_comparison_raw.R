@@ -319,7 +319,7 @@ ggplot(mbm_vec_1, aes(x = factor(FuncName, levels = Names_vec), y = time,
         axis.title.x = element_text(size = 20),
         axis.title.y = element_text(size = 20),
         legend.position = "none")
-ggsave(paste0(path, "mtl_bm_0-30.png"), width = 16, height = 9)
+ggsave(paste0(save_dir, "mtl_bm_0-30.png"), width = 16, height = 9)
 
 ##### Parameter Space 2 Benchmorks #############################################
 RT <- seq(0.1, 2, by = 0.1)
@@ -380,4 +380,4 @@ ggplot(mbm_vec_2, aes(x = factor(FuncName, levels = Names_vec), y = time,
         axis.title.x = element_text(size = 20),
         axis.title.y = element_text(size = 20),
         legend.position = "none")
-ggsave(paste0(path, "mtl_bm_0-2.png"), width = 16, height = 9)
+ggsave(paste0(save_dir, "mtl_bm_0-2.png"), width = 16, height = 9)
