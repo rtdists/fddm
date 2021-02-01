@@ -22,6 +22,17 @@ ll_fb_SWSE_17 <- function(pars, rt, resp, truth, err_tol) {
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
+ll_fb_SWSE_14 <- function(pars, rt, resp, truth, err_tol) {
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                n_terms_small = "SWSE", summation_small = "2014",
+                scale = "both", err_tol = err_tol)
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
+}
+
 ll_fb_Gon_17 <- function(pars, rt, resp, truth, err_tol) {
   v <- numeric(length(rt))
   v[truth == "upper"] <- pars[[1]]
@@ -30,6 +41,50 @@ ll_fb_Gon_17 <- function(pars, rt, resp, truth, err_tol) {
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "Gondan", summation_small = "2017",
                 scale = "both", err_tol = err_tol)
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
+}
+
+ll_fb_Gon_14 <- function(pars, rt, resp, truth, err_tol) {
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                n_terms_small = "Gondan", summation_small = "2014",
+                scale = "both", err_tol = err_tol)
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
+}
+
+ll_fb_Nav_17 <- function(pars, rt, resp, truth, err_tol) {
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                n_terms_small = "Navarro", summation_small = "2017",
+                scale = "both", err_tol = err_tol)
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
+}
+
+ll_fb_Nav_14 <- function(pars, rt, resp, truth, err_tol) {
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                n_terms_small = "Navarro", summation_small = "2014",
+                scale = "both", err_tol = err_tol)
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
+}
+
+ll_fs_SWSE_17 <- function(pars, rt, resp, truth, err_tol) {
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                n_terms_small = "SWSE", summation_small = "2017",
+                scale = "small", err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -51,6 +106,39 @@ ll_fs_Gon_17 <- function(pars, rt, resp, truth, err_tol) {
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "Gondan", summation_small = "2017",
+                scale = "small", err_tol = err_tol)
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
+}
+
+ll_fs_Gon_14 <- function(pars, rt, resp, truth, err_tol) {
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                n_terms_small = "Gondan", summation_small = "2014",
+                scale = "small", err_tol = err_tol)
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
+}
+
+ll_fs_Nav_17 <- function(pars, rt, resp, truth, err_tol) {
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                n_terms_small = "Navarro", summation_small = "2017",
+                scale = "small", err_tol = err_tol)
+  return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
+}
+
+ll_fs_Nav_14 <- function(pars, rt, resp, truth, err_tol) {
+  v <- numeric(length(rt))
+  v[truth == "upper"] <- pars[[1]]
+  v[truth == "lower"] <- pars[[2]]
+  dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
+                n_terms_small = "Navarro", summation_small = "2014",
                 scale = "small", err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
@@ -139,8 +227,10 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                           sv = c( 1,   1,   1,  1,  1,  1,  1,  1,  1, .05,  5))
   ninit_vals <- nrow(init_vals)
 
-  algo_names <- c("fb_SWSE_17", "fb_Gon_17", "fs_SWSE_14",
-                  "fs_Gon_17", "fl_Nav_09", "rtdists")
+  algo_names <- c("fb_SWSE_17", "fb_SWSE_14", "fb_Gon_17", "fb_Gon_14",
+                  "fb_Nav_17", "fb_Nav_14", "fs_SWSE_17", "fs_SWSE_14",
+                  "fs_Gon_17", "fs_Gon_14", "fs_Nav_17", "fs_Nav_14",
+                  "fl_Nav_09", "rtdists")
   nalgos <- length(algo_names)
   ni <- nalgos*ninit_vals
 
@@ -182,7 +272,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
       res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
       res[["FuncEvals"]][(i-1)*ni+0*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
-      temp <- nlminb(init_vals[j, ], ll_fb_Gon_17,
+      temp <- nlminb(init_vals[j, ], ll_fb_SWSE_14,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
@@ -192,7 +282,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
       res[["Iterations"]][(i-1)*ni+1*ninit_vals+j] <- temp[["iterations"]]
       res[["FuncEvals"]][(i-1)*ni+1*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
-      temp <- nlminb(init_vals[j, ], ll_fs_SWSE_14,
+      temp <- nlminb(init_vals[j, ], ll_fb_Gon_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
@@ -202,7 +292,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
       res[["Iterations"]][(i-1)*ni+2*ninit_vals+j] <- temp[["iterations"]]
       res[["FuncEvals"]][(i-1)*ni+2*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
-      temp <- nlminb(init_vals[j, ], ll_fs_Gon_17,
+      temp <- nlminb(init_vals[j, ], ll_fb_Gon_14,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
@@ -212,7 +302,7 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
       res[["Iterations"]][(i-1)*ni+3*ninit_vals+j] <- temp[["iterations"]]
       res[["FuncEvals"]][(i-1)*ni+3*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
-      temp <- nlminb(init_vals[j, ], ll_fl_Nav_09,
+      temp <- nlminb(init_vals[j, ], ll_fb_Nav_17,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
@@ -222,8 +312,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
       res[["Iterations"]][(i-1)*ni+4*ninit_vals+j] <- temp[["iterations"]]
       res[["FuncEvals"]][(i-1)*ni+4*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
-      temp <- nlminb(init_vals[j, ], ll_RTDists,
-                     rt = rti, resp = respi, truth = truthi,
+      temp <- nlminb(init_vals[j, ], ll_fb_Nav_14,
+                     rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
                      upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
@@ -232,9 +322,94 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
       res[["Iterations"]][(i-1)*ni+5*ninit_vals+j] <- temp[["iterations"]]
       res[["FuncEvals"]][(i-1)*ni+5*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
+      temp <- nlminb(init_vals[j, ], ll_fs_SWSE_17,
+                     rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
+                     # limits:   vu,   vl,   a,      t0, w,  sv
+                     lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+      res[["Convergence"]][(i-1)*ni+6*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+6*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+6*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+6*ninit_vals+j] <- temp[["evaluations"]][[1]]
+
+      temp <- nlminb(init_vals[j, ], ll_fs_SWSE_14,
+                     rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
+                     # limits:   vu,   vl,   a,      t0, w,  sv
+                     lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+      res[["Convergence"]][(i-1)*ni+7*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+7*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+7*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+7*ninit_vals+j] <- temp[["evaluations"]][[1]]
+
+      temp <- nlminb(init_vals[j, ], ll_fs_Gon_17,
+                     rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
+                     # limits:   vu,   vl,   a,      t0, w,  sv
+                     lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+      res[["Convergence"]][(i-1)*ni+8*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+8*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+8*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+8*ninit_vals+j] <- temp[["evaluations"]][[1]]
+
+      temp <- nlminb(init_vals[j, ], ll_fs_Gon_14,
+                     rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
+                     # limits:   vu,   vl,   a,      t0, w,  sv
+                     lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+      res[["Convergence"]][(i-1)*ni+9*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+9*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+9*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+9*ninit_vals+j] <- temp[["evaluations"]][[1]]
+
+      temp <- nlminb(init_vals[j, ], ll_fs_Nav_17,
+                     rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
+                     # limits:   vu,   vl,   a,      t0, w,  sv
+                     lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+      res[["Convergence"]][(i-1)*ni+10*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+10*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+10*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+10*ninit_vals+j] <- temp[["evaluations"]][[1]]
+
+      temp <- nlminb(init_vals[j, ], ll_fs_Nav_14,
+                     rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
+                     # limits:   vu,   vl,   a,      t0, w,  sv
+                     lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+      res[["Convergence"]][(i-1)*ni+11*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+11*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+11*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+11*ninit_vals+j] <- temp[["evaluations"]][[1]]
+
+      temp <- nlminb(init_vals[j, ], ll_fl_Nav_09,
+                     rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
+                     # limits:   vu,   vl,   a,      t0, w,  sv
+                     lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+      res[["Convergence"]][(i-1)*ni+12*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+12*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+12*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+12*ninit_vals+j] <- temp[["evaluations"]][[1]]
+
+      temp <- nlminb(init_vals[j, ], ll_RTDists,
+                     rt = rti, resp = respi, truth = truthi,
+                     # limits:   vu,   vl,   a,      t0, w,  sv
+                     lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+      res[["Convergence"]][(i-1)*ni+13*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+13*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+13*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+13*ninit_vals+j] <- temp[["evaluations"]][[1]]
+
       # microbenchmark
       mbm <- microbenchmark(
         fb_SWSE_17 = nlminb(init_vals[j,], ll_fb_SWSE_17, err_tol = err_tol,
+                            rt = rti, resp = respi, truth = truthi,
+                            # limits:   vu,   vl,   a,      t0, w,  sv
+                            lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                            upper = c( Inf,  Inf, Inf, min_rti, 1, Inf)),
+        fb_SWSE_14 = nlminb(init_vals[j,], ll_fb_SWSE_14, err_tol = err_tol,
                             rt = rti, resp = respi, truth = truthi,
                             # limits:   vu,   vl,   a,      t0, w,  sv
                             lower = c(-Inf, -Inf, .01,       0, 0,   0),
@@ -244,12 +419,47 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                            # limits:   vu,   vl,   a,      t0, w,  sv
                            lower = c(-Inf, -Inf, .01,       0, 0,   0),
                            upper = c( Inf,  Inf, Inf, min_rti, 1, Inf)),
+        fb_Gon_14 = nlminb(init_vals[j,], ll_fb_Gon_14, err_tol = err_tol,
+                           rt = rti, resp = respi, truth = truthi,
+                           # limits:   vu,   vl,   a,      t0, w,  sv
+                           lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                           upper = c( Inf,  Inf, Inf, min_rti, 1, Inf)),
+        fb_Nav_17 = nlminb(init_vals[j,], ll_fb_Nav_17, err_tol = err_tol,
+                           rt = rti, resp = respi, truth = truthi,
+                           # limits:   vu,   vl,   a,      t0, w,  sv
+                           lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                           upper = c( Inf,  Inf, Inf, min_rti, 1, Inf)),
+        fb_Nav_14 = nlminb(init_vals[j,], ll_fb_Nav_14, err_tol = err_tol,
+                           rt = rti, resp = respi, truth = truthi,
+                           # limits:   vu,   vl,   a,      t0, w,  sv
+                           lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                           upper = c( Inf,  Inf, Inf, min_rti, 1, Inf)),
+        fs_SWSE_17 = nlminb(init_vals[j,], ll_fs_SWSE_17, err_tol = err_tol,
+                            rt = rti, resp = respi, truth = truthi,
+                            # limits:   vu,   vl,   a,      t0, w,  sv
+                            lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                            upper = c( Inf,  Inf, Inf, min_rti, 1, Inf)),
         fs_SWSE_14 = nlminb(init_vals[j,], ll_fs_SWSE_14, err_tol = err_tol,
                             rt = rti, resp = respi, truth = truthi,
                             # limits:   vu,   vl,   a,      t0, w,  sv
                             lower = c(-Inf, -Inf, .01,       0, 0,   0),
                             upper = c( Inf,  Inf, Inf, min_rti, 1, Inf)),
         fs_Gon_17 = nlminb(init_vals[j,], ll_fs_Gon_17, err_tol = err_tol,
+                           rt = rti, resp = respi, truth = truthi,
+                           # limits:   vu,   vl,   a,      t0, w,  sv
+                           lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                           upper = c( Inf,  Inf, Inf, min_rti, 1, Inf)),
+        fs_Gon_14 = nlminb(init_vals[j,], ll_fs_Gon_14, err_tol = err_tol,
+                           rt = rti, resp = respi, truth = truthi,
+                           # limits:   vu,   vl,   a,      t0, w,  sv
+                           lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                           upper = c( Inf,  Inf, Inf, min_rti, 1, Inf)),
+        fs_Nav_17 = nlminb(init_vals[j,], ll_fs_Nav_17, err_tol = err_tol,
+                           rt = rti, resp = respi, truth = truthi,
+                           # limits:   vu,   vl,   a,      t0, w,  sv
+                           lower = c(-Inf, -Inf, .01,       0, 0,   0),
+                           upper = c( Inf,  Inf, Inf, min_rti, 1, Inf)),
+        fs_Nav_14 = nlminb(init_vals[j,], ll_fs_Nav_14, err_tol = err_tol,
                            rt = rti, resp = respi, truth = truthi,
                            # limits:   vu,   vl,   a,      t0, w,  sv
                            lower = c(-Inf, -Inf, .01,       0, 0,   0),
@@ -282,7 +492,7 @@ data(med_dec, package = "fddm")
 med_dec <- med_dec[which(med_dec[["rt"]] >= 0), ]
 fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
               truth_idx = 5, response_upper = "blast", err_tol = 1e-6,
-              times = 25, unit = "ns")
+              times = 5, unit = "ns")
 save(fit, compress = "xz", compression_level = 9,
      file = paste0(save_dir, "bm_fit.Rds"))
 
