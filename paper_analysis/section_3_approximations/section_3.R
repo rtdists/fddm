@@ -1,5 +1,9 @@
+# This file produces the sample terms in the various timescales of the truncated
+# infinite sums, as seen in Section 3 of the fddm paper:
+# "Approximations to the DDM Density Functions"
+
 library("ggplot2")
-save_dir <- "paper_analysis/image_files/"
+save_dir <- "paper_analysis/images/"
 
 fl <- function(j, t, a, w) {
   return(j*sin(j*w*pi)*exp(-(j*j*pi*pi*t)/(2*a*a)))
