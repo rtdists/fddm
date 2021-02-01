@@ -6,7 +6,7 @@ library("rtdists")
 library("microbenchmark")
 library("reshape2")
 library("ggplot2")
-save_dir <- "paper_analysis/section_5_benchmarking/data_fitting/"
+save_dir <- "paper_analysis/section_5_benchmark/data_fitting/"
 
 
 
@@ -337,9 +337,6 @@ Fills <- c("#ffffff00", "#ffffff00", "#80808099")
 fit_mbm <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
                 measure.vars = "BmTime", value.name = "BmTime")[,-4]
 
-mibm <- min(fit[fit[["Algorithm"]] != "rtdists", "BmTime"])
-mabm <- max(fit[fit[["Algorithm"]] != "rtdists", "BmTime"])
-
 ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
                     y = BmTime)) +
   geom_violin(trim = TRUE, alpha = 0.5,
@@ -370,7 +367,6 @@ ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
                  size = factor(Obj_diff, levels = c(0, 1, 3)),
                  stroke = factor(Obj_diff, levels = c(0, 1, 3)),
                  fill = factor(Obj_diff, levels = c(0, 1, 3)))) +
-  coord_cartesian(ylim = c(mibm, mabm)) +
   labs(title = "Median microbenchmark times for data fitting",
        subtitle = paste(
          "Dashed lines represent mean benchmark times",
@@ -408,9 +404,6 @@ ggsave("paper_analysis/images/fit_bm.png", width = 16, height = 9)
 fit_fev <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
                 measure.vars = "FuncEvals", value.name = "FuncEvals")[,-4]
 
-mife <- min(fit[fit[["Algorithm"]] != "rtdists", "FuncEvals"])
-mafe <- max(fit[fit[["Algorithm"]] != "rtdists", "FuncEvals"])
-
 ggplot(fit_fev, aes(x = factor(Algorithm, levels = Names),
                     y = FuncEvals)) +
   geom_violin(trim = TRUE, alpha = 0.5,
@@ -441,7 +434,6 @@ ggplot(fit_fev, aes(x = factor(Algorithm, levels = Names),
                  size = factor(Obj_diff, levels = c(0, 1, 3)),
                  stroke = factor(Obj_diff, levels = c(0, 1, 3)),
                  fill = factor(Obj_diff, levels = c(0, 1, 3)))) +
-  coord_cartesian(ylim = c(mife, mafe)) +
   labs(title = "Function evaluations for data fitting",
        subtitle = paste(
          "Dashed lines represent mean benchmark times",
