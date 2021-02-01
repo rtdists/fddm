@@ -14,7 +14,7 @@ ll_fb_SWSE_17_0 <- function(pars, rt, resp, truth, err_tol) {
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "SWSE", summation_small = "2017",
-                scale = "both", maxterms_large = 0, err_tol = err_tol)
+                scale = "both", max_terms_large = 0, err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -25,7 +25,7 @@ ll_fb_SWSE_14_0 <- function(pars, rt, resp, truth, err_tol) {
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "SWSE", summation_small = "2014",
-                scale = "both", maxterms_large = 0, err_tol = err_tol)
+                scale = "both", max_terms_large = 0, err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -36,7 +36,7 @@ ll_fb_SWSE_17_1 <- function(pars, rt, resp, truth, err_tol) {
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "SWSE", summation_small = "2017",
-                scale = "both", maxterms_large = 1, err_tol = err_tol)
+                scale = "both", max_terms_large = 1, err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -47,7 +47,7 @@ ll_fb_SWSE_14_1 <- function(pars, rt, resp, truth, err_tol) {
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "SWSE", summation_small = "2014",
-                scale = "both", maxterms_large = 1, err_tol = err_tol)
+                scale = "both", max_terms_large = 1, err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -58,7 +58,7 @@ ll_fb_SWSE_17_2 <- function(pars, rt, resp, truth, err_tol) {
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "SWSE", summation_small = "2017",
-                scale = "both", maxterms_large = 2, err_tol = err_tol)
+                scale = "both", max_terms_large = 2, err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -69,7 +69,7 @@ ll_fb_SWSE_14_2 <- function(pars, rt, resp, truth, err_tol) {
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "SWSE", summation_small = "2014",
-                scale = "both", maxterms_large = 2, err_tol = err_tol)
+                scale = "both", max_terms_large = 2, err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -80,7 +80,7 @@ ll_fb_SWSE_17_3 <- function(pars, rt, resp, truth, err_tol) {
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "SWSE", summation_small = "2017",
-                scale = "both", maxterms_large = 3, err_tol = err_tol)
+                scale = "both", max_terms_large = 3, err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -91,7 +91,7 @@ ll_fb_SWSE_14_3 <- function(pars, rt, resp, truth, err_tol) {
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "SWSE", summation_small = "2014",
-                scale = "both", maxterms_large = 3, err_tol = err_tol)
+                scale = "both", max_terms_large = 3, err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -102,7 +102,7 @@ ll_fb_SWSE_17_4 <- function(pars, rt, resp, truth, err_tol) {
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "SWSE", summation_small = "2017",
-                scale = "both", maxterms_large = 4, err_tol = err_tol)
+                scale = "both", max_terms_large = 4, err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -113,7 +113,7 @@ ll_fb_SWSE_14_4 <- function(pars, rt, resp, truth, err_tol) {
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "SWSE", summation_small = "2014",
-                scale = "both", maxterms_large = 4, err_tol = err_tol)
+                scale = "both", max_terms_large = 4, err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -124,7 +124,7 @@ ll_fb_SWSE_17_5 <- function(pars, rt, resp, truth, err_tol) {
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "SWSE", summation_small = "2017",
-                scale = "both", maxterms_large = 5, err_tol = err_tol)
+                scale = "both", max_terms_large = 5, err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -135,7 +135,7 @@ ll_fb_SWSE_14_5 <- function(pars, rt, resp, truth, err_tol) {
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "SWSE", summation_small = "2014",
-                scale = "both", maxterms_large = 5, err_tol = err_tol)
+                scale = "both", max_terms_large = 5, err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -146,7 +146,7 @@ ll_fb_SWSE_17_6 <- function(pars, rt, resp, truth, err_tol) {
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "SWSE", summation_small = "2017",
-                scale = "both", maxterms_large = 6, err_tol = err_tol)
+                scale = "both", max_terms_large = 6, err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -157,7 +157,7 @@ ll_fb_SWSE_14_6 <- function(pars, rt, resp, truth, err_tol) {
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "SWSE", summation_small = "2014",
-                scale = "both", maxterms_large = 6, err_tol = err_tol)
+                scale = "both", max_terms_large = 6, err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -168,7 +168,7 @@ ll_fb_SWSE_17_7 <- function(pars, rt, resp, truth, err_tol) {
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "SWSE", summation_small = "2017",
-                scale = "both", maxterms_large = 7, err_tol = err_tol)
+                scale = "both", max_terms_large = 7, err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -179,7 +179,7 @@ ll_fb_SWSE_14_7 <- function(pars, rt, resp, truth, err_tol) {
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
                 t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
                 n_terms_small = "SWSE", summation_small = "2014",
-                scale = "both", maxterms_large = 7, err_tol = err_tol)
+                scale = "both", max_terms_large = 7, err_tol = err_tol)
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -535,7 +535,7 @@ data(med_dec, package = "fddm")
 med_dec <- med_dec[which(med_dec[["rt"]] >= 0), ]
 fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
               truth_idx = 5, response_upper = "blast", err_tol = 1e-6,
-              times = 25, unit = "ns")
+              times = 5, unit = "ns")
 
 save(fit, compress = "xz", compression_level = 9,
      file = paste0(save_dir, "mtl_fit.Rds"))
