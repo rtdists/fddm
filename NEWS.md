@@ -6,6 +6,9 @@
 ## Bug Fixes
 * Amended the required number of terms and summation functions.
 
+## Other Changes
+* Changed default value of `max_terms_large` to 1. This affects the default method (`n_terms_small = "SWSE", scale = "both"`).
+
 
 
 
