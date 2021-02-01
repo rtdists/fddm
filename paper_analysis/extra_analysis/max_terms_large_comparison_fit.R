@@ -540,6 +540,10 @@ fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
 save(fit, compress = "xz", compression_level = 9,
      file = paste0(save_dir, "mtl_fit.Rds"))
 
+# uncomment the following line if loading pre-run benchmark data,
+# will load into variable named "fit"
+# load(paste0(save_dir, "mtl_fit.Rds"))
+
 
 ##### Plot Results #############################################################
 fit_prep <- function(fit, eps = 1e-4) {
