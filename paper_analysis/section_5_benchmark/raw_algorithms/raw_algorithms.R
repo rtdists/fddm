@@ -8,7 +8,7 @@ source(system.file("extdata", "Gondan_et_al_density.R", package = "fddm", mustWo
 library("microbenchmark")
 library("reshape2")
 library("ggplot2")
-save_dir <- "paper_analysis/section_5_benchmarking/raw_algorithms/"
+save_dir <- "paper_analysis/section_5_benchmark/raw_algorithms/"
 
 
 
