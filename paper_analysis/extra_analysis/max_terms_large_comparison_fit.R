@@ -290,150 +290,150 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
                      upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
-      res[["Convergence"]][(i-1)*ni+0*ninit_vals+j] <- temp[["convergence"]]
-      res[["Objective"]][(i-1)*ni+0*ninit_vals+j] <- temp[["objective"]]
-      res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
-      res[["FuncEvals"]][(i-1)*ni+0*ninit_vals+j] <- temp[["evaluations"]][[1]]
+      res[["Convergence"]][(i-1)*ni+1*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+1*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+1*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+1*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
       temp <- nlminb(init_vals[j, ], ll_fb_SWSE_17_1,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
                      upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
-      res[["Convergence"]][(i-1)*ni+0*ninit_vals+j] <- temp[["convergence"]]
-      res[["Objective"]][(i-1)*ni+0*ninit_vals+j] <- temp[["objective"]]
-      res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
-      res[["FuncEvals"]][(i-1)*ni+0*ninit_vals+j] <- temp[["evaluations"]][[1]]
+      res[["Convergence"]][(i-1)*ni+2*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+2*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+2*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+2*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
       temp <- nlminb(init_vals[j, ], ll_fb_SWSE_14_1,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
                      upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
-      res[["Convergence"]][(i-1)*ni+0*ninit_vals+j] <- temp[["convergence"]]
-      res[["Objective"]][(i-1)*ni+0*ninit_vals+j] <- temp[["objective"]]
-      res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
-      res[["FuncEvals"]][(i-1)*ni+0*ninit_vals+j] <- temp[["evaluations"]][[1]]
+      res[["Convergence"]][(i-1)*ni+3*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+3*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+3*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+3*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
       temp <- nlminb(init_vals[j, ], ll_fb_SWSE_17_2,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
                      upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
-      res[["Convergence"]][(i-1)*ni+0*ninit_vals+j] <- temp[["convergence"]]
-      res[["Objective"]][(i-1)*ni+0*ninit_vals+j] <- temp[["objective"]]
-      res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
-      res[["FuncEvals"]][(i-1)*ni+0*ninit_vals+j] <- temp[["evaluations"]][[1]]
+      res[["Convergence"]][(i-1)*ni+4*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+4*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+4*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+4*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
       temp <- nlminb(init_vals[j, ], ll_fb_SWSE_14_2,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
                      upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
-      res[["Convergence"]][(i-1)*ni+0*ninit_vals+j] <- temp[["convergence"]]
-      res[["Objective"]][(i-1)*ni+0*ninit_vals+j] <- temp[["objective"]]
-      res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
-      res[["FuncEvals"]][(i-1)*ni+0*ninit_vals+j] <- temp[["evaluations"]][[1]]
+      res[["Convergence"]][(i-1)*ni+5*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+5*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+5*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+5*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
       temp <- nlminb(init_vals[j, ], ll_fb_SWSE_17_3,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
                      upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
-      res[["Convergence"]][(i-1)*ni+0*ninit_vals+j] <- temp[["convergence"]]
-      res[["Objective"]][(i-1)*ni+0*ninit_vals+j] <- temp[["objective"]]
-      res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
-      res[["FuncEvals"]][(i-1)*ni+0*ninit_vals+j] <- temp[["evaluations"]][[1]]
+      res[["Convergence"]][(i-1)*ni+6*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+6*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+6*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+6*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
       temp <- nlminb(init_vals[j, ], ll_fb_SWSE_14_3,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
                      upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
-      res[["Convergence"]][(i-1)*ni+0*ninit_vals+j] <- temp[["convergence"]]
-      res[["Objective"]][(i-1)*ni+0*ninit_vals+j] <- temp[["objective"]]
-      res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
-      res[["FuncEvals"]][(i-1)*ni+0*ninit_vals+j] <- temp[["evaluations"]][[1]]
+      res[["Convergence"]][(i-1)*ni+7*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+7*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+7*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+7*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
       temp <- nlminb(init_vals[j, ], ll_fb_SWSE_17_4,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
                      upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
-      res[["Convergence"]][(i-1)*ni+0*ninit_vals+j] <- temp[["convergence"]]
-      res[["Objective"]][(i-1)*ni+0*ninit_vals+j] <- temp[["objective"]]
-      res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
-      res[["FuncEvals"]][(i-1)*ni+0*ninit_vals+j] <- temp[["evaluations"]][[1]]
+      res[["Convergence"]][(i-1)*ni+8*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+8*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+8*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+8*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
       temp <- nlminb(init_vals[j, ], ll_fb_SWSE_14_4,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
                      upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
-      res[["Convergence"]][(i-1)*ni+0*ninit_vals+j] <- temp[["convergence"]]
-      res[["Objective"]][(i-1)*ni+0*ninit_vals+j] <- temp[["objective"]]
-      res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
-      res[["FuncEvals"]][(i-1)*ni+0*ninit_vals+j] <- temp[["evaluations"]][[1]]
+      res[["Convergence"]][(i-1)*ni+9*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+9*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+9*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+9*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
       temp <- nlminb(init_vals[j, ], ll_fb_SWSE_17_5,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
                      upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
-      res[["Convergence"]][(i-1)*ni+0*ninit_vals+j] <- temp[["convergence"]]
-      res[["Objective"]][(i-1)*ni+0*ninit_vals+j] <- temp[["objective"]]
-      res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
-      res[["FuncEvals"]][(i-1)*ni+0*ninit_vals+j] <- temp[["evaluations"]][[1]]
+      res[["Convergence"]][(i-1)*ni+10*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+10*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+10*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+10*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
       temp <- nlminb(init_vals[j, ], ll_fb_SWSE_14_5,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
                      upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
-      res[["Convergence"]][(i-1)*ni+0*ninit_vals+j] <- temp[["convergence"]]
-      res[["Objective"]][(i-1)*ni+0*ninit_vals+j] <- temp[["objective"]]
-      res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
-      res[["FuncEvals"]][(i-1)*ni+0*ninit_vals+j] <- temp[["evaluations"]][[1]]
+      res[["Convergence"]][(i-1)*ni+11*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+11*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+11*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+11*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
       temp <- nlminb(init_vals[j, ], ll_fb_SWSE_17_6,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
                      upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
-      res[["Convergence"]][(i-1)*ni+0*ninit_vals+j] <- temp[["convergence"]]
-      res[["Objective"]][(i-1)*ni+0*ninit_vals+j] <- temp[["objective"]]
-      res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
-      res[["FuncEvals"]][(i-1)*ni+0*ninit_vals+j] <- temp[["evaluations"]][[1]]
+      res[["Convergence"]][(i-1)*ni+12*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+12*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+12*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+12*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
       temp <- nlminb(init_vals[j, ], ll_fb_SWSE_14_6,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
                      upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
-      res[["Convergence"]][(i-1)*ni+0*ninit_vals+j] <- temp[["convergence"]]
-      res[["Objective"]][(i-1)*ni+0*ninit_vals+j] <- temp[["objective"]]
-      res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
-      res[["FuncEvals"]][(i-1)*ni+0*ninit_vals+j] <- temp[["evaluations"]][[1]]
+      res[["Convergence"]][(i-1)*ni+13*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+13*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+13*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+13*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
       temp <- nlminb(init_vals[j, ], ll_fb_SWSE_17_7,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
                      upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
-      res[["Convergence"]][(i-1)*ni+0*ninit_vals+j] <- temp[["convergence"]]
-      res[["Objective"]][(i-1)*ni+0*ninit_vals+j] <- temp[["objective"]]
-      res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
-      res[["FuncEvals"]][(i-1)*ni+0*ninit_vals+j] <- temp[["evaluations"]][[1]]
+      res[["Convergence"]][(i-1)*ni+14*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+14*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+14*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+14*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
       temp <- nlminb(init_vals[j, ], ll_fb_SWSE_14_7,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
                      upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
-      res[["Convergence"]][(i-1)*ni+0*ninit_vals+j] <- temp[["convergence"]]
-      res[["Objective"]][(i-1)*ni+0*ninit_vals+j] <- temp[["objective"]]
-      res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
-      res[["FuncEvals"]][(i-1)*ni+0*ninit_vals+j] <- temp[["evaluations"]][[1]]
+      res[["Convergence"]][(i-1)*ni+15*ninit_vals+j] <- temp[["convergence"]]
+      res[["Objective"]][(i-1)*ni+15*ninit_vals+j] <- temp[["objective"]]
+      res[["Iterations"]][(i-1)*ni+15*ninit_vals+j] <- temp[["iterations"]]
+      res[["FuncEvals"]][(i-1)*ni+15*ninit_vals+j] <- temp[["evaluations"]][[1]]
 
       # microbenchmark
       mbm <- microbenchmark(
