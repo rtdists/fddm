@@ -9,6 +9,7 @@ source(system.file("extdata", "Gondan_et_al_density.R", package = "fddm", mustWo
 library("microbenchmark")
 library("reshape2")
 library("ggplot2")
+library("ggforce")
 save_dir <- "paper_analysis/appendices/"
 
 
@@ -305,7 +306,7 @@ ggplot(mbm_vec, aes(x = factor(FuncName, levels = Names_vec), y = time,
        stat_summary(fun = mean, geom = "errorbar",
                     aes(ymax = ..y.., ymin = ..y..),
                     width = .35, linetype = "dashed") +
-       coord_cartesian(ylim = c(mi, ma)) +
+       facet_zoom(ylim = c(mi, ma)) +
        labs(title = "Distribution of median benchmark times",
             subtitle = "Dashed lines represent mean benchmark times",
             x = "Method", y = "Time (microseconds)",

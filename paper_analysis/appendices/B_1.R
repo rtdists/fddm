@@ -8,6 +8,7 @@ source(system.file("extdata", "Gondan_et_al_density.R", package = "fddm", mustWo
 library("microbenchmark")
 library("reshape2")
 library("ggplot2")
+library("ggforce")
 save_dir <- "paper_analysis/appendices/"
 
 
