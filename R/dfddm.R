@@ -97,7 +97,9 @@
 #'   variant when \code{n_terms_small = "SWSE", scale = "both"}. Allowed values
 #'   are any non-negative integer. \code{max_terms_large = 0} indicates that the
 #'   "small-time" variant will always be used instead of the "large-time"
-#'   variant. Default value is \eqn{4}.
+#'   variant. The \code{fddm} GitHub has plots showing the relative efficiencies
+#'   of several options for the \code{max_terms_large} parameter in the
+#'   \code{paper_analysis/extra_analysis} folder. Default value is \eqn{1}.
 #'
 #' @param err_tol Allowed error tolerance of the density function. Since the
 #'   density function contains an infinite sum, this parameter defines the
@@ -206,7 +208,7 @@ dfddm <- function(rt, response,
                   n_terms_small = "SWSE",
                   summation_small = "2017",
                   scale = "both",
-                  max_terms_large = 4,
+                  max_terms_large = 1,
                   err_tol = 0.000001)
 {
   return(cpp_dfddm(rt, response, a, v, t0, w, sv, sigma, log,
