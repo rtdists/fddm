@@ -2,7 +2,7 @@ library("fddm")
 library("microbenchmark")
 library("reshape2")
 library("ggplot2")
-path <- "paper_analysis/extra_analysis/"
+save_dir <- "paper_analysis/extra_analysis/"
 
 
 
@@ -273,6 +273,13 @@ bm_vec_1 <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                              W = W, SV = SV, err_tol = err_tol,
                              times = 1000, unit = "ns")
 
+save(bm_vec_1, compress = "xz", compression_level = 9,
+     file = paste0(save_dir, "mtl_bm_0-30.Rds"))
+
+# uncomment the following line if loading pre-run benchmark data,
+# will load into variable named "bm_vec_1"
+# load(paste0(save_dir, "mtl_bm_0-30.Rds"))
+
 # Plot Results
 t_idx <- match("SV", colnames(bm_vec_1))
 bm_vec_1[, -seq_len(t_idx)] <- bm_vec_1[, -seq_len(t_idx)]/1000 # convert to microseconds
@@ -312,7 +319,7 @@ ggplot(mbm_vec_1, aes(x = factor(FuncName, levels = Names_vec), y = time,
         axis.title.x = element_text(size = 20),
         axis.title.y = element_text(size = 20),
         legend.position = "none")
-ggsave(paste0(path, "bm_vec_mtl_violin_0-30.png"), width = 16, height = 9)
+ggsave(paste0(path, "mtl_bm_0-30.png"), width = 16, height = 9)
 
 ##### Parameter Space 2 Benchmorks #############################################
 RT <- seq(0.1, 2, by = 0.1)
@@ -326,6 +333,13 @@ err_tol <- 1e-6 # this is the setting from rtdists
 bm_vec_2 <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                              W = W, SV = SV, err_tol = err_tol,
                              times = 1000, unit = "ns")
+
+save(bm_vec_2, compress = "xz", compression_level = 9,
+     file = paste0(save_dir, "mtl_bm_0-2.Rds"))
+
+# uncomment the following line if loading pre-run benchmark data,
+# will load into variable named "bm_vec_2"
+# load(paste0(save_dir, "mtl_bm_0-2.Rds"))
 
 # Plot Results
 t_idx <- match("SV", colnames(bm_vec_2))
@@ -366,4 +380,4 @@ ggplot(mbm_vec_2, aes(x = factor(FuncName, levels = Names_vec), y = time,
         axis.title.x = element_text(size = 20),
         axis.title.y = element_text(size = 20),
         legend.position = "none")
-ggsave(paste0(path, "bm_vec_mtl_violin_0-2.png"), width = 16, height = 9)
+ggsave(paste0(path, "mtl_bm_0-2.png"), width = 16, height = 9)
