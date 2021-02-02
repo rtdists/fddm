@@ -381,9 +381,9 @@ ggsave("paper_analysis/images/bm_ind_0-30.png", width = 16, height = 9)
 
 
 ### Mean and Quantile Plots
-Names_meq <- c("fb_SWSE_17", "fs_SWSE_14", "fl_Nav_09",
+Names_meq <- c("fb_SWSE_17", "fs_SWSE_17", "fl_Nav_09",
                "RWiener", "Gondan", "rtdists")
-Color_meq <- c("#e000b4", "#cc99ff", "#996633",
+Color_meq <- c("#e000b4", "#9900cc", "#996633",
                "#ff9999", "#ff5050", "#990000")
 mbm_meq <- mbm_ind[mbm_ind[["FuncName"]] %in% Names_meq, ]
 
