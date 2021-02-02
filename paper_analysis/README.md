@@ -1,11 +1,18 @@
-This folder contains all of the code used to produce the results (i.e., images) in the fddm paper.
+This folder contains all of the code used to produce the results (i.e., images) in the `fddm` paper.
 
-images contains all of the plots that are used in the paper.
+# images/
+* the plots that are used in the `fddm` paper
 
-section_3 contains all of the code and images used in Section 3 of the paper "Approximations to the DDM Density Functions".
+# section_3/
+* large_terms_eps
+* small_terms_eps_14
+* small_terms_eps_17
 
-section_5 contains all of the code and images used in Section 5 of the paper "Benchmark Testing".
+# section_5/
+* max_terms_large
+* raw_algorithms
+* data_fitting
 
-appendices contains all of the code and benchmark data used in the appendices (specifically the one about the additional analysis)
-
-extra_analysis contains some other perhaps useful code and images. Mainly it compares the max_terms_large parameter in the dfddm function (to do with the SWSE combined-time algorithm).
+# appendices/
+* B.1
+* B.2
