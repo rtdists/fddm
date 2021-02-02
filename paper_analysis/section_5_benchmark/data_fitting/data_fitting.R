@@ -1,5 +1,5 @@
 # This file produces the results (and plots) that pertain to data fitting, as
-# shown in Section 5.2 of the fddm paper: "Benchmarking Data Fitting"
+# shown in Section 5.3 of the fddm paper: "Benchmarking Data Fitting"
 
 library("fddm")
 library("rtdists")

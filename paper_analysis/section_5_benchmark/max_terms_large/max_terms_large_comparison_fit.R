@@ -1,8 +1,12 @@
+# This file produces the results (and plots) that pertain to data fitting using
+# the algorithms that combine the SWSE small-time method with the Navarro et al.
+# large-time method, as shown in Section 5.1 of the fddm paper: "maxtermslarge"
+
 library("fddm")
 library("microbenchmark")
 library("reshape2")
 library("ggplot2")
-save_dir <- "paper_analysis/extra_analysis/"
+save_dir <- "paper_analysis/section_5_benchmark/max_terms_large/"
 
 
 

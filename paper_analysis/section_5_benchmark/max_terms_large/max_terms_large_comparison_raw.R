@@ -1,8 +1,12 @@
+# This file produces the results (and plots) that pertain to the raw algorithms
+# that combine the SWSE small-time method with the Navarro et al. large-time
+# method, as shown in Section 5.1 of the fddm paper: "maxtermslarge"
+
 library("fddm")
 library("microbenchmark")
 library("reshape2")
 library("ggplot2")
-save_dir <- "paper_analysis/extra_analysis/"
+save_dir <- "paper_analysis/section_5_benchmark/max_terms_large/"
 
 
 
@@ -260,7 +264,7 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
 
 
 
-##### Parameter Space 1 Benchmarks #############################################
+##### Parameter Space 1 (RT: 0-30) Benchmarks ##################################
 RT <- c(0.001, 0.1, 1, 2, 3, 4, 5, 10, 30)
 A <- c(0.25, 0.5, 1, 2.5, 5)
 V <- c(-5, -2, 0, 2, 5)
@@ -321,7 +325,7 @@ ggplot(mbm_vec_1, aes(x = factor(FuncName, levels = Names_vec), y = time,
         legend.position = "none")
 ggsave(paste0(save_dir, "mtl_bm_0-30.png"), width = 16, height = 9)
 
-##### Parameter Space 2 Benchmorks #############################################
+##### Parameter Space 2 (RT:0-2) Benchmorks ####################################
 RT <- seq(0.1, 2, by = 0.1)
 A <- seq(0.5, 3.5, by = 0.5)
 V <- c(-5, -2, 0, 2, 5)

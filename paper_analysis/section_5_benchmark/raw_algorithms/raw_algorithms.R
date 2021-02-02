@@ -1,5 +1,5 @@
 # This file produces the results (and plots) that pertain to the raw algorithms,
-# as shown in Section 5.1 of the fddm paper: "Benchmarking the Raw Algorithms"
+# as shown in Section 5.2 of the fddm paper: "Benchmarking the Raw Algorithms"
 
 library("fddm")
 library("rtdists")
