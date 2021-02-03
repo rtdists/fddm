@@ -36,8 +36,7 @@ int ks_Gon(const double& t, const double& w, const double& eps)
 
 // Navarro and Fuss 2009
 int ks_Nav(const double& t, const double& w, const double& eps)
-{
-  // note: w is not used
+{ // note: w is not used
   if (eps < 1 / (2 * sqrt(2 * M_PI * t))) { // if error threshold is set low enough
     float ks = 2 + sqrt(-2 * t * log(2 * eps * sqrt(2 * M_PI * t)));
     float bc = sqrt(t) + 1; // boundary conditions
@@ -57,8 +56,7 @@ int ks_Nav(const double& t, const double& w, const double& eps)
 
 // Navarro and Fuss 2009
 int kl_Nav(const double& t, const double& w, const double& eps)
-{
-  // note: w is not used
+{ // note: w is not used
   float bc = 1 / (M_PI * sqrt(t)); // boundary conditions
   if (bc > INT_MAX) return INT_MAX;
   if (eps < 1 / (M_PI * t)) { // error threshold is low enough

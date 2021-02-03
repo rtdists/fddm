@@ -662,7 +662,7 @@ ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
         legend.background = element_rect(fill = "transparent"),
         legend.title = element_text(size = 14),
         legend.text = element_text(size = 13))
-ggsave(paste0(save_dir, "fit_mtl_bm.png"), width = 16, height = 9)
+ggsave(paste0(save_dir, "mtl_fit_bm.png"), width = 16, height = 9)
 
 
 
@@ -729,4 +729,4 @@ ggplot(fit_fev, aes(x = factor(Algorithm, levels = Names),
         legend.background = element_rect(fill = "transparent"),
         legend.title = element_text(size = 14),
         legend.text = element_text(size = 13))
-ggsave(paste0(save_dir, "fit_mtl_fe.png"), width = 16, height = 9)
+ggsave(paste0(save_dir, "mtl_fit_fe.png"), width = 16, height = 9)
