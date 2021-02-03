@@ -105,6 +105,28 @@ ggplot(mbm_ks, aes(x = factor(FuncName, levels = Names), y = time,
 ggsave("paper_analysis/images/ks_bm.png", width = 16, height = 9)
 
 
+### Difference Density Plot
+ggplot(data.frame(diff = ks_bm[, "ks_Gondan_14"] - ks_bm[, "ks_Navarro_09"]),
+       aes(x = diff)) +
+  geom_density() +
+  labs(title = paste("Density of the differences between the median benchmark times",
+                     "for ks_Gon and ks_Nav at each combination of parameter values",
+                     sep = "\n"),
+       subtitle = "Negative values indicate ks_Gon is faster",
+       x = "Difference in time (microseconds)", y = "Density") +
+  theme_bw() +
+  theme(panel.border = element_blank(),
+        plot.title = element_text(size = 23),
+        plot.subtitle = element_text(size = 16),
+        axis.text.x = element_text(size = 16, angle = 90,
+                              vjust = 0.5, hjust = 1),
+        axis.text.y = element_text(size = 16),
+        axis.title.x = element_text(size = 20),
+        axis.title.y = element_text(size = 20),
+        legend.position = "none")
+ggsave("paper_analysis/images/ks_diff.png", width = 16, height = 9)
+
+
 ### Mean and Quantile Plots
 # t
 ggplot(mbm_ks, aes(x = t, y = time,
