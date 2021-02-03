@@ -23,9 +23,9 @@ ks_benchmark <- function(t, w, eps, times = 1000, unit = "ns") {
   # Initialize the dataframe to contain the microbenchmark results
   mbm_res <- data.frame(matrix(ncol = 3+nf, nrow = nt*nw*neps))
   colnames(mbm_res) <- c('t', 'w', 'eps', fnames)
-  row_idx <- 1
 
   # Loop through each combination of parameters
+  row_idx <- 1
   for (ti in 1:nt) {
     for (wi in 1:nw) {
       for (ei in 1:neps) {
@@ -34,16 +34,16 @@ ks_benchmark <- function(t, w, eps, times = 1000, unit = "ns") {
           ks_Gondan_14 = ks_Gon(t[ti], w[wi], eps[ei]),
           ks_Navarro_09 = ks_Nav(t[ti], w[wi], eps[ei]),
           times = times, unit = unit)
-          # add the t, w, and eps values to the dataframe
-          mbm_res[row_idx, 1] <- t[ti]
-          mbm_res[row_idx, 2] <- w[wi]
-          mbm_res[row_idx, 3] <- eps[ei]
-          # add the median microbenchmark results to the dataframe
-          for (fi in 1:nf) {
-            mbm_res[row_idx, 3+fi] <- median(mbm[mbm[,1] == fnames[fi], 2])
-          }
-          # iterate start value
-          row_idx = row_idx + 1
+        # add the t, w, and eps values to the dataframe
+        mbm_res[row_idx, 1] <- t[ti]
+        mbm_res[row_idx, 2] <- w[wi]
+        mbm_res[row_idx, 3] <- eps[ei]
+        # add the median microbenchmark results to the dataframe
+        for (fi in 1:nf) {
+          mbm_res[row_idx, 3+fi] <- median(mbm[mbm[,1] == fnames[fi], 2])
+        }
+        # iterate start value
+        row_idx = row_idx + 1
       }
     }
   }
@@ -139,7 +139,7 @@ ggplot(mbm_ks, aes(x = t, y = time,
         strip.text = element_text(size = 14),
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
-  facet_wrap(~ factor(FuncName, levels = Names), scales = "free_y")
+  facet_wrap(~ factor(FuncName, levels = Names))
 ggsave("paper_analysis/images/ks_meq_t.png", width = 16, height = 9)
 
 
@@ -176,7 +176,7 @@ ggplot(mbm_ks, aes(x = w, y = time,
         strip.text = element_text(size = 14),
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
-  facet_wrap(~ factor(FuncName, levels = Names), scales = "free_y")
+  facet_wrap(~ factor(FuncName, levels = Names))
 ggsave("paper_analysis/images/ks_meq_w.png", width = 16, height = 9)
 
 
@@ -214,5 +214,5 @@ ggplot(mbm_ks, aes(x = eps, y = time,
         strip.text = element_text(size = 14),
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
-  facet_wrap(~ factor(FuncName, levels = Names), scales = "free_y")
+  facet_wrap(~ factor(FuncName, levels = Names))
 ggsave("paper_analysis/images/ks_meq_eps.png", width = 16, height = 9)
