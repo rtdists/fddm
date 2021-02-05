@@ -72,65 +72,26 @@ save(ks_bm, compress = "xz", compression_level = 9,
 t_idx <- match("t_stop", colnames(ks_bm))
 mbm_ks <- melt(ks_bm, measure.vars = -seq_len(t_idx),
                variable.name = "FuncName", value.name = "time")
+mbm_ks[["time"]] <- mbm_ks[["time"]] * 1e-3 # convert nano to microseconds
 
 Names <- c("ks_Gondan_14", "ks_Navarro_09")
 Color <- c("#d7db42", "#33cc33")
 
-
-### Violin Plot
-ggplot(mbm_ks, aes(x = factor(FuncName, levels = Names), y = time,
-                   color = factor(FuncName, levels = Names),
-                   fill = factor(FuncName, levels = Names))) +
-       geom_violin(trim = TRUE, alpha = 0.5) +
-       scale_color_manual(values = Color, guide = FALSE) +
-       scale_fill_manual(values = Color, guide = FALSE) +
-       geom_boxplot(width = 0.15, fill = "white", alpha = 0.5) +
-       stat_summary(fun = mean, geom = "errorbar",
-                    aes(ymax = ..y.., ymin = ..y..),
-                    width = .35, linetype = "dashed") +
-       labs(title = "Distribution of median benchmark times",
-            subtitle = "Dashed lines represent mean benchmark times",
-            x = "Method", y = "Time (nanoseconds)",
-            color = "Method") +
-       theme_bw() +
-       theme(panel.border = element_blank(),
-             plot.title = element_text(size = 23),
-             plot.subtitle = element_text(size = 16),
-             axis.text.x = element_text(size = 16, angle = 90,
-                                        vjust = 0.5, hjust = 1),
-             axis.text.y = element_text(size = 16),
-             axis.title.x = element_text(size = 20),
-             axis.title.y = element_text(size = 20),
-             legend.position = "none")
-ggsave("paper_analysis/images/ks_bm.png", width = 16, height = 9)
-
-
-### Mean and Quantile Plots
-# t
 ggplot(mbm_ks, aes(x = t_mid, y = time,
                    color = factor(FuncName, levels = Names),
                    fill = factor(FuncName, levels = Names))) +
-  stat_summary(fun.min = min, fun.max = max,
-               geom = "ribbon", color = NA, alpha = 0.1) +
-  stat_summary(fun.min = function(z) { quantile(z, 0.1) },
-               fun.max = function(z) { quantile(z, 0.9) },
-               geom = "ribbon", color = NA, alpha = 0.2) +
-  stat_summary(fun = mean, geom = "line") +
-  scale_color_manual(values = Color) +
-  scale_fill_manual(values = Color) +
-  labs(title = "Means of the median microbenchmark results",
-       subtitle = paste(
-         "The shaded regions represent the 10% and 90% quantiles",
-         "The lighter shaded regions represent the min and max times",
-         sep = ";\n"),
-       x = bquote(frac(t, a^2) ~ ", effective response time"),
+  geom_line(size = 1) +
+  scale_color_manual(values = Color,
+                     labels = Names,
+                     name = "Method:") +
+  labs(title = bquote("Median microbenchmark results for " ~ k[s] ~ " calculation"),
+       x = bquote(frac(rt, a^2) ~ ", effective response time"),
        y = "Time (microseconds)") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
-        plot.title = element_text(size = 20),
-        plot.subtitle = element_text(size = 16,
-                                     margin = margin(5, 5, 15, 5, "pt")),
+        plot.title = element_text(size = 20,
+                                  margin = margin(5, 5, 30, 5, "pt")),
         axis.text.x = element_text(size = 16, angle = 90,
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
@@ -138,6 +99,11 @@ ggplot(mbm_ks, aes(x = t_mid, y = time,
         axis.title.y = element_text(size = 18),
         strip.text = element_text(size = 14),
         strip.background = element_rect(fill = "white"),
-        legend.position = "none") +
-  facet_wrap(~ factor(FuncName, levels = Names))
-ggsave("paper_analysis/images/ks_meq_t.png", width = 16, height = 9)
+        legend.position = c(1, 1),
+        legend.justification = c(1, 0),
+        legend.box = "horizontal",
+        legend.direction = "horizontal",
+        legend.background = element_rect(fill = "transparent"),
+        legend.title = element_text(size = 14),
+        legend.text = element_text(size = 13))
+ggsave("paper_analysis/images/ks_med_t.png", width = 16, height = 9)
