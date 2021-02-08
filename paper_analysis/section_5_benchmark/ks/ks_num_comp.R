@@ -18,9 +18,6 @@ t <- seq(0.1, 10, by = 0.1)
 w <- seq(0, 1, by = 0.1)
 eps <- 10^(-1:-10)
 
-
-
-
 ks_num_test <- function(t, w, eps) {
   nt <- length(t)
   nw <- length(w)
@@ -36,17 +33,6 @@ ks_num_test <- function(t, w, eps) {
   )
 
   return(res)
-}
-
-
-
-for (ti in 0:(nt-1)) {
-  for (wi in 0:(nw-1)) {
-    for (ei in 0:(ne-1)) {
-      i <- ti*(nw*ne) + wi*ne + ei
-      cat(i, " = ", ti*(nw*ne), " + ", wi*ne, " + ", ei, "\n")
-    }
-  }
 }
 
 
@@ -79,7 +65,6 @@ for (i in 1:length(w)) {
                          name = bquote(k[s] ~ "diff"),
                          breaks = ks_diffs,
                          labels = lbl) +
-    scale_x_continuous(breaks = unique(ks_num[["t"]]), labels = xlab) +
     scale_y_log10() +
     labs(title = bquote("Median microbenchmark results for " ~ k[s] ~ " calculation"),
          x = bquote(frac(rt, a^2) ~ ", effective response time"),
