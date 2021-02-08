@@ -19,6 +19,7 @@ w <- seq(0, 1, by = 0.1)
 eps <- 10^(-1:-10)
 
 ks_num_test <- function(t, w, eps) {
+  t <- t[t > 0]
   nt <- length(t)
   nw <- length(w)
   ne <- length(eps)
@@ -55,6 +56,8 @@ lbl <- as.character(ks_diffs)
 lbl[ks_diffs > 0] <- paste0("+", lbl[ks_diffs > 0])
 w <- sort(unique(ks_num[["w"]]))
 
+sum(ks_num[["ks_diff"]])
+
 for (i in 1:length(w)) {
   ggplot(ks_num[ks_num[["w"]] == w[i], ]) +
     geom_tile(aes(x = t, y = eps, fill = ks_diff)) +
@@ -67,13 +70,15 @@ for (i in 1:length(w)) {
                          labels = lbl) +
     scale_y_log10() +
     labs(title = bquote("Median microbenchmark results for " ~ k[s] ~ " calculation"),
+         subtitle = paste0("w = ", w[i], "\n",
+                           "Cumulative difference = ", sum(ks_num[ks_num[["w"]] == w[i], "ks_diff"])),
          x = bquote(frac(rt, a^2) ~ ", effective response time"),
-         y = bquote(epsilon ~ ", desired precision")) +
+         y = bquote(epsilon ~ ", desired precision, " ~ log[10])) +
     theme_bw() +
     theme(panel.grid.minor = element_blank(),
           panel.border = element_blank(),
-          plot.title = element_text(size = 20,
-                                    margin = margin(5, 5, 30, 5, "pt")),
+          plot.title = element_text(size = 20),
+          plot.subtitle = element_text(size = 17),
           axis.text.x = element_text(size = 16),
           axis.text.y = element_text(size = 16),
           axis.title.x = element_text(size = 18),
