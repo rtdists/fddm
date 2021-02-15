@@ -92,12 +92,10 @@ IntegerVector ks_SWSE_14(const NumericVector& t, const NumericVector& w,
   int nt = t.length();
   int nw = w.length();
   int ne = eps.length();
-  // int n = nt * nw * ne;
   IntegerVector out(nt * nw * ne);
 
-  double gamma, sum, term, tt, ww, eeps;
-  int minterms, j;
-  int oddj = 0;
+  double gamma, sum, term, tt, ww, eeps, rj;
+  int minterms, j, oddj;
 
   for (int ti = 0; ti < nt; ti++) {
     tt = t[ti];
@@ -109,26 +107,33 @@ IntegerVector ks_SWSE_14(const NumericVector& t, const NumericVector& w,
         minterms = sqrt(tt)/2 - ww/2; // min number of terms, truncates toward 0
         gamma = -1 / (2 * tt);
         sum = ww * exp(gamma * ww*ww); // initialize with j=0 term
-        term = (ww > 0 || minterms > 0) ? sum: 1.1 * eeps; // bug workaround
         j = 0;
         while (j < minterms) {
           j++;
-          sum -= (2*j - ww) * exp(gamma * (2*j - ww)*(2*j - ww));
-          term = (2*j + ww) * exp(gamma * (2*j + ww)*(2*j + ww));
-          sum += term;
+          rj = 2*j - ww;
+          sum -= rj * exp(gamma * rj*rj);
+          rj = 2*j + ww;
+          sum += rj * exp(gamma * rj*rj);
         }
+        j++;
+        rj = 2*j - ww;
+        term = rj * exp(gamma * rj*rj);
+        sum -= term;
+        oddj = 1;
         while (term > eeps) {
-          j++;
-          term = (2*j - ww) * exp(gamma * (2*j - ww)*(2*j - ww));
-          sum -= term;
+          rj = 2*j + ww;
+          term = rj * exp(gamma * rj*rj);
+          sum += term;
           if (term <= eeps) {
-            oddj = 1;
+            oddj = 0;
             break;
           }
-          term = (2*j + ww) * exp(gamma * (2*j + ww)*(2*j + ww));
-          sum += term;
+          j++;
+          rj = 2*j - ww;
+          term = rj * exp(gamma * rj*rj);
+          sum -= term;
         }
-        out[ti*nw*ne + wi*ne + ei] = 2*j + oddj;
+        out[ti*nw*ne + wi*ne + ei] = 2*j - oddj;
       }
     }
   }
@@ -142,7 +147,6 @@ IntegerVector ks_SWSE_17(const NumericVector& t, const NumericVector& w,
   int nt = t.length();
   int nw = w.length();
   int ne = eps.length();
-  // int n = nt * nw * ne;
   IntegerVector out(nt * nw * ne);
 
   double gamma, sum, term, rj, tt, ww, eeps;
@@ -158,14 +162,13 @@ IntegerVector ks_SWSE_17(const NumericVector& t, const NumericVector& w,
         minterms = sqrt(tt) - ww; // min number of terms, truncates toward 0
         gamma = -1 / (2 * tt);
         sum = ww * exp(gamma * ww*ww); // initialize with j=0 term
-        term = (ww > 0 || minterms > 0) ? sum: 1.1 * eeps; // bug workaround
         j = 0;
         if (minterms % 2) { // minterms is odd (and at least 1)
           j++;
           rj = j + 1 - ww;
           term = rj * exp(gamma * rj*rj);
           sum -= term;
-          while (j < minterms) { // j is currently 1
+          while (j < minterms) {
             j++;
             rj = j + ww;
             sum += rj * exp(gamma * rj*rj);
@@ -174,16 +177,20 @@ IntegerVector ks_SWSE_17(const NumericVector& t, const NumericVector& w,
             term = rj * exp(gamma * rj*rj);
             sum -= term;
           }
-          while (term > eeps) { // j is currently odd
-            j++;
-            rj = j + ww;
-            term = rj * exp(gamma * rj*rj);
-            sum += term;
-            if (term <= eeps) break;
+          j++;
+          rj = j + ww; // j is now even
+          term = rj * exp(gamma * rj*rj);
+          sum += term;
+          while (term > eeps) {
             j++;
             rj = j + 1 - ww;
             term = rj * exp(gamma * rj*rj);
             sum -= term;
+            if (term <= eeps) break;
+            j++;
+            rj = j + ww;
+            term = rj * exp(gamma * rj*rj);
+            sum += term;
           }
         } else { // minterms is even (and at least 0)
           while (j < minterms) { // j is currently 0
@@ -195,16 +202,20 @@ IntegerVector ks_SWSE_17(const NumericVector& t, const NumericVector& w,
             term = rj * exp(gamma * rj*rj);
             sum += term;
           }
-          while (term > eeps) { // j is currently even
-            j++;
-            rj = j + 1 - ww;
-            term = rj * exp(gamma * rj*rj);
-            sum -= term;
-            if (term <= eeps) break;
+          j++;
+          rj = j + 1 - ww; // j is now odd
+          term = rj * exp(gamma * rj*rj);
+          sum -= term;
+          while (term > eeps) {
             j++;
             rj = j + ww;
             term = rj * exp(gamma * rj*rj);
             sum += term;
+            if (term <= eeps) break;
+            j++;
+            rj = j + 1 - ww;
+            term = rj * exp(gamma * rj*rj);
+            sum -= term;
           }
         }
         out[ti*nw*ne + wi*ne + ei] = j;

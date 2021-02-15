@@ -54,7 +54,7 @@
 #' @param sv Inter-trial-variability of drift rate. Standard deviation of a
 #'   normal distribution with mean \code{v} describing the distribution of
 #'   actual drift rates from specific trials. Values different from \eqn{0} can
-#'   predict slow errors. Allowed range: \eqn{0 <} \code{sv}. Typical range:
+#'   predict slow errors. Allowed range: \eqn{0 \le} \code{sv}. Typical range:
 #'   \eqn{0 <} \code{sv} \eqn{< 2}. Default value is \eqn{-1}, which indicates
 #'   no drift in the function call. See Details for more information.
 #'

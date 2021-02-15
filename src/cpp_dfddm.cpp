@@ -109,7 +109,7 @@ NumericVector cpp_dfddm(const NumericVector& rt,
     stop("dfddm error: model parameter 'a' is empty");
   } else {
     for (int i = 0; i < Na; i++) {
-      if (a[i] < 0) {
+      if (a[i] <= 0) {
         stop("dfddm error: model parameter 'a' < 0 at index %i.", i+1);
       }
     }
@@ -130,8 +130,8 @@ NumericVector cpp_dfddm(const NumericVector& rt,
     stop("dfddm error: model parameter 'w' is empty");
   } else {
     for (int i = 0; i < Nw; i++) {
-      if (w[i] < 0 || w[i] > 1) {
-        stop("dfddm error: model parameter 'w' < 0 or 'w' > 1 at index %i.", i+1);
+      if (w[i] <= 0 || w[i] >= 1) {
+        stop("dfddm error: model parameter 'w' <= 0 or 'w' >= 1 at index %i.", i+1);
       }
     }
   }

@@ -11,9 +11,8 @@ save_dir <- "paper_analysis/section_5_benchmark/ks/"
 	# ks_SWSE_17(t, w, eps)
 sourceCpp(paste0(save_dir, "ks_vec.cpp"))
 
-ks_SWSE_14(0.9, 0, 1e-6)
-ks_SWSE_17(0.9, 0, 1e-6)
-ks_Gon(0.9, 0, 1e-6)
+
+
 
 
 ##### Testing Function #########################################################
@@ -42,23 +41,13 @@ ks_num_test <- function(t, w, eps) {
 ##### Run and Save the Results #################################################
 t <- seq(0.1, 10, by = 0.1)
 w <- seq(0, 1, by = 0.1)
-eps <- 10^(-1:-10)
+eps <- 10^(-2:-10)
 
 ks_num <- ks_num_test(t, w, eps)
 save(ks_num, compress = "xz", compression_level = 9,
      file = paste0(save_dir, "ks_num.Rds"))
 
-tt <- 1.3
-ww <- 0.1
-eeps <- 0.1
-gamma <- -1 / (2 * tt);
-ww * exp(gamma * ww*ww)
-sqrt(tt)/2 - ww/2
-sqrt(tt) - ww
 
-ks_num[ks_num[["ks_SWSE_17"]] - ks_num[["ks_SWSE_14"]] > 0, ]
-hist(ks_num[ks_num[["ks_SWSE_17"]] - ks_num[["ks_SWSE_14"]] > 0, "w"])
-all(ks_num[ks_num[["ks_SWSE_17"]] - ks_num[["ks_SWSE_14"]] > 0, "ks_SWSE_14"] == 1)
 
 ##### Plot Heatmap of Results ##################################################
 # uncomment the following line if loading pre-run benchmark data,
@@ -69,11 +58,11 @@ ks_num[["ks_CGN"]] <- pmin(ks_num[["ks_Gondan_14"]], ks_num[["ks_Navarro_09"]])
 ks_num[["ks_diff_GN"]] <- ks_num[["ks_Gondan_14"]] - ks_num[["ks_Navarro_09"]]
 ks_num[["ks_diff_SC"]] <- ks_num[["ks_SWSE_17"]] - ks_num[["ks_CGN"]]
 
-
 sum(ks_num[["ks_diff_GN"]])
 sum(ks_num[["ks_diff_SC"]])
 
 w <- sort(unique(ks_num[["w"]]))
+
 
 # Gondan - Navarro
 ks_diffs_GN <- sort(unique(ks_num[["ks_diff_GN"]]))
@@ -122,7 +111,7 @@ for (i in 1:length(w)) {
     geom_tile(aes(x = t, y = eps, fill = ks_diff_SC)) +
     scale_fill_gradient2(low = "#9900cc",
                          mid = "#ffffff",
-                         high = "#336600",
+                         high = "#7a8600",
                          midpoint = 0,
                          name = bquote(k[s] ~ "diff"),
                          breaks = ks_diffs_SC,
