@@ -55,7 +55,7 @@
 #'   normal distribution with mean \code{v} describing the distribution of
 #'   actual drift rates from specific trials. Values different from \eqn{0} can
 #'   predict slow errors. Allowed range: \eqn{0 \le} \code{sv}. Typical range:
-#'   \eqn{0 <} \code{sv} \eqn{< 2}. Default value is \eqn{-1}, which indicates
+#'   \eqn{0 <} \code{sv} \eqn{< 2}. Default value is \eqn{0}, which indicates
 #'   no drift in the function call. See Details for more information.
 #'
 #' @param sigma Diffusion coefficient of the underlying Wiener process.
@@ -141,12 +141,9 @@
 #' (i.e., \code{sv} \eqn{> 0}). The details of the differences between these two
 #' density functions can be found in our associated paper. To use the density
 #' function with a constant drift rate, leave the parameter \code{sv} to its
-#' default value of \code{sv = -1}, as this will indicate no drift to the
+#' default value of \code{sv = 0}, as this will indicate no drift to the
 #' function. To use the density function with a variable drift rate, set the
-#' parameter \code{sv} to some non-negative value, i.e., \code{sv} \eqn{\geq 0}.
-#' This has implications for optimization routines (e.g. parameter estimation)
-#' because with only the default value (\code{sv = -1}), \code{dfddm} will only
-#' ever execute the constant drift rate variant of the DDM.
+#' parameter \code{sv} to some non-negative value, i.e., \code{sv} \eqn{> 0}.
 #'
 #' \code{sigma} - The default value of this parameter is \code{1} because it
 #' only scales the parameters \code{a}, \code{v}, and \code{sv}, as shown above.
@@ -202,7 +199,7 @@
 #' @export
 dfddm <- function(rt, response,
                   a, v, t0, w = 0.5,
-                  sv = -1,
+                  sv = 0,
                   sigma  = 1,
                   log = FALSE,
                   n_terms_small = "SWSE",

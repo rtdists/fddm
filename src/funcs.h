@@ -15,7 +15,9 @@ using std::sqrt;
 using std::min;
 using std::max;
 using std::ceil;
+using std::to_string;
 using Rcpp::stop;
+using Rcpp::warning;
 using Rcpp::NumericVector;
 using Rcpp::LogicalVector;
 
@@ -102,3 +104,34 @@ double fb_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& eps,
               const int& max_terms_large,
               const NumFunc& numf, const SumFunc& sumf);
+
+
+
+// Helper Functions
+vector<int> convert_responses(const SEXP& response, int& Nres);
+bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
+                     const int& Nv, const int& Nt0, const int& Nw,
+                     const int& Nsv, const int& Nsig, const int& Neps,
+                     const NumericVector& rt, const NumericVector& a,
+                     const NumericVector& t0, const NumericVector& w,
+                     const NumericVector& sv, const NumericVector& sigma,
+                     const NumericVector& eps,
+                     vector<double>& a_c, vector<double>& t0_c,
+                     vector<double>& w_c, vector<double>& sv_c,
+                     vector<double>& sigma_c, vector<double>& eps_c);
+void determine_method(const std::string& n_terms_small,
+                      const std::string& summation_small,
+                      const std::string& scale,
+                      NumFunc& numf, SumFunc& sumf, DenFunc& denf,
+                      double& rt0, const bool& log_prob);
+NumericVector calculate_pdf(const int& Nrt, const int& Nres, const int& Na,
+                            const int& Nv, const int& Nt0, const int& Nw,
+                            const int& Nsv, const int& Nsig, const int& Neps,
+                            const int& Nmax,
+                            const NumericVector& rt, const vector<int>& resp,
+                            const vector<double>& a, const NumericVector& v,
+                            const vector<double>& t0, const vector<double>& w,
+                            const vector<double>& sv, const vector<double>& sigma,
+                            const vector<double>& eps, const int& max_terms_large,
+                            const NumFunc& numf, const SumFunc& sumf,
+                            const DenFunc& denf, const double& rt0);

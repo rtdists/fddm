@@ -18,7 +18,7 @@ double ff(const double& t, const double& a, const double& v,
 { // note: max_terms_large, numf are not used
   double mult;
 
-  if (sv < SV_THRESH) { // no sv
+  if (sv <= SV_THRESH) { // no sv
     mult = a * exp(-v * a * w - v * v * t / 2) / (t * SQRT_2PI * sqrt(t));
   } else { // sv
     mult = a * exp((sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
@@ -34,7 +34,7 @@ double ff_log(const double& t, const double& a, const double& v,
 { // note: max_terms_large, numf are not used
   double mult;
 
-  if (sv < SV_THRESH) { // no sv
+  if (sv <= SV_THRESH) { // no sv
     mult = log(a) - LOG_2PI_2 - 1.5 * log(t) - v * a * w - v*v * t / 2;
   } else { // sv
     mult = log(a) - 1.5 * log(t) - LOG_2PI_2 - 0.5 * log(1 + sv*sv * t)
@@ -58,7 +58,7 @@ double fs(const double& t, const double& a, const double& v,
   double mult_s;
   int ks;
 
-  if (sv < SV_THRESH) { // no sv
+  if (sv <= SV_THRESH) { // no sv
     mult_s = exp(-v * a * w - v * v * t / 2);
   } else { // sv
     mult_s = exp((sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
@@ -77,7 +77,7 @@ double fs_log(const double& t, const double& a, const double& v,
   double mult_s;
   int ks;
 
-  if (sv < SV_THRESH) { // no sv
+  if (sv <= SV_THRESH) { // no sv
     mult_s = -v * a * w - v * v * t / 2;
   } else { // sv
     mult_s = (sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
@@ -105,7 +105,7 @@ double fl(const double& t, const double& a, const double& v,
   double mult_l;
   int kl;
 
-  if (sv < SV_THRESH) { // no sv
+  if (sv <= SV_THRESH) { // no sv
     mult_l = exp(-v * a * w - v*v * t / 2) / (a*a);
   } else { // sv
     mult_l = exp((sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
@@ -124,7 +124,7 @@ double fl_log(const double& t, const double& a, const double& v,
   double mult_l;
   int kl;
 
-  if (sv < SV_THRESH) { // no sv
+  if (sv <= SV_THRESH) { // no sv
     mult_l = - v * a * w - v * v * t / 2 - 2 * log(a);
   } else { // sv
     mult_l = (sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
@@ -150,7 +150,7 @@ double fc(const double& t, const double& a, const double& v,
   double mult;
 
   // calculate large time multiplier to check number of terms
-  if (sv < SV_THRESH) { // no sv
+  if (sv <= SV_THRESH) { // no sv
     mult = exp(-v * a * w - v*v * t / 2) / (a*a);
   } else { // sv
     mult = exp((sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
@@ -161,7 +161,7 @@ double fc(const double& t, const double& a, const double& v,
   if (kl <= max_terms_large) { // use large time
     return M_PI * mult * large_sum_Nav(t, a, w, kl, 0.0);
   } else { // use small time
-    if (sv < SV_THRESH) { // no sv
+    if (sv <= SV_THRESH) { // no sv
       mult = a * exp(-v * a * w - v * v * t / 2) / (t * SQRT_2PI * sqrt(t));
     } else { // sv
       mult = a * exp((sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
@@ -179,7 +179,7 @@ double fc_log(const double& t, const double& a, const double& v,
   double mult;
 
   // calculate large time multiplier to check number of terms
-  if (sv < SV_THRESH) { // no sv
+  if (sv <= SV_THRESH) { // no sv
     mult = - v * a * w - v * v * t / 2 - 2 * log(a);
   } else { // sv
     mult = (sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
@@ -190,7 +190,7 @@ double fc_log(const double& t, const double& a, const double& v,
   if (kl <= max_terms_large) { // use large time
     return LOG_PI + mult + log(large_sum_Nav(t, a, w, kl, 0.0));
   } else { // use small time
-    if (sv < SV_THRESH) { // no sv
+    if (sv <= SV_THRESH) { // no sv
       mult = log(a) - LOG_2PI_2 - 1.5 * log(t) - v * a * w - v*v * t / 2;
     } else { // sv
       mult = log(a) - 1.5 * log(t) - LOG_2PI_2 - 0.5 * log(1 + sv*sv * t)
@@ -210,7 +210,7 @@ double fb(const double& t, const double& a, const double& v,
   double mult_s, mult_l;
   int ks, kl;
 
-  if (sv < SV_THRESH) { // no sv
+  if (sv <= SV_THRESH) { // no sv
     mult_s = exp(-v * a * w - v * v * t / 2);
     mult_l = exp(-v * a * w - v*v * t / 2) / (a*a);
   } else { // sv
@@ -238,7 +238,7 @@ double fb_log(const double& t, const double& a, const double& v,
   double mult_s, mult_l;
   int ks, kl;
 
-  if (sv < SV_THRESH) { // no sv
+  if (sv <= SV_THRESH) { // no sv
     mult_s = -v * a * w - v * v * t / 2;
     mult_l = - v * a * w - v * v * t / 2 - 2 * log(a);
   } else { // sv

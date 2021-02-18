@@ -19,70 +19,8 @@ NumericVector cpp_dfddm(const NumericVector& rt,
                         const NumericVector& eps)
 {
   // convert responses to false (0, lower) and true (1, upper)
-  vector<bool> resp;
-  int Nres, type = TYPEOF(response);
-  if (type == 10) { // LogicalVector
-    resp = Rcpp::as<vector<bool> >(response);
-    Nres = resp.size();
-  } else if (type == 13) { // IntegerVector (including factors)
-    Rcpp::IntegerVector temp = Rcpp::wrap(response);
-    if (Rf_isFactor(response) == 1) { // factor
-      Rcpp::CharacterVector levs = temp.attr("levels");
-      vector<int> temp = Rcpp::as<vector<int> >(response);
-      Nres = temp.size();
-      resp.reserve(Nres);
-      for (int i = 0; i < Nres; i++) {
-        if (levs[temp[i]-1] == levs[0]) { // lower
-          resp[i] = 0;
-        } else if (levs[temp[i]-1] == levs[1]) { // upper
-          resp[i] = 1;
-        } else {
-          stop("dfddm error: index %i of function parameter 'response' contains a value that is neither 1 nor 2", i+1);
-        }
-      }
-    } else { // IntegerVector, NOT factor
-      vector<int> temp = Rcpp::as<vector<int> >(response);
-      Nres = temp.size();
-      resp.reserve(Nres);
-      for (int i = 0; i < Nres; i++) {
-        if (temp[i] == 1) { // lower
-          resp[i] = 0;
-        } else if (temp[i] == 2){ // upper
-          resp[i] = 1;
-        } else {
-          stop("dfdmm error: function parameter 'response' was input as a vector of integers, and an integer other than 1 or 2 was detected at index %i", i+1);
-        }
-      }
-    }
-  } else if (type == 14) { // NumericVector
-    vector<double> temp = Rcpp::as<vector<double> >(response);
-    Nres = temp.size();
-    resp.reserve(Nres);
-    for (int i = 0; i < Nres; i++) {
-      if (temp[i] == 1) { // lower
-        resp[i] = 0;
-      } else if (temp[i] == 2){ // upper
-        resp[i] = 1;
-      } else {
-        stop("dfdmm error: function parameter 'response' was input as a vector of integers, and an integer other than 1 or 2 was detected at index %i", i+1);
-      }
-    }
-  } else if (type == 16) { // StringVector (contains at least one string)
-    vector<string> temp = Rcpp::as<vector<string> >(response);
-    Nres = temp.size();
-    resp.reserve(Nres);
-    for (int i = 0; i < Nres; i++) {
-      if (temp[i][0] == 'l' || temp[i][0] == 'L') { // lower
-        resp[i] = 0;
-      } else if (temp[i][0] == 'u' || temp[i][0] == 'U') { // upper
-        resp[i] = 1;
-      } else {
-        stop("dfddm error: function parameter 'response' was input as a vector of strings (characters), and an object other than 'u' or 'l' (case insensitive) was detected as the first character at index %i.", i+1);
-      }
-    }
-  } else {
-    stop("dfddm error: type of function parameter 'response' vector is not one of: integer, double, boolean (logical), or string (character).");
-  }
+  int Nres;
+  vector<int> resp = convert_responses(response, Nres);
 
 
 
@@ -97,228 +35,41 @@ NumericVector cpp_dfddm(const NumericVector& rt,
   int Neps = eps.length();
   int Nmax = max({Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Nsig, Neps});
 
+  vector<double> a_c(Na);
+  vector<double> t0_c(Nt0);
+  vector<double> w_c(Nw);
+  vector<double> sv_c(Nsv);
+  vector<double> sigma_c(Nsig);
+  vector<double> eps_c(Neps);
+
   // input checking
-  if (Nrt < 1) {
+  if (!parameter_check(Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Nsig, Neps,
+                       rt, a, t0, w, sv, sigma, eps,
+                       a_c, t0_c, w_c, sv_c, sigma_c, eps_c)) {
     NumericVector empty_out(0);
     return empty_out;
-  }
-  if (Nres < 1) {
-    stop("dfddm error: model input 'response' is empty");
-  }
-  if (Na < 1) {
-    stop("dfddm error: model parameter 'a' is empty");
-  } else {
-    for (int i = 0; i < Na; i++) {
-      if (a[i] <= 0) {
-        stop("dfddm error: model parameter 'a' < 0 at index %i.", i+1);
-      }
-    }
-  }
-  if (Nv < 1) {
-    stop("dfddm error: model parameter 'v' is empty");
-  }
-  if (Nt0 < 1) {
-    stop("dfddm error: model parameter 't0' is empty");
-  } else {
-    for (int i = 0; i < Nt0; i++) {
-      if (t0[i] < 0) {
-        stop("dfddm error: model parameter 't0' < 0 at index %i.", i+1);
-      }
-    }
-  }
-  if (Nw < 1) {
-    stop("dfddm error: model parameter 'w' is empty");
-  } else {
-    for (int i = 0; i < Nw; i++) {
-      if (w[i] <= 0 || w[i] >= 1) {
-        stop("dfddm error: model parameter 'w' <= 0 or 'w' >= 1 at index %i.", i+1);
-      }
-    }
-  }
-  if (Nsv < 1) {
-    stop("dfddm error: model parameter 'sv' is empty");
-  } else {
-    if (sv[0] != -1) {
-      for (int i = 0; i < Nsv; i++) {
-        if (sv[i] < 0) {
-          stop("dfddm error: model parameter 'sv' < 0 at index %i.", i+1);
-        }
-      }
-    }
-  }
-  if (Nsig < 1) {
-    stop("dfddm error: model parameter 'sigma' is empty");
-  } else {
-    for (int i = 0; i < Nsig; i++) {
-      if (sigma[i] < 0) {
-        stop("dfddm error: model parameter 'sigma' < 0 at index %i.", i+1);
-      }
-    }
-  }
-  if (Neps < 1) {
-    stop("dfddm error: model parameter 'err_tol' is empty");
-  } else {
-    for (int i = 0; i < Neps; i++) {
-      if (eps[i] < 0) {
-        stop("dfddm error: model parameter 'err_tol' < 0 at index %i.", i+1);
-      }
-    }
   }
 
 
 
   // determine which method to use
-  char n_terms_small0 = (!n_terms_small.empty()) ? n_terms_small[0] : EMPTYCHAR;
-  char summation_small0 = (!summation_small.empty()) ?
-    summation_small[summation_small.length()-1] : EMPTYCHAR;
-  char scale0 = (!scale.empty()) ? scale[0] : EMPTYCHAR;
   NumFunc numf;
   SumFunc sumf;
   DenFunc denf;
   double rt0;
 
-  if (log_prob) { // calculate log(probability)
-    rt0 = -std::numeric_limits<double>::infinity();
-    if (n_terms_small0 == 'S' || n_terms_small0 == 's') { // SWSE method
-      if (scale0 == 'b' || scale0 == 'B') { // both
-        denf = &fc_log;
-      } else if (scale0 == 's' || scale0 == 'S'){ // small
-        denf = &ff_log;
-      } else {
-        stop("dfddm error: invalid function parameter 'scale': %s", scale);
-      }
-      numf = NULL;
-      if (summation_small0 == '7') { // 2017
-        sumf = &small_sum_eps_17;
-      } else if (summation_small0 == '4') { // 2014
-        sumf = &small_sum_eps_14;
-      } else {
-        stop("dfddm error: invalid function parameter 'summation_small': %s",
-             summation_small);
-      }
-    } else {
-      if (scale0 == 'l' || scale0 == 'L') { // large
-        denf = &fl_log;
-        numf = NULL;
-        sumf = NULL;
-      } else {
-        if (scale0 == 'b' || scale0 == 'B') { // both
-          denf = &fb_log;
-        } else if (scale0 == 's' || scale0 == 'S') { // small
-          denf = &fs_log;
-        } else {
-          stop("dfddm error: invalid function parameter 'scale': %s", scale);
-        }
-        if (n_terms_small0 == 'G' || n_terms_small0 == 'g') { // Gondan
-          numf = &ks_Gon;
-        } else if (n_terms_small0 == 'N' || n_terms_small0 == 'n') { // Navarro
-          numf = &ks_Nav;
-        } else {
-          stop("dfddm error: invalid function parameter 'n_terms_small': %s",
-               n_terms_small);
-        }
-        if (summation_small0 == '7') { // 2017
-          sumf = &small_sum_2017;
-        } else if (summation_small0 == '4') { // 2014
-          sumf = &small_sum_2014;
-        } else {
-          stop("dfddm error: invalid function parameter 'summation_small': %s",
-               summation_small);
-        }
-      }
-    }
-  } else { // calculate regular probability
-    rt0 = 0;
-    if (n_terms_small0 == 'S' || n_terms_small0 == 's') { // SWSE method
-      if (scale0 == 'b' || scale0 == 'B') { // both
-        denf = &fc;
-      } else if (scale0 == 's' || scale0 == 'S'){ // small
-        denf = &ff;
-      } else {
-        stop("dfddm error: invalid function parameter 'scale': %s", scale);
-      }
-      numf = NULL;
-      if (summation_small0 == '7') { // 2017
-        sumf = &small_sum_eps_17;
-      } else if (summation_small0 == '4') { // 2014
-        sumf = &small_sum_eps_14;
-      } else {
-        stop("dfddm error: invalid function parameter 'summation_small': %s",
-             summation_small);
-      }
-    } else {
-      if (scale0 == 'l' || scale0 == 'L') { // large
-        denf = &fl;
-        numf = NULL;
-        sumf = NULL;
-      } else {
-        if (scale0 == 'b' || scale0 == 'B') { // both
-          denf = &fb;
-        } else if (scale0 == 's' || scale0 == 'S') { // small
-          denf = &fs;
-        } else {
-          stop("dfddm error: invalid function parameter 'scale': %s", scale);
-        }
-        if (n_terms_small0 == 'G' || n_terms_small0 == 'g') { // Gondan
-          numf = &ks_Gon;
-        } else if (n_terms_small0 == 'N' || n_terms_small0 == 'n') { // Navarro
-          numf = &ks_Nav;
-        } else {
-          stop("dfddm error: invalid function parameter 'n_terms_small': %s",
-               n_terms_small);
-        }
-        if (summation_small0 == '7') { // 2017
-          sumf = &small_sum_2017;
-        } else if (summation_small0 == '4') { // 2014
-          sumf = &small_sum_2014;
-        } else {
-          stop("dfddm error: invalid function parameter 'summation_small': %s",
-               summation_small);
-        }
-      }
-    }
-  }
+  determine_method(n_terms_small, summation_small, scale,
+                   numf, sumf, denf, rt0, log_prob);
+
 
 
 
   // loop through all inputs
-  NumericVector out(Nmax);
-  double t;
-  if (Nsig == 1 && sigma[0] == 1) {
-    for (int i = 0; i < Nmax; i++) {
-      t = rt[i % Nrt] - t0[i % Nt0]; // take non-decision time from response time
-      if (t <= 0) { // handle density outside of time bounds
-        out[i] = rt0;
-        continue;
-      }
-      if (resp[i % Nres]) { // response is "upper" so use alternate parameters
-        out[i] = denf(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw], sv[i % Nsv],
-                      eps[i % Neps], max_terms_large, numf, sumf);
-      } else { // response is "lower" so use unchanged parameters
-        out[i] = denf(t, a[i % Na], v[i % Nv], w[i % Nw], sv[i % Nsv],
-                      eps[i % Neps], max_terms_large, numf, sumf);
-      }
-    }
-  } else {
-    for (int i = 0; i < Nmax; i++) {
-      t = rt[i % Nrt] - t0[i % Nt0]; // take non-decision time from response time
-      if (t <= 0) { // handle density outside of time bounds
-        out[i] = rt0;
-        continue;
-      }
-      if (resp[i % Nres]) { // response is "upper" so use alternate parameters
-        out[i] = denf(t, a[i % Na]/sigma[i % Nsig],
-                      -v[i % Nv]/sigma[i % Nsig], 1 - w[i % Nw],
-                      sv[i % Nsv]/sigma[i % Nsig], eps[i % Neps],
-                      max_terms_large, numf, sumf);
-      } else { // response is "lower" so use unchanged parameters
-        out[i] = denf(t, a[i % Na]/sigma[i % Nsig],
-                      v[i % Nv]/sigma[i % Nsig], w[i % Nw],
-                      sv[i % Nsv]/sigma[i % Nsig], eps[i % Neps],
-                      max_terms_large, numf, sumf);
-      }
-    }
-  }
+  NumericVector out = calculate_pdf(Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Nsig, Neps,
+                                    Nmax, rt, resp, a_c, v, t0_c, w_c, sv_c,
+                                    sigma_c, eps_c, max_terms_large,
+                                    numf, sumf, denf, rt0);
+
 
 
 
