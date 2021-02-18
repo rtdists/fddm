@@ -47,61 +47,61 @@ typedef double (*DenFunc)(const double&, const double&, const double&,
 
 // Number of Terms
 
-int ks_Gon(const double& t, const double& w, const double& eps);
-int ks_Nav(const double& t, const double& w, const double& eps);
-int kl_Nav(const double& t, const double& w, const double& eps);
+int ks_Gon(const double& t, const double& w, const double& err);
+int ks_Nav(const double& t, const double& w, const double& err);
+int kl_Nav(const double& t, const double& w, const double& err);
 
 
 
 // Infinite Summation Approximations
 
 double small_sum_eps_17(const double& t, const double& a, const double& w,
-                        const int& ks, const double& eps);
+                        const int& ks, const double& err);
 double small_sum_eps_14(const double& t, const double& a, const double& w,
-                        const int& ks, const double&  eps);
+                        const int& ks, const double&  err);
 double small_sum_2017(const double& t, const double& a, const double& w,
-                      const int& ks, const double& eps);
+                      const int& ks, const double& err);
 double small_sum_2014(const double& t, const double& a, const double& w,
-                      const int& ks, const double& eps);
+                      const int& ks, const double& err);
 double large_sum_Nav(const double& t, const double& a, const double& w,
-                     const int& kl, const double& eps);
+                     const int& kl, const double& err);
 
 
 
 // Density Functions
 double ff(const double& t, const double& a, const double& v,
-          const double& w, const double& sv, const double& eps,
+          const double& w, const double& sv, const double& err,
           const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf);
 double ff_log(const double& t, const double& a, const double& v,
-              const double& w, const double& sv, const double& eps,
+              const double& w, const double& sv, const double& err,
               const int& max_terms_large,
               const NumFunc& numf, const SumFunc& sumf);
 double fs(const double& t, const double& a, const double& v,
-          const double& w, const double& sv, const double& eps,
+          const double& w, const double& sv, const double& err,
           const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf);
 double fs_log(const double& t, const double& a, const double& v,
-              const double& w, const double& sv, const double& eps,
+              const double& w, const double& sv, const double& err,
               const int& max_terms_large,
               const NumFunc& numf, const SumFunc& sumf);
 double fl(const double& t, const double& a, const double& v,
-          const double& w, const double& sv, const double& eps,
+          const double& w, const double& sv, const double& err,
           const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf);
 double fl_log(const double& t, const double& a, const double& v,
-              const double& w, const double& sv, const double& eps,
+              const double& w, const double& sv, const double& err,
               const int& max_terms_large,
               const NumFunc& numf, const SumFunc& sumf);
 double fc(const double& t, const double& a, const double& v,
-          const double& w, const double& sv, const double& eps,
+          const double& w, const double& sv, const double& err,
           const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf);
 double fc_log(const double& t, const double& a, const double& v,
-              const double& w, const double& sv, const double& eps,
+              const double& w, const double& sv, const double& err,
               const int& max_terms_large,
               const NumFunc& numf, const SumFunc& sumf);
 double fb(const double& t, const double& a, const double& v,
-          const double& w, const double& sv, const double& eps,
+          const double& w, const double& sv, const double& err,
           const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf);
 double fb_log(const double& t, const double& a, const double& v,
-              const double& w, const double& sv, const double& eps,
+              const double& w, const double& sv, const double& err,
               const int& max_terms_large,
               const NumFunc& numf, const SumFunc& sumf);
 
@@ -111,14 +111,14 @@ double fb_log(const double& t, const double& a, const double& v,
 vector<int> convert_responses(const SEXP& response, int& Nres);
 bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
                      const int& Nv, const int& Nt0, const int& Nw,
-                     const int& Nsv, const int& Nsig, const int& Neps,
+                     const int& Nsv, const int& Nsig, const int& Nerr,
                      const NumericVector& rt, const NumericVector& a,
                      const NumericVector& t0, const NumericVector& w,
                      const NumericVector& sv, const NumericVector& sigma,
-                     const NumericVector& eps,
+                     const NumericVector& err,
                      vector<double>& a_c, vector<double>& t0_c,
                      vector<double>& w_c, vector<double>& sv_c,
-                     vector<double>& sigma_c, vector<double>& eps_c);
+                     vector<double>& sigma_c, vector<double>& err_c);
 void determine_method(const std::string& n_terms_small,
                       const std::string& summation_small,
                       const std::string& scale,
@@ -126,12 +126,12 @@ void determine_method(const std::string& n_terms_small,
                       double& rt0, const bool& log_prob);
 NumericVector calculate_pdf(const int& Nrt, const int& Nres, const int& Na,
                             const int& Nv, const int& Nt0, const int& Nw,
-                            const int& Nsv, const int& Nsig, const int& Neps,
+                            const int& Nsv, const int& Nsig, const int& Nerr,
                             const int& Nmax,
                             const NumericVector& rt, const vector<int>& resp,
                             const vector<double>& a, const NumericVector& v,
                             const vector<double>& t0, const vector<double>& w,
                             const vector<double>& sv, const vector<double>& sigma,
-                            const vector<double>& eps, const int& max_terms_large,
+                            const vector<double>& err, const int& max_terms_large,
                             const NumFunc& numf, const SumFunc& sumf,
                             const DenFunc& denf, const double& rt0);

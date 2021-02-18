@@ -14,11 +14,11 @@
 
 
 // Gondan et al 2014
-int ks_Gon(const double& t, const double& w, const double& eps)
+int ks_Gon(const double& t, const double& w, const double& err)
 {
   float u_eps, arg, k1;
   int k;
-  u_eps = min(-1.0, log(2 * M_PI * t*t * eps*eps)); // Safe bound for sqrt
+  u_eps = min(-1.0, log(2 * M_PI * t*t * err*err)); // Safe bound for sqrt
   arg = -t * (u_eps - sqrt(-2 * u_eps - 2)); // sqrt(x) with x > 0
   k1 = (sqrt(2 * t) - w)/2;
   if (k1 > INT_MAX) return INT_MAX;
@@ -35,10 +35,10 @@ int ks_Gon(const double& t, const double& w, const double& eps)
 
 
 // Navarro and Fuss 2009
-int ks_Nav(const double& t, const double& w, const double& eps)
+int ks_Nav(const double& t, const double& w, const double& err)
 { // note: w is not used
-  if (eps < 1 / (2 * sqrt(2 * M_PI * t))) { // if error threshold is set low enough
-    float ks = 2 + sqrt(-2 * t * log(2 * eps * sqrt(2 * M_PI * t)));
+  if (err < 1 / (2 * sqrt(2 * M_PI * t))) { // if error threshold is set low enough
+    float ks = 2 + sqrt(-2 * t * log(2 * err * sqrt(2 * M_PI * t)));
     float bc = sqrt(t) + 1; // boundary conditions
     if (ks > INT_MAX || bc > INT_MAX) return INT_MAX;
     return ceil(max(ks, bc)); // ensure boundary conditions are met
@@ -55,12 +55,12 @@ int ks_Nav(const double& t, const double& w, const double& eps)
 
 
 // Navarro and Fuss 2009
-int kl_Nav(const double& t, const double& w, const double& eps)
+int kl_Nav(const double& t, const double& w, const double& err)
 { // note: w is not used
   float bc = 1 / (M_PI * sqrt(t)); // boundary conditions
   if (bc > INT_MAX) return INT_MAX;
-  if (eps < 1 / (M_PI * t)) { // error threshold is low enough
-    float kl = sqrt(-2 * log(M_PI * t * eps) / (M_PI*M_PI * t));
+  if (err < 1 / (M_PI * t)) { // error threshold is low enough
+    float kl = sqrt(-2 * log(M_PI * t * err) / (M_PI*M_PI * t));
     if (kl > INT_MAX) return INT_MAX;
     return ceil(max(kl, bc)); // ensure boundary conditions are met
   }

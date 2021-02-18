@@ -10,9 +10,9 @@
 //////////                                                           //////////
 
 
-// term < eps Blurton et al 2017 style truncated sum, with minimum terms
+// term < err Blurton et al 2017 style truncated sum, with minimum terms
 double small_sum_eps_17(const double& t, const double& a, const double& w,
-                        const int& ks, const double& eps)
+                        const int& ks, const double& err)
 { // note: ks is not used
   int minterms = sqrt(t)/a - w; // min number of terms, truncates toward 0
   double gamma = -a*a / (2 * t);
@@ -37,12 +37,12 @@ double small_sum_eps_17(const double& t, const double& a, const double& w,
     rj = j + w; // j is now even
     term = rj * exp(gamma * rj*rj);
     sum += term;
-    while (term > eps) {
+    while (term > err) {
       j++;
       rj = j + 1 - w;
       term = rj * exp(gamma * rj*rj);
       sum -= term;
-      if (term <= eps) break;
+      if (term <= err) break;
       j++;
       rj = j + w;
       term = rj * exp(gamma * rj*rj);
@@ -62,12 +62,12 @@ double small_sum_eps_17(const double& t, const double& a, const double& w,
     rj = j + 1 - w; // j is now odd
     term = rj * exp(gamma * rj*rj);
     sum -= term;
-    while (term > eps) {
+    while (term > err) {
       j++;
       rj = j + w;
       term = rj * exp(gamma * rj*rj);
       sum += term;
-      if (term <= eps) break;
+      if (term <= err) break;
       j++;
       rj = j + 1 - w;
       term = rj * exp(gamma * rj*rj);
@@ -78,9 +78,9 @@ double small_sum_eps_17(const double& t, const double& a, const double& w,
 }
 
 
-// term < eps Gondan et al 2014 style truncated sum, with minimum terms
+// term < err Gondan et al 2014 style truncated sum, with minimum terms
 double small_sum_eps_14(const double& t, const double& a, const double& w,
-                        const int& ks, const double& eps)
+                        const int& ks, const double& err)
 { // note: ks is not used
   int minterms = sqrt(t)/a/2 - w/2; // min number of terms, truncates toward 0
   double gamma = -a*a / (2 * t);
@@ -98,11 +98,11 @@ double small_sum_eps_14(const double& t, const double& a, const double& w,
   rj = 2*j - w;
   term = rj * exp(gamma * rj*rj);
   sum -= term;
-  while (term > eps) {
+  while (term > err) {
     rj = 2*j + w;
     term = rj * exp(gamma * rj*rj);
     sum += term;
-    if (term <= eps) {
+    if (term <= err) {
       break;
     }
     j++;
@@ -116,8 +116,8 @@ double small_sum_eps_14(const double& t, const double& a, const double& w,
 
 // Blurton et al 2017 style truncated sum
 double small_sum_2017(const double& t, const double& a, const double& w,
-                      const int& ks, const double& eps)
-{ // note: eps is not used
+                      const int& ks, const double& err)
+{ // note: err is not used
   double gamma = -a*a / (2 * t);
   double sum = w * exp(gamma * w*w); // initialize with j = 0 term
   double rj;
@@ -141,8 +141,8 @@ double small_sum_2017(const double& t, const double& a, const double& w,
 
 // Gondan et al 2014 style truncated sum
 double small_sum_2014(const double& t, const double& a, const double& w,
-                      const int& ks, const double& eps)
-{ // note: eps is not used
+                      const int& ks, const double& err)
+{ // note: err is not used
   double gamma = -a*a / (2 * t);
   double sum = w * exp(gamma * w*w); // initialize with j = 0 term
   for (int j = floor(ks/2); j > 0; j--) { // iterate through all ks
@@ -161,8 +161,8 @@ double small_sum_2014(const double& t, const double& a, const double& w,
 
 // Navarro and Fuss 2009 style truncated sum
 double large_sum_Nav(const double& t, const double& a, const double& w,
-                     const int& kl, const double& eps)
-{ // note: eps is not used
+                     const int& kl, const double& err)
+{ // note: err is not used
   double gamma = -M_PI*M_PI * t / (2 * a*a);
   double sum = 0.0;
   for (int j = 1; j <= kl; j++) {

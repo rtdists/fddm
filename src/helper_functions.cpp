@@ -95,14 +95,14 @@ vector<int> convert_responses(const SEXP& response, int& Nres)
 
 bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
                      const int& Nv, const int& Nt0, const int& Nw,
-                     const int& Nsv, const int& Nsig, const int& Neps,
+                     const int& Nsv, const int& Nsig, const int& Nerr,
                      const NumericVector& rt, const NumericVector& a,
                      const NumericVector& t0, const NumericVector& w,
                      const NumericVector& sv, const NumericVector& sigma,
-                     const NumericVector& eps,
+                     const NumericVector& err,
                      vector<double>& a_c, vector<double>& t0_c,
                      vector<double>& w_c, vector<double>& sv_c,
-                     vector<double>& sigma_c, vector<double>& eps_c)
+                     vector<double>& sigma_c, vector<double>& err_c)
 {
   bool out = 1;
   if (Nrt < 1) {
@@ -271,17 +271,17 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
       }
     }
   }
-  if (Neps < 1) {
+  if (Nerr < 1) {
     warning("dfddm warning: function parameter 'err_tol' is empty; empty vector returned.");
     out = 0;
   } else {
     bool bad_par = 0;
     vector<int> bad_idx;
-    for (int i = 0; i < Neps; i++) {
-      if (eps[i] > 0) {
-        eps_c[i] = eps[i];
+    for (int i = 0; i < Nerr; i++) {
+      if (err[i] > 0) {
+        err_c[i] = err[i];
       } else {
-        eps_c[i] = 1e-6; // set to default value
+        err_c[i] = 1e-6; // set to default value
         bad_par = 1;
         bad_idx.push_back(i);
       }
@@ -437,13 +437,13 @@ void determine_method(const std::string& n_terms_small,
 
 NumericVector calculate_pdf(const int& Nrt, const int& Nres, const int& Na,
                             const int& Nv, const int& Nt0, const int& Nw,
-                            const int& Nsv, const int& Nsig, const int& Neps,
+                            const int& Nsv, const int& Nsig, const int& Nerr,
                             const int& Nmax,
                             const NumericVector& rt, const vector<int>& resp,
                             const vector<double>& a, const NumericVector& v,
                             const vector<double>& t0, const vector<double>& w,
                             const vector<double>& sv, const vector<double>& sigma,
-                            const vector<double>& eps, const int& max_terms_large,
+                            const vector<double>& err, const int& max_terms_large,
                             const NumFunc& numf, const SumFunc& sumf,
                             const DenFunc& denf, const double& rt0)
 {
@@ -458,10 +458,10 @@ NumericVector calculate_pdf(const int& Nrt, const int& Nres, const int& Na,
       }
         if (resp[i % Nres] == 1) { // response is "lower" so use unchanged parameters
           out[i] = denf(t, a[i % Na], v[i % Nv], w[i % Nw], sv[i % Nsv],
-                      eps[i % Neps], max_terms_large, numf, sumf);
+                      err[i % Nerr], max_terms_large, numf, sumf);
       } else if (resp[i % Nres] == 2) { // response is "upper" so use alternate parameters
         out[i] = denf(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw], sv[i % Nsv],
-                      eps[i % Neps], max_terms_large, numf, sumf);
+                      err[i % Nerr], max_terms_large, numf, sumf);
       } else {
         out[i] = rt0;
       }
@@ -476,12 +476,12 @@ NumericVector calculate_pdf(const int& Nrt, const int& Nres, const int& Na,
       if (resp[i % Nres] == 1) { // response is "lower" so use unchanged parameters
         out[i] = denf(t, a[i % Na]/sigma[i % Nsig],
                       v[i % Nv]/sigma[i % Nsig], w[i % Nw],
-                      sv[i % Nsv]/sigma[i % Nsig], eps[i % Neps],
+                      sv[i % Nsv]/sigma[i % Nsig], err[i % Nerr],
                       max_terms_large, numf, sumf);
       } else if (resp[i % Nres] == 2) { // response is "upper" so use alternate parameters
         out[i] = denf(t, a[i % Na]/sigma[i % Nsig],
                       -v[i % Nv]/sigma[i % Nsig], 1 - w[i % Nw],
-                      sv[i % Nsv]/sigma[i % Nsig], eps[i % Neps],
+                      sv[i % Nsv]/sigma[i % Nsig], err[i % Nerr],
                       max_terms_large, numf, sumf);
       } else {
         out[i] = rt0;
