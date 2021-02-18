@@ -6,6 +6,44 @@ library("RWiener")
 source(system.file("extdata", "Gondan_et_al_density.R", package = "fddm", mustWork = TRUE))
 
 
+### Input checking
+test_that("Input checking", {
+  expect_warning(expect_equal(
+    dfddm(rt = 1, response = c(3, -1, NA, NaN), a = 1, v = -1, t0 = 0, w = 0.5,
+          sv = 0, sigma = 1, log = 0, err_tol = 1e-6),
+    c(0, 0, 0, 0) ))
+
+  expect_warning(expect_true(all(is.nan(
+    dfddm(rt = 1, response = 1, a = c(-0.4, 0, NA, NaN), v = -1, t0 = 0,
+          w = 0.5, sv = 0, sigma = 1, log = 0, err_tol = 1e-6) ))))
+
+  expect_warning(expect_true(all(is.nan(
+    dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = c(-0.25, NA, NaN),
+          w = 0.5, sv = 0, sigma = 1, log = 0, err_tol = 1e-6) ))))
+
+  expect_warning(expect_true(all(is.nan(
+    dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = 0,
+          w = c(-0.5, 1.5, 0, 1, NA, NaN), sv = 0, sigma = 1, log = 0,
+          err_tol = 1e-6) ))))
+
+  expect_warning(expect_true(all(is.nan(
+    dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = 0, w = 0.5,
+          sv = c(-1, NA, NaN), sigma = 1, log = 0, err_tol = 1e-6) ))))
+
+  expect_warning(expect_true(all(is.nan(
+    dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = 0, w = 0.5,
+          sv = 0, sigma = c(-1, 0, NA, NaN), log = 0, err_tol = 1e-6) ))))
+
+  expect_warning(expect_equal(
+      dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = 0, w = 0.5,
+            sv = 0, sigma = 1, log = 0, err_tol = c(-1e-6, 0, NA, NaN)),
+      dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = 0, w = 0.5,
+            sv = 0, sigma = 1, log = 0, err_tol = c(1e-6, 1e-6, 1e-6, 1e-6)) ))
+
+})
+
+
+
 ### Evaluate densities for checking later ##
 # Define different parameter spaces
 if (identical(Sys.getenv("NOT_CRAN"), "true")) { # not on CRAN
