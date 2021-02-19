@@ -327,7 +327,7 @@ ggsave("paper_analysis/images/bm_vec_0-30.png", width = 16, height = 9)
 ##### Non-Vectorized Inputs (RT)
 # uncomment the following line if loading pre-run benchmark data,
 # will load into variable named "bm_ind"
-# load(paste0(save_dir, "bm_ind_0-2.Rds"))
+# load(paste0(save_dir, "bm_ind_0-30.Rds"))
 
 bm_ind[["RTAA"]] <- bm_ind[["RT"]] / bm_ind[["A"]] / bm_ind[["A"]]
 bm_ind <- bm_ind[, c(1, ncol(bm_ind), 2:(ncol(bm_ind)-1)) ]
