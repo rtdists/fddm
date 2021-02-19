@@ -47,7 +47,7 @@ MathJax.Hub.Config({
 
 Function `dfddm` evaluates the density function (or probability density function, PDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full PDF, which contains an infinite sum. An empirical validation of the implemented methods is provided in the [Validity Vignette](validity.html). Timing benchmarks for the present methods and comparison with existing methods are provided in the [Benchmark Vignette](benchmark.html). Two examples of using `dfddm` for parameter estimation are provided in the [Example Vignette](example.html).
 
-Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ (threshold separation), $v \in (-\infty, \infty)$ (drift rate), $t_0 \in [0, \infty)$ (non-decision time/response time constant), $w \in (0, 1)$ (relative starting point), and $sv \in (0, \infty)$ (inter-trial-variability of drift).
+Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ (threshold separation), $v \in (-\infty, \infty)$ (drift rate), $t_0 \in [0, \infty)$ (non-decision time/response time constant), $w \in (0, 1)$ (relative starting point), $sv \in (0, \infty)$ (inter-trial-variability of drift), and $sigma \in (0, \infty)$ (diffusion coefficient of the underlying Wiener Process).
 <br><br>
 
 

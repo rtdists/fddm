@@ -259,13 +259,13 @@ err_tol <- 1e-6 # this is the setting from rtdists
 
 bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                            W = W, SV = SV, err_tol = err_tol,
-                           times = 1000, unit = "ns")
+                           times = 10000, unit = "ns")
 save(bm_vec, compress = "xz", compression_level = 9,
      file = paste0(save_dir, "bm_vec_0-2.Rds"))
 
 bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                            W = W, SV = SV, err_tol = err_tol,
-                           times = 100, unit = "ns")
+                           times = 1000, unit = "ns")
 save(bm_ind, compress = "xz", compression_level = 9,
      file = paste0(save_dir, "bm_ind_0-2.Rds"))
 
