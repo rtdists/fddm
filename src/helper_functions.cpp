@@ -131,7 +131,8 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     if (bad_par) { // show warning
       int n_bad = bad_idx.size();
       if (n_bad == 1) {
-        warning("dfddm warning: model parameter 'a' <= 0 at index %i; NaNs produced.", bad_idx[0]+1);
+        warning("dfddm warning: model parameter 'a' <= 0 at index %i; NaNs produced.",
+                bad_idx[0]+1);
       } else {
         std::string warning_text = "dfddm warning: model parameter 'a' <= 0 at the following indices: ";
         warning_text = warning_text.append(to_string(bad_idx[0]+1));
@@ -165,7 +166,8 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     if (bad_par) { // show warning
       int n_bad = bad_idx.size();
       if (n_bad == 1) {
-        warning("dfddm warning: model parameter 't0' < 0 at index %i; NaNs produced.", bad_idx[0]+1);
+        warning("dfddm warning: model parameter 't0' < 0 at index %i; NaNs produced.",
+                bad_idx[0]+1);
       } else {
         std::string warning_text = "dfddm warning: model parameter 't0' < 0 at the following indices: ";
         warning_text = warning_text.append(to_string(bad_idx[0]+1));
@@ -196,7 +198,8 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     if (bad_par) { // show warning
       int n_bad = bad_idx.size();
       if (n_bad == 1) {
-        warning("dfddm warning: model parameter 'w' <= 0 or 'w' >= 1 at index %i; NaNs produced.", bad_idx[0]+1);
+        warning("dfddm warning: model parameter 'w' <= 0 or 'w' >= 1 at index %i; NaNs produced.",
+                bad_idx[0]+1);
       } else {
         std::string warning_text = "dfddm warning: model parameter 'w' <= 0 or 'w' >= 1 at the following indices: ";
         warning_text = warning_text.append(to_string(bad_idx[0]+1));
@@ -227,7 +230,8 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     if (bad_par) { // show warning
       int n_bad = bad_idx.size();
       if (n_bad == 1) {
-        warning("dfddm warning: model parameter 'sv' < 0 at index %i; NaNs produced.", bad_idx[0]+1);
+        warning("dfddm warning: model parameter 'sv' < 0 at index %i; NaNs produced.",
+                bad_idx[0]+1);
       } else {
         std::string warning_text = "dfddm warning: model parameter 'sv' < 0 at the following indices: ";
         warning_text = warning_text.append(to_string(bad_idx[0]+1));
@@ -258,7 +262,8 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     if (bad_par) { // show warning
       int n_bad = bad_idx.size();
       if (n_bad == 1) {
-        warning("dfddm warning: model parameter 'sigma' <= 0 at index %i; NaNs produced.", bad_idx[0]+1);
+        warning("dfddm warning: model parameter 'sigma' <= 0 at index %i; NaNs produced.",
+                bad_idx[0]+1);
       } else {
         std::string warning_text = "dfddm warning: model parameter 'sigma' <= 0 at the following indices: ";
         warning_text = warning_text.append(to_string(bad_idx[0]+1));
@@ -272,7 +277,7 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     }
   }
   if (Nerr < 1) {
-    warning("dfddm warning: function parameter 'err_tol' is empty; empty vector returned.");
+    stop("dfddm error: function parameter 'err_tol' is empty.");
     out = 0;
   } else {
     bool bad_par = 0;
@@ -281,7 +286,6 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
       if (err[i] > 0) {
         err_c[i] = err[i];
       } else {
-        err_c[i] = 1e-6; // set to default value
         bad_par = 1;
         bad_idx.push_back(i);
       }
@@ -289,16 +293,17 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     if (bad_par) {
       int n_bad = bad_idx.size();
       if (n_bad == 1) {
-        warning("dfddm warning: model parameter 'err_tol' <= 0 at index %i; default value used (1e-6).", bad_idx[0]+1);
+        stop("dfddm error: model parameter 'err_tol' <= 0 at index %i.",
+             bad_idx[0]+1);
       } else {
-        std::string warning_text = "dfddm warning: model parameter 'err_tol' <= 0 at the following indices: ";
-        warning_text = warning_text.append(to_string(bad_idx[0]+1));
+        std::string error_text = "dfddm error: model parameter 'err_tol' <= 0 at the following indices: ";
+        error_text = error_text.append(to_string(bad_idx[0]+1));
         for(int j = 1; j < n_bad; j++) {
-          warning_text = warning_text.append(", ");
-          warning_text = warning_text.append(to_string(bad_idx[j]+1));
+          error_text = error_text.append(", ");
+          error_text = error_text.append(to_string(bad_idx[j]+1));
         }
-        warning_text = warning_text.append("; default value used (1e-6).");
-        warning(warning_text);
+        error_text = error_text.append(".");
+        stop(error_text);
       }
     }
   }
@@ -328,8 +333,7 @@ void determine_method(const std::string& n_terms_small,
       } else if (scale0 == 's' || scale0 == 'S'){ // small
         denf = &ff_log;
       } else {
-        denf = &fc_log;
-        warning("dfddm warning: invalid function parameter 'scale': %s; default used ('both').", scale);
+        stop("dfddm error: invalid function parameter 'scale': %s.", scale);
       }
       numf = NULL;
       if (summation_small0 == '7') { // 2017
@@ -337,8 +341,7 @@ void determine_method(const std::string& n_terms_small,
       } else if (summation_small0 == '4') { // 2014
         sumf = &small_sum_eps_14;
       } else {
-        sumf = &small_sum_eps_17;
-        warning("dfddm warning: invalid function parameter 'summation_small': %s; default used ('2017').",
+        stop("dfddm error: invalid function parameter 'summation_small': %s.",
              summation_small);
       }
     } else {
@@ -352,16 +355,14 @@ void determine_method(const std::string& n_terms_small,
         } else if (scale0 == 's' || scale0 == 'S') { // small
           denf = &fs_log;
         } else {
-          denf = &fb_log;
-          warning("dfddm warning: invalid function parameter 'scale': %s; default used ('both').", scale);
+          stop("dfddm error: invalid function parameter 'scale': %s.", scale);
         }
         if (n_terms_small0 == 'G' || n_terms_small0 == 'g') { // Gondan
           numf = &ks_Gon;
         } else if (n_terms_small0 == 'N' || n_terms_small0 == 'n') { // Navarro
           numf = &ks_Nav;
         } else {
-          numf = &ks_Gon;
-          warning("dfddm warning: invalid function parameter 'n_terms_small': %s; alternate used ('Gondan').",
+          stop("dfddm error: invalid function parameter 'n_terms_small': %s.",
                n_terms_small);
         }
         if (summation_small0 == '7') { // 2017
@@ -369,8 +370,7 @@ void determine_method(const std::string& n_terms_small,
         } else if (summation_small0 == '4') { // 2014
           sumf = &small_sum_2014;
         } else {
-          sumf = &small_sum_2017;
-          warning("dfddm warning: invalid function parameter 'summation_small': %s; default used ('2017').",
+          stop("dfddm error: invalid function parameter 'summation_small': %s.",
                summation_small);
         }
       }
@@ -383,8 +383,7 @@ void determine_method(const std::string& n_terms_small,
       } else if (scale0 == 's' || scale0 == 'S'){ // small
         denf = &ff;
       } else {
-        denf = &fc;
-        warning("dfddm warning: invalid function parameter 'scale': %s; default used ('both').", scale);
+        stop("dfddm error: invalid function parameter 'scale': %s.", scale);
       }
       numf = NULL;
       if (summation_small0 == '7') { // 2017
@@ -392,8 +391,7 @@ void determine_method(const std::string& n_terms_small,
       } else if (summation_small0 == '4') { // 2014
         sumf = &small_sum_eps_14;
       } else {
-        sumf = &small_sum_eps_17;
-        warning("dfddm warning: invalid function parameter 'summation_small': %s; default used ('2017').",
+        stop("dfddm error: invalid function parameter 'summation_small': %s.",
              summation_small);
       }
     } else {
@@ -407,8 +405,7 @@ void determine_method(const std::string& n_terms_small,
         } else if (scale0 == 's' || scale0 == 'S') { // small
           denf = &fs;
         } else {
-          denf = &fb;
-          warning("dfddm warning: invalid function parameter 'scale': %s; default used ('both').", scale);
+          stop("dfddm error: invalid function parameter 'scale': %s.", scale);
         }
         if (n_terms_small0 == 'G' || n_terms_small0 == 'g') { // Gondan
           numf = &ks_Gon;
@@ -416,7 +413,7 @@ void determine_method(const std::string& n_terms_small,
           numf = &ks_Nav;
         } else {
           numf = &ks_Gon;
-          warning("dfddm warning: invalid function parameter 'n_terms_small': %s; alternate used ('Gondan').",
+          stop("dfddm error: invalid function parameter 'n_terms_small': %s.",
                n_terms_small);
         }
         if (summation_small0 == '7') { // 2017
@@ -425,7 +422,7 @@ void determine_method(const std::string& n_terms_small,
           sumf = &small_sum_2014;
         } else {
           sumf = &small_sum_2017;
-          warning("dfddm warning: invalid function parameter 'summation_small': %s; default used ('2017').",
+          stop("dfddm error: invalid function parameter 'summation_small': %s.",
                summation_small);
         }
       }
