@@ -293,10 +293,10 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     if (bad_par) {
       int n_bad = bad_idx.size();
       if (n_bad == 1) {
-        stop("dfddm error: model parameter 'err_tol' <= 0 at index %i.",
+        stop("dfddm error: function parameter 'err_tol' <= 0 at index %i.",
              bad_idx[0]+1);
       } else {
-        std::string error_text = "dfddm error: model parameter 'err_tol' <= 0 at the following indices: ";
+        std::string error_text = "dfddm error: function parameter 'err_tol' <= 0 at the following indices: ";
         error_text = error_text.append(to_string(bad_idx[0]+1));
         for(int j = 1; j < n_bad; j++) {
           error_text = error_text.append(", ");

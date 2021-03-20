@@ -34,11 +34,9 @@ test_that("Input checking", {
     dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = 0, w = 0.5,
           sv = 0, sigma = c(-1, 0, NA, NaN), log = 0, err_tol = 1e-6) ))))
 
-  expect_warning(expect_equal(
+  expect_error(
       dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = 0, w = 0.5,
-            sv = 0, sigma = 1, log = 0, err_tol = c(-1e-6, 0, NA, NaN)),
-      dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = 0, w = 0.5,
-            sv = 0, sigma = 1, log = 0, err_tol = c(1e-6, 1e-6, 1e-6, 1e-6)) ))
+            sv = 0, sigma = 1, log = 0, err_tol = c(-1e-6, 0, NA, NaN)))
 
 })
 
