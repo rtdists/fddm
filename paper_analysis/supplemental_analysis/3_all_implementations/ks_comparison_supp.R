@@ -10,7 +10,7 @@ library("Rcpp")
 library("microbenchmark")
 library("reshape2")
 library("ggplot2")
-save_dir <- "paper_analysis/supplemental_analysis/3_all_implementations/"
+save_dir <- "paper_analysis/supplemental_analysis/3_all_implementations/results/"
 img_dir <- "paper_analysis/images/supplemental_analysis/3_all_implementations/"
 
 # Load the ks functions (from C++, using Rcpp)
@@ -67,31 +67,32 @@ ks_benchmark <- function(t_range, dt, def = 1000, w, eps,
 ks_bm <- ks_benchmark(t_range = c(0, 10), dt = 0.02, def = 1000,
                       w = 0.5, eps = 1e-6, times = 1000)
 save(ks_bm, compress = "xz", compression_level = 9,
-     file = paste0(save_dir, "results/ks_bm.Rds"))
+     file = paste0(save_dir, "ks_bm.Rds"))
 
 
 ### Plot Benchmark Timing Results
 # Figure S6
 
+Names <- c("ks_Gondan_14", "ks_Navarro_09")
+Color <- c("#b34d4d", "#4d80b3")
+
 # uncomment the following line if loading pre-run benchmark data,
 # will load into variable named "ks_bm"
-load(paste0(save_dir, "results/ks_bm-windows.Rds"))
+load(paste0(save_dir, "ks_bm-windows.Rds"))
 
 t_idx <- match("t_stop", colnames(ks_bm))
 mbm_ks <- melt(ks_bm, measure.vars = -seq_len(t_idx),
                variable.name = "FuncName", value.name = "time")
 mbm_ks[["time"]] <- mbm_ks[["time"]] * 1e-3 # convert nano to microseconds
 
-Names <- c("ks_Gondan_14", "ks_Navarro_09")
-Color <- c("#d7db42", "#33cc33")
-
 fig_s6a <- ggplot(mbm_ks, aes(x = t_mid, y = time,
-                              color = factor(FuncName, levels = Names),
-                              fill = factor(FuncName, levels = Names))) +
+                              color = factor(FuncName, levels = Names))) +
   geom_line(size = 1) +
   scale_color_manual(values = Color,
-                     labels = Names,
+                     labels = c(bquote(k[s] ~ "Gondan (2014)"),
+                                bquote(k[s] ~ "Navarro (2009)")),
                      name = "Method:") +
+  guides(color = guide_legend(override.aes = list(size = c(2,2)))) +
   labs(title = bquote("Median microbenchmark results for " ~ k[s] ~ " calculation"),
        x = bquote(frac(rt, a^2) ~ ", effective response time"),
        y = "Time (microseconds)") +
@@ -119,23 +120,21 @@ ggsave(paste0(img_dir, "ks_med_t-windows.png"),
 
 # uncomment the following line if loading pre-run benchmark data,
 # will load into variable named "ks_bm"
-load(paste0(save_dir, "results/ks_bm-linux.Rds"))
+# load(paste0(save_dir, "ks_bm-linux.Rds"))
 
 t_idx <- match("t_stop", colnames(ks_bm))
 mbm_ks <- melt(ks_bm, measure.vars = -seq_len(t_idx),
                variable.name = "FuncName", value.name = "time")
 mbm_ks[["time"]] <- mbm_ks[["time"]] * 1e-3 # convert nano to microseconds
 
-Names <- c("ks_Gondan_14", "ks_Navarro_09")
-Color <- c("#d7db42", "#33cc33")
-
 fig_s6b <- ggplot(mbm_ks, aes(x = t_mid, y = time,
-                              color = factor(FuncName, levels = Names),
-                              fill = factor(FuncName, levels = Names))) +
+                              color = factor(FuncName, levels = Names))) +
   geom_line(size = 1) +
   scale_color_manual(values = Color,
-                     labels = Names,
+                     labels = c(bquote(k[s] ~ "Gondan (2014)"),
+                                bquote(k[s] ~ "Navarro (2009)")),
                      name = "Method:") +
+  guides(color = guide_legend(override.aes = list(size = c(2,2)))) +
   labs(title = bquote("Median microbenchmark results for " ~ k[s] ~ " calculation"),
        x = bquote(frac(rt, a^2) ~ ", effective response time"),
        y = "Time (microseconds)") +

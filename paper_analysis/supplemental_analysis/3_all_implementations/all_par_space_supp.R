@@ -14,8 +14,8 @@ library("microbenchmark")
 library("reshape2")
 library("ggplot2")
 library("ggforce")
-save_dir <- "paper_analysis/supplemental_analysis/3_all_implementations/"
-img_dir <- "paper_analysis/images/supplemental_analysis/3_all_implementations"
+save_dir <- "paper_analysis/supplemental_analysis/3_all_implementations/results/"
+img_dir <- "paper_analysis/images/supplemental_analysis/3_all_implementations/"
 
 
 
@@ -309,10 +309,14 @@ Names_vec <- c("fb_SWSE_17", "fb_SWSE_14", "fb_Gon_17", "fb_Gon_14",
                "fb_Nav_17", "fb_Nav_14", "fs_SWSE_17", "fs_SWSE_14",
                "fs_Gon_17", "fs_Gon_14", "fs_Nav_17", "fs_Nav_14",
                "fl_Nav_09", "RWiener", "Gondan", "rtdists")
-Color_vec <- c("#e000b4", "#ff99eb", "#e68a00", "#ffb366",
-               "#006699", "#66ccff", "#9900cc", "#cc99ff",
-               "#c2a500", "#d7db42", "#336600", "#33cc33",
-               "#996633", "#ff9999", "#ff5050", "#990000")
+Color_vec <- c("#92c639", "#d3e8b0", "#b3724d", "#e0c7b8",
+               "#4da7b3", "#b8dce0", "#5cc639", "#bee8b0",
+               "#b34d4d", "#e0b8b8", "#4d80b3", "#b8cce0",
+               "#dcdca3", "#deccba", "#c5a687", "#ac8053")
+Outline_vec <- c("#92c639", "#92c639", "#b3724d", "#b3724d",
+               "#4da7b3", "#4da7b3", "#5cc639", "#5cc639",
+               "#b34d4d", "#b34d4d", "#4d80b3", "#4d80b3",
+               "#dcdca3", "#deccba", "#c5a687", "#ac8053")
 
 mi <- min(bm_vec[, -seq_len(t_idx)])
 ma <- max(bm_vec[, (t_idx+1):(ncol(bm_vec)-4)])
@@ -322,7 +326,7 @@ fig_s4 <- ggplot(mbm_vec, aes(x = factor(FuncName, levels = Names_vec), y = time
                               color = factor(FuncName, levels = Names_vec),
                               fill = factor(FuncName, levels = Names_vec))) +
   geom_violin(trim = TRUE, alpha = 0.5) +
-  scale_color_manual(values = Color_vec, guide = FALSE) +
+  scale_color_manual(values = Outline_vec, guide = FALSE) +
   scale_fill_manual(values = Color_vec, guide = FALSE) +
   geom_boxplot(width = 0.15, fill = "white", alpha = 0.5) +
   stat_summary(fun = mean, geom = "errorbar",
@@ -355,7 +359,7 @@ ggsave(paste0(img_dir, "bm_vec_0-30.png"),
 ##### Non-Vectorized Inputs (RT)
 # uncomment the following line if loading pre-run benchmark data,
 # will load into variable named "bm_ind"
-# load(paste0("paper_analysis/appendices/", "bm_ind_0-2.Rds"))
+# load(paste0(save_dir, "bm_ind_0-2.Rds"))
 
 t_idx <- match("SV", colnames(bm_ind))
 bm_ind[, -seq_len(t_idx)] <- bm_ind[, -seq_len(t_idx)]/1000 # convert to microseconds
@@ -366,10 +370,15 @@ Names_ind <- c("fb_SWSE_17", "fb_SWSE_14", "fb_Gon_17", "fb_Gon_14",
                "fb_Nav_17", "fb_Nav_14", "fs_SWSE_17", "fs_SWSE_14",
                "fs_Gon_17", "fs_Gon_14", "fs_Nav_17", "fs_Nav_14",
                "fl_Nav_09", "RWiener", "Gondan", "rtdists")
-Color_ind <- c("#e000b4", "#ff99eb", "#e68a00", "#ffb366",
-               "#006699", "#66ccff", "#9900cc", "#cc99ff",
-               "#c2a500", "#d7db42", "#336600", "#33cc33",
-               "#996633", "#ff9999", "#ff5050", "#990000")
+Color_ind <- c("#92c639", "#d3e8b0", "#b3724d", "#e0c7b8",
+               "#4da7b3", "#b8dce0", "#5cc639", "#bee8b0",
+               "#b34d4d", "#e0b8b8", "#4d80b3", "#b8cce0",
+               "#dcdca3", "#deccba", "#c5a687", "#ac8053")
+Outline_ind <- c("#92c639", "#92c639", "#b3724d", "#b3724d",
+               "#4da7b3", "#4da7b3", "#5cc639", "#5cc639",
+               "#b34d4d", "#b34d4d", "#4d80b3", "#4d80b3",
+               "#dcdca3", "#deccba", "#c5a687", "#ac8053")
+
 
 mi <- min(bm_ind[, -seq_len(t_idx)])
 ma <- max(bm_ind[, (t_idx+1):(ncol(bm_ind)-4)])
@@ -379,7 +388,7 @@ fig_s3 <- ggplot(mbm_ind, aes(x = factor(FuncName, levels = Names_ind), y = time
                               color = factor(FuncName, levels = Names_ind),
                               fill = factor(FuncName, levels = Names_ind))) +
   geom_violin(trim = TRUE, alpha = 0.5) +
-  scale_color_manual(values = Color_ind, guide = FALSE) +
+  scale_color_manual(values = Outline_ind, guide = FALSE) +
   scale_fill_manual(values = Color_ind, guide = FALSE) +
   geom_boxplot(width = 0.15, fill = "white", alpha = 0.5) +
   stat_summary(fun = mean, geom = "errorbar",
@@ -427,7 +436,7 @@ fig_s5 <- ggplot(mbm_ind, aes(x = factor(FuncName, levels = Names_ind), y = time
                               color = factor(FuncName, levels = Names_ind),
                               fill = factor(FuncName, levels = Names_ind))) +
   geom_violin(trim = TRUE, alpha = 0.5) +
-  scale_color_manual(values = Color_ind, guide = FALSE) +
+  scale_color_manual(values = Outline_ind, guide = FALSE) +
   scale_fill_manual(values = Color_ind, guide = FALSE) +
   geom_boxplot(width = 0.15, fill = "white", alpha = 0.5) +
   stat_summary(fun = mean, geom = "errorbar",
@@ -461,8 +470,8 @@ ggsave(paste0(img_dir, "bm_ind_0-30.png"),
 ### Mean and Quantile Plots
 Names_meq <- c("fb_SWSE_17", "fs_SWSE_17", "fl_Nav_09",
                "RWiener", "Gondan", "rtdists")
-Color_meq <- c("#e000b4", "#9900cc", "#996633",
-               "#ff9999", "#ff5050", "#990000")
+Color_meq <- c("#92c639", "#5cc639", "#dcdca3",
+               "#deccba", "#c5a687", "#ac8053")
 mbm_meq <- subset(mbm_ind, FuncName %in% Names_meq)
 
 my_labeller <- as_labeller(c(fb_SWSE_17 = "f[c] ~ SWSE[17]",
@@ -475,7 +484,7 @@ my_labeller <- as_labeller(c(fb_SWSE_17 = "f[c] ~ SWSE[17]",
 
 ### W (Relative Starting Point)
 # Figure S7
-fig_s7 ,- ggplot(mbm_meq, aes(x = W, y = time,
+fig_s7 <- ggplot(mbm_meq, aes(x = W, y = time,
                               color = factor(FuncName, levels = Names_meq),
                               fill = factor(FuncName, levels = Names_meq))) +
   stat_summary(fun.min = min, fun.max = max,

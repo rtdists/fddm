@@ -303,10 +303,14 @@ Names_vec <- c("fb_SWSE_17", "fb_SWSE_14", "fb_Gon_17", "fb_Gon_14",
                "fb_Nav_17", "fb_Nav_14", "fs_SWSE_17", "fs_SWSE_14",
                "fs_Gon_17", "fs_Gon_14", "fs_Nav_17", "fs_Nav_14",
                "fl_Nav_09", "RWiener", "Gondan", "rtdists")
-Color_vec <- c("#e000b4", "#ff99eb", "#e68a00", "#ffb366",
-               "#006699", "#66ccff", "#9900cc", "#cc99ff",
-               "#c2a500", "#d7db42", "#336600", "#33cc33",
-               "#996633", "#ff9999", "#ff5050", "#990000")
+Color_vec <- c("#92c639", "#d3e8b0", "#b3724d", "#e0c7b8",
+               "#4da7b3", "#b8dce0", "#5cc639", "#bee8b0",
+               "#b34d4d", "#e0b8b8", "#4d80b3", "#b8cce0",
+               "#dcdca3", "#deccba", "#c5a687", "#ac8053")
+Outline_vec <- c("#92c639", "#92c639", "#b3724d", "#b3724d",
+               "#4da7b3", "#4da7b3", "#5cc639", "#5cc639",
+               "#b34d4d", "#b34d4d", "#4d80b3", "#4d80b3",
+               "#dcdca3", "#deccba", "#c5a687", "#ac8053")
 
 mi <- min(bm_vec[, -seq_len(t_idx)])
 ma <- max(bm_vec[, (t_idx+1):(ncol(bm_vec)-4)])
@@ -316,7 +320,7 @@ fig_6 <- ggplot(mbm_vec, aes(x = factor(FuncName, levels = Names_vec), y = time,
                              color = factor(FuncName, levels = Names_vec),
                              fill = factor(FuncName, levels = Names_vec))) +
   geom_violin(trim = TRUE, alpha = 0.5) +
-  scale_color_manual(values = Color_vec, guide = FALSE) +
+  scale_color_manual(values = Outline_vec, guide = FALSE) +
   scale_fill_manual(values = Color_vec, guide = FALSE) +
   geom_boxplot(width = 0.15, fill = "white", alpha = 0.5) +
   stat_summary(fun = mean, geom = "errorbar",
@@ -329,8 +333,7 @@ fig_6 <- ggplot(mbm_vec, aes(x = factor(FuncName, levels = Names_vec), y = time,
     bquote(f[s] ~ SWSE[17]), bquote(f[s] ~ SWSE[14]),
     bquote(f[s] ~ Gon[17]), bquote(f[s] ~ Gon[14]),
     bquote(f[s] ~ Nav[17]), bquote(f[s] ~ Nav[14]),
-    bquote(f[l] ~ "Nav"), "RWiener",
-    "Gondan", "rtdists")) +
+    bquote(f[l] ~ "Nav"), "RWiener", "Gondan", "rtdists")) +
   facet_zoom(ylim = c(mi, ma)) +
   labs(x = "Implementation", y = "Time (microseconds)") +
   theme_bw() +
@@ -360,8 +363,8 @@ mbm_ind <- melt(bm_ind, measure.vars = -seq_len(t_idx),
 
 Names_meq <- c("fb_SWSE_17", "fs_SWSE_17", "fl_Nav_09",
                "RWiener", "Gondan", "rtdists")
-Color_meq <- c("#e000b4", "#9900cc", "#996633",
-               "#ff9999", "#ff5050", "#990000")
+Color_meq <- c("#92c639", "#5cc639", "#dcdca3",
+               "#deccba", "#c5a687", "#ac8053")
 mbm_meq <- subset(mbm_ind, FuncName %in% Names_meq)
 
 my_labeller <- as_labeller(c(fb_SWSE_17 = "f[c] ~ SWSE[17]",

@@ -549,10 +549,14 @@ Names <- c("fb_SWSE_17", "fb_SWSE_14", "fb_Gon_17", "fb_Gon_14",
            "fb_Nav_17", "fb_Nav_14", "fs_SWSE_17", "fs_SWSE_14",
            "fs_Gon_17", "fs_Gon_14", "fs_Nav_17", "fs_Nav_14",
            "fl_Nav_09", "rtdists")
-Color <- c("#e000b4", "#ff99eb", "#e68a00", "#ffb366",
-           "#006699", "#66ccff", "#9900cc", "#cc99ff",
-           "#c2a500", "#d7db42", "#336600", "#33cc33",
-           "#996633", "#990000")
+Color <- c("#92c639", "#d3e8b0", "#b3724d", "#e0c7b8",
+           "#4da7b3", "#b8dce0", "#5cc639", "#bee8b0",
+           "#b34d4d", "#e0b8b8", "#4d80b3", "#b8cce0",
+           "#dcdca3", "#ac8053")
+Outline <- c("#92c639", "#92c639", "#b3724d", "#b3724d",
+           "#4da7b3", "#4da7b3", "#5cc639", "#5cc639",
+           "#b34d4d", "#b34d4d", "#4d80b3", "#4d80b3",
+           "#dcdca3", "#ac8053")
 Shape <- c(21, 25)
 Sizes <- c(0, 3, 3)
 Stroke <- c(0, 1, 1)
@@ -600,14 +604,14 @@ fig_9 <- ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
     bquote(f[s] ~ Nav[17]), bquote(f[s] ~ Nav[14]),
     bquote(f[l] ~ "Nav"), "rtdists")) +
   coord_cartesian(ylim = c(mi, ma*1.05)) +
-  scale_color_manual(values = Color, guide = FALSE) +
+  scale_color_manual(values = Outline, guide = FALSE) +
+  scale_fill_manual(values = Color, guide = FALSE) +
   scale_shape_manual(values = Shape,
                      name = "Convergence Code",
                      breaks = c(0, 1),
                      labels = c("Success", "Failure")) +
   scale_size_manual(values = Sizes, guide = FALSE) +
   scale_discrete_manual(aesthetics = "stroke", values = Stroke, guide = FALSE) +
-  scale_fill_manual(values = Color, guide = FALSE) +
   ggnewscale::new_scale_fill() +
   scale_fill_manual(values = Fills,
                     name = paste("Difference in", "Log-likelihood", "from MLE",
@@ -676,14 +680,14 @@ fig_10 <- ggplot(fit_fev, aes(x = factor(Algorithm, levels = Names),
     bquote(f[s] ~ Gon[17]), bquote(f[s] ~ Gon[14]),
     bquote(f[s] ~ Nav[17]), bquote(f[s] ~ Nav[14]),
     bquote(f[l] ~ "Nav"), "rtdists")) +
-  scale_color_manual(values = Color, guide = FALSE) +
+  scale_color_manual(values = Outline, guide = FALSE) +
+  scale_fill_manual(values = Color, guide = FALSE) +
   scale_shape_manual(values = Shape,
                      name = "Convergence Code",
                      breaks = c(0, 1),
                      labels = c("Success", "Failure")) +
   scale_size_manual(values = Sizes, guide = FALSE) +
   scale_discrete_manual(aesthetics = "stroke", values = Stroke, guide = FALSE) +
-  scale_fill_manual(values = Color, guide = FALSE) +
   ggnewscale::new_scale_fill() +
   scale_fill_manual(values = Fills,
                     name = paste("Difference in", "Log-likelihood", "from MLE",

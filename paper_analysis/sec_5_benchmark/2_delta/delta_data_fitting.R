@@ -594,10 +594,14 @@ Names <- c("fb_SWSE_17_0", "fb_SWSE_14_0", "fb_SWSE_17_1", "fb_SWSE_14_1",
            "fb_SWSE_17_2", "fb_SWSE_14_2", "fb_SWSE_17_3", "fb_SWSE_14_3",
            "fb_SWSE_17_4", "fb_SWSE_14_4", "fb_SWSE_17_5", "fb_SWSE_14_5",
            "fb_SWSE_17_6", "fb_SWSE_14_6", "fb_SWSE_17_7", "fb_SWSE_14_7")
-Color <- c("#e000b4", "#ff99eb", "#e68a00", "#ffb366",
-           "#006699", "#66ccff", "#9900cc", "#cc99ff",
-           "#c2a500", "#d7db42", "#336600", "#33cc33",
-           "#996633", "#ff9999", "#ff5050", "#990000")
+Color <- c("#818679", "#cdcfc9", "#92c639", "#d3e8b0",
+           "#8bb34d", "#d0e0b8", "#88ac53", "#d0deba",
+           "#87a659", "#cfdbbd", "#869f60", "#cfd9bf",
+           "#859966", "#ced6c2", "#83936c", "#cdd4c4")
+Outline <- c("#818679", "#818679", "#92c639", "#92c639",
+             "#8bb34d", "#8bb34d", "#88ac53", "#88ac53",
+             "#87a659", "#87a659", "#869f60", "#869f60",
+             "#859966", "#859966", "#83936c", "#83936c")
 Shape <- c(21, 25)
 Sizes <- c(0, 3, 3)
 Stroke <- c(0, 1, 1)
@@ -642,14 +646,14 @@ fig_5 <- ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
                               bquote("5, " ~ S[17]), bquote("5, " ~ S[14]),
                               bquote("6, " ~ S[17]), bquote("6, " ~ S[14]),
                               bquote("7, " ~ S[17]), bquote("7, " ~ S[14]))) +
-  scale_color_manual(values = Color, guide = FALSE) +
+  scale_color_manual(values = Outline, guide = FALSE) +
+  scale_fill_manual(values = Color, guide = FALSE) +
   scale_shape_manual(values = Shape,
                      name = "Convergence Code",
                      breaks = c(0, 1),
                      labels = c("Success", "Failure")) +
   scale_size_manual(values = Sizes, guide = FALSE) +
   scale_discrete_manual(aesthetics = "stroke", values = Stroke, guide = FALSE) +
-  scale_fill_manual(values = Color, guide = FALSE) +
   ggnewscale::new_scale_fill() +
   scale_fill_manual(values = Fills,
                     name = paste("Difference in", "Log-likelihood", "from MLE",

@@ -65,9 +65,9 @@ lbl_GN[breaks_GN > 0] <- paste0("+", lbl_GN[breaks_GN > 0])
 # Figure 7
 fig_7 <- ggplot(ks_num[ks_num[["w"]] == 0.5, ]) +
   geom_tile(aes(x = t, y = eps, fill = ks_diff_GN)) +
-  scale_fill_gradient2(low = "#c2a500",
+  scale_fill_gradient2(low = "#b34d4d",
                        mid = "#ffffff",
-                       high = "#336600",
+                       high = "#4d80b3",
                        midpoint = 0,
                        name = bquote(k[s] ~ "difference"),
                        limits = c(-max_diff_GN, max_diff_GN),
