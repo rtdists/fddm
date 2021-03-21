@@ -47,7 +47,7 @@ MathJax.Hub.Config({
 
 Function `dfddm` evaluates the density function (or probability density function, PDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full PDF, which contains an infinite sum. An empirical validation of the implemented methods is provided in the [Validity Vignette](validity.html). Timing benchmarks for the present methods and comparison with existing methods are provided in the [Benchmark Vignette](benchmark.html). Two examples of using `dfddm` for parameter estimation are provided in the [Example Vignette](example.html).
 
-Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ (threshold separation), $v \in (-\infty, \infty)$ (drift rate), $t_0 \in [0, \infty)$ (non-decision time/response time constant), $w \in (0, 1)$ (relative starting point), $sv \in (0, \infty)$ (inter-trial-variability of drift), and $\sigma \in (0, \infty)$ (diffusion coefficient of the underlying Wiener Process).
+Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ (threshold separation), $v \in (-\infty, \infty)$ (drift rate), $t_0 \in [0, \infty)$ (non-decision time/response time constant), $w \in (0, 1)$ (relative starting point), $sv \in (0, \infty)$ (inter-trial-variability of drift), and $\sigma \in (0, \infty)$ (diffusion coefficient of the underlying Wiener Process). Please note that for only this vignette, we will refer to the inter-trial variability of drift as $\eta$ instead of $sv$ to make the notation in the equations less confusing.
 <br><br>
 
 
@@ -57,7 +57,7 @@ Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ 
 # Mathematical Background {#background}
 <hr class="sec1">
 
-There are several different methods for approximating the PDF of the DDM, and there are three optional parameters in `dfddm` that can be used to indicate which method should be in the function call: `scale`, `n_terms_small`, and `summation_small`. For each method we describe, we include the parameter settings for the function call to `dfddm` so that it uses the desired method. As these parameters are optional, leaving them blank results in the [default method](#default-method)  that is indicated later in this vignette. For general purpose use, we recommend ignoring these optional parameters so that the default settings are used as this will be the fastest and most stable algorithm. Note that precedence for the optional parameters is first given to checking if the [default method](#default-method) is selected. If not, precedence is then given to the `scale` parameter value; for example, `scale = "large"` will ignore the `summation_small` input value.
+There are several different methods for approximating the PDF of the DDM, and there are three optional parameters in `dfddm` that can be used to indicate which method should be in the function call: `scale`, `n_terms_small`, and `summation_small`. For each method we describe, we include the parameter settings for the function call to `dfddm` so that it uses the desired method. As these parameters are optional, leaving them blank results in the [default implementation](#default-implementation)  that is indicated later in this vignette. For general purpose use, we recommend ignoring these optional parameters so that the default settings are used as this will be the fastest and most stable algorithm. Note that precedence for the optional parameters is first given to checking if the [default implementation](#default-implementation) is selected. If not, precedence is then given to the `scale` parameter value; for example, `scale = "large"` will ignore the `summation_small` input value.
 
 Since the DDM is widely used in parameter estimation usually involving numerical optimization, significant effort has been put into making the evaluation of its density as fast as possible. However, the density function for the DDM is notorious for containing an unavoidable infinite sum; hence, the literature has produced a few different methods of approximating the density. This vignette details the various methods used in the literature to approximate the infinite sum in the density function for the DDM.
 
@@ -224,14 +224,14 @@ To use this method, set `n_terms_small = "Gondan"` and keep `scale = "both"` in 
 </p>
 
 
-<a id="default-method"></a>
+<a id="default-implementation"></a>
 
 ### Stop When Small Enough (SWSE) Small & Navarro Large {#dens-ct-swse}
 
 This method uses the SWSE approximation to the small-time density function in conjunction with the Navarro large-time approximation to achieve consistent performance across the parameter space. Since the SWSE approximation to the small-time density function does not explicitly calculate $k_s$, we only calculate $k_\ell^{\text{Nav}}$ and compare it to the new optional parameter `max_terms_large`. If $k_\ell^{\text{Nav}}$ $\le$ `max_terms_large`, then the Navarro large-time approximation is used. On the other hand, if $k_\ell^{\text{Nav}}$ $>$ `max_terms_large`, then the SWSE small-time approximation is used. The user can set the optional parameter `max_terms_large` to any non-negative integer to alter the behavior of this method; the default value for this parameter is $1$. Again, the validity of this method is proven in the paper that accompanies the `fddm` package. Note that in the `fddm` paper, the parameter `max_terms_large` is labelled $\delta$.
 
 <p class="method">
-Since this is the default method, all three of the optional parameters (`n_terms_small`, `scale`, and `summation_small`) can be ignored. For completeness, set `n_terms_small = "SWSE"` and keep `scale = "both"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance. This method uses a fourth optional parameter, `max_terms_large`, and we recommend ignoring this parameter so that it retains its default value.
+Since this is the default implementation, all three of the optional parameters (`n_terms_small`, `scale`, and `summation_small`) can be ignored. For completeness, set `n_terms_small = "SWSE"` and keep `scale = "both"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance. This method uses a fourth optional parameter, `max_terms_large`, and we recommend ignoring this parameter so that it retains its default value.
 </p>
 </div>
 
