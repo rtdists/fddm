@@ -37,7 +37,7 @@ int ks_Gon(const double& t, const double& w, const double& err)
 // Navarro and Fuss 2009
 int ks_Nav(const double& t, const double& w, const double& err)
 { // note: w is not used
-  if (err < 1 / (2 * sqrt(2 * M_PI * t))) { // if error threshold is set low enough
+  if (err * 2 * sqrt(2 * M_PI * t) < 1) { // if error threshold is set low enough
     float ks = 2 + sqrt(-2 * t * log(2 * err * sqrt(2 * M_PI * t)));
     float bc = sqrt(t) + 1; // boundary conditions
     if (ks > INT_MAX || bc > INT_MAX) return INT_MAX;
@@ -59,7 +59,7 @@ int kl_Nav(const double& t, const double& w, const double& err)
 { // note: w is not used
   float bc = 1 / (M_PI * sqrt(t)); // boundary conditions
   if (bc > INT_MAX) return INT_MAX;
-  if (err < 1 / (M_PI * t)) { // error threshold is low enough
+  if (err * M_PI * t < 1) { // error threshold is low enough
     float kl = sqrt(-2 * log(M_PI * t * err) / (M_PI*M_PI * t));
     if (kl > INT_MAX) return INT_MAX;
     return ceil(max(kl, bc)); // ensure boundary conditions are met
