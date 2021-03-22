@@ -4,7 +4,8 @@
 * Added new parameter `sigma` to denote the diffusion coefficient of the Wiener process that underlies the DDM.
 
 ## Bug Fixes
-* Amended the required number of terms and summation functions.
+* Corrected the required number of terms in the small-time approximation methods.
+* `k` now consistently refers to the number of _individual_ terms instead of sometimes the number of _pairs_ of terms.
 
 ## Other Changes
 * Changed default value of `max_terms_large` to 1. This affects the default method (`n_terms_small = "SWSE", scale = "both"`).
