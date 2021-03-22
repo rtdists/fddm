@@ -78,7 +78,7 @@ Color <- c("#b34d4d", "#4d80b3")
 
 # uncomment the following line if loading pre-run benchmark data,
 # will load into variable named "ks_bm"
-load(paste0(save_dir, "ks_bm-windows.Rds"))
+# load(paste0(save_dir, "ks_bm-windows.Rds"))
 
 t_idx <- match("t_stop", colnames(ks_bm))
 mbm_ks <- melt(ks_bm, measure.vars = -seq_len(t_idx),
@@ -94,7 +94,7 @@ fig_s6a <- ggplot(mbm_ks, aes(x = t_mid, y = time,
                      name = "Method:") +
   guides(color = guide_legend(override.aes = list(size = c(2,2)))) +
   labs(title = bquote("Median microbenchmark results for " ~ k[s] ~ " calculation"),
-       x = bquote(frac(rt, a^2) ~ ", effective response time"),
+       x = bquote(frac(t, a^2) ~ ", effective response time"),
        y = "Time (microseconds)") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
@@ -136,7 +136,7 @@ fig_s6b <- ggplot(mbm_ks, aes(x = t_mid, y = time,
                      name = "Method:") +
   guides(color = guide_legend(override.aes = list(size = c(2,2)))) +
   labs(title = bquote("Median microbenchmark results for " ~ k[s] ~ " calculation"),
-       x = bquote(frac(rt, a^2) ~ ", effective response time"),
+       x = bquote(frac(t, a^2) ~ ", effective response time"),
        y = "Time (microseconds)") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),

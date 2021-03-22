@@ -117,31 +117,11 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     warning("dfddm warning: model parameter 'a' is empty; empty vector returned.");
     out = 0;
   } else {
-    bool bad_par = 0;
-    vector<int> bad_idx;
     for (int i = 0; i < Na; i++) {
       if (a[i] > 0) {
         a_c[i] = a[i];
       } else {
         a_c[i] = NAN;
-        bad_par = 1;
-        bad_idx.push_back(i);
-      }
-    }
-    if (bad_par) { // show warning
-      int n_bad = bad_idx.size();
-      if (n_bad == 1) {
-        warning("dfddm warning: model parameter 'a' <= 0 at index %i; NaNs produced.",
-                bad_idx[0]+1);
-      } else {
-        std::string warning_text = "dfddm warning: model parameter 'a' <= 0 at the following indices: ";
-        warning_text = warning_text.append(to_string(bad_idx[0]+1));
-        for(int j = 1; j < n_bad; j++) {
-          warning_text = warning_text.append(", ");
-          warning_text = warning_text.append(to_string(bad_idx[j]+1));
-        }
-        warning_text = warning_text.append("; NaNs produced.");
-        warning(warning_text);
       }
     }
   }
@@ -152,31 +132,11 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
   if (Nt0 < 1) {
     out = 0;
   } else {
-    bool bad_par = 0;
-    vector<int> bad_idx;
     for (int i = 0; i < Nt0; i++) {
       if (t0[i] >= 0) {
         t0_c[i] = t0[i];
       } else {
         t0_c[i] = NAN;
-        bad_par = 1;
-        bad_idx.push_back(i);
-      }
-    }
-    if (bad_par) { // show warning
-      int n_bad = bad_idx.size();
-      if (n_bad == 1) {
-        warning("dfddm warning: model parameter 't0' < 0 at index %i; NaNs produced.",
-                bad_idx[0]+1);
-      } else {
-        std::string warning_text = "dfddm warning: model parameter 't0' < 0 at the following indices: ";
-        warning_text = warning_text.append(to_string(bad_idx[0]+1));
-        for(int j = 1; j < n_bad; j++) {
-          warning_text = warning_text.append(", ");
-          warning_text = warning_text.append(to_string(bad_idx[j]+1));
-        }
-        warning_text = warning_text.append("; NaNs produced.");
-        warning(warning_text);
       }
     }
   }
@@ -184,31 +144,11 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     warning("dfddm warning: model parameter 'w' is empty; empty vector returned.");
     out = 0;
   } else {
-    bool bad_par = 0;
-    vector<int> bad_idx;
     for (int i = 0; i < Nw; i++) {
       if (w[i] > 0 && w[i] < 1) {
         w_c[i] = w[i];
       } else {
         w_c[i] = NAN;
-        bad_par = 1;
-        bad_idx.push_back(i);
-      }
-    }
-    if (bad_par) { // show warning
-      int n_bad = bad_idx.size();
-      if (n_bad == 1) {
-        warning("dfddm warning: model parameter 'w' <= 0 or 'w' >= 1 at index %i; NaNs produced.",
-                bad_idx[0]+1);
-      } else {
-        std::string warning_text = "dfddm warning: model parameter 'w' <= 0 or 'w' >= 1 at the following indices: ";
-        warning_text = warning_text.append(to_string(bad_idx[0]+1));
-        for(int j = 1; j < n_bad; j++) {
-          warning_text = warning_text.append(", ");
-          warning_text = warning_text.append(to_string(bad_idx[j]+1));
-        }
-        warning_text = warning_text.append("; NaNs produced.");
-        warning(warning_text);
       }
     }
   }
@@ -216,31 +156,11 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     warning("dfddm warning: model parameter 'sv' is empty; empty vector returned.");
     out = 0;
   } else {
-    bool bad_par = 0;
-    vector<int> bad_idx;
     for (int i = 0; i < Nsv; i++) {
       if (sv[i] >= 0) {
         sv_c[i] = sv[i];
       } else {
         sv_c[i] = NAN;
-        bad_par = 1;
-        bad_idx.push_back(i);
-      }
-    }
-    if (bad_par) { // show warning
-      int n_bad = bad_idx.size();
-      if (n_bad == 1) {
-        warning("dfddm warning: model parameter 'sv' < 0 at index %i; NaNs produced.",
-                bad_idx[0]+1);
-      } else {
-        std::string warning_text = "dfddm warning: model parameter 'sv' < 0 at the following indices: ";
-        warning_text = warning_text.append(to_string(bad_idx[0]+1));
-        for(int j = 1; j < n_bad; j++) {
-          warning_text = warning_text.append(", ");
-          warning_text = warning_text.append(to_string(bad_idx[j]+1));
-        }
-        warning_text = warning_text.append("; NaNs produced.");
-        warning(warning_text);
       }
     }
   }
@@ -248,31 +168,11 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     warning("dfddm warning: model parameter 'sigma' is empty; empty vector returned.");
     out = 0;
   } else {
-    bool bad_par = 0;
-    vector<int> bad_idx;
     for (int i = 0; i < Nsig; i++) {
       if (sigma[i] > 0) {
         sigma_c[i] = sigma[i];
       } else {
         sigma_c[i] = NAN;
-        bad_par = 1;
-        bad_idx.push_back(i);
-      }
-    }
-    if (bad_par) { // show warning
-      int n_bad = bad_idx.size();
-      if (n_bad == 1) {
-        warning("dfddm warning: model parameter 'sigma' <= 0 at index %i; NaNs produced.",
-                bad_idx[0]+1);
-      } else {
-        std::string warning_text = "dfddm warning: model parameter 'sigma' <= 0 at the following indices: ";
-        warning_text = warning_text.append(to_string(bad_idx[0]+1));
-        for(int j = 1; j < n_bad; j++) {
-          warning_text = warning_text.append(", ");
-          warning_text = warning_text.append(to_string(bad_idx[j]+1));
-        }
-        warning_text = warning_text.append("; NaNs produced.");
-        warning(warning_text);
       }
     }
   }
@@ -296,7 +196,7 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
         stop("dfddm error: function parameter 'err_tol' <= 0 at index %i.",
              bad_idx[0]+1);
       } else {
-        std::string error_text = "dfddm error: function parameter 'err_tol' <= 0 at the following indices: ";
+        std::string error_text = "dfddm error: function parameter 'err_tol' <= 0 at the following indices:\n";
         error_text = error_text.append(to_string(bad_idx[0]+1));
         for(int j = 1; j < n_bad; j++) {
           error_text = error_text.append(", ");

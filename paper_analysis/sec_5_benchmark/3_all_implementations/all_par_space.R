@@ -394,7 +394,7 @@ fig_8 <- ggplot(mbm_meq, aes(x = RTAA, y = time,
          "The darker shaded regions represent the 10% and 90% quantiles",
          "The lighter shaded regions represent the min and max times",
          sep = ";\n"),
-       x = bquote(frac(rt, a^2) ~ ", effective response time, " ~ log[10]),
+       x = bquote(frac(t, a^2) ~ ", effective response time, " ~ log[10]),
        y = "Time (microseconds)") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),

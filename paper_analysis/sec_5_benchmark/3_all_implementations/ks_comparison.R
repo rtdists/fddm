@@ -76,7 +76,7 @@ fig_7 <- ggplot(ks_num[ks_num[["w"]] == 0.5, ]) +
   scale_y_log10() +
   labs(subtitle = paste0("Cumulative difference = ",
                          sum(ks_num[ks_num[["w"]] == 0.5, "ks_diff_GN"])),
-       x = bquote(frac(rt, a^2) ~ ", effective response time"),
+       x = bquote(frac(t, a^2) ~ ", effective response time"),
        y = bquote(epsilon ~ ", desired precision, " ~ log[10])) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
