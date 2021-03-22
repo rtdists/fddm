@@ -8,31 +8,30 @@ source(system.file("extdata", "Gondan_et_al_density.R", package = "fddm", mustWo
 
 ### Input checking
 test_that("Input checking", {
-  expect_warning(expect_equal(
+  expect_true(all(is.nan(
     dfddm(rt = 1, response = c(3, -1, NA, NaN), a = 1, v = -1, t0 = 0, w = 0.5,
-          sv = 0, sigma = 1, log = 0, err_tol = 1e-6),
-    c(0, 0, 0, 0) ))
+          sv = 0, sigma = 1, log = 0, err_tol = 1e-6) )))
 
-  expect_warning(expect_true(all(is.nan(
+  expect_true(all(is.nan(
     dfddm(rt = 1, response = 1, a = c(-0.4, 0, NA, NaN), v = -1, t0 = 0,
-          w = 0.5, sv = 0, sigma = 1, log = 0, err_tol = 1e-6) ))))
+          w = 0.5, sv = 0, sigma = 1, log = 0, err_tol = 1e-6) )))
 
-  expect_warning(expect_true(all(is.nan(
+  expect_true(all(is.nan(
     dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = c(-0.25, NA, NaN),
-          w = 0.5, sv = 0, sigma = 1, log = 0, err_tol = 1e-6) ))))
+          w = 0.5, sv = 0, sigma = 1, log = 0, err_tol = 1e-6) )))
 
-  expect_warning(expect_true(all(is.nan(
+  expect_true(all(is.nan(
     dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = 0,
           w = c(-0.5, 1.5, 0, 1, NA, NaN), sv = 0, sigma = 1, log = 0,
-          err_tol = 1e-6) ))))
+          err_tol = 1e-6) )))
 
-  expect_warning(expect_true(all(is.nan(
+  expect_true(all(is.nan(
     dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = 0, w = 0.5,
-          sv = c(-1, NA, NaN), sigma = 1, log = 0, err_tol = 1e-6) ))))
+          sv = c(-1, NA, NaN), sigma = 1, log = 0, err_tol = 1e-6) )))
 
-  expect_warning(expect_true(all(is.nan(
+  expect_true(all(is.nan(
     dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = 0, w = 0.5,
-          sv = 0, sigma = c(-1, 0, NA, NaN), log = 0, err_tol = 1e-6) ))))
+          sv = 0, sigma = c(-1, 0, NA, NaN), log = 0, err_tol = 1e-6) )))
 
   expect_error(
       dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = 0, w = 0.5,

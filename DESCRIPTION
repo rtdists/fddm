@@ -26,7 +26,8 @@ Suggests:
     knitr,
     rmarkdown,
     microbenchmark,
-    ggnewscale
+    ggnewscale,
+    ggforce
 URL: https://github.com/rtdists/fddm
 BugReports: https://github.com/rtdists/fddm/issues
 SystemRequirements: C++11
