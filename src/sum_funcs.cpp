@@ -145,7 +145,7 @@ double small_sum_2014(const double& t, const double& a, const double& w,
 { // note: err is not used
   double gamma = -a*a / (2 * t);
   double sum = w * exp(gamma * w*w); // initialize with j = 0 term
-  for (int j = floor(ks/2); j > 0; j--) { // iterate through all ks
+  for (int j = floor(ks/2.0); j > 0; j--) { // iterate through all ks
     sum += (2 * j + w) * exp(gamma * (2 * j + w) * (2 * j + w))
     - (2 * j - w) * exp(gamma * (2 * j - w) * (2 * j - w));
   }
