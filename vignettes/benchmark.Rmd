@@ -410,8 +410,8 @@ mi <- min(bm_vec[, -seq_len(t_idx)])
 ma <- max(bm_vec[, (t_idx+1):(ncol(bm_vec)-4)])
 
 ggplot(mbm_vec, aes(x = factor(FuncName, levels = Names_vec), y = time,
-                             color = factor(FuncName, levels = Names_vec),
-                             fill = factor(FuncName, levels = Names_vec))) +
+                    color = factor(FuncName, levels = Names_vec),
+                    fill = factor(FuncName, levels = Names_vec))) +
   geom_violin(trim = TRUE, alpha = 0.5) +
   scale_color_manual(values = Outline_vec, guide = FALSE) +
   scale_fill_manual(values = Color_vec, guide = FALSE) +
@@ -435,14 +435,15 @@ ggplot(mbm_vec, aes(x = factor(FuncName, levels = Names_vec), y = time,
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
         axis.title.x = element_text(size = 20,
-                                    margin = margin(10, 5, 5, 5)),
-        axis.title.y = element_text(size = 20),
+                                    margin = margin(10, 0, 0, 0)),
+        axis.title.y = element_text(size = 20,
+                                    margin = margin(0, 10, 0, 0)),
         legend.position = "none")
 ```
 
 Depending on your system, the results might differ from the ones shown here, but they should replicate the general pattern. The small-time implementations ($f_s$) have long tails due to very few outliers, but their central tendencies are rather fast. The implementations combining small-time and large-time ($f_c$) approximations show an almost normal distribution with only a short tail; they also have rather fast central tendencies. Of the `fddm` implementations, the large-time implementation ($f_\ell$) is the slowest with a long tail. The function from the `Rwiener` package combines small-time and large-time approach and also shows an almost normal distribution, but its distribution of median benchmark times is shifted higher compared to those of `fddm`. The other two implementations are clearly slower; the function provided by @gondan2014even is purely in `R` so it is constrained by the speed of `R`'s vectorization. Similarly constrained by `R`, the function from the `rtdists` package performs quite a few computations in `R` that make it very user-friendly but at the cost of having the slowest central tendencies.
 
-To visualize how the response time input can affect the efficiency of each implementation, we plot the benchmark times as a function of the _effective_ response time. We define the effective response time as $\frac{rt}{a^2}$ because the two model parameters $rt$ and $a$ always appear inside the infinite sums in this relationship. In the following plot, we will vary the effective response time and show the mean of the benchmark times, the 10% quantiles and 90% quantiles of the benchmark times, as well as the minimum and maximum benchmark times. For each value of the effective response time, we aggregate the benchmark data for all values of the other parameter to generate the statistics plotted. Note that because we vary the response time in this plot,  we use the benchmark data generated from [`rt_benchmark_ind`](#bm-funcs)). As this benchmark function records the evaluation time of approximating the density for only one response time in contrast to a vector of response times, we expect the typical benchmark times produced by [`rt_benchmark_ind`](#bm-funcs) to be faster than that of [`rt_benchmark_vec`](#bm-funcs).
+To visualize how the response time input can affect the efficiency of each implementation, we plot the benchmark times as a function of the _effective_ response time. We define the effective response time as $\frac{t}{a^2}$ because the two model parameters $t$ and $a$ always appear inside the infinite sums in this relationship. In the following plot, we will vary the effective response time and show the mean of the benchmark times, the 10% quantiles and 90% quantiles of the benchmark times, as well as the minimum and maximum benchmark times. For each value of the effective response time, we aggregate the benchmark data for all values of the other parameter to generate the statistics plotted. Note that because we vary the response time in this plot,  we use the benchmark data generated from [`rt_benchmark_ind`](#bm-funcs)). As this benchmark function records the evaluation time of approximating the density for only one response time in contrast to a vector of response times, we expect the typical benchmark times produced by [`rt_benchmark_ind`](#bm-funcs) to be faster than that of [`rt_benchmark_vec`](#bm-funcs).
 
 To avoid too many repetitious plots, we will only include six of the implementations from the previous plot that illustrate the different variations and implementations of the density function approximations. We include: the fastest small-time implementation in `dfddm` ("$f_s \text{SWSE}_{17}$"), the one large-time implementation of the large-time in `dfddm` ("$f_\ell$ Nav"), the fastest implementation in `dfddm` that combines the small-time and large-time ("$f_c \text{SWSE}_{17}$"), and the three implementations from `R` packages and the literature as [described above](#den-gen).
 
@@ -483,33 +484,36 @@ ggplot(mbm_meq, aes(x = RTAA, y = time,
                fun.max = function(z) { quantile(z, 0.9) },
                geom = "ribbon", color = NA, alpha = 0.2) +
   stat_summary(fun = mean, geom = "line") +
-  scale_x_log10() +
+  scale_x_log10(breaks = c(0.001, 0.1, 10, 1000),
+                labels = as.character(c(0.001, 0.1, 10, 1000))) +
   scale_color_manual(values = Color_meq) +
   scale_fill_manual(values = Color_meq) +
   labs(subtitle = paste(
          "The darker shaded regions represent the 10% and 90% quantiles",
          "The lighter shaded regions represent the min and max times",
          sep = ";\n"),
-       x = bquote(frac(rt, a^2) ~ ", effective response time, " ~ log[10]),
+       x = bquote(frac(t, a^2) ~ ", effective response time, " ~ log[10]),
        y = "Time (microseconds)") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         plot.subtitle = element_text(size = 16,
-                                     margin = margin(5, 5, 15, 5, "pt")),
+                                     margin = margin(0, 0, 15, 0)),
         axis.text.x = element_text(size = 16, angle = 90,
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
-        axis.title.x = element_text(size = 18),
-        axis.title.y = element_text(size = 18),
-        strip.text = element_text(size = 14),
+        axis.title.x = element_text(size = 20,
+                                    margin = margin(10, 0, 0, 0)),
+        axis.title.y = element_text(size = 20,
+                                    margin = margin(0, 10, 0, 0)),
+        strip.text = element_text(size = 16),
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
   facet_wrap(~ factor(FuncName, levels = Names_meq), scales = "free_y",
              labeller = my_labeller)
 ```
 
-This plot confirms that the aptly named small-time and large-time density functions are generally more efficient at calculating the density for small response times and large response times, respectively. Of the three implementations used from the literature, the `RWiener` and `rtdists` functions use a switching mechanism between the small-time and large-time density functions, and the implementation from @gondan2014even only uses the small-time density function. Importantly, the implementations that utilize a switching mechanism between the small-time and large-time density function approximations have much flatter plots and generally perform well across the $\frac{rt}{a^2}$ parameter space; this confirms that using a combination of both timescales results in a very stable implementation.
+This plot confirms that the aptly named small-time and large-time density functions are generally more efficient at calculating the density for small response times and large response times, respectively. Of the three implementations used from the literature, the `RWiener` and `rtdists` functions use a switching mechanism between the small-time and large-time density functions, and the implementation from @gondan2014even only uses the small-time density function. Importantly, the implementations that utilize a switching mechanism between the small-time and large-time density function approximations have much flatter plots and generally perform well across the $\frac{t}{a^2}$ parameter space; this confirms that using a combination of both timescales results in a very stable implementation.
 
 
 
@@ -1148,7 +1152,7 @@ mi <- min(fit[fit[["Algorithm"]] != "rtdists", "BmTime"])
 ma <- max(fit[fit[["Algorithm"]] != "rtdists", "BmTime"])
 
 ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
-                             y = BmTime)) +
+                    y = BmTime)) +
   geom_violin(trim = TRUE, alpha = 0.5,
               aes(color = factor(Algorithm, levels = Names),
                   fill = factor(Algorithm, levels = Names))) +
@@ -1205,9 +1209,10 @@ ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
         axis.text.x = element_text(size = 16, angle = 90,
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
-        axis.title.x = element_text(size = 20),
+        axis.title.x = element_text(size = 20,
+                                    margin = margin(15, 0, 0, 0)),
         axis.title.y = element_text(size = 20,
-                                    margin = margin(5, 10, 5, 5, "pt")),
+                                    margin = margin(0, 10, 0, 0)),
         legend.position = "right",
         legend.box = "vertical",
         legend.direction = "vertical",
@@ -1216,13 +1221,13 @@ ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
         legend.text = element_text(size = 13))
 ```
 
-This plot vaguely resembles [the `microbenchmark` violin plot](#den-ana) from the previous section. Immediately we observe that fitting to data using the `rtdists` function is noticeably slower than fitting to data using the functions provided in `fddm`, but the magnitude of the difference is much smaller. The large-time implementation has many problematic data points, further emphasizing its shortcomings when handling small "effective response times".
+This plot vaguely resembles [the `microbenchmark` violin plot](#den-ana) from the previous section. Immediately we observe that fitting to data using the `rtdists` function is noticeably slower than fitting to data using the functions provided in `fddm`, but the magnitude of the difference is much smaller. The large-time implementation has many problematic data points, further emphasizing its shortcomings when handling small effective response times.
 
-Upon closer inspection, the means and medians of the benchmark times are slightly lower for the small-time implementations than for the implementations that combine both the small-time and large-time density function approximations. However, these two seemingly faster small-time implementations have more problematic data points in the optimization process, due to the poor support for large "effective response times" that we discussed in a [previous section](#den-ana) of this vignette.
+Upon closer inspection, the means and medians of the benchmark times are slightly lower for the small-time implementations than for the implementations that combine both the small-time and large-time density function approximations. However, these two seemingly faster small-time implementations have more problematic data points in the optimization process, due to the poor support for large effective response times that we discussed in a [previous section](#den-ana) of this vignette.
 
 We also see that the two combined-time implementations only show relatively very few cases where the optimization algorithm did not reach the optimum for one participant and starting value. These issues can be avoided by using multiple sets of initial values and choosing the best optimization result from that set. Despite these few problematic fits, the combined-time implementations are very stable and fast.
 
-If the data is known to contain only small response times, then using a small-time implementation may yield fast and unproblematic fitting results. However, instability may still arise from the optimization routine testing small values of $a$, as this would create large "effective response times" and cause the small-time aproximations to reveal their vulnerability. For this reason, we recommend using an implementation that combines the small-time and large-time approximations instead of an implementation that uses only one timescale.
+If the data is known to contain only small response times, then using a small-time implementation may yield fast and unproblematic fitting results. However, instability may still arise from the optimization routine testing small values of $a$, as this would create large effective response times and cause the small-time aproximations to reveal their vulnerability. For this reason, we recommend using an implementation that combines the small-time and large-time approximations instead of an implementation that uses only one timescale.
 
 The second plot will show the distribution of the number of function evaluations in the optimization process for each implementation.
 
@@ -1287,9 +1292,10 @@ ggplot(fit_fev, aes(x = factor(Algorithm, levels = Names),
         axis.text.x = element_text(size = 16, angle = 90,
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
-        axis.title.x = element_text(size = 20),
+        axis.title.x = element_text(size = 20,
+                                    margin = margin(15, 0, 0, 0)),
         axis.title.y = element_text(size = 20,
-                                    margin = margin(5, 10, 5, 5, "pt")),
+                                    margin = margin(0, 10, 0, 0)),
         legend.position = "right",
         legend.box = "vertical",
         legend.direction = "vertical",
@@ -1298,7 +1304,7 @@ ggplot(fit_fev, aes(x = factor(Algorithm, levels = Names),
         legend.text = element_text(size = 13))
 ```
 
-Here we see that the implementations that use both the small-time and large-time density function approximations appear to be the most stable. They have relatively short tails, suggesting that the optimization routine has little trouble in finding the optimum parameter estimates. Moreover, these implementations have few data points where the objective difference is high or the convergence code indicates unsuccessful convergence. In contrast, the large-time implementation suffers greatly from its inability to handle small "effective response times". The `rtdists` function performs well in this test relative to the previous tests, but it is still hindered by longer benchmark times.
+Here we see that the implementations that use both the small-time and large-time density function approximations appear to be the most stable. They have relatively short tails, suggesting that the optimization routine has little trouble in finding the optimum parameter estimates. Moreover, these implementations have few data points where the objective difference is high or the convergence code indicates unsuccessful convergence. In contrast, the large-time implementation suffers greatly from its inability to handle small effective response times. The `rtdists` function performs well in this test relative to the previous tests, but it is still hindered by longer benchmark times.
 
 In addition to being the fastest implementation available, the default implementation for `fddm`, "$f_c \text{SWSE}_{17}$", appears to be the most stable implementation for fitting the DDM to real-world data. The optimization routine handles this implementation consistently well in that there are very few troublesome fits compared to that of the implementations which only implement the small-time density function approximation. The default implementation also outperforms its counterparts, "$f_c \text{Gon}_{17}$" and "$f_c \text{Nav}_{17}$", because it uses a faster mechanism to choose between the two timescales and exploits the large-time implementation where it is most useful.
 

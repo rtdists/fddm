@@ -349,8 +349,9 @@ fig_s4 <- ggplot(mbm_vec, aes(x = factor(FuncName, levels = Names_vec), y = time
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
         axis.title.x = element_text(size = 20,
-                                    margin = margin(10, 5, 5, 5)),
-        axis.title.y = element_text(size = 20),
+                                    margin = margin(10, 0, 0, 0)),
+        axis.title.y = element_text(size = 20,
+                                    margin = margin(0, 10, 0, 0)),
         legend.position = "none")
 ggsave(paste0(img_dir, "bm_vec_0-30.png"),
        plot = fig_s4, width = 16, height = 9)
@@ -411,8 +412,9 @@ fig_s3 <- ggplot(mbm_ind, aes(x = factor(FuncName, levels = Names_ind), y = time
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
         axis.title.x = element_text(size = 20,
-                                    margin = margin(10, 5, 5, 5)),
-        axis.title.y = element_text(size = 20),
+                                    margin = margin(10, 0, 0, 0)),
+        axis.title.y = element_text(size = 20,
+                                    margin = margin(0, 10, 0, 0)),
         legend.position = "none")
 ggsave(paste0(img_dir, "bm_ind_0-2.png"),
        plot = fig_s3, width = 16, height = 9)
@@ -421,7 +423,7 @@ ggsave(paste0(img_dir, "bm_ind_0-2.png"),
 
 # uncomment the following line if loading pre-run benchmark data,
 # will load into variable named "bm_ind"
-# load(paste0("paper_analysis/appendices/", "bm_ind_0-30.Rds"))
+# load(paste0(save_dir, "bm_ind_0-30.Rds"))
 bm_ind[["RTAA"]] <- bm_ind[["RT"]] / bm_ind[["A"]] / bm_ind[["A"]]
 bm_ind <- bm_ind[, c(1, 2, ncol(bm_ind), 3:(ncol(bm_ind)-1)) ]
 
@@ -459,8 +461,9 @@ fig_s5 <- ggplot(mbm_ind, aes(x = factor(FuncName, levels = Names_ind), y = time
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
         axis.title.x = element_text(size = 20,
-                                    margin = margin(10, 5, 5, 5)),
-        axis.title.y = element_text(size = 20),
+                                    margin = margin(10, 0, 0, 0)),
+        axis.title.y = element_text(size = 20,
+                                    margin = margin(0, 10, 0, 0)),
         legend.position = "none")
 ggsave(paste0(img_dir, "bm_ind_0-30.png"),
        plot = fig_s5, width = 16, height = 9)
@@ -495,8 +498,7 @@ fig_s7 <- ggplot(mbm_meq, aes(x = W, y = time,
   stat_summary(fun = mean, geom = "line") +
   scale_color_manual(values = Color_meq) +
   scale_fill_manual(values = Color_meq) +
-  labs(title = "Means of the median microbenchmark results",
-       subtitle = paste(
+  labs(subtitle = paste(
          "The shaded regions represent the 10% and 90% quantiles",
          "The lighter shaded regions represent the min and max times",
          sep = ";\n"),
@@ -505,15 +507,16 @@ fig_s7 <- ggplot(mbm_meq, aes(x = W, y = time,
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
-        plot.title = element_text(size = 20),
         plot.subtitle = element_text(size = 16,
-                                     margin = margin(5, 5, 15, 5, "pt")),
+                                     margin = margin(0, 0, 15, 0)),
         axis.text.x = element_text(size = 16, angle = 90,
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
-        axis.title.x = element_text(size = 18),
-        axis.title.y = element_text(size = 18),
-        strip.text = element_text(size = 14),
+        axis.title.x = element_text(size = 20,
+                                    margin = margin(10, 0, 0, 0)),
+        axis.title.y = element_text(size = 20,
+                                    margin = margin(0, 10, 0, 0)),
+        strip.text = element_text(size = 16),
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
   facet_wrap(~ factor(FuncName, levels = Names_meq), scales = "free_y",
@@ -535,8 +538,7 @@ fig_s8 <- ggplot(mbm_meq, aes(x = V, y = time,
   stat_summary(fun = mean, geom = "line") +
   scale_color_manual(values = Color_meq) +
   scale_fill_manual(values = Color_meq) +
-  labs(title = "Means of the median microbenchmark results",
-       subtitle = paste(
+  labs(subtitle = paste(
          "The shaded regions represent the 10% and 90% quantiles",
          "The lighter shaded regions represent the min and max times",
          sep = ";\n"),
@@ -545,15 +547,16 @@ fig_s8 <- ggplot(mbm_meq, aes(x = V, y = time,
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
-        plot.title = element_text(size = 20),
         plot.subtitle = element_text(size = 16,
-                                     margin = margin(5, 5, 15, 5, "pt")),
+                                     margin = margin(0, 0, 15, 0)),
         axis.text.x = element_text(size = 16, angle = 90,
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
-        axis.title.x = element_text(size = 18),
-        axis.title.y = element_text(size = 18),
-        strip.text = element_text(size = 14),
+        axis.title.x = element_text(size = 20,
+                                    margin = margin(10, 0, 0, 0)),
+        axis.title.y = element_text(size = 20,
+                                    margin = margin(0, 10, 0, 0)),
+        strip.text = element_text(size = 16),
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
   facet_wrap(~ factor(FuncName, levels = Names_meq), scales = "free_y",
@@ -575,8 +578,7 @@ fig_s9 <- ggplot(mbm_meq, aes(x = SV, y = time,
   stat_summary(fun = mean, geom = "line") +
   scale_color_manual(values = Color_meq) +
   scale_fill_manual(values = Color_meq) +
-  labs(title = "Means of the median microbenchmark results",
-       subtitle = paste(
+  labs(subtitle = paste(
          "The shaded regions represent the 10% and 90% quantiles",
          "The lighter shaded regions represent the min and max times",
          sep = ";\n"),
@@ -585,15 +587,16 @@ fig_s9 <- ggplot(mbm_meq, aes(x = SV, y = time,
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
-        plot.title = element_text(size = 20),
         plot.subtitle = element_text(size = 16,
-                                     margin = margin(5, 5, 15, 5, "pt")),
+                                     margin = margin(0, 0, 15, 0)),
         axis.text.x = element_text(size = 16, angle = 90,
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
-        axis.title.x = element_text(size = 18),
-        axis.title.y = element_text(size = 18),
-        strip.text = element_text(size = 14),
+        axis.title.x = element_text(size = 20,
+                                    margin = margin(10, 0, 0, 0)),
+        axis.title.y = element_text(size = 20,
+                                    margin = margin(0, 10, 0, 0)),
+        strip.text = element_text(size = 16),
         strip.background = element_rect(fill = "white"),
         legend.position = "none") +
   facet_wrap(~ factor(FuncName, levels = Names_meq), scales = "free_y",

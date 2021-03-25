@@ -209,8 +209,9 @@ fig_4 <- ggplot(data = mbm_vec_1,
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
         axis.title.x = element_text(size = 20,
-                                    margin = margin(10, 5, 5, 5)),
-        axis.title.y = element_text(size = 20),
+                                    margin = margin(15, 0, 0, 0)),
+        axis.title.y = element_text(size = 20,
+                                    margin = margin(0, 10, 0, 0)),
         legend.position = "none")
 ggsave(paste0(img_dir, "delta_bm_vec_0-30.png"),
        plot = fig_4, width = 16, height = 9)

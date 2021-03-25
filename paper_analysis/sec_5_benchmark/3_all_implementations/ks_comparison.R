@@ -81,12 +81,14 @@ fig_7 <- ggplot(ks_num[ks_num[["w"]] == 0.5, ]) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
-        plot.subtitle = element_text(size = 17),
+        plot.subtitle = element_text(size = 18),
         axis.text.x = element_text(size = 16),
         axis.text.y = element_text(size = 16),
-        axis.title.x = element_text(size = 18),
-        axis.title.y = element_text(size = 18),
-        strip.text = element_text(size = 14),
-        strip.background = element_rect(fill = "white"))
+        axis.title.x = element_text(size = 20,
+                                    margin = margin(10, 0, 0, 0)),
+        axis.title.y = element_text(size = 20,
+                                    margin = margin(0, 10, 0, 0)),
+        legend.title = element_text(size = 14),
+        legend.text = element_text(size = 13))
 ggsave(paste0(img_dir, "ks_Gon_Nav_w_5.png"),
        plot = fig_7, width = 16, height = 9)

@@ -93,21 +93,19 @@ fig_s6a <- ggplot(mbm_ks, aes(x = t_mid, y = time,
                                 bquote(k[s] ~ "Navarro (2009)")),
                      name = "Method:") +
   guides(color = guide_legend(override.aes = list(size = c(2,2)))) +
-  labs(title = bquote("Median microbenchmark results for " ~ k[s] ~ " calculation"),
+  labs(title = "", # need title because of position of legend
        x = bquote(frac(t, a^2) ~ ", effective response time"),
        y = "Time (microseconds)") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         plot.title = element_text(size = 20,
-                                  margin = margin(5, 5, 30, 5, "pt")),
+                                  margin = margin(0, 0, 0, 0)),
         axis.text.x = element_text(size = 16, angle = 90,
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
-        axis.title.x = element_text(size = 18),
-        axis.title.y = element_text(size = 18),
-        strip.text = element_text(size = 14),
-        strip.background = element_rect(fill = "white"),
+        axis.title.x = element_text(size = 20),
+        axis.title.y = element_text(size = 20),
         legend.position = c(1, 1),
         legend.justification = c(1, 0),
         legend.box = "horizontal",
@@ -135,21 +133,19 @@ fig_s6b <- ggplot(mbm_ks, aes(x = t_mid, y = time,
                                 bquote(k[s] ~ "Navarro (2009)")),
                      name = "Method:") +
   guides(color = guide_legend(override.aes = list(size = c(2,2)))) +
-  labs(title = bquote("Median microbenchmark results for " ~ k[s] ~ " calculation"),
+  labs(title = "", # need title because of position of legend
        x = bquote(frac(t, a^2) ~ ", effective response time"),
        y = "Time (microseconds)") +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         panel.border = element_blank(),
         plot.title = element_text(size = 20,
-                                  margin = margin(5, 5, 30, 5, "pt")),
+                                  margin = margin(0, 0, 0, 0)),
         axis.text.x = element_text(size = 16, angle = 90,
                                    vjust = 0.5, hjust = 1),
         axis.text.y = element_text(size = 16),
-        axis.title.x = element_text(size = 18),
-        axis.title.y = element_text(size = 18),
-        strip.text = element_text(size = 14),
-        strip.background = element_rect(fill = "white"),
+        axis.title.x = element_text(size = 20),
+        axis.title.y = element_text(size = 20),
         legend.position = c(1, 1),
         legend.justification = c(1, 0),
         legend.box = "horizontal",
