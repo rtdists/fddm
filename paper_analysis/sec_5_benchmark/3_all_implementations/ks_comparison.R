@@ -33,7 +33,7 @@ ks_num_test <- function(t, w, eps) {
     w = rep(w, each = ne, times = nt),
     eps = rep(eps, each = 1, times = nw * nt),
     ks_Gondan_14 = ks_Gon(t, w, eps),
-    ks_Navarro_09 = ks_Nav(t, w, eps),
+    ks_Navarro_09 = ks_Nav(t, w, eps)
   )
 
   return(res)

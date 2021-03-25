@@ -1,4 +1,4 @@
-# Figures S3, S4, S5, S7, S8, S9
+# Figures S3, S4, S5, S8, S9, S10
 
 # This file produces the supplementary results (and plots) that pertain to all
 # of the implementations discussed in the fddm paper on a predefined parameter
@@ -486,8 +486,8 @@ my_labeller <- as_labeller(c(fb_SWSE_17 = "f[c] ~ SWSE[17]",
                            default = label_parsed)
 
 ### W (Relative Starting Point)
-# Figure S7
-fig_s7 <- ggplot(mbm_meq, aes(x = W, y = time,
+# Figure S8
+fig_s8 <- ggplot(mbm_meq, aes(x = W, y = time,
                               color = factor(FuncName, levels = Names_meq),
                               fill = factor(FuncName, levels = Names_meq))) +
   stat_summary(fun.min = min, fun.max = max,
@@ -526,8 +526,8 @@ ggsave(paste0(img_dir, "meq_w_0-30.png"),
 
 
 ### V (Drift Rate)
-# Figure S8
-fig_s8 <- ggplot(mbm_meq, aes(x = V, y = time,
+# Figure S9
+fig_s9 <- ggplot(mbm_meq, aes(x = V, y = time,
                               color = factor(FuncName, levels = Names_meq),
                               fill = factor(FuncName, levels = Names_meq))) +
   stat_summary(fun.min = min, fun.max = max,
@@ -562,12 +562,12 @@ fig_s8 <- ggplot(mbm_meq, aes(x = V, y = time,
   facet_wrap(~ factor(FuncName, levels = Names_meq), scales = "free_y",
              labeller = my_labeller)
 ggsave(paste0(img_dir, "meq_v_0-30.png"),
-       plot = fig_s8, width = 16, height = 9)
+       plot = fig_s9, width = 16, height = 9)
 
 
 ### SV (Inter-Trial Variability in the Drift Rate)
-# Figure S9
-fig_s9 <- ggplot(mbm_meq, aes(x = SV, y = time,
+# Figure S10
+fig_s10 <- ggplot(mbm_meq, aes(x = SV, y = time,
                               color = factor(FuncName, levels = Names_meq),
                               fill = factor(FuncName, levels = Names_meq))) +
   stat_summary(fun.min = min, fun.max = max,
@@ -602,4 +602,4 @@ fig_s9 <- ggplot(mbm_meq, aes(x = SV, y = time,
   facet_wrap(~ factor(FuncName, levels = Names_meq), scales = "free_y",
              labeller = my_labeller)
 ggsave(paste0(img_dir, "meq_sv_0-30.png"),
-       plot = fig_s9, width = 16, height = 9)
+       plot = fig_s10, width = 16, height = 9)
