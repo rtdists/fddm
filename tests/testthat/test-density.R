@@ -163,20 +163,26 @@ for (rt in 1:nRT) {
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
                                     log = FALSE, n_terms_small = "Navarro",
                                     scale = "large", err_tol = eps)
-          res[start+13, 7] <- dwiener(RT[rt], resp = resp[rt], alpha = A[a],
-                                      delta = V[v], tau = t0, beta = W[w],
-                                      give_log = FALSE)
+          if (require("RWiener")) {
+            res[start+13, 7] <- dwiener(RT[rt], resp = resp[rt], alpha = A[a],
+                                        delta = V[v], tau = t0, beta = W[w],
+                                        give_log = FALSE)
+          }
           res[start+14, 7] <- fs(t = RT[rt]-t0, a = A[a], v = V[v],
                                  w = W[w], eps = eps)
-          res[start+15, 7] <- ddiffusion(RT[rt], resp[rt], a = A[a], v = V[v],
-                                        t0 = t0, z = W[w]*A[a], sv = SV[sv])
+          if (require("rtdists")) {
+            res[start+15, 7] <- ddiffusion(RT[rt], resp[rt], a = A[a], v = V[v],
+                                          t0 = t0, z = W[w]*A[a], sv = SV[sv])
+          }
           if (sv > SV_THRESH) { # multiply to get density with sv
             t <- RT[rt] - t0
             M <- exp(V[v] * A[a] * W[w] + V[v]*V[v] * t / 2 +
                      (SV[sv]*SV[sv] * A[a]*A[a] * W[w]*W[w] -
                        2 * V[v] * A[a] * W[w] - V[v]*V[v] * t) /
                      (2 + 2 * SV[sv]*SV[sv] * t)) / sqrt(1 + SV[sv]*SV[sv] * t)
-            res[start+13, 7] <- M * res[start+11, 7] # RWiener
+            if (require("RWiener")) {
+              res[start+13, 7] <- M * res[start+11, 7] # RWiener
+            }
             res[start+14, 7] <- M * res[start+12, 7] # Gondan_R
           }
 
@@ -195,9 +201,13 @@ for (rt in 1:nRT) {
           res[start+10, 8] <- abs(res[start+10, 7] - ans)
           res[start+11, 8] <- abs(res[start+11, 7] - ans)
           res[start+12, 8] <- abs(res[start+12, 7] - ans)
-          res[start+13, 8] <- abs(res[start+13, 7] - ans)
+          if (require("RWiener")) {
+            res[start+13, 8] <- abs(res[start+13, 7] - ans)
+          }
           res[start+14, 8] <- abs(res[start+14, 7] - ans)
-          res[start+15, 8] <- abs(res[start+15, 7] - ans)
+          if (require("rtdists")) {
+            res[start+15, 8] <- abs(res[start+15, 7] - ans)
+          }
 
           # calculate log of "lower" density
           res[start,    9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
@@ -264,21 +274,27 @@ for (rt in 1:nRT) {
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
                                     log = TRUE, n_terms_small = "Navarro",
                                     scale = "large", err_tol = eps)
-          res[start+13, 9] <- dwiener(RT[rt], resp = resp[rt], alpha = A[a],
-                                      delta = V[v], tau = t0, beta = W[w],
-                                      give_log = TRUE)
+          if (require("RWiener")) {
+            res[start+13, 9] <- dwiener(RT[rt], resp = resp[rt], alpha = A[a],
+                                        delta = V[v], tau = t0, beta = W[w],
+                                        give_log = TRUE)
+          }
           res[start+14, 9] <- log(fs(t = RT[rt]-t0, a = A[a], v = V[v],
                                      w = W[w], eps = eps))
-          res[start+15, 9] <- log(ddiffusion(RT[rt], resp[rt], a = A[a],
-                                             v = V[v], t0 = t0, z = W[w]*A[a],
-                                             sv = SV[sv]))
+          if (require("rtdists")) {
+            res[start+15, 9] <- log(ddiffusion(RT[rt], resp[rt], a = A[a],
+                                               v = V[v], t0 = t0, z = W[w]*A[a],
+                                               sv = SV[sv]))
+          }
           if (sv > SV_THRESH) { # add to get log of density with sv
             t <- RT[rt] - t0
             M <- V[v] * A[a] * W[w] + V[v]*V[v] * t / 2 +
                  (SV[sv]*SV[sv] * A[a]*A[a] * W[w]*W[w] -
                   2 * V[v] * A[a] * W[w] - V[v]*V[v] * t) /
                  (2 + 2 * SV[sv]*SV[sv] * t) - 0.5 * log(1 + SV[sv]*SV[sv] * t)
-            res[start+13, 9] <- M + res[start+11, 9] # RWiener
+            if (require("RWiener")) {
+              res[start+13, 9] <- M + res[start+11, 9] # RWiener
+            }
             res[start+14, 9] <- M + res[start+12, 9] # Gondan_R
           }
 
@@ -301,9 +317,13 @@ Gondan_b <- res[res[["FuncName"]] %in% fnames[c(7, 8)], ]
 Navarro_s <- res[res[["FuncName"]] %in% fnames[c(9, 10)], ]
 Navarro_b <- res[res[["FuncName"]] %in% fnames[c(11, 12)], ]
 Navarro_l <- res[res[["FuncName"]] %in% fnames[13], ]
-RWiener <- res[res[["FuncName"]] %in% fnames[14], ]
+if (require("RWiener")) {
+  RWiener <- res[res[["FuncName"]] %in% fnames[14], ]
+}
 Gondan_R <- res[res[["FuncName"]] %in% fnames[15], ]
-rtdists <- res[res[["FuncName"]] %in% fnames[16], ]
+if (require("rtdists")) {
+  rtdists <- res[res[["FuncName"]] %in% fnames[16], ]
+}
 
 
 ### Testing ###
@@ -316,9 +336,13 @@ test_that("Non-negativity of densities", {
   expect_true(all(Navarro_s[["res"]] >= 0))
   expect_true(all(Navarro_b[["res"]] >= 0))
   expect_true(all(Navarro_l[["res"]] >= 0))
-  expect_true(all(RWiener[["res"]] >= 0))
+  if (require("RWiener")) {
+    expect_true(all(RWiener[["res"]] >= 0))
+  }
   expect_true(all(Gondan_R[["res"]] >= 0))
-  expect_true(all(rtdists[["res"]] >= 0))
+  if (require("rtdists")) {
+    expect_true(all(rtdists[["res"]] >= 0))
+  }
 })
 
 # Test accuracy within 2*eps (allows for convergence from above and below)
@@ -339,8 +363,12 @@ test_that("Consistency among internal methods", {
 })
 
 test_that("Accuracy relative to established packages", {
-  expect_true(all(RWiener[RWiener[["sv"]] < SV_THRESH, "dif"] < 2*eps)) # see KE 2
-  expect_true(all(rtdists[["dif"]] < 2*eps))
+  if (require("RWiener")) {
+    expect_true(all(RWiener[RWiener[["sv"]] < SV_THRESH, "dif"] < 2*eps)) # see KE 2
+  }
+  if (require("rtdists")) {
+    expect_true(all(rtdists[["dif"]] < 2*eps))
+  }
   testthat::skip_on_os("solaris")
   testthat::skip_if(dfddm(rt = 0.001, response = "lower",
                           a = 5, v = -5, t0 = 1e-4, w = 0.8, sv = 1.5,
@@ -369,12 +397,16 @@ test_that("Log-Consistency among internal methods", {
 
 test_that("Log-Consistency of established packages", {
   testthat::skip_on_cran()
-  expect_equal(RWiener[RWiener[["res"]] > eps*eps, "log_res"],
-               log(RWiener[RWiener[["res"]] > eps*eps, "res"]))
+  if (require("RWiener")) {
+    expect_equal(RWiener[RWiener[["res"]] > eps*eps, "log_res"],
+                 log(RWiener[RWiener[["res"]] > eps*eps, "res"]))
+  }
   expect_equal(Gondan_R[Gondan_R[["res"]] > eps*eps, "log_res"],
                log(Gondan_R[Gondan_R[["res"]] > eps*eps, "res"]))
-  expect_equal(rtdists[rtdists[["res"]] > eps*eps, "log_res"],
-               log(rtdists[rtdists[["res"]] > eps*eps, "res"]))
+  if (require("rtdists")) {
+    expect_equal(rtdists[rtdists[["res"]] > eps*eps, "log_res"],
+                 log(rtdists[rtdists[["res"]] > eps*eps, "res"]))
+  }
 })
 
 }
