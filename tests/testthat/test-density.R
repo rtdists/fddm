@@ -1,8 +1,6 @@
 context("Testing the density function for accuracy")
 ### See Known Errors (KE) at bottom
 
-library("rtdists")
-library("RWiener")
 source(system.file("extdata", "Gondan_et_al_density.R", package = "fddm", mustWork = TRUE))
 
 
@@ -82,6 +80,9 @@ colnames(res) <- c('rt', 'a', 'v', 'w', 'sv', 'FuncName', 'res', 'dif',
                    'log_res')
 start <- 1
 stop <- nf
+
+
+if (require("rtdists") & require("RWiener")) {
 
 # Loop through each combination of parameters and record results
 for (rt in 1:nRT) {
@@ -376,7 +377,7 @@ test_that("Log-Consistency of established packages", {
                log(rtdists[rtdists[["res"]] > eps*eps, "res"]))
 })
 
-
+}
 
 ### Known Errors (KE) ###
 #
