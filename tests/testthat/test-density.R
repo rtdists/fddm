@@ -82,7 +82,6 @@ start <- 1
 stop <- nf
 
 
-if (require("rtdists") & require("RWiener")) {
 
 # Loop through each combination of parameters and record results
 for (rt in 1:nRT) {
@@ -409,7 +408,7 @@ test_that("Log-Consistency of established packages", {
   }
 })
 
-}
+
 
 ### Known Errors (KE) ###
 #
