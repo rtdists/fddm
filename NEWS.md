@@ -1,3 +1,11 @@
+# fddm v0.3-2 (Release date: 2021-3-30)
+
+## Bug Fixes
+* Fixed issue on Solaris involving floor function and the int data type.
+
+
+
+
 # fddm v0.3-1 (Release date: 2021-3-21)
 
 ## New Features
