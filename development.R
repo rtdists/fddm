@@ -17,7 +17,8 @@ library("fddm")
 devtools::document()
 
 ###################
-
+# because Solaris and rtdists don't mix well
+rhub::check_on_solaris(env_vars = c(`_R_CHECK_FORCE_SUGGESTS_` = "false"))
 
 sqrt(.Machine$double.eps)
 
