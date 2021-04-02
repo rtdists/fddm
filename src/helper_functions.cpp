@@ -12,7 +12,7 @@ vector<int> convert_responses(const SEXP& response, int& Nres)
     resp = Rcpp::as<vector<int> >(response);
     Nres = resp.size();
     for (int i = 0; i < Nres; i++) {
-      if (resp[i] != 1 && resp[i] != 2) {
+      if (resp[i] != 1 && resp[i] != 2) { // factors automatically sort themselves
         resp[i] = 0;
         bad_par++;
         bad_idx.push_back(i);
