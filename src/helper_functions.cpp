@@ -110,11 +110,11 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
   if (Nrt < 1) {
     warning("dfddm warning: function parameter 'rt' is empty; empty vector returned.");
     out = 0;
-  }
+  } // invalid inputs handled in calculate_pdf()
   if (Nres < 1) {
     warning("dfddm warning: function parameter 'response' is empty; empty vector returned.");
     out = 0;
-  }
+  } // invalid inputs handled in calculate_pdf()
   if (Na < 1) {
     warning("dfddm warning: model parameter 'a' is empty; empty vector returned.");
     out = 0;
@@ -133,6 +133,14 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
   if (Nv < 1) {
     warning("dfddm warning: model parameter 'v' is empty; empty vector returned.");
     out = 0;
+  } else {
+    for (int i = 0; i < Nv; i++) {
+      if (std::isnan(v[i])) {
+        for (int j = i; j < Nmax; j += Nv) {
+          invalid_input[j] = 1;
+        }
+      }
+    }
   }
   if (Nt0 < 1) {
     out = 0;

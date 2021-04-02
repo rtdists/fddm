@@ -2,6 +2,7 @@
 
 ## Bug Fixes
 * Fixed issue on Solaris involving floor function and the int data type.
+* Revamped handling of model parameters whose values are out-of-bounds.
 
 
 
