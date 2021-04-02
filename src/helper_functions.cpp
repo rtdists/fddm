@@ -96,15 +96,11 @@ vector<int> convert_responses(const SEXP& response, int& Nres)
 bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
                      const int& Nv, const int& Nt0, const int& Nw,
                      const int& Nsv, const int& Nsig, const int& Nerr,
-                     const int& Nmax,
-                     const NumericVector& rt, const NumericVector& a,
+                     const int& Nmax, const NumericVector& rt,
+                     const NumericVector& a, const NumericVector& v,
                      const NumericVector& t0, const NumericVector& w,
                      const NumericVector& sv, const NumericVector& sigma,
-                     const NumericVector& err,
-                     vector<double>& a_c, vector<double>& t0_c,
-                     vector<double>& w_c, vector<double>& sv_c,
-                     vector<double>& sigma_c, vector<double>& err_c,
-                     vector<bool>& invalid_input)
+                     const NumericVector& err, vector<bool>& invalid_input)
 {
   bool out = 1;
   if (Nrt < 1) {
@@ -120,10 +116,7 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     out = 0;
   } else {
     for (int i = 0; i < Na; i++) {
-      if (a[i] > 0) {
-        a_c[i] = a[i];
-      } else {
-        a_c[i] = NAN;
+      if (a[i] <= 0) {
         for (int j = i; j < Nmax; j += Na) {
           invalid_input[j] = 1;
         }
@@ -146,10 +139,7 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     out = 0;
   } else {
     for (int i = 0; i < Nt0; i++) {
-      if (t0[i] >= 0) {
-        t0_c[i] = t0[i];
-      } else {
-        t0_c[i] = NAN;
+      if (t0[i] < 0) {
         for (int j = i; j < Nmax; j += Nt0) {
           invalid_input[j] = 1;
         }
@@ -161,10 +151,7 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     out = 0;
   } else {
     for (int i = 0; i < Nw; i++) {
-      if (w[i] > 0 && w[i] < 1) {
-        w_c[i] = w[i];
-      } else {
-        w_c[i] = NAN;
+      if (w[i] <= 0 || w[i] >= 1) {
         for (int j = i; j < Nmax; j += Nw) {
           invalid_input[j] = 1;
         }
@@ -176,10 +163,7 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     out = 0;
   } else {
     for (int i = 0; i < Nsv; i++) {
-      if (sv[i] >= 0) {
-        sv_c[i] = sv[i];
-      } else {
-        sv_c[i] = NAN;
+      if (sv[i] < 0) {
         for (int j = i; j < Nmax; j += Nsv) {
           invalid_input[j] = 1;
         }
@@ -191,10 +175,7 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     out = 0;
   } else {
     for (int i = 0; i < Nsig; i++) {
-      if (sigma[i] > 0) {
-        sigma_c[i] = sigma[i];
-      } else {
-        sigma_c[i] = NAN;
+      if (sigma[i] <= 0) {
         for (int j = i; j < Nmax; j += Nsig) {
           invalid_input[j] = 1;
         }
@@ -208,9 +189,7 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     bool bad_par = 0;
     vector<int> bad_idx;
     for (int i = 0; i < Nerr; i++) {
-      if (err[i] > 0) {
-        err_c[i] = err[i];
-      } else {
+      if (err[i] <= 0) {
         bad_par = 1;
         bad_idx.push_back(i);
       }
@@ -362,11 +341,10 @@ NumericVector calculate_pdf(const int& Nrt, const int& Nres, const int& Na,
                             const int& Nsv, const int& Nsig, const int& Nerr,
                             const int& Nmax,
                             const NumericVector& rt, const vector<int>& resp,
-                            const vector<double>& a, const NumericVector& v,
-                            const vector<double>& t0, const vector<double>& w,
-                            const vector<double>& sv,
-                            const vector<double>& sigma,
-                            const vector<double>& err,
+                            const NumericVector& a, const NumericVector& v,
+                            const NumericVector& t0, const NumericVector& w,
+                            const NumericVector& sv, const NumericVector& sigma,
+                            const NumericVector& err,
                             const vector<bool>& invalid_input,
                             const int& max_terms_large,
                             const NumFunc& numf, const SumFunc& sumf,
