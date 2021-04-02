@@ -100,91 +100,91 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
                      const NumericVector& a, const NumericVector& v,
                      const NumericVector& t0, const NumericVector& w,
                      const NumericVector& sv, const NumericVector& sigma,
-                     const NumericVector& err, vector<bool>& invalid_input)
+                     const NumericVector& err, NumericVector& out)
 {
-  bool out = 1;
+  bool valid = 1;
   if (Nrt < 1) {
     warning("dfddm warning: function parameter 'rt' is empty; empty vector returned.");
-    out = 0;
+    valid = 0;
   } // invalid inputs handled in calculate_pdf()
   if (Nres < 1) {
     warning("dfddm warning: function parameter 'response' is empty; empty vector returned.");
-    out = 0;
+    valid = 0;
   } // invalid inputs handled in calculate_pdf()
   if (Na < 1) {
     warning("dfddm warning: model parameter 'a' is empty; empty vector returned.");
-    out = 0;
+    valid = 0;
   } else {
     for (int i = 0; i < Na; i++) {
       if (a[i] <= 0) {
         for (int j = i; j < Nmax; j += Na) {
-          invalid_input[j] = 1;
+          out[j] = NAN;
         }
       }
     }
   }
   if (Nv < 1) {
     warning("dfddm warning: model parameter 'v' is empty; empty vector returned.");
-    out = 0;
+    valid = 0;
   } else {
     for (int i = 0; i < Nv; i++) {
-      if (std::isnan(v[i])) {
+      if (isnan(v[i])) {
         for (int j = i; j < Nmax; j += Nv) {
-          invalid_input[j] = 1;
+          out[j] = NAN;
         }
       }
     }
   }
   if (Nt0 < 1) {
-    out = 0;
+    valid = 0;
   } else {
     for (int i = 0; i < Nt0; i++) {
       if (t0[i] < 0) {
         for (int j = i; j < Nmax; j += Nt0) {
-          invalid_input[j] = 1;
+          out[j] = NAN;
         }
       }
     }
   }
   if (Nw < 1) {
     warning("dfddm warning: model parameter 'w' is empty; empty vector returned.");
-    out = 0;
+    valid = 0;
   } else {
     for (int i = 0; i < Nw; i++) {
       if (w[i] <= 0 || w[i] >= 1) {
         for (int j = i; j < Nmax; j += Nw) {
-          invalid_input[j] = 1;
+          out[j] = NAN;
         }
       }
     }
   }
   if (Nsv < 1) {
     warning("dfddm warning: model parameter 'sv' is empty; empty vector returned.");
-    out = 0;
+    valid = 0;
   } else {
     for (int i = 0; i < Nsv; i++) {
       if (sv[i] < 0) {
         for (int j = i; j < Nmax; j += Nsv) {
-          invalid_input[j] = 1;
+          out[j] = NAN;
         }
       }
     }
   }
   if (Nsig < 1) {
     warning("dfddm warning: model parameter 'sigma' is empty; empty vector returned.");
-    out = 0;
+    valid = 0;
   } else {
     for (int i = 0; i < Nsig; i++) {
       if (sigma[i] <= 0) {
         for (int j = i; j < Nmax; j += Nsig) {
-          invalid_input[j] = 1;
+          out[j] = NAN;
         }
       }
     }
   }
   if (Nerr < 1) {
     stop("dfddm error: function parameter 'err_tol' is empty.");
-    out = 0;
+    valid = 0;
   } else {
     bool bad_par = 0;
     vector<int> bad_idx;
@@ -212,7 +212,7 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
     }
   }
 
-  return out;
+  return valid;
 }
 
 
@@ -344,20 +344,17 @@ NumericVector calculate_pdf(const int& Nrt, const int& Nres, const int& Na,
                             const NumericVector& a, const NumericVector& v,
                             const NumericVector& t0, const NumericVector& w,
                             const NumericVector& sv, const NumericVector& sigma,
-                            const NumericVector& err,
-                            const vector<bool>& invalid_input,
+                            const NumericVector& err, NumericVector& out,
                             const int& max_terms_large,
                             const NumFunc& numf, const SumFunc& sumf,
                             const DenFunc& denf, const double& rt0)
 {
-  NumericVector out(Nmax);
   double t;
   if (Nsig == 1 && sigma[0] == 1) { // standard diffusion coefficient
     for (int i = 0; i < Nmax; i++) {
       t = rt[i % Nrt] - t0[i % Nt0]; // response time minus non-decision time
       // out-of-bounds handling, same priority as dnorm()
-      if (invalid_input[i]) { // out-of-bounds model parameters
-        out[i] = NAN;
+      if (isnan(out[i])) { // out-of-bounds model parameters
         continue;
       }
       if (t <= 0) { // out-of-bounds response time
@@ -379,8 +376,7 @@ NumericVector calculate_pdf(const int& Nrt, const int& Nres, const int& Na,
     for (int i = 0; i < Nmax; i++) {
       t = rt[i % Nrt] - t0[i % Nt0]; // response time minus non-decision time
       // out-of-bounds handling, same priority as dnorm()
-      if (invalid_input[i]) { // out-of-bounds model parameters
-        out[i] = NAN;
+      if (isnan(out[i])) { // out-of-bounds model parameters
         continue;
       }
       if (t <= 0) { // out-of-bounds response time

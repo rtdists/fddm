@@ -16,6 +16,7 @@ using std::min;
 using std::max;
 using std::ceil;
 using std::to_string;
+using std::isnan;
 using Rcpp::stop;
 using Rcpp::warning;
 using Rcpp::NumericVector;
@@ -116,7 +117,7 @@ bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
                      const NumericVector& a, const NumericVector& v,
                      const NumericVector& t0, const NumericVector& w,
                      const NumericVector& sv, const NumericVector& sigma,
-                     const NumericVector& err, vector<bool>& invalid_input);
+                     const NumericVector& err, NumericVector& out);
 void determine_method(const std::string& n_terms_small,
                       const std::string& summation_small,
                       const std::string& scale,
@@ -130,8 +131,7 @@ NumericVector calculate_pdf(const int& Nrt, const int& Nres, const int& Na,
                             const NumericVector& a, const NumericVector& v,
                             const NumericVector& t0, const NumericVector& w,
                             const NumericVector& sv, const NumericVector& sigma,
-                            const NumericVector& err,
-                            const vector<bool>& invalid_input,
+                            const NumericVector& err, NumericVector& out,
                             const int& max_terms_large,
                             const NumFunc& numf, const SumFunc& sumf,
                             const DenFunc& denf, const double& rt0);

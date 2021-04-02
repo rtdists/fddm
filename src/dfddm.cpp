@@ -237,11 +237,11 @@ NumericVector dfddm(const NumericVector& rt,
   int Nerr = err_tol.length();
   int Nmax = max({Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr});
 
-  vector<bool> invalid_input(Nmax, 0);
+  NumericVector out(Nmax, 0.0);
 
   // input checking
   if (!parameter_check(Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr, Nmax,
-                       rt, a, v, t0, w, sv, sigma, err_tol, invalid_input)) {
+                       rt, a, v, t0, w, sv, sigma, err_tol, out)) {
     NumericVector empty_out(0);
     return empty_out;
   }
@@ -258,10 +258,10 @@ NumericVector dfddm(const NumericVector& rt,
 
 
   // loop through all inputs
-  NumericVector out = calculate_pdf(Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr,
-                                    Nmax, rt, resp, a, v, t0, w, sv, sigma,
-                                    err_tol, invalid_input, max_terms_large,
-                                    numf, sumf, denf, rt0);
+  calculate_pdf(Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr,
+                Nmax, rt, resp, a, v, t0, w, sv, sigma,
+                err_tol, out, max_terms_large,
+                numf, sumf, denf, rt0);
 
 
   return out;
