@@ -6,6 +6,11 @@ source(system.file("extdata", "Gondan_et_al_density.R", package = "fddm", mustWo
 
 ### Input checking
 test_that("Input checking", {
+  expect_equal(
+    dfddm(rt = c(0, -1), response = 1, a = 1, v = -1, t0 = 0, w = 0.5,
+          sv = 0, sigma = 1, log = 0, err_tol = 1e-6),
+    c(0, 0) )
+
   expect_warning(expect_equal(
     dfddm(rt = 1, response = c(3, -1, NA, NaN), a = 1, v = -1, t0 = 0, w = 0.5,
           sv = 0, sigma = 1, log = 0, err_tol = 1e-6),
@@ -13,6 +18,10 @@ test_that("Input checking", {
 
   expect_true(all(is.nan(
     dfddm(rt = 1, response = 1, a = c(-0.4, 0, NA, NaN), v = -1, t0 = 0,
+          w = 0.5, sv = 0, sigma = 1, log = 0, err_tol = 1e-6) )))
+
+  expect_true(all(is.nan(
+    dfddm(rt = 1, response = 1, a = 1, v = c(NA, NaN), t0 = 0,
           w = 0.5, sv = 0, sigma = 1, log = 0, err_tol = 1e-6) )))
 
   expect_true(all(is.nan(
