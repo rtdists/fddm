@@ -221,32 +221,6 @@ NumericVector dfddm(const NumericVector& rt,
                     const int& max_terms_large = 1,
                     const NumericVector& err_tol = 0.000001)
 {
-  // convert responses to 1 (lower) and 2 (upper)
-  int Nres;
-  vector<int> resp = convert_responses(response, Nres);
-
-
-  // find Nmax (max length of parameter inputs)
-  int Nrt  = rt.length();
-  int Na   = a.length();
-  int Nv   = v.length();
-  int Nt0  = t0.length();
-  int Nw   = w.length();
-  int Nsv  = sv.length();
-  int Nsig = sigma.length();
-  int Nerr = err_tol.length();
-  int Nmax = max({Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr});
-
-  NumericVector out(Nmax, 0.0);
-
-  // input checking
-  if (!parameter_check(Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr, Nmax,
-                       rt, a, v, t0, w, sv, sigma, err_tol, out)) {
-    NumericVector empty_out(0);
-    return empty_out;
-  }
-
-
   // determine which method to use
   NumFunc numf;
   SumFunc sumf;
@@ -257,12 +231,38 @@ NumericVector dfddm(const NumericVector& rt,
                    numf, sumf, denf, rt0, log);
 
 
-  // loop through all inputs
-  calculate_pdf(Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr,
-                Nmax, rt, resp, a, v, t0, w, sv, sigma,
+  // determine lengths of parameter inputs, except response
+  int Nrt  = rt.length();
+  int Na   = a.length();
+  int Nv   = v.length();
+  int Nt0  = t0.length();
+  int Nw   = w.length();
+  int Nsv  = sv.length();
+  int Nsig = sigma.length();
+  int Nerr = err_tol.length();
+  int Nmax = max({Nrt, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr}); // include Nres later
+  int Nres;
+
+
+  // initialize output, resized in convert_responses() inside parameter_check()
+  vector<double> out;
+
+
+  // check for invalid inputs, invalid inputs get marked in the vector `out`
+  if (!parameter_check(Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr, Nmax,
+                       rt, response, a, v, t0, w, sv, sigma, err_tol,
+                       out, rt0)) {
+    NumericVector empty_out(0);
+    return empty_out;
+  }
+
+
+  // loop through all inputs, the vector `out` gets updated
+  calculate_pdf(Nrt, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr,
+                Nmax, rt, a, v, t0, w, sv, sigma,
                 err_tol, out, max_terms_large,
                 numf, sumf, denf, rt0);
 
 
-  return out;
+  return Rcpp::wrap(out);
 }

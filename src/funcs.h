@@ -16,7 +16,9 @@ using std::min;
 using std::max;
 using std::ceil;
 using std::to_string;
+using std::isfinite;
 using std::isnan;
+using std::isnormal;
 using Rcpp::stop;
 using Rcpp::warning;
 using Rcpp::NumericVector;
@@ -109,29 +111,30 @@ double fb_log(const double& t, const double& a, const double& v,
 
 
 // Helper Functions
-vector<int> convert_responses(const SEXP& response, int& Nres);
-bool parameter_check(const int& Nrt, const int& Nres, const int& Na,
-                     const int& Nv, const int& Nt0, const int& Nw,
-                     const int& Nsv, const int& Nsig, const int& Nerr,
-                     const int& Nmax, const NumericVector& rt,
-                     const NumericVector& a, const NumericVector& v,
-                     const NumericVector& t0, const NumericVector& w,
-                     const NumericVector& sv, const NumericVector& sigma,
-                     const NumericVector& err, NumericVector& out);
 void determine_method(const std::string& n_terms_small,
                       const std::string& summation_small,
                       const std::string& scale,
                       NumFunc& numf, SumFunc& sumf, DenFunc& denf,
                       double& rt0, const bool& log_prob);
-NumericVector calculate_pdf(const int& Nrt, const int& Nres, const int& Na,
-                            const int& Nv, const int& Nt0, const int& Nw,
-                            const int& Nsv, const int& Nsig, const int& Nerr,
-                            const int& Nmax,
-                            const NumericVector& rt, const vector<int>& resp,
-                            const NumericVector& a, const NumericVector& v,
-                            const NumericVector& t0, const NumericVector& w,
-                            const NumericVector& sv, const NumericVector& sigma,
-                            const NumericVector& err, NumericVector& out,
-                            const int& max_terms_large,
-                            const NumFunc& numf, const SumFunc& sumf,
-                            const DenFunc& denf, const double& rt0);
+void convert_responses(const SEXP& response, int& Nres, int& Nmax,
+                       vector<double>& out, const double& rt0);
+bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
+                     const int& Nt0, const int& Nw, const int& Nsv,
+                     const int& Nsig, const int& Nerr, int& Nmax,
+                     const NumericVector& rt, const SEXP& response,
+                     const NumericVector& a, const NumericVector& v,
+                     const NumericVector& t0, const NumericVector& w,
+                     const NumericVector& sv, const NumericVector& sigma,
+                     const NumericVector& err,
+                     vector<double>& out, const double& rt0);
+void calculate_pdf(const int& Nrt, const int& Na, const int& Nv, const int& Nt0,
+                   const int& Nw, const int& Nsv, const int& Nsig,
+                   const int& Nerr, const int& Nmax,
+                   const NumericVector& rt,
+                   const NumericVector& a, const NumericVector& v,
+                   const NumericVector& t0, const NumericVector& w,
+                   const NumericVector& sv, const NumericVector& sigma,
+                   const NumericVector& err, vector<double>& out,
+                   const int& max_terms_large,
+                   const NumFunc& numf, const SumFunc& sumf,
+                   const DenFunc& denf, const double& rt0);
