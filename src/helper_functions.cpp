@@ -121,7 +121,7 @@ void determine_method(const std::string& n_terms_small,
 
 
 void convert_responses(const SEXP& response, int& Nres, int& Nmax,
-                       vector<double>& out, const double& rt0)
+                       vector<double>& out, const double& rt0, bool& valid)
 {
   vector<int> bad_idx;
   int bad_par = 0;
@@ -130,74 +130,89 @@ void convert_responses(const SEXP& response, int& Nres, int& Nmax,
   if (type == 13 || type == 14) { // IntegerVector (including factors) or NumericVector
     out = Rcpp::as<vector<double> >(response);
     Nres = out.size();
-    Nmax = max(Nmax, Nres);
-    out.resize(Nmax);
-    for (int i = 0; i < Nres; i++) {
-      if (out[i] == 1 || out[i] == 2) { // factors sort automatically
-        for (int j = i; j < Nmax; j += Nres) {
-          out[j] = out[i];
+    if (Nres < 1) {
+      warning("dfddm warning: function parameter 'response' is empty; empty vector returned.");
+      valid = 0;
+    } else {
+      Nmax = max(Nmax, Nres);
+      out.resize(Nmax);
+      for (int i = 0; i < Nres; i++) {
+        if (out[i] == 1 || out[i] == 2) { // factors sort automatically
+          for (int j = i; j < Nmax; j += Nres) {
+            out[j] = out[i];
+          }
+        } else { // response = {Inf, -Inf} implies PDF = 0 (or log(0) )
+          double naan = isnan(out[i]) ? out[i] : rt0;
+          for (int j = i; j < Nmax; j += Nres) {
+            out[j] = naan;
+          }
+          bad_par++;
+          bad_idx.push_back(i);
         }
-      } else { // response = {Inf, -Inf} implies PDF = 0 (or log(0) )
-        double naan = isnan(out[i]) ? out[i] : rt0;
-        for (int j = i; j < Nmax; j += Nres) {
-          out[j] = naan;
-        }
-        bad_par++;
-        bad_idx.push_back(i);
       }
     }
   } else if (type == 16) { // StringVector (contains at least one string)
     vector<string> temp = Rcpp::as<vector<string> >(response);
     Nres = temp.size();
-    Nmax = max(Nmax, Nres);
-    out.resize(Nmax);
-    for (int i = 0; i < Nres; i++) {
-      if (temp[i][0] == 'l' || temp[i][0] == 'L') { // lower
-        for (int j = i; j < Nmax; j += Nres) {
-          out[j] = 1;
-        }
-      } else if (temp[i][0] == 'u' || temp[i][0] == 'U') { // upper
-        for (int j = i; j < Nmax; j += Nres) {
-          out[j] = 2;
-        }
-      } else {
-        double naan = rt0;
-        if (temp[i][0] == 'N') {
-          int temp_length = temp[i].size();
-          if (temp_length == 2 && temp[i][1] == 'A') {
-            naan = NA_REAL;
-          } else if (temp_length == 3 && temp[i][1] == 'a' && temp[i][2] == 'N') {
-            naan = NAN;
+    if (Nres < 1) {
+      warning("dfddm warning: function parameter 'response' is empty; empty vector returned.");
+      valid = 0;
+    } else {
+      Nmax = max(Nmax, Nres);
+      out.resize(Nmax);
+      for (int i = 0; i < Nres; i++) {
+        if (temp[i][0] == 'l' || temp[i][0] == 'L') { // lower
+          for (int j = i; j < Nmax; j += Nres) {
+            out[j] = 1;
           }
+        } else if (temp[i][0] == 'u' || temp[i][0] == 'U') { // upper
+          for (int j = i; j < Nmax; j += Nres) {
+            out[j] = 2;
+          }
+        } else {
+          double naan = rt0;
+          if (temp[i][0] == 'N') {
+            int temp_length = temp[i].size();
+            if (temp_length == 2 && temp[i][1] == 'A') {
+              naan = NA_REAL;
+            } else if (temp_length == 3 && temp[i][1] == 'a' && temp[i][2] == 'N') {
+              naan = NAN;
+            }
+          }
+          for (int j = i; j < Nmax; j += Nres) {
+            out[j] = naan;
+          }
+          bad_par++;
+          bad_idx.push_back(i);
         }
-        for (int j = i; j < Nmax; j += Nres) {
-          out[j] = naan;
-        }
-        bad_par++;
-        bad_idx.push_back(i);
       }
     }
   } else if (type == 10) { // LogicalVector (boolean values)
     out = Rcpp::as<vector<double> >(response);
     Nres = out.size();
-    Nmax = max(Nmax, Nres);
-    out.reserve(Nmax);
-    for (int i = 0; i < Nres; i++) {
-      if (out[i] == 0 || out[i] == 1) {
-        for (int j = i; j < Nmax; j += Nres) {
-          out[j] = out[i] + 1;
+    if (Nres < 1) {
+      warning("dfddm warning: function parameter 'response' is empty; empty vector returned.");
+      valid = 0;
+    } else {
+      Nmax = max(Nmax, Nres);
+      out.reserve(Nmax);
+      for (int i = 0; i < Nres; i++) {
+        if (out[i] == 0 || out[i] == 1) {
+          for (int j = i; j < Nmax; j += Nres) {
+            out[j] = out[i] + 1;
+          }
+        } else { // response = {Inf, -Inf} implies PDF = 0 (or log(0) )
+          double naan = isnan(out[i]) ? out[i] : rt0;
+          for (int j = i; j < Nmax; j += Nres) {
+            out[j] = naan;
+          }
+          bad_par++;
+          bad_idx.push_back(i);
         }
-      } else { // response = {Inf, -Inf} implies PDF = 0 (or log(0) )
-        double naan = isnan(out[i]) ? out[i] : rt0;
-        for (int j = i; j < Nmax; j += Nres) {
-          out[j] = naan;
-        }
-        bad_par++;
-        bad_idx.push_back(i);
       }
     }
   } else {
-    stop("dfddm error: type of function parameter 'response' vector is not one of: integer, double, factor, string (character), or boolean (logical).");
+    stop("dfddm error: type of function parameter 'response' is not one of: integer, double, factor, string (character), or boolean (logical).");
   }
 
   if (bad_par > 0) { // error handling
@@ -252,16 +267,17 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
                      vector<double>& out, const double& rt0)
 {
   bool valid = 1;
+
+  // rt, invalid inputs will be handled in calculate_pdf()
   if (Nrt < 1) {
     warning("dfddm warning: function parameter 'rt' is empty; empty vector returned.");
     valid = 0;
-  } // invalid inputs will be handled in calculate_pdf()
-  if (Nres < 1) {
-    warning("dfddm warning: function parameter 'response' is empty; empty vector returned.");
-    valid = 0;
-  } else {
-    convert_responses(response, Nres, Nmax, out, rt0);
   }
+
+  // response, checks and converts responses
+  convert_responses(response, Nres, Nmax, out, rt0, valid);
+
+  // a
   if (Na < 1) {
     warning("dfddm warning: model parameter 'a' is empty; empty vector returned.");
     valid = 0;
@@ -283,6 +299,8 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       }
     }
   }
+
+  // v
   if (Nv < 1) {
     warning("dfddm warning: model parameter 'v' is empty; empty vector returned.");
     valid = 0;
@@ -298,6 +316,8 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       }
     }
   }
+
+  // t0
   if (Nt0 < 1) {
     warning("dfddm warning: model parameter 't0' is empty; empty vector returned.");
     valid = 0;
@@ -319,6 +339,8 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       }
     }
   }
+
+  // w
   if (Nw < 1) {
     warning("dfddm warning: model parameter 'w' is empty; empty vector returned.");
     valid = 0;
@@ -334,6 +356,8 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       }
     }
   }
+
+  // sv
   if (Nsv < 1) {
     warning("dfddm warning: model parameter 'sv' is empty; empty vector returned.");
     valid = 0;
@@ -355,6 +379,8 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       }
     }
   }
+
+  // sigma
   if (Nsig < 1) {
     warning("dfddm warning: model parameter 'sigma' is empty; empty vector returned.");
     valid = 0;
@@ -370,6 +396,8 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       }
     }
   }
+
+  // err_tol
   if (Nerr < 1) {
     stop("dfddm error: function parameter 'err_tol' is empty.");
     valid = 0;

@@ -117,7 +117,7 @@ void determine_method(const std::string& n_terms_small,
                       NumFunc& numf, SumFunc& sumf, DenFunc& denf,
                       double& rt0, const bool& log_prob);
 void convert_responses(const SEXP& response, int& Nres, int& Nmax,
-                       vector<double>& out, const double& rt0);
+                       vector<double>& out, const double& rt0, bool& valid);
 bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
                      const int& Nt0, const int& Nw, const int& Nsv,
                      const int& Nsig, const int& Nerr, int& Nmax,
