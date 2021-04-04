@@ -1,4 +1,4 @@
-// Helper functions for cpp_dfddm function (located at src/cpp_dfddm.cpp)
+// Helper functions for dfddm function (located at src/dfddm.cpp)
 
 #include "funcs.h"
 

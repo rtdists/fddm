@@ -1,4 +1,4 @@
-// Density function for the Ratcliff Diffusion Decision Model (DDM) PDF
+// Density function for the Ratcliff Diffusion Decision Model (DDM)
 
 #include "funcs.h"
 
