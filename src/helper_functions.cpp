@@ -286,9 +286,9 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       if (a[i] > 0) {
         if (isfinite(a[i])) {
           continue;
-        } else { // a = Inf implies PDF = 0
+        } else { // a = Inf implies PDF = 0 (or log(0) )
           for (int j = i; j < Nmax; j += Na) {
-            out[j] = 0;
+            out[j] = rt0;
           }
         }
       } else { // {NaN, NA} evaluate to FALSE
@@ -309,7 +309,7 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       if (isfinite(v[i])) {
         continue;
       } else { // NaN, NA, Inf, -Inf are not finite
-        double naan = isnan(v[i]) ? v[i] : 0; // v = {Inf, -Inf} implies PDF = 0
+        double naan = isnan(v[i]) ? v[i] : rt0; // v = {Inf, -Inf} implies PDF = 0 (or log(0) )
         for (int j = i; j < Nmax; j += Nv) {
           out[j] = naan;
         }
@@ -326,9 +326,9 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       if (t0[i] >= 0) {
         if (isfinite(t0[i])) { // this could also be handled in calculate_pdf()
           continue;
-        } else { // t0 = Inf implies rt - t0 < 0 implies PDF = 0
+        } else { // t0 = Inf implies rt - t0 < 0 implies PDF = 0 (or log(0) )
           for (int j = i; j < Nmax; j += Nt0) {
-            out[j] = 0;
+            out[j] = rt0;
           }
         }
       } else { // {NaN, NA} evaluate to FALSE
@@ -366,9 +366,9 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       if (sv[i] >= 0) {
         if (isfinite(sv[i])) {
           continue;
-        } else { // sv = Inf implies PDF = 0
+        } else { // sv = Inf implies PDF = 0 (or log(0) )
           for (int j = i; j < Nmax; j += Nsv) {
-            out[j] = 0;
+            out[j] = rt0;
           }
         }
       } else { // {NaN, NA} evaluate to FALSE
