@@ -25,7 +25,6 @@ test_that("Input checking", {
     0
   ))
 
-
   # response
   expect_warning(expect_equal(
     dfddm(rt = 1, response = c(3, -1, Inf, -Inf), a = 1, v = -1, t0 = 0,

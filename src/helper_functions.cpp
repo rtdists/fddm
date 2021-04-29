@@ -457,7 +457,7 @@ void calculate_pdf(const int& Nrt, const int& Na, const int& Nv, const int& Nt0,
     for (int i = 0; i < Nmax; i++) {
       if (isnormal(out[i])) { // not {NaN, NA, Inf, -Inf, rt0 = {0 or -Inf} }
         t = rt[i % Nrt] - t0[i % Nt0]; // response time minus non-decision time
-        if (t > 0) { // sort response and calculate density
+        if (t > 0 && isfinite(t)) { // sort response and calculate density
           if (out[i] == 1) { // response is "lower" so use unchanged parameters
               out[i] = denf(t, a[i % Na], v[i % Nv], w[i % Nw], sv[i % Nsv],
                           err[i % Nerr], max_terms_large, numf, sumf);
@@ -478,7 +478,7 @@ void calculate_pdf(const int& Nrt, const int& Na, const int& Nv, const int& Nt0,
     for (int i = 0; i < Nmax; i++) {
       if (isnormal(out[i])) { // not {NaN, NA, Inf, -Inf, rt0 = {0 or -Inf} }
         t = rt[i % Nrt] - t0[i % Nt0]; // response time minus non-decision time
-        if (t > 0) { // sort response and calculate density
+        if (t > 0 && isfinite(t)) { // sort response and calculate density
           if (out[i] == 1) { // response is "lower" so use unchanged parameters
               out[i] = denf(t, a[i % Na]/sigma[i % Nsig],
                             v[i % Nv]/sigma[i % Nsig], w[i % Nw],
