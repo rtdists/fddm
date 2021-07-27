@@ -1,17 +1,17 @@
-// Density function for the Ratcliff Diffusion Decision Model (DDM)
+// Distribution function for the Ratcliff Diffusion Decision Model (DDM)
 
 #include "parameter_checks.hpp"
-#include "dfddm_helper_functions/func_defs.hpp"
-#include "dfddm_helper_functions/helper_funcs.hpp"
-#include "dfddm_helper_functions/density_funcs.hpp"
-#include "dfddm_helper_functions/sum_funcs.hpp"
-#include "dfddm_helper_functions/num_funcs.hpp"
+#include "pfddm_helper_functions/func_defs.hpp"
+#include "pfddm_helper_functions/helper_funcs.hpp"
+#include "pfddm_helper_functions/distribution_funcs.hpp"
+#include "pfddm_helper_functions/sum_funcs.hpp"
+#include "pfddm_helper_functions/mills_funcs.hpp"
 
 
 
-//' Density of Ratcliff Diffusion Decision Model
+//' Distribution of Ratcliff Diffusion Decision Model
 //'
-//' Density function for the Ratcliff diffusion decision model (DDM) with
+//' Distribution function for the Ratcliff diffusion decision model (DDM) with
 //' following parameters: \code{a} (threshold separation), \code{v} (drift
 //' rate), \code{t0} (non-decision time/response time constant), \code{w}
 //' (relative starting point), \code{sv} (inter-trial variability of drift), and
@@ -85,34 +85,6 @@
 //' @param log Logical; if \code{TRUE}, probabilities \eqn{p} are given as
 //'   \eqn{log(p)}. Default is \code{FALSE}.
 //'
-//' @param n_terms_small Which method for calculating number of terms used in
-//'   the approximation of the infinite sum in the small-time approximation of
-//'   the density function. Can be one of \{\code{"SWSE"}, \code{"Gondan"},
-//'   \code{"Navarro"}\}. Only applicable if \code{scale} is one of
-//'   \{\code{"small"}, \code{"both"}\}. See Details for more information.
-//'   Default is \code{"Gondan"}.
-//'
-//' @param summation_small Which style of summation to use for the small-time
-//'   approximation to the infinite sum. Can be one of \{\code{"2017"},
-//'   \code{"2014"}\}. Only applicable if \code{scale} is one of
-//'   \{\code{"small"}, \code{"both"}\}. See Details for more information.
-//'   Default is \code{"2017"}.
-//'
-//' @param scale Which density function to use. Can be one of \{\code{"small"},
-//'   \code{"large"}, \code{"both"}\}. Note that the large-time approximation is
-//'   unstable for small effective response times (\code{rt}\eqn{/(}\code{a}
-//'   \eqn{*}\code{a}\eqn{) < 0.009}). See Details for more information. Default
-//'   is \code{"both"}.
-//'
-//' @param max_terms_large Maximum number of terms to use for the "large-time"
-//'   variant when \code{n_terms_small = "SWSE", scale = "both"}. Allowed values
-//'   are any non-negative integer. \code{max_terms_large = 0} indicates that
-//'   the "small-time" variant will always be used instead of the "large-time"
-//'   variant. The \code{fddm} GitHub has plots showing the relative
-//'   efficiencies of several options for the \code{max_terms_large} parameter
-//'   in the \code{paper_analysis/extra_analysis} folder. Default value is
-//'   \eqn{1}.
-//'
 //' @param err_tol Allowed error tolerance of the density function. Since the
 //'   density function contains an infinite sum, this parameter defines the
 //'   precision of the approximation to that infinite sum. Default is
@@ -127,58 +99,11 @@
 //' input as a single value or as a vector of values. If input as a vector of
 //' values, then the standard \code{R} input wrapping will occur.
 //'
-//' The default settings of \code{n_terms_small = "SWSE"}, \code{summation_small
-//' = "2017"}, \code{scale = "both"} produce the fastest and most accurate
-//' results, as shown in our associated paper.
-//'
-//' \code{scale} - The density function for the DDM has traditionally been
-//' written in two forms: a "large-time" variant, and a "small-time" variant.
-//' The parameter \code{scale} determines which of these variants will be used
-//' in the calculation; \code{scale = "large"} uses the "large-time" variant,
-//' and \code{scale = "small"} uses the "small-time" variant. The "large-time"
-//' variant is unstable for small effective response times (
-//' \eqn{(}\code{rt}\eqn{-}\code{t0}\eqn{)} \eqn{/
-//' (}\code{a}\eqn{*}\code{a}\eqn{) < 0.009} ) and produces inaccurate
-//' densities; thus we do not recommend using only the \code{scale = "large"}
-//' option if the inputs contain such small response times. To circumvent this
-//' issue, the \code{scale = "both"} option utilizes both the "small-time" and
-//' "large-time" variants by determining which variant is more computationally
-//' efficient before calculating the density. Even though the "large-time"
-//' density function is often significantly slower than the "small-time"
-//' variant, it is extremely efficient in some areas of the parameter space, and
-//' so the \code{scale = "both"} option is the fastest.
-//'
-//' \code{sv} - Both the "small-time" and "large-time" variants of the density
-//' function have two further variants: one with a constant drift rate \code{v}
-//' (i.e., \code{sv} \eqn{= 0}), and one with a variable drift rate \code{v}
-//' (i.e., \code{sv} \eqn{> 0}). The details of the differences between these
-//' two density functions can be found in our associated paper. To use the
-//' density function with a constant drift rate, leave the parameter \code{sv}
-//' to its default value of \code{sv = 0}, as this will indicate no drift to the
-//' function. To use the density function with a variable drift rate, set the
-//' parameter \code{sv} to some non-negative value, i.e., \code{sv} \eqn{> 0}.
-//'
 //' \code{sigma} - The default value of this parameter is \code{1} because it
 //' only scales the parameters \code{a}, \code{v}, and \code{sv}, as shown
 //' above. However, other formulations of the DDM may set \code{sigma = 0.1}
 //' (see Ratcliff (1978), the fourth reference), so care must be taken when
 //' comparing the results of different formulations.
-//'
-//' \code{summation_small} - The "large-time" variant of the density function
-//' does not have any further variants, but the "small-time" has more options
-//' with respect to evaluating the infinite sum. There are two equivalent styles
-//' of summation, \code{summation_small = "2017"} and \code{summation_small =
-//' "2014"}, of which the \code{"2017"} version evaluates slightly faster and
-//' thus earns our recommendation. These different styles of summation are
-//' discussed in our associated paper.
-//'
-//' \code{n_terms_small} - The "small-time" variant also has three different
-//' methods for how to truncate the infinite sum in the density function. These
-//' different methods are discussed extensively in our associated paper, but the
-//' key distinction is that \code{n_terms_small = "SWSE"} uses a new method of
-//' truncating the infinite sum. The \code{n_terms_small = "SWSE"} method is
-//' currently recommended because it is the fastest and most stable algorithm
-//' when used with \code{scale = "both"}.
 //'
 //'
 //'
@@ -199,11 +124,11 @@
 //'
 //'
 //'
-//' @example examples/examples.diffusion.R
+//' @example examples/examples.distribution.R
 //'
 //'
 //'
-//' @return A vector containing the densities of the DDM with precision
+//' @return A vector containing the distribution of the DDM with precision
 //'   \code{err_tol} whose length matches that of the longest input parameter
 //'   (usually \code{rt}).
 //'
@@ -211,7 +136,7 @@
 //' @import Rcpp
 //' @export
 // [[Rcpp::export]]
-NumericVector dfddm(const NumericVector& rt,
+NumericVector pfddm(const NumericVector& rt,
                     const SEXP& response,
                     const NumericVector& a,
                     const NumericVector& v,
@@ -220,22 +145,15 @@ NumericVector dfddm(const NumericVector& rt,
                     const NumericVector& sv = 0,
                     const NumericVector& sigma = 1,
                     const bool& log = 0,
-                    const std::string& n_terms_small = "SWSE",
-                    const std::string& summation_small = "2017",
-                    const std::string& scale = "both",
-                    const int& max_terms_large = 1,
+                    const std::string& method = "1",
                     const NumericVector& err_tol = 0.000001)
 {
-  // determine which method to use
-  NumFunc numf;
-  SumFunc sumf;
-  DenFunc denf;
+  // determine which method to use (also log or non-log)
+  DisFunc disf;
   double rt0;
-
-  determine_method(n_terms_small, summation_small, scale,
-                   numf, sumf, denf, rt0, log);
-
-
+  
+  determine_method(method, disf, rt0, log);
+  
   // determine lengths of parameter inputs, except response
   int Nrt  = rt.length();
   int Na   = a.length();
@@ -261,13 +179,10 @@ NumericVector dfddm(const NumericVector& rt,
     return empty_out;
   }
 
-
   // loop through all inputs, the vector `out` gets updated
-  calculate_pdf(Nrt, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr,
+  calculate_cdf(Nrt, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr,
                 Nmax, rt, a, v, t0, w, sv, sigma,
-                err_tol, out, max_terms_large,
-                numf, sumf, denf, rt0);
-
+                err_tol, out, rt0, disf);
 
   return Rcpp::wrap(out);
 }

@@ -1,3 +1,14 @@
+# fddm v0.4-1 (Release date: 2021-7-27)
+
+## New Features
+* Added the function `pfddm()` to calculate the cumulative distribution function (CDF) of the DDM; it uses the same model parameters as the existing `dfddm()` function.
+
+## Bug Fixes
+* Fixed issue where the log optional parameter was ignored and the non-log result was produced.
+
+
+
+
 # fddm v0.3-3 (Release date: 2021-4-4)
 
 ## Bug Fixes

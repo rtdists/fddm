@@ -1,8 +1,5 @@
 // Functions to approximate the infinite sum in the density function
 
-#include "funcs.h"
-
-
 
 
 //////////                                                           //////////
@@ -164,10 +161,10 @@ double small_sum_2014(const double& t, const double& a, const double& w,
 double large_sum_Nav(const double& t, const double& a, const double& w,
                      const int& kl, const double& err)
 { // note: err is not used
-  double gamma = -M_PI*M_PI * t / (2 * a*a);
+  double gamma = -PI_CONST*PI_CONST * t / (2 * a*a);
   double sum = 0.0;
   for (int j = 1; j <= kl; j++) {
-    sum += j * sin(j * w * M_PI) * exp(gamma * j*j);
+    sum += j * sin(j * w * PI_CONST) * exp(gamma * j*j);
   }
   return (sum > 0) ? sum : 0; // if result is negative, return 0 instead
 }

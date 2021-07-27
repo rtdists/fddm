@@ -1,123 +1,6 @@
-// Helper functions for dfddm function (located at src/dfddm.cpp)
+// Functions to check valid parameter values in dfddm and pfddm
 
-#include "funcs.h"
-
-void determine_method(const std::string& n_terms_small,
-                      const std::string& summation_small,
-                      const std::string& scale,
-                      NumFunc& numf, SumFunc& sumf, DenFunc& denf,
-                      double& rt0, const bool& log_prob)
-{
-  char n_terms_small0 = (!n_terms_small.empty()) ? n_terms_small[0] : EMPTYCHAR;
-  char summation_small0 = (!summation_small.empty()) ?
-    summation_small[summation_small.length()-1] : EMPTYCHAR;
-  char scale0 = (!scale.empty()) ? scale[0] : EMPTYCHAR;
-
-  if (log_prob) { // calculate log(probability)
-    rt0 = -std::numeric_limits<double>::infinity();
-    if (n_terms_small0 == 'S' || n_terms_small0 == 's') { // SWSE method
-      if (scale0 == 'b' || scale0 == 'B') { // both
-        denf = &fc_log;
-      } else if (scale0 == 's' || scale0 == 'S'){ // small
-        denf = &ff_log;
-      } else {
-        stop("dfddm error: invalid function parameter 'scale': %s.", scale);
-      }
-      numf = NULL;
-      if (summation_small0 == '7') { // 2017
-        sumf = &small_sum_eps_17;
-      } else if (summation_small0 == '4') { // 2014
-        sumf = &small_sum_eps_14;
-      } else {
-        stop("dfddm error: invalid function parameter 'summation_small': %s.",
-             summation_small);
-      }
-    } else {
-      if (scale0 == 'l' || scale0 == 'L') { // large
-        denf = &fl_log;
-        numf = NULL;
-        sumf = NULL;
-      } else {
-        if (scale0 == 'b' || scale0 == 'B') { // both
-          denf = &fb_log;
-        } else if (scale0 == 's' || scale0 == 'S') { // small
-          denf = &fs_log;
-        } else {
-          stop("dfddm error: invalid function parameter 'scale': %s.", scale);
-        }
-        if (n_terms_small0 == 'G' || n_terms_small0 == 'g') { // Gondan
-          numf = &ks_Gon;
-        } else if (n_terms_small0 == 'N' || n_terms_small0 == 'n') { // Navarro
-          numf = &ks_Nav;
-        } else {
-          stop("dfddm error: invalid function parameter 'n_terms_small': %s.",
-               n_terms_small);
-        }
-        if (summation_small0 == '7') { // 2017
-          sumf = &small_sum_2017;
-        } else if (summation_small0 == '4') { // 2014
-          sumf = &small_sum_2014;
-        } else {
-          stop("dfddm error: invalid function parameter 'summation_small': %s.",
-               summation_small);
-        }
-      }
-    }
-  } else { // calculate regular probability
-    rt0 = 0;
-    if (n_terms_small0 == 'S' || n_terms_small0 == 's') { // SWSE method
-      if (scale0 == 'b' || scale0 == 'B') { // both
-        denf = &fc;
-      } else if (scale0 == 's' || scale0 == 'S'){ // small
-        denf = &ff;
-      } else {
-        stop("dfddm error: invalid function parameter 'scale': %s.", scale);
-      }
-      numf = NULL;
-      if (summation_small0 == '7') { // 2017
-        sumf = &small_sum_eps_17;
-      } else if (summation_small0 == '4') { // 2014
-        sumf = &small_sum_eps_14;
-      } else {
-        stop("dfddm error: invalid function parameter 'summation_small': %s.",
-             summation_small);
-      }
-    } else {
-      if (scale0 == 'l' || scale0 == 'L') { // large
-        denf = &fl;
-        numf = NULL;
-        sumf = NULL;
-      } else {
-        if (scale0 == 'b' || scale0 == 'B') { // both
-          denf = &fb;
-        } else if (scale0 == 's' || scale0 == 'S') { // small
-          denf = &fs;
-        } else {
-          stop("dfddm error: invalid function parameter 'scale': %s.", scale);
-        }
-        if (n_terms_small0 == 'G' || n_terms_small0 == 'g') { // Gondan
-          numf = &ks_Gon;
-        } else if (n_terms_small0 == 'N' || n_terms_small0 == 'n') { // Navarro
-          numf = &ks_Nav;
-        } else {
-          numf = &ks_Gon;
-          stop("dfddm error: invalid function parameter 'n_terms_small': %s.",
-               n_terms_small);
-        }
-        if (summation_small0 == '7') { // 2017
-          sumf = &small_sum_2017;
-        } else if (summation_small0 == '4') { // 2014
-          sumf = &small_sum_2014;
-        } else {
-          sumf = &small_sum_2017;
-          stop("dfddm error: invalid function parameter 'summation_small': %s.",
-               summation_small);
-        }
-      }
-    }
-  }
-}
-
+#include "parameter_checks.hpp"
 
 
 void convert_responses(const SEXP& response, int& Nres, int& Nmax,
@@ -126,7 +9,7 @@ void convert_responses(const SEXP& response, int& Nres, int& Nmax,
   vector<int> bad_idx;
   int bad_par = 0;
   int type = TYPEOF(response);
-
+  
   if (type == 13 || type == 14) { // IntegerVector (including factors) or NumericVector
     out = Rcpp::as<vector<double> >(response);
     Nres = out.size();
@@ -214,10 +97,10 @@ void convert_responses(const SEXP& response, int& Nres, int& Nmax,
   } else {
     stop("dfddm error: type of function parameter 'response' is not one of: integer, double, factor, string (character), or boolean (logical).");
   }
-
+  
   if (bad_par > 0) { // error handling
-    std::string warning_text = "dfddm warning: function parameter 'response' was input as a vector of ";
-
+    string warning_text = "dfddm warning: function parameter 'response' was input as a vector of ";
+    
     if (type == 13) { // IntegerVector
       if (Rf_isFactor(response) == 1) { // factor
         warning_text = warning_text.append("factors, and a value that does not match either the first or second level");
@@ -233,9 +116,9 @@ void convert_responses(const SEXP& response, int& Nres, int& Nmax,
     } else {
       warning_text = warning_text.append("some unknown type");
     }
-
+    
     warning_text = warning_text.append(" was detected at ");
-
+    
     if (bad_par == 1) {
       warning_text = warning_text.append("index ");
       warning_text = warning_text.append(to_string(bad_idx[0]+1));
@@ -267,16 +150,16 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
                      vector<double>& out, const double& rt0)
 {
   bool valid = 1;
-
+  
   // rt, invalid inputs will be handled in calculate_pdf()
   if (Nrt < 1) {
     warning("dfddm warning: function parameter 'rt' is empty; empty vector returned.");
     valid = 0;
   }
-
+  
   // response, checks and converts responses
   convert_responses(response, Nres, Nmax, out, rt0, valid);
-
+  
   // a
   if (Na < 1) {
     warning("dfddm warning: model parameter 'a' is empty; empty vector returned.");
@@ -299,7 +182,7 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       }
     }
   }
-
+  
   // v
   if (Nv < 1) {
     warning("dfddm warning: model parameter 'v' is empty; empty vector returned.");
@@ -316,7 +199,7 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       }
     }
   }
-
+  
   // t0
   if (Nt0 < 1) {
     warning("dfddm warning: model parameter 't0' is empty; empty vector returned.");
@@ -339,7 +222,7 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       }
     }
   }
-
+  
   // w
   if (Nw < 1) {
     warning("dfddm warning: model parameter 'w' is empty; empty vector returned.");
@@ -356,7 +239,7 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       }
     }
   }
-
+  
   // sv
   if (Nsv < 1) {
     warning("dfddm warning: model parameter 'sv' is empty; empty vector returned.");
@@ -379,7 +262,7 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       }
     }
   }
-
+  
   // sigma
   if (Nsig < 1) {
     warning("dfddm warning: model parameter 'sigma' is empty; empty vector returned.");
@@ -396,7 +279,7 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       }
     }
   }
-
+  
   // err_tol
   if (Nerr < 1) {
     stop("dfddm error: function parameter 'err_tol' is empty.");
@@ -433,71 +316,6 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       }
     }
   }
-
+  
   return valid;
-}
-
-
-
-
-void calculate_pdf(const int& Nrt, const int& Na, const int& Nv, const int& Nt0,
-                   const int& Nw, const int& Nsv, const int& Nsig,
-                   const int& Nerr, const int& Nmax,
-                   const NumericVector& rt,
-                   const NumericVector& a, const NumericVector& v,
-                   const NumericVector& t0, const NumericVector& w,
-                   const NumericVector& sv, const NumericVector& sigma,
-                   const NumericVector& err, vector<double>& out,
-                   const int& max_terms_large,
-                   const NumFunc& numf, const SumFunc& sumf,
-                  const DenFunc& denf, const double& rt0)
-{
-  double t;
-  if (Nsig == 1 && sigma[0] == 1) { // standard diffusion coefficient
-    for (int i = 0; i < Nmax; i++) {
-      if (isnormal(out[i])) { // not {NaN, NA, Inf, -Inf, rt0 = {0 or -Inf} }
-        t = rt[i % Nrt] - t0[i % Nt0]; // response time minus non-decision time
-        if (t > 0 && isfinite(t)) { // sort response and calculate density
-          if (out[i] == 1) { // response is "lower" so use unchanged parameters
-              out[i] = denf(t, a[i % Na], v[i % Nv], w[i % Nw], sv[i % Nsv],
-                          err[i % Nerr], max_terms_large, numf, sumf);
-          } else { // response is "upper" so use alternate parameters
-            out[i] = denf(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw], sv[i % Nsv],
-                          err[i % Nerr], max_terms_large, numf, sumf);
-          }
-        } else { // {NaN, NA} evaluate to FALSE
-          if (isnan(t)) {
-            out[i] = t;
-          } else {
-            out[i] = rt0;
-          }
-        }
-      }
-    }
-  } else { // non-standard diffusion coefficient
-    for (int i = 0; i < Nmax; i++) {
-      if (isnormal(out[i])) { // not {NaN, NA, Inf, -Inf, rt0 = {0 or -Inf} }
-        t = rt[i % Nrt] - t0[i % Nt0]; // response time minus non-decision time
-        if (t > 0 && isfinite(t)) { // sort response and calculate density
-          if (out[i] == 1) { // response is "lower" so use unchanged parameters
-              out[i] = denf(t, a[i % Na]/sigma[i % Nsig],
-                            v[i % Nv]/sigma[i % Nsig], w[i % Nw],
-                            sv[i % Nsv]/sigma[i % Nsig], err[i % Nerr],
-                            max_terms_large, numf, sumf);
-          } else { // response is "upper" so use alternate parameters
-            out[i] = denf(t, a[i % Na]/sigma[i % Nsig],
-                          -v[i % Nv]/sigma[i % Nsig], 1 - w[i % Nw],
-                          sv[i % Nsv]/sigma[i % Nsig], err[i % Nerr],
-                          max_terms_large, numf, sumf);
-          }
-        } else { // {NaN, NA} evaluate to FALSE
-          if (isnan(t)) {
-            out[i] = t;
-          } else {
-            out[i] = rt0;
-          }
-        }
-      }
-    }
-  }
 }

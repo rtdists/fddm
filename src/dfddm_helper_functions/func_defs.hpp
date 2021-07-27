@@ -4,7 +4,6 @@
 
 #include <Rcpp.h>
 // [[Rcpp::plugins(cpp11)]]
-#define _USE_MATH_DEFINES
 #include <cmath>
 
 using std::vector;
@@ -15,14 +14,11 @@ using std::sqrt;
 using std::min;
 using std::max;
 using std::ceil;
-using std::to_string;
 using std::isfinite;
 using std::isnan;
 using std::isnormal;
 using Rcpp::stop;
-using Rcpp::warning;
 using Rcpp::NumericVector;
-using Rcpp::LogicalVector;
 
 
 
@@ -30,9 +26,10 @@ using Rcpp::LogicalVector;
 
 static const double SV_THRESH = 0; // threshold for using variable drift rate
 static const double LOG_100 = log(100);
-static const double LOG_PI = log(M_PI);
-static const double LOG_2PI_2 = 0.5 * log(2 * M_PI);
-static const double SQRT_2PI = sqrt(2 * M_PI);
+static const double PI_CONST = 3.14159265358979323846; // define pi like C++
+static const double LOG_PI = log(PI_CONST);
+static const double LOG_2PI_2 = 0.5 * log(2 * PI_CONST);
+static const double SQRT_2PI = sqrt(2 * PI_CONST);
 static const char EMPTYCHAR = '\0'; // literally, the empty character
 // INT_MAX is in num_funcs.cpp, maximum value of the int data type = 2147483647
 

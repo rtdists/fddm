@@ -1,9 +1,5 @@
 // Functions to evaluate the DDM PDF for specific criteria
 
-#include "funcs.h"
-
-
-
 
 
 //////////                                                            //////////
@@ -112,7 +108,7 @@ double fl(const double& t, const double& a, const double& v,
                    / (2 + 2 * sv*sv * t)) / (a*a * sqrt(1 + sv*sv * t));
   }
   kl = kl_Nav(t / (a*a), w, err / mult_l);
-  mult_l *= M_PI;
+  mult_l *= PI;
   return mult_l * large_sum_Nav(t, a, w, kl, 0.0);
 }
 
@@ -159,7 +155,7 @@ double fc(const double& t, const double& a, const double& v,
   int kl = kl_Nav(t / (a*a), w, err / mult);
 
   if (kl <= max_terms_large) { // use large time
-    return M_PI * mult * large_sum_Nav(t, a, w, kl, 0.0);
+    return PI_CONST * mult * large_sum_Nav(t, a, w, kl, 0.0);
   } else { // use small time
     if (sv <= SV_THRESH) { // no sv
       mult = a * exp(-v * a * w - v * v * t / 2) / (t * SQRT_2PI * sqrt(t));
@@ -222,7 +218,7 @@ double fb(const double& t, const double& a, const double& v,
   ks = numf(t / (a*a), w, err * a*a / mult_s);
   mult_s *= a / (t * SQRT_2PI * sqrt(t));
   kl = kl_Nav(t / (a*a), w, err / mult_l);
-  mult_l *= M_PI;
+  mult_l *= PI_CONST;
   if (ks < kl) { // small-time is better
     return mult_s * sumf(t, a, w, ks, 0.0);
   } else { // large-time is better

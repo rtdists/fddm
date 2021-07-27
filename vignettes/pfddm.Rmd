@@ -1,0 +1,216 @@
+---
+title: "Description of Methods in `pfddm()`"
+author: "Kendal Foster and Henrik Singmann"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+bibliography: references.bib
+output:
+  rmarkdown::html_vignette:
+    css: stile.css
+    toc: false
+vignette: >
+  %\VignetteIndexEntry{Description of Methods in pfddm}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  error = TRUE,
+  comment = "#>"
+)
+```
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+
+<div id="TOC">
+<ul>
+  <li><a href="#background">Mathematical Background</a></li>
+  <li><a href="#dist">The Distribution Function Approximations</a>
+  <ul>
+    <li><a href="#dist-inf">Infinite Sum Method</a></li>
+    <li><a href="#dist-pde">PDE Method</a></li>
+  </ul></li>
+  <li><a href="#benchmarks">Benchmark Results</a></li>
+  <li><a href="#references">References</a></li>
+</ul>
+</div>
+
+
+
+
+
+
+Function `pfddm` evaluates the distribution function (or cumulative distribution function, CDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full CDF, which contains an infinite sum. This vignette provides an overview of the mathematical details of the different approximations implemented in `pfddm` as well as another approximation that is not included in `pfddm`. At the end of this vignette are timing benchmarks for the present approximation methods and comparison with existing approximation methods.
+
+Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ (threshold separation), $v \in (-\infty, \infty)$ (drift rate), $t_0 \in [0, \infty)$ (non-decision time/response time constant), $w \in (0, 1)$ (relative starting point), $sv \in (0, \infty)$ (inter-trial-variability of drift), and $\sigma \in (0, \infty)$ (diffusion coefficient of the underlying Wiener Process). Please note that for only this vignette, we will refer to the inter-trial variability of drift as $\eta$ instead of $sv$ to make the notation in the equations less confusing.
+<br><br>
+
+
+
+
+
+# Mathematical Background {#background}
+<hr class="sec1">
+
+There is one optional parameter in `pfddm` that can be used to indicate which method should be used in the function call: `method`. For each approximation method we describe, we include the parameter settings for the function call to `pfddm` so that it uses the desired method. As this parameter is optional, leaving it blank results in the [default method](#default-method) that is indicated later in this vignette. For general purpose use, we recommend ignoring this optional parameter so that the default settings are used as this will be the fastest and most stable algorithm for calculating the CDF.
+
+Note that there are actually two cumulative distribution functions of the DDM: the CDF with respect to the upper boundary, and the CDF with respect to the lower boundary. Following the precedent set by the literature, we use the general terminology "CDF" or "distribution function" to mean the cumulative distribution function with respect to the lower boundary. Should the cumulative distribution function with respect to the upper boundary be required, it may be calculated using the simple transformation $F_\text{upper}(t ~|~ v, \eta, a, w) = F_\text{lower}(t ~|~ -v, \eta, a, 1-w)$.
+
+Since the CDF of the DDM is widely used in parameter estimation usually involving numerical optimization (e.g., $\chi^2$ and Kolmogorov-Smirnov stastics), significant effort has been put into making its evaluation as fast as possible. However, the options for calculating the CDF are limited; one can either approximate an infinite sum or numerically solve a partial differential equation (PDE). The `pfddm` function uses the infinte sum method but not the PDE method. This vignette details these choices and demonstrates why the infinite sum method is preferable over the PDE method.
+
+
+
+
+
+# The Distribution Function Approximations {#dist}
+<hr class="sec1">
+
+There are two main ways of calculating the CDF of the DDM: approximating the analytic form of CDF itself [@blurton2017first], and numerically solving a partial differential equation (PDE) whose solution is the CDF [@voss2008fast]. Like the probability density function (PDF) of the DDM, the analytic form of the CDF also contains an infinite sum (see the [Math Vignette](math.html) for more information on the PDF). We include the infinite sum method in `pfddm` but not the PDE method, and these reasons will be discussed in the following sections.
+
+Both approximation methods inherently introduce error into the calculation (i.e., difference between the result of the approximated CDF and the "true" value of the CDF). Understanding this approximation error is important to minimizing the uncertainty in DDM parameter estimation (and other uses) that depend on calculating the CDF.
+
+
+
+
+<div class="indent2">
+## Infinite Sum Methods {#dist-inf}
+
+Similarly to the density function of the DDM, there is a large-time variant and a small-time variant of the CDF for a constant drift rate (i.e., $\eta = 0$) (see @blurton2012fast for details). There is no analytic large-time variant for $\eta > 0$ because the resulting integral is incalculable (see @tuerlinckx2004efficient for more details). However, @blurton2017first provide the small-time variant of the CDF for $\eta > 0$; this variant contains an infinite sum that must be approximated. @blurton2017first even provide two different forms of the small-time variant of the CDF: one that uses the standard normal CDF in each term of the infinite sum, and one that instead utilizes Mills ratio in each term of the infinite sum.
+
+Similarly to the small-time variant of the PDF, the small-time variant of the CDF contains an infinite sum whose terms alternate and decay to zero. Like in the SWSE method of `dfddm`, we can exploit these mathematical properties and bound the approximation error. In this case, the approximation error, $\epsilon$, is bounded above by the absolute value of the next term in the sum. For example, if the sum includes $k$ terms ($b_1 + b_2 + \dots + b_k$), then the approximation error is at most the absolute value of the $k+1$^th^ term ($\epsilon \leq \left\lvert b_{k+1} \right\rvert$). These mathematical properties allows us to explicitly pre-define and control the precision of the calculation before actually doing it.
+
+Moreover, in the [Benchmark Results below](#bechmarks), it is shown that this class of approximation methods is quite fast. The combination of directly controlled precision and fast calculation times are why `pfddm` uses the infinite sum methods instead of the PDE method for approximating the CDF of the DDM.
+
+The following two subsections detail the two slightly different variations on the small-time CDF provided by @blurton2017first.
+
+
+
+### Normal CDF {#dist-inf-ncdf}
+
+When @blurton2017first derived the the small-time CDF with inter-trial variability in the drift rate (i.e., $\eta > 0$), they first arrived at the following equation for the distribution function:
+
+\begin{align} \label{eq:cdf_ncdf}
+  F(t ~|~ v, \eta, a, w) = &\exp{\left( \frac{1}{2} \eta^2 a^2 w^2 - v a w \right)} \times\\
+                           &\sum_{j = 0}^{\infty} (-1)^j \exp{\left( \frac{1}{2} \eta^2 r_j^2 \right)}
+                           \Bigg(
+                             \exp{(-\gamma r_j)} \Phi \left(\frac{\gamma t - \lambda r_j}{\rho} \right) +
+                             \exp{(\gamma r_j)} \Phi \left(\frac{-\gamma t - \lambda r_j}{\rho} \right)
+                           \Bigg)\nonumber
+\end{align}
+
+where
+
+\begin{align*}
+r_j     &= \begin{cases}
+             a \big( j + w \big) & \text{if } j \text{ is even,}\\
+             a \big( j + (1-w) \big) & \text{if } j \text{ is odd,}
+           \end{cases}\\[0.5ex]
+\gamma  &= v - \eta^2 a w,\\[0.1ex]
+\lambda &= 1 + \eta^2 t,\\[0.1ex]
+\rho    &= \sqrt{\lambda t},
+\nonumber
+\end{align*}
+
+and $\Phi(x)$ is the standard normal CDF evaluated at $x$.
+
+One important note is that the $\exp{\left( \frac{1}{2} \eta^2 r_j^2 \right)}$ expression in each term of the infinite sum tends to infinity as $j \to \infty$. This is balanced by the terms inside the parentheses decaying to $0$ quickly, yet it is still cause for concern from a computational perspective. If the growing exponential overflows to positive infinity before the sum is truncated, then the approximation is no longer useful^[this can happen for the parameter values: `rt = 30, response = 1, a = 5, v = 0, t0 = 0, w = 0.5, sv = 1.5, err_tol = 1e-6, method = "NCDF"`].
+
+<p class="method">
+To use this method, set `method = "NCDF"` in the function call to `pfddm()`. We caution use of this approximation method, as the [default-method](#default-method) (using Mills ratio) is both faster and more stable.
+</p>
+</div>
+
+
+
+<div class="indent3">
+<a id="default-method"></a>
+
+### Mills Ratio {#dist-inf-mills}
+
+After deriving Equation $\ref{eq:cdf_ncdf}$, @blurton2017first manipulated their result to use the Mills ratio for its favorable numerical properties (see @blurton2012fast for more discussion on these properties of Mills ratio). The Mills ratio is defined as
+
+\begin{equation} \label{eq:mills}
+  M[x] = \frac{1 - \Phi(x)}{\phi(x)} = \frac{\Phi(-x)}{\phi(x)},
+\end{equation}
+
+where $\Phi(x)$ is the standard normal CDF evaluated at $x$, and $\phi(x)$ is the standard normal PDF evaluated at $x$. Then the CDF of the DDM becomes
+
+\begin{align} \label{eq:cdf_mills}
+  F(t ~|~ v, \eta, a, w) = &\exp{ \left( \frac{\eta^2 a^2 w^2 - 2 v a w - v^2 t}{2 \lambda} \right) } \times\\
+                           &\sum_{j = 0}^{\infty} (-1)^j \phi \left( \frac{r_j}{\sqrt{t}} \right)
+                           \Bigg(
+                             M \left( \frac{\lambda r_j - \gamma t}{\rho} \right) +
+                             M \left( \frac{\lambda r_j + \gamma t}{\rho} \right)
+                           \Bigg)\nonumber
+\end{align}
+
+where again
+
+\begin{align*}
+r_j     &= \begin{cases}
+             a \big( j + w \big) & \text{if } j \text{ is even,}\\
+             a \big( j + (1-w) \big) & \text{if } j \text{ is odd,}
+           \end{cases}\\[0.5ex]
+\gamma  &= v - \eta^2 a w,\\[0.1ex]
+\lambda &= 1 + \eta^2 t,\\[0.1ex]
+\rho    &= \sqrt{\lambda t}.
+\nonumber
+\end{align*}
+
+Whereas this form does not have the issue of the exponential increasing to infinity, the Mills ratio does introduce a potential divide-by-zero error if one is not careful with handling large arguments in the PDF in the denominator of the Mills ratio^[Note that as $x \to \infty$, $1 - \Phi(x) = \Phi(-x) \to 0$ and $\phi(x) \to 0$; this results in $M(x) = \frac{0}{0}$. Similarly for $x \to -\infty$, $1 - \Phi(x) = \Phi(-x) \to 1$ and $\phi(x) \to 0$; this results in $M(x) = \frac{1}{0}$.]. Fortunately, there exists a useful approximation to Mills ratio for large arguments (__figure out a way to cite the approximation used in the zeta function__). By combining the standard Mills ratio with this approximation, we can achieve a robust algorithm that can be used to consistently calculate the CDF. Moreover, this approximation method is quite fast, as demonstrated in the [Benchmark Results below](#benchmarks). The speed and stability of this algorithm earns our recommendation and is the default method in `pfddm`.
+
+<p class="method">
+To use this method, set `method = "Mills"` in the function call to `pfddm()`. This is the default method, and we recommend using it for the fastest and most stable algorithm for calculating the CDF of the DDM.
+</p>
+
+
+
+
+## PDE Method {#dist-pde}
+
+This section only provides a brief overview of the PDE method, highlighting how the PDE method may not be useful for our application; for more details on the PDE method, see @voss2008fast.
+
+Essentially, there exists a PDE whose solution is the CDF of the DDM; hence, solving the PDE allows one to calculate the CDF. The approximation error is controlled is via the step size in the numerical solution of the PDE. Compared to the infinite sum approach from [the previous section](#dist-inf), controlling the step size does not allow for directly bounding the approximation error. Whereas this method of controlling the approximation error may be suitable for some use cases, we suggest the infinite sum approach because it guarantees the precision of the result.
+
+In our testing with the implementation of the algorithm provided by @voss2008fast (using the function `pdiffusion()` from the `rtdists` package), we found it to be inaccurate relative to the infinite sum method quite often. Increasing the `precision` parameter usually increased the accuracy of the PDE method (by reducing the step size in the numerical solver), but that resulted in very slow calculation times.
+
+It should be noted, however, that the method proposed by @voss2008fast is not only applicable to the case of inter-trial variability in the drift rate ($v$), but it can also be used in the cases of inter-trial variability in the starting point ($w$) and non-decision time ($t_0$).
+
+<p class="method">
+This method is unavailable in `fddm`. Instead, we recommend using the [default method](#default-method) (using Mills ratio) for calculating the CDF of the DDM by ignoring the optional parameter `method` in the function call to `pfddm()`. If the PDE method is desired, we recommend using the function `pdiffusion()` from the `rtdists` package, as this function uses the PDE method to calculate the CDF.
+</p>
+</div>
+
+
+
+
+
+# Benchmark Results {#benchmarks}
+<hr class="sec1">
+
+This section needs to be filled in
+
+
+
+
+
+
+
+
+
+
+</div>
+# {.unlisted .unnumbered}
+#### R Session Info {.unlisted .unnumbered}
+```{r session-info, collapse=TRUE}
+sessionInfo()
+```
+
+
+
+# References
