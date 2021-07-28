@@ -1,11 +1,11 @@
 // Distribution function for the Ratcliff Diffusion Decision Model (DDM)
 
-#include "parameter_checks.hpp"
-#include "pfddm_helper_functions/func_defs.hpp"
-#include "pfddm_helper_functions/helper_funcs.hpp"
-#include "pfddm_helper_functions/distribution_funcs.hpp"
-#include "pfddm_helper_functions/sum_funcs.hpp"
-#include "pfddm_helper_functions/mills_funcs.hpp"
+#include "parameter_checks.h"
+#include "pfddm_helper_functions/func_defs.h"
+#include "pfddm_helper_functions/helper_funcs.h"
+#include "pfddm_helper_functions/distribution_funcs.h"
+#include "pfddm_helper_functions/sum_funcs.h"
+#include "pfddm_helper_functions/mills_funcs.h"
 
 
 

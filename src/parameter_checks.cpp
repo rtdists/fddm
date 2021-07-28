@@ -1,6 +1,6 @@
 // Functions to check valid parameter values in dfddm and pfddm
 
-#include "parameter_checks.hpp"
+#include "parameter_checks.h"
 
 
 void convert_responses(const SEXP& response, int& Nres, int& Nmax,

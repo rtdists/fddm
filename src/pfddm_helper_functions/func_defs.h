@@ -1,6 +1,6 @@
 // Header file to declare constants and functions
-// This file must have a .h extension rather than .hpp extension because then...
-// ...R CMD Check will fail
+// This file must have a .h extension rather than .hpp extension because then
+// R CMD Check will fail
 
 #include <Rcpp.h>
 // [[Rcpp::plugins(cpp11)]]

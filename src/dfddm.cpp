@@ -1,11 +1,11 @@
 // Density function for the Ratcliff Diffusion Decision Model (DDM)
 
-#include "parameter_checks.hpp"
-#include "dfddm_helper_functions/func_defs.hpp"
-#include "dfddm_helper_functions/helper_funcs.hpp"
-#include "dfddm_helper_functions/density_funcs.hpp"
-#include "dfddm_helper_functions/sum_funcs.hpp"
-#include "dfddm_helper_functions/num_funcs.hpp"
+#include "parameter_checks.h"
+#include "dfddm_helper_functions/func_defs.h"
+#include "dfddm_helper_functions/helper_funcs.h"
+#include "dfddm_helper_functions/density_funcs.h"
+#include "dfddm_helper_functions/sum_funcs.h"
+#include "dfddm_helper_functions/num_funcs.h"
 
 
 
