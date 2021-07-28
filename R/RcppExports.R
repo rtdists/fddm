@@ -281,6 +281,10 @@ dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0L, sigma = 1L, log = 0L
 #'
 #' @param log Logical; if \code{TRUE}, probabilities \eqn{p} are given as
 #'   \eqn{log(p)}. Default is \code{FALSE}.
+#' 
+#' @param method Which method of calculating the CDF to use. Can be one of
+#'   \{\code{"Mills"}, \code{"NCDF"}\}, case-insensitive. Default is
+#'   \code{"Mills"}.
 #'
 #' @param err_tol Allowed error tolerance of the density function. Since the
 #'   density function contains an infinite sum, this parameter defines the

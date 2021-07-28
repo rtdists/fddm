@@ -85,6 +85,10 @@ See Details for more information. \itemize{ \item \code{a}
 \item{log}{Logical; if \code{TRUE}, probabilities \eqn{p} are given as
 \eqn{log(p)}. Default is \code{FALSE}.}
 
+\item{method}{Which method of calculating the CDF to use. Can be one of
+\{\code{"Mills"}, \code{"NCDF"}\}, case-insensitive. Default is
+\code{"Mills"}.}
+
 \item{err_tol}{Allowed error tolerance of the density function. Since the
 density function contains an infinite sum, this parameter defines the
 precision of the approximation to that infinite sum. Default is
