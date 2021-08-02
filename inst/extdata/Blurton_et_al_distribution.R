@@ -19,19 +19,13 @@ G_0 = function(t=1.2, nu=0.1, eta2=0.01, sigma2=0.01, a=0.08, w=.375,
   j = 0
   # Kendal added this to make eps (error tolerance) accurate inside the sum
   eps = eps / exp((-nu*nu*t - 2*nu*a*w + eta2*a*a*w*w)/2/(1 + eta2*t))
-  # cat("mult is: ", exp((-nu*nu*t - 2*nu*a*w + eta2*a*a*w*w)/2/(1 + eta2*t)), "\n\n")
   repeat
   {
     rj = j*a + a*w
     logphi = dnorm(rj/sqt, log=TRUE)
     logM1 = logMill((rj - nu*t + eta2*(rj + a*w)*t) / sqet)
     logM2 = logMill((rj + nu*t + eta2*(rj - a*w)*t) / sqet)
-    # cat("m1 is: ", (rj - nu*t + eta2*(rj + a*w)*t) / sqet, "\n")
-    # cat("mills 1 is: ", exp(logM1), "\n")
-    # cat("m2 is: ", (rj + nu*t + eta2*(rj - a*w)*t) / sqet, "\n")
-    # cat("mills 2 is: ", exp(logM2), "\n")
     gj = exp(logphi + logM1) + exp(logphi + logM2)
-    # cat("term ", j, " is: ", gj, "\n\n")
     G = G + gj
     # Kendal is not sure why eps is only checked every 2 iterations
     if(all(gj < eps))
@@ -41,14 +35,7 @@ G_0 = function(t=1.2, nu=0.1, eta2=0.01, sigma2=0.01, a=0.08, w=.375,
     logphi = dnorm(rj/sqt, log=TRUE)
     logM1 = logMill((rj - nu*t + eta2*t*(rj + a*w)) / sqet)
     logM2 = logMill((rj + nu*t + eta2*t*(rj - a*w)) / sqet)
-    # cat("m1 is: ", (rj - nu*t + eta2*(rj + a*w)*t) / sqet, "\n")
-    # cat("mills 1 is: ", exp(logM1), "\n")
-    # cat("m2 is: ", (rj + nu*t + eta2*(rj - a*w)*t) / sqet, "\n")
-    # cat("mills 2 is: ", exp(logM2), "\n")
-    # cat("mills 1 is: ", exp(logM1), "\n")
-    # cat("mills 2 is: ", exp(logM2), "\n")
     gj = exp(logphi + logM1) + exp(logphi + logM2)
-    # cat("term ", j, " is: ", gj, "\n\n")
     G = G - gj
     j = j + 1
   }
@@ -68,8 +55,6 @@ logMill = function(x) # log of Mill's ratio
 {
   m = numeric(length(x))
   m[x >= 10000] = -log(x[x >= 10000]) # limiting case for x -> Inf
-  # cat("logMill:: CDF is: ", pnorm(x[x < 10000], lower=FALSE, log=FALSE), "\n")
-  # cat("logMill:: PDF is: ", dnorm(x[x < 10000], log=FALSE), "\n")
   m[x < 10000] = pnorm(x[x < 10000], lower=FALSE, log=TRUE) -
   dnorm(x[x < 10000], log=TRUE)
   m

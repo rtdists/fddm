@@ -87,7 +87,8 @@ At each point in this parameter space, we run the `microbenchmark` function 1000
 library("fddm")
 library("rtdists")
 library("RWiener")
-source(system.file("extdata", "Gondan_et_al_density.R", package = "fddm", mustWork = TRUE))
+source(system.file("extdata", "Gondan_et_al_density.R",
+                   package = "fddm", mustWork = TRUE))
 library("microbenchmark")
 
 rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
@@ -362,13 +363,15 @@ bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                            times = 1000, unit = "ns")
 save(bm_vec, compress = "xz", compression_level = 9,
      file = "inst/extdata/bm_vec_0-2.Rds")
-# load(system.file("extdata", "bm_vec_0-2.Rds", package = "fddm", mustWork = TRUE))
+# load(system.file("extdata", "dfddm_density", "bm_vec_0-2.Rds",
+#                  package = "fddm", mustWork = TRUE))
 bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                            W = W, SV = SV, err_tol = err_tol,
                            times = 100, unit = "ns")
 save(bm_ind, compress = "xz", compression_level = 9,
      file = "inst/extdata/bm_ind_0-2.Rds")
-# load(system.file("extdata", "bm_ind_0-2.Rds", package = "fddm", mustWork = TRUE))
+# load(system.file("extdata", "dfddm_density", "bm_ind_0-2.Rds",
+#                  package = "fddm", mustWork = TRUE))
 ```
 
 
@@ -386,7 +389,8 @@ library("ggplot2")
 library("ggforce")
 
 # load data, will be in the variable 'bm_vec'
-load(system.file("extdata", "bm_vec_0-2.Rds", package = "fddm", mustWork = TRUE))
+load(system.file("extdata", "dfddm_density", "bm_vec_0-2.Rds",
+                 package = "fddm", mustWork = TRUE))
 
 t_idx <- match("SV", colnames(bm_vec))
 bm_vec[, -seq_len(t_idx)] <- bm_vec[, -seq_len(t_idx)]/1000 # convert to microseconds
@@ -451,7 +455,8 @@ The following code chunk loads the pre-run benchmark data, prepares it, and plot
 
 ```{r bm-meq-prep, eval=TRUE}
 # load data, will be in the variable 'bm_ind'
-load(system.file("extdata", "bm_ind_0-2.Rds", package = "fddm", mustWork = TRUE))
+load(system.file("extdata", "dfddm_density", "bm_ind_0-2.Rds",
+                 package = "fddm", mustWork = TRUE))
 bm_ind[["RTAA"]] <- bm_ind[["RT"]] / bm_ind[["A"]] / bm_ind[["A"]]
 bm_ind <- bm_ind[, c(1, 2, ncol(bm_ind), 3:(ncol(bm_ind)-1)) ]
 
@@ -1134,7 +1139,8 @@ Stroke <- c(0, 1, 1)
 Fills <- c("#ffffff00", "#ffffff00", "#80808099")
 
 # load data, will be in the variable 'fit'
-load(system.file("extdata", "bm_fit.Rds", package = "fddm", mustWork = TRUE))
+load(system.file("extdata", "dfddm_density", "bm_fit.Rds",
+                 package = "fddm", mustWork = TRUE))
 fit <- fit_prep(fit)
 ```
 

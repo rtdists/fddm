@@ -774,7 +774,7 @@ As previously mentioned, we will read the pre-fit data from file as the fits can
 
 ```{r fit-load, eval=TRUE}
 # load data, will be in the variable 'fit'
-load(system.file("extdata", "valid_fit.Rds", package = "fddm", mustWork = TRUE))
+load(system.file("extdata", "dfddm_density", "valid_fit.Rds", package = "fddm", mustWork = TRUE))
 fit <- fit_prep(fit)
 
 cat("Results for ID = experienced 2")

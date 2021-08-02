@@ -35,7 +35,11 @@ MathJax.Hub.Config({
     <li><a href="#dist-inf">Infinite Sum Method</a></li>
     <li><a href="#dist-pde">PDE Method</a></li>
   </ul></li>
-  <li><a href="#benchmarks">Benchmark Results</a></li>
+  <li><a href="#ben">Benchmarking the Distribution Function Approximations</a>
+  <ul>
+    <li><a href="#ben-vec">Vectorized Benchmark Data and Results</a></li>
+    <li><a href="#ben-ind">Non-vectorized Benchmark Data and Results</a></li>
+  </ul></li>
   <li><a href="#references">References</a></li>
 </ul>
 </div>
@@ -92,7 +96,7 @@ The following two subsections detail the two slightly different variations on th
 
 ### Normal CDF {#dist-inf-ncdf}
 
-When @blurton2017first derived the the small-time CDF with inter-trial variability in the drift rate (i.e., $\eta > 0$), they first arrived at the following equation for the distribution function:
+When @blurton2017first derived the the small-time CDF with inter-trial variability in the drift rate (i.e., $\eta > 0$), they first arrived at the following equation for the distribution function^[I think there may have been a sign error in the equation for $g_j^+$ on the top of the right column of page 9: I think the argument inside $\Phi$ should be negated. The corresponding argument in the Mills ratio further down the page appears to be correct.]:
 
 \begin{align} \label{eq:cdf_ncdf}
   F(t ~|~ v, \eta, a, w) = &\exp{\left( \frac{1}{2} \eta^2 a^2 w^2 - v a w \right)} \times\\
@@ -162,7 +166,7 @@ r_j     &= \begin{cases}
 \nonumber
 \end{align*}
 
-Whereas this form does not have the issue of the exponential increasing to infinity, the Mills ratio does introduce a potential divide-by-zero error if one is not careful with handling large arguments in the PDF in the denominator of the Mills ratio^[Note that as $x \to \infty$, $1 - \Phi(x) = \Phi(-x) \to 0$ and $\phi(x) \to 0$; this results in $M(x) = \frac{0}{0}$. Similarly for $x \to -\infty$, $1 - \Phi(x) = \Phi(-x) \to 1$ and $\phi(x) \to 0$; this results in $M(x) = \frac{1}{0}$.]. Fortunately, there exists a useful approximation to Mills ratio for large arguments (__figure out a way to cite the approximation used in the zeta function__). By combining the standard Mills ratio with this approximation, we can achieve a robust algorithm that can be used to consistently calculate the CDF. Moreover, this approximation method is quite fast, as demonstrated in the [Benchmark Results below](#benchmarks). The speed and stability of this algorithm earns our recommendation and is the default method in `pfddm`.
+Whereas this form does not have the issue of the exponential increasing to infinity, the Mills ratio does introduce a potential divide-by-zero error if one is not careful with handling large arguments in the PDF in the denominator of the Mills ratio^[Note that as $x \to \infty$, $1 - \Phi(x) = \Phi(-x) \to 0$ and $\phi(x) \to 0$; this results in $M(x) = \frac{0}{0}$. Similarly for $x \to -\infty$, $1 - \Phi(x) = \Phi(-x) \to 1$ and $\phi(x) \to 0$; this results in $M(x) = \frac{1}{0}$.]. Fortunately, there exists a useful approximation to Mills ratio for large arguments (__figure out a way to cite the approximation used in the zeta function__). By combining the standard Mills ratio with this approximation, we can achieve a robust algorithm that can be used to consistently calculate the CDF. Moreover, this approximation method is quite fast, as demonstrated in the [Benchmark Results below](#ben-res). The speed and stability of this algorithm earns our recommendation and is the default method in `pfddm`.
 
 <p class="method">
 To use this method, set `method = "Mills"` in the function call to `pfddm()`. This is the default method, and we recommend using it for the fastest and most stable algorithm for calculating the CDF of the DDM.
@@ -190,11 +194,305 @@ This method is unavailable in `fddm`. Instead, we recommend using the [default m
 
 
 
-# Benchmark Results {#benchmarks}
+# Benchmarking the Distribution Function Approximations {#ben}
 <hr class="sec1">
 
-This section needs to be filled in
+We want to determine the performance of the two methods available in `pfddm` as well as comparing their performance to the implementations currently available in the literature: the `R` Code provided by @blurton2017first, and the `pdiffusion` function from the `rtdists` package. Note that we only test implementations that include inter-trial variability in the drift rate (i.e., `sv > 0` in `pfddm`).
 
+Testing each implementation across a wide parameter space (defined in [the code chunk below](#par-space)) will not only show the algorithms' overall viability for a practical set of parameters, but it will also allow for a more granular analysis of where each algorithm succeeds and struggles in the parameter space. To measure this viability, we will perform two benchmark tests: one where the response times are input as a vector to each function call, and one where the response times will be input individually to each function call.
+
+<a id="par-space"></a>
+```{r bm-par-space, eval=TRUE}
+# Define parameter space
+RT <- seq(0.1, 2, by = 0.1)
+A <- seq(0.5, 3.5, by = 0.5)
+V <- c(-5, -2, 0, 2, 5)
+t0 <- 0
+W <- seq(0.3, 0.7, by = 0.1)
+SV <- c(0, 1, 2, 3.5)
+err_tol <- 1e-6 # this is the setting from rtdists
+```
+
+Note that each function call will assume that the response corresponds to the lower boundary of the DDM, and thus these benchmark tests only assess the performance of the "lower" distribution function. It is redundant to benchmark the "upper" distribution function because it is identical to the "lower" distribution function with the following mappings: $v \to -v$ and $w \to 1-w$; and these remapped values are already included in the parameter space (i.e., the values of $v$ are symmetric around $0$, and the values of $w$ are symmetric around $0.5$) .
+
+For each combination of parameters in the parameter space, we run the `microbenchmark` function from the package [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) 1000 times for each implementation and only save the median benchmark time of these 1000. We will refer to these medians as simply the "benchmark times" for the remainder of this vignette. Running the benchmark tests this many times for each set of parameters generates a sufficient amount of benchmark data so that the median of these times is unlikely to be an outlier, either faster or slower than a typical run time.
+
+First, we load the required packages.
+
+```{r bm-packages, eval=TRUE}
+# packages for generating benchmark data
+library("fddm")
+source(system.file("extdata", "Blurton_et_al_distribution.R",
+                   package = "fddm", mustWork = TRUE))
+library("rtdists")
+library("microbenchmark")
+
+# packages for plotting
+library("reshape2")
+library("ggplot2")
+library("ggforce")
+```
+
+
+
+
+<div class="indent2">
+## Vectorized Benchmark Data and Results {#ben-vec}
+
+The first benchmark test will record the algorithms' performances across the parameter space, with the response times input as a vector. Inputting the response times in this way is both more common (as it is typically easier to input a vector into a function as opposed to writing a loop) and beneficial for the `R`-based implementation from @blurton2017first to exploit `R`'s vectorization (making this implementation as fast as possible).
+
+We write the function that we will use to systematically benchmark each implementation at each combination of parameters.
+
+```{r bm-vec-fun, eval=TRUE}
+rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
+                             err_tol = 1e-6, times = 1000) {
+
+  fnames <- c("Mills", "NCDF", "Blurton", "rtdists")
+  nf <- length(fnames) # number of functions being benchmarked
+  nV <- length(V)
+  nA <- length(A)
+  nW <- length(W)
+  nSV <- length(SV)
+  resp <- rep(resp, length(RT)) # for RWiener
+
+  # Initialize the dataframe to contain the microbenchmark results
+  mbm_res <- data.frame(matrix(ncol = 4+nf, nrow = nV*nA*nW*nSV))
+  colnames(mbm_res) <- c('V', 'A', 'W', 'SV', fnames)
+  row_idx <- 1
+
+  # Loop through each combination of parameters and record microbenchmark results
+  for (v in 1:nV) {
+    for (a in 1:nA) {
+      for (w in 1:nW) {
+        for (sv in 1:nSV) {
+          mbm <- microbenchmark(
+          Mills = pfddm(rt = RT, response = resp, a = A[a], v = V[v], t0 = t0,
+                        w = W[w], sv = SV[sv], log = FALSE, method = "Mills",
+                        err_tol = err_tol),
+          NCDF = pfddm(rt = RT, response = resp, a = A[a], v = V[v], t0 = t0,
+                       w = W[w], sv = SV[sv], log = FALSE, method = "NCDF",
+                       err_tol = err_tol),
+          Blurton = G_0(t = RT-t0, a = A[a], nu = V[v], w = W[w],
+                        eta2 = SV[sv]*SV[sv], sigma2 = 1, eps = err_tol), # only "lower" resp
+          rtdists = pdiffusion(RT, resp, a = A[a], v = V[v], t0 = t0,
+                               z = W[w]*A[a], sv = SV[sv], precision = 5),
+          times = times)
+        # add the v, a, and w values to the dataframe
+        mbm_res[row_idx, 1] <- V[v]
+        mbm_res[row_idx, 2] <- A[a]
+        mbm_res[row_idx, 3] <- W[w]
+        mbm_res[row_idx, 4] <- SV[sv]
+        # add the median microbenchmark results to the dataframe
+        for (i in 1:nf) {
+          mbm_res[row_idx, 4+i] <- median(mbm[mbm[,1] == fnames[i],2])
+        }
+        # iterate start value
+        row_idx = row_idx + 1
+        }
+      }
+    }
+  }
+  return(mbm_res)
+}
+```
+
+We will not actually run the benchmark tests in this vignette as it can take a while to run, and instead we will load pre-run benchmark data before we plot the results.
+
+```{r bm-vec-run, eval=FALSE}
+bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
+                           W = W, SV = SV, err_tol = err_tol, times = 100)
+```
+```{r bm-vec-save, eval=FALSE, include=FALSE}
+save(bm_vec, compress = "xz", compression_level = 9,
+     file = "../inst/extdata/pfddm_distribution/bm_vec_0-2.Rds")
+```
+
+Here, we load the pre-run benchmark data and plot the results as side-by-side violin plots. The horizontal axis shows the implementation, and the vertical axis shows the benchmark time. Each individual violin plot shows a mirrored density estimate; overlaying the violin plot, the boxplot shows the median in addition to the first and third quartiles; the horizontal dashed line shows the mean.
+
+```{r bm-violin, eval=TRUE, fig.height=5}
+# load data, will be in the variable 'bm_vec'
+load(system.file("extdata", "pfddm_distribution", "bm_vec_0-2.Rds",
+                 package = "fddm", mustWork = TRUE))
+
+t_idx <- match("SV", colnames(bm_vec))
+bm_vec[, -seq_len(t_idx)] <- bm_vec[, -seq_len(t_idx)]/1000 # convert to microseconds
+mbm_vec <- melt(bm_vec, measure.vars = -seq_len(t_idx),
+                variable.name = "FuncName", value.name = "time")
+
+Names_vec <- c("Mills", "NCDF", "Blurton", "rtdists")
+Color_vec <- c("#b34d4d", "#4d80b3", "#c5a687", "#ac8053")
+Outline_vec <- c("#b34d4d", "#4d80b3", "#c5a687", "#ac8053")
+
+mi <- min(bm_vec[, (t_idx+1):(ncol(bm_vec)-2)])
+ma <- max(bm_vec[, (t_idx+1):(ncol(bm_vec)-2)])
+
+ggplot(mbm_vec, aes(x = factor(FuncName, levels = Names_vec), y = time,
+                    color = factor(FuncName, levels = Names_vec),
+                    fill = factor(FuncName, levels = Names_vec))) +
+  geom_violin(trim = TRUE, alpha = 0.5) +
+  scale_color_manual(values = Outline_vec, guide = FALSE) +
+  scale_fill_manual(values = Color_vec, guide = FALSE) +
+  geom_boxplot(width = 0.15, fill = "white", alpha = 0.5) +
+  stat_summary(fun = mean, geom = "errorbar",
+               aes(ymax = ..y.., ymin = ..y..),
+               width = .35, linetype = "dashed") +
+  scale_x_discrete(labels = c(
+    bquote(F[s] ~ Mills), bquote(F[s] ~ NCDF), "Blurton (Mills)", "rtdists")) +
+  facet_zoom(ylim = c(mi, ma)) +
+  # ylim(mi, ma*1.1) +
+  labs(x = "Implementation", y = "Time (microseconds)") +
+  theme_bw() +
+  theme(panel.border = element_blank(),
+        axis.text.x = element_text(size = 16, angle = 90,
+                                   vjust = 0.5, hjust = 1),
+        axis.text.y = element_text(size = 16),
+        axis.title.x = element_text(size = 20,
+                                    margin = margin(10, 0, 0, 0)),
+        axis.title.y = element_text(size = 20,
+                                    margin = margin(0, 10, 0, 0)),
+        legend.position = "none")
+```
+
+Depending on your system, the results might differ from the ones shown here, but they should replicate the general pattern. The two implementations in `pfddm` are both on average faster than the pure `R` code implementation and the implementation in `rtdists`, but each implementation still has quite a long tail on its distribution of benchmark times. These inefficiencies will be explored in the next section, where we can isolate the response time inputs and determine in which parts of the parameter space these algorithms struggle. Of the two implementations in `pfddm`, the one utilizing the Mills ratio is on average faster than the one that just uses the standard normal CDF. Although the Mills ratio must calculate an additional standard normal PDF (i.e., the denominator of the Mills ratio), the useful approximation __citation pending__ allows for a fast and accurate approximation to it.
+
+
+
+
+## Non-vectorized Benchmark Data and Results {#ben-ind}
+
+The second benchmark test will record the algorithms' performances across the parameter space, with the response times input individuall (i.e., not as a vector). Inputting the response times in this way are both more common (as it is typically easier to input a vector into a function as opposed to writing a loop) and beneficial for the `R`-based implementation from @blurton2017first to exploit `R`'s vectorization (making this implementation as fast as possible).
+
+We write the function that we will use to systematically benchmark each implementation at each combination of parameters.
+
+```{r bm-ind-fun, eval=TRUE}
+rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
+                             err_tol = 1e-6, times = 100) {
+  fnames <- c("Mills", "NCDF", "Blurton", "rtdists")
+  nf <- length(fnames) # number of functions being benchmarked
+  nRT <- length(RT)
+  nV <- length(V)
+  nA <- length(A)
+  nW <- length(W)
+  nSV <- length(SV)
+
+  # Initialize the dataframe to contain the microbenchmark results
+  mbm_res <- data.frame(matrix(ncol = 5+nf, nrow = nRT*nV*nA*nW*nSV))
+  colnames(mbm_res) <- c('RT', 'V', 'A', 'W', 'SV', fnames)
+  row_idx <- 1
+
+  # Loop through each combination of parameters and record microbenchmark results
+  for (rt in 1:nRT) {
+    for (v in 1:nV) {
+      for (a in 1:nA) {
+        for (w in 1:nW) {
+          for (sv in 1:nSV) {
+            mbm <- microbenchmark(
+            Mills = pfddm(rt = RT[rt], response = resp, a = A[a], v = V[v],
+                          t0 = t0, w = W[w], sv = SV[sv], log = FALSE,
+                          method = "Mills", err_tol = err_tol),
+            NCDF = pfddm(rt = RT[rt], response = resp, a = A[a], v = V[v],
+                         t0 = t0, w = W[w], sv = SV[sv], log = FALSE,
+                         method = "NCDF", err_tol = err_tol),
+            Blurton = G_0(t = RT[rt]-t0, a = A[a], nu = V[v], w = W[w],
+                          eta2 = SV[sv]*SV[sv], sigma2 = 1, eps = err_tol), # only "lower" resp
+            rtdists = pdiffusion(RT[rt], resp, a = A[a], v = V[v], t0 = t0,
+                                 z = W[w]*A[a], sv = SV[sv], precision = 5),
+            times = times)
+          # add the v, a, and w values to the dataframe
+          mbm_res[row_idx, 1] <- RT[rt]
+          mbm_res[row_idx, 2] <- V[v]
+          mbm_res[row_idx, 3] <- A[a]
+          mbm_res[row_idx, 4] <- W[w]
+          mbm_res[row_idx, 5] <- SV[sv]
+          # add the median microbenchmark results to the dataframe
+          for (i in 1:nf) {
+            mbm_res[row_idx, 5+i] <- median(mbm[mbm[,1] == fnames[i],2])
+          }
+          # iterate start value
+          row_idx = row_idx + 1
+          }
+        }
+      }
+    }
+  }
+  return(mbm_res)
+}
+```
+
+We will not actually run the benchmark tests in this vignette as it can take a while to run, and instead we will load pre-run benchmark data before we plot the results.
+
+```{r bm-ind-run, eval=FALSE}
+bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
+                           W = W, SV = SV, err_tol = err_tol, times = 100)
+```
+```{r bm-ind-save, eval=FALSE, include=FALSE}
+save(bm_ind, compress = "xz", compression_level = 9,
+     file = "../inst/extdata/pfddm_distribution/bm_ind_0-2.Rds")
+```
+
+Here, we load the pre-run benchmark data and plot the results as a series of plots that show how the benchmark times change as a result of varying the response time input to the CDF approximation. On the horizontal axis is the response time (input to the CDF approximation), and the vertical axis displays the benchmark time; note that the vertical axis is not fixed across panels. The dark line in each panel indicates the mean benchmark time; the darker shaded region in each panel shows the 10% and 90& quantiles; and the lightly shaded region shows the minimum and maximum benchmark times.
+
+```{r bm-meq-prep, eval=TRUE}
+# load data, will be in the variable 'bm_ind'
+load(system.file("extdata", "pfddm_distribution", "bm_ind_0-2.Rds",
+                 package = "fddm", mustWork = TRUE))
+
+t_idx <- match("SV", colnames(bm_ind))
+bm_ind[,-seq_len(t_idx)] <- bm_ind[, -seq_len(t_idx)]/1000 # convert to microseconds
+mbm_ind <- melt(bm_ind, measure.vars = -seq_len(t_idx),
+                variable.name = "FuncName", value.name = "time")
+
+Names_meq <- c("Mills", "NCDF", "Blurton", "rtdists")
+Color_meq <- c("#b34d4d", "#4d80b3", "#c5a687", "#ac8053")
+
+my_labeller <- as_labeller(c(Mills = "F[s] ~ Mills",
+                             NCDF = "F[s] ~ NCDF",
+                             fl_Nav_09 = "f[l] ~ Nav",
+                             Blurton = "Blurton (Mills)",
+                             rtdists = "rtdists"),
+                           default = label_parsed)
+
+ggplot(mbm_ind, aes(x = RT, y = time,
+                    color = factor(FuncName, levels = Names_meq),
+                    fill = factor(FuncName, levels = Names_meq))) +
+  stat_summary(fun.min = min, fun.max = max,
+               geom = "ribbon", color = NA, alpha = 0.1) +
+  stat_summary(fun.min = function(z) { quantile(z, 0.1) },
+               fun.max = function(z) { quantile(z, 0.9) },
+               geom = "ribbon", color = NA, alpha = 0.2) +
+  stat_summary(fun = mean, geom = "line") +
+  scale_x_log10(breaks = c(0.001, 0.1, 10, 1000),
+                labels = as.character(c(0.001, 0.1, 10, 1000))) +
+  scale_color_manual(values = Color_meq) +
+  scale_fill_manual(values = Color_meq) +
+  labs(subtitle = paste(
+         "The darker shaded regions represent the 10% and 90% quantiles",
+         "The lighter shaded regions represent the min and max times",
+         sep = ";\n"),
+       x = bquote(t ~ ", response time"),
+       y = "Time (microseconds)") +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        plot.subtitle = element_text(size = 16,
+                                     margin = margin(0, 0, 15, 0)),
+        axis.text.x = element_text(size = 16, angle = 90,
+                                   vjust = 0.5, hjust = 1),
+        axis.text.y = element_text(size = 16),
+        axis.title.x = element_text(size = 20,
+                                    margin = margin(10, 0, 0, 0)),
+        axis.title.y = element_text(size = 20,
+                                    margin = margin(0, 10, 0, 0)),
+        strip.text = element_text(size = 16),
+        strip.background = element_rect(fill = "white"),
+        legend.position = "none") +
+  facet_wrap(~ factor(FuncName, levels = Names_meq), scales = "free_y",
+             labeller = my_labeller)
+```
+
+This series of plots confirms that the inefficiencies of these algorithms occur when large response times are input, although the inefficiencies are not as dramatic as in [the density function benchmark results](benchmark.html#den-ana). As there is no analytic form for the large-time distribution function that includes inter-trial variability in the drift rate, we must make do with only the small-time distribution function or the PDE method. As we discussed [earlier in this vignette](#dist-inf), approximating the infinite sum in the small-time distribution function is preferable to using the PDE method because it allows us to directly control the approximation error. Moreover, the small-time implementations in `pfddm` are on average faster than the implementation of the PDE method in `rtdists`; they are also faster than the implementation in the pure `R` code from @blurton2017first.
+
+</div>
 
 
 

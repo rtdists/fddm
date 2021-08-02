@@ -73,21 +73,15 @@ void calculate_cdf(const int& Nrt, const int& Na, const int& Nv, const int& Nt0,
       if (isnormal(out[i])) { // not {NaN, NA, Inf, -Inf, rt0 = {0 or -Inf} }
         t = rt[i % Nrt] - t0[i % Nt0]; // response time minus non-decision time
         if (t > 0) { // sort response and calculate density
-          if (isfinite(t)) {
-            if (out[i] == 1) { // response is "lower" so use unchanged parameters
-              out[i] = disf(t, a[i % Na], v[i % Nv], w[i % Nw], sv[i % Nsv],
-                            err[i % Nerr]);
-            } else { // response is "upper" so use alternate parameters
-              out[i] = disf(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw],
-                            sv[i % Nsv], err[i % Nerr]);
-            }
-          } else { // t = +Inf
-            if (out[i] == 1) { // response is "lower"
-              out[i] = prob_lower(a[i % Na], v[i % Nv], w[i % Nw], rt0);
-            } else { // response is "upper"
-              out[i] = 1 - prob_lower(a[i % Na], -v[i % Nv], 1 - w[i % Nw],
-                                      rt0);
-            }
+          if (t > 32) { // appx for +Infinity
+            t = 32; // see zedonked/scratch_prob_upper.R for reason it's 32
+          }
+          if (out[i] == 1) { // response is "lower" so use unchanged parameters
+            out[i] = disf(t, a[i % Na], v[i % Nv], w[i % Nw], sv[i % Nsv],
+                          err[i % Nerr]);
+          } else { // response is "upper" so use alternate parameters
+            out[i] = disf(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw],
+                          sv[i % Nsv], err[i % Nerr]);
           }
         } else { // {NaN, NA} evaluate to FALSE
           if (isnan(t)) {
@@ -103,25 +97,17 @@ void calculate_cdf(const int& Nrt, const int& Na, const int& Nv, const int& Nt0,
       if (isnormal(out[i])) { // not {NaN, NA, Inf, -Inf, rt0 = {0 or -Inf} }
         t = rt[i % Nrt] - t0[i % Nt0]; // response time minus non-decision time
         if (t > 0) { // sort response and calculate density
-          if (isfinite(t)) {
-            if (out[i] == 1) { // response is "lower" so use unchanged parameters
-              out[i] = disf(t, a[i % Na]/sigma[i % Nsig],
-                            v[i % Nv]/sigma[i % Nsig], w[i % Nw],
-                            sv[i % Nsv]/sigma[i % Nsig], err[i % Nerr]);
-            } else { // response is "upper" so use alternate parameters
-              out[i] = disf(t, a[i % Na]/sigma[i % Nsig],
-                            -v[i % Nv]/sigma[i % Nsig], 1 - w[i % Nw],
-                            sv[i % Nsv]/sigma[i % Nsig], err[i % Nerr]);
-            }
-          } else { // t = +Inf
-            if (out[i] == 1) {
-              out[i] = prob_lower(a[i % Na]/sigma[i % Nsig],
-                                  v[i % Nv]/sigma[i % Nsig], w[i % Nw], rt0);
-            } else {
-              out[i] = 1 - prob_lower(a[i % Na]/sigma[i % Nsig],
-                                      -v[i % Nv]/sigma[i % Nsig],
-                                      1 - w[i % Nw], rt0);
-            }
+          if (t > 32) { // appx for +Infinity
+            t = 32; // see zedonked/scratch_prob_upper.R for reason it's 32
+          }
+          if (out[i] == 1) { // response is "lower" so use unchanged parameters
+            out[i] = disf(t, a[i % Na]/sigma[i % Nsig],
+                          v[i % Nv]/sigma[i % Nsig], w[i % Nw],
+                          sv[i % Nsv]/sigma[i % Nsig], err[i % Nerr]);
+          } else { // response is "upper" so use alternate parameters
+            out[i] = disf(t, a[i % Na]/sigma[i % Nsig],
+                          -v[i % Nv]/sigma[i % Nsig], 1 - w[i % Nw],
+                          sv[i % Nsv]/sigma[i % Nsig], err[i % Nerr]);
           }
         } else { // {NaN, NA} evaluate to FALSE
           if (isnan(t)) {
