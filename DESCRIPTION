@@ -1,7 +1,7 @@
 Package: fddm
 Type: Package
 Title: Fast Implementation of the Diffusion Decision Model
-Version: 0.4-1
+Version: 0.4-0
 Authors@R: c(person(given="Kendal B.", family="Foster", role=c("aut")),
              person(given="Henrik", family="Singmann", role=c("ctb", "cre"),
              email="singmann@gmail.com", comment=c(ORCID="0000-0002-4842-3657")))

@@ -166,10 +166,14 @@ r_j     &= \begin{cases}
 \nonumber
 \end{align*}
 
-Whereas this form does not have the issue of the exponential increasing to infinity, the Mills ratio does introduce a potential divide-by-zero error if one is not careful with handling large arguments in the PDF in the denominator of the Mills ratio^[Note that as $x \to \infty$, $1 - \Phi(x) = \Phi(-x) \to 0$ and $\phi(x) \to 0$; this results in $M(x) = \frac{0}{0}$. Similarly for $x \to -\infty$, $1 - \Phi(x) = \Phi(-x) \to 1$ and $\phi(x) \to 0$; this results in $M(x) = \frac{1}{0}$.]. Fortunately, there exists a useful approximation to Mills ratio for large arguments (__figure out a way to cite the approximation used in the zeta function__). By combining the standard Mills ratio with this approximation, we can achieve a robust algorithm that can be used to consistently calculate the CDF. Moreover, this approximation method is quite fast, as demonstrated in the [Benchmark Results below](#ben-res). The speed and stability of this algorithm earns our recommendation and is the default method in `pfddm`.
+Whereas this form does not have the issue of the exponential increasing to infinity, the Mills ratio does introduce a potential divide-by-zero error if one is not careful with handling large arguments in the PDF in the denominator of the Mills ratio^[Note that as $x \to \infty$, $1 - \Phi(x) = \Phi(-x) \to 0$ and $\phi(x) \to 0$; this results in $M(x) = \frac{0}{0}$. Similarly for $x \to -\infty$, $1 - \Phi(x) = \Phi(-x) \to 1$ and $\phi(x) \to 0$; this results in $M(x) = \frac{1}{0}$.].
+
+Fortunately, there exists a useful approximation to the Mills ratio for large arguments. @abramowitz1964handbook provide an asymptotic expansion for the complementary CDF of the standard normal distribution in Expression 26.2.13 in their book; dividing this asymptotic expansion by the PDF of the standard normal distribution yields the Mills ratio. This approximation was found in the `zeta` function in the `sn` package [@sn] for `R`, which in turn was recommended by @gondan2014even. The `zeta` function actually calculates the inverse Mills ratio, so we use the reciprocal of the approximation used in the `zeta` function.
+
+By combining the standard Mills ratio with this approximation, we can achieve a robust algorithm that can be used to consistently calculate the CDF. Moreover, this approximation method is quite fast, as demonstrated in the [Benchmark Results below](#ben-res). The speed and stability of this algorithm earns our recommendation and is the default method in `pfddm`.
 
 <p class="method">
-To use this method, set `method = "Mills"` in the function call to `pfddm()`. This is the default method, and we recommend using it for the fastest and most stable algorithm for calculating the CDF of the DDM.
+To use this method, the user can ignore the optional parameter as this is the default method (internally, it sets `method = "Mills"` in the function call to `pfddm()`). This is the default method, and we recommend using it for the fastest and most stable algorithm for calculating the CDF of the DDM.
 </p>
 
 
@@ -300,7 +304,7 @@ We will not actually run the benchmark tests in this vignette as it can take a w
 
 ```{r bm-vec-run, eval=FALSE}
 bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
-                           W = W, SV = SV, err_tol = err_tol, times = 100)
+                           W = W, SV = SV, err_tol = err_tol, times = 1000)
 ```
 ```{r bm-vec-save, eval=FALSE, include=FALSE}
 save(bm_vec, compress = "xz", compression_level = 9,
@@ -309,7 +313,7 @@ save(bm_vec, compress = "xz", compression_level = 9,
 
 Here, we load the pre-run benchmark data and plot the results as side-by-side violin plots. The horizontal axis shows the implementation, and the vertical axis shows the benchmark time. Each individual violin plot shows a mirrored density estimate; overlaying the violin plot, the boxplot shows the median in addition to the first and third quartiles; the horizontal dashed line shows the mean.
 
-```{r bm-violin, eval=TRUE, fig.height=5}
+```{r bm-vec, eval=TRUE, fig.height=5, fig.width=8}
 # load data, will be in the variable 'bm_vec'
 load(system.file("extdata", "pfddm_distribution", "bm_vec_0-2.Rds",
                  package = "fddm", mustWork = TRUE))
@@ -353,7 +357,7 @@ ggplot(mbm_vec, aes(x = factor(FuncName, levels = Names_vec), y = time,
         legend.position = "none")
 ```
 
-Depending on your system, the results might differ from the ones shown here, but they should replicate the general pattern. The two implementations in `pfddm` are both on average faster than the pure `R` code implementation and the implementation in `rtdists`, but each implementation still has quite a long tail on its distribution of benchmark times. These inefficiencies will be explored in the next section, where we can isolate the response time inputs and determine in which parts of the parameter space these algorithms struggle. Of the two implementations in `pfddm`, the one utilizing the Mills ratio is on average faster than the one that just uses the standard normal CDF. Although the Mills ratio must calculate an additional standard normal PDF (i.e., the denominator of the Mills ratio), the useful approximation __citation pending__ allows for a fast and accurate approximation to it.
+Depending on your system, the results might differ from the ones shown here, but they should replicate the general pattern. The two implementations in `pfddm` are both on average faster than the pure `R` code implementation and the implementation in `rtdists`, but each implementation still has quite a long tail on its distribution of benchmark times. These inefficiencies will be explored in the next section, where we can isolate the response time inputs and determine in which parts of the parameter space these algorithms struggle. Of the two implementations in `pfddm`, the one utilizing the Mills ratio is on average faster than the one that just uses the standard normal CDF. Although the Mills ratio must calculate an additional standard normal PDF (i.e., the denominator of the Mills ratio), the useful approximation from @abramowitz1964handbook allows for a fast and accurate approximation to it.
 
 
 
@@ -432,7 +436,7 @@ save(bm_ind, compress = "xz", compression_level = 9,
 
 Here, we load the pre-run benchmark data and plot the results as a series of plots that show how the benchmark times change as a result of varying the response time input to the CDF approximation. On the horizontal axis is the response time (input to the CDF approximation), and the vertical axis displays the benchmark time; note that the vertical axis is not fixed across panels. The dark line in each panel indicates the mean benchmark time; the darker shaded region in each panel shows the 10% and 90& quantiles; and the lightly shaded region shows the minimum and maximum benchmark times.
 
-```{r bm-meq-prep, eval=TRUE}
+```{r bm-meq-prep, eval=TRUE, fig.height=5, fig.width=8}
 # load data, will be in the variable 'bm_ind'
 load(system.file("extdata", "pfddm_distribution", "bm_ind_0-2.Rds",
                  package = "fddm", mustWork = TRUE))
