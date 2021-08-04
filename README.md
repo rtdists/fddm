@@ -130,7 +130,7 @@ fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun,
               upper = c( Inf,  Inf, Inf, min(onep[["rt"]]), 1, Inf))
 fit
 #> $par
-#> [1]  5.6813044 -2.1886662  2.7909130  0.3764465  0.4010117  2.2812999
+#> [1]  5.6813074 -2.1886617  2.7909132  0.3764465  0.4010115  2.2813001
 #> 
 #> $objective
 #> [1] 42.47181
@@ -139,11 +139,11 @@ fit
 #> [1] 0
 #> 
 #> $iterations
-#> [1] 47
+#> [1] 55
 #> 
 #> $evaluations
 #> function gradient 
-#>       76      339 
+#>       82      389 
 #> 
 #> $message
 #> [1] "relative convergence (4)"
