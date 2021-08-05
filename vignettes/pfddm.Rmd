@@ -279,7 +279,7 @@ rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
           Blurton = G_0(t = RT-t0, a = A[a], nu = V[v], w = W[w],
                         eta2 = SV[sv]*SV[sv], sigma2 = 1, eps = err_tol), # only "lower" resp
           rtdists = pdiffusion(RT, resp, a = A[a], v = V[v], t0 = t0,
-                               z = W[w]*A[a], sv = SV[sv], precision = 5),
+                               z = W[w]*A[a], sv = SV[sv], precision = 3),
           times = times)
         # add the v, a, and w values to the dataframe
         mbm_res[row_idx, 1] <- V[v]
@@ -343,7 +343,6 @@ ggplot(mbm_vec, aes(x = factor(FuncName, levels = Names_vec), y = time,
   scale_x_discrete(labels = c(
     bquote(F[s] ~ Mills), bquote(F[s] ~ NCDF), "Blurton (Mills)", "rtdists")) +
   facet_zoom(ylim = c(mi, ma)) +
-  # ylim(mi, ma*1.1) +
   labs(x = "Implementation", y = "Time (microseconds)") +
   theme_bw() +
   theme(panel.border = element_blank(),
@@ -400,7 +399,7 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
             Blurton = G_0(t = RT[rt]-t0, a = A[a], nu = V[v], w = W[w],
                           eta2 = SV[sv]*SV[sv], sigma2 = 1, eps = err_tol), # only "lower" resp
             rtdists = pdiffusion(RT[rt], resp, a = A[a], v = V[v], t0 = t0,
-                                 z = W[w]*A[a], sv = SV[sv], precision = 5),
+                                 z = W[w]*A[a], sv = SV[sv], precision = 3),
             times = times)
           # add the v, a, and w values to the dataframe
           mbm_res[row_idx, 1] <- RT[rt]
@@ -427,7 +426,7 @@ We will not actually run the benchmark tests in this vignette as it can take a w
 
 ```{r bm-ind-run, eval=FALSE}
 bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
-                           W = W, SV = SV, err_tol = err_tol, times = 100)
+                           W = W, SV = SV, err_tol = err_tol, times = 1000)
 ```
 ```{r bm-ind-save, eval=FALSE, include=FALSE}
 save(bm_ind, compress = "xz", compression_level = 9,
