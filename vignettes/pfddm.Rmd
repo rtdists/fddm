@@ -12,6 +12,16 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+```{r echo=FALSE}
+req_suggested_packages <- c("rtdists", "microbenchmark", 
+                            "reshape2", "ggplot2", "ggforce")
+pcheck <- lapply(req_suggested_packages, requireNamespace, 
+                 quietly = TRUE)
+if (any(!unlist(pcheck))) {
+   message("Required package(s) for this vignette are not available/installed and code will not be executed.")
+   knitr::opts_chunk$set(eval = FALSE)
+}
+```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
@@ -63,7 +73,7 @@ Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ 
 
 There is one optional parameter in `pfddm` that can be used to indicate which method should be used in the function call: `method`. For each approximation method we describe, we include the parameter settings for the function call to `pfddm` so that it uses the desired method. As this parameter is optional, leaving it blank results in the [default method](#default-method) that is indicated later in this vignette. For general purpose use, we recommend ignoring this optional parameter so that the default settings are used as this will be the fastest and most stable algorithm for calculating the CDF.
 
-Note that there are actually two cumulative distribution functions of the DDM: the CDF with respect to the upper boundary, and the CDF with respect to the lower boundary. And only the combined CDF of upper and lower is a "proper" CDF in the sense that it reaches at at $\infty$. Following the precedent set by the literature, we use the general terminology "CDF" or "distribution function" to mean the "defective" cumulative distribution function with respect to the lower boundary (defective in the sense that it does not reach 1). Should the cumulative distribution function with respect to the upper boundary be required, it may be calculated using the simple transformation $F_\text{upper}(t ~|~ v, \eta, a, w) = F_\text{lower}(t ~|~ -v, \eta, a, 1-w)$.
+Note that there are actually two cumulative distribution functions of the DDM: the CDF with respect to the upper boundary, and the CDF with respect to the lower boundary. Importantly, only the combined CDF of upper and lower boundary is a *proper* CDF in the sense that it reaches 1 at $t = \infty$. Following the precedent set by the literature, we use the general terminology "CDF" or "distribution function" to mean the *defective* cumulative distribution function with respect to the lower boundary (defective in the sense that it does not reach 1). Should the cumulative distribution function with respect to the upper boundary be required, it may be calculated using the simple transformation $F_\text{upper}(t ~|~ v, \eta, a, w) = F_\text{lower}(t ~|~ -v, \eta, a, 1-w)$.
 
 Since the CDF of the DDM is widely used in parameter estimation usually involving numerical optimization (e.g., $\chi^2$ and Kolmogorov-Smirnov stastics), significant effort has been put into making its evaluation as fast as possible. However, the options for calculating the CDF are limited; one can either approximate an infinite sum or numerically solve a partial differential equation (PDE). The `pfddm` function uses the infinte sum method but not the PDE method. This vignette details these choices and demonstrates why the infinite sum method is preferable over the PDE method.
 
@@ -206,7 +216,7 @@ We want to determine the performance of the two methods available in `pfddm` as 
 Testing each implementation across a wide parameter space (defined in [the code chunk below](#par-space)) will not only show the algorithms' overall viability for a practical set of parameters, but it will also allow for a more granular analysis of where each algorithm succeeds and struggles in the parameter space. To measure this viability, we will perform two benchmark tests: one where the response times are input as a vector to each function call, and one where the response times will be input individually to each function call.
 
 <a id="par-space"></a>
-```{r bm-par-space, eval=TRUE}
+```{r bm-par-space}
 # Define parameter space
 RT <- seq(0.1, 2, by = 0.1)
 A <- seq(0.5, 3.5, by = 0.5)
@@ -223,7 +233,7 @@ For each combination of parameters in the parameter space, we run the `microbenc
 
 First, we load the required packages.
 
-```{r bm-packages, eval=TRUE}
+```{r bm-packages}
 # packages for generating benchmark data
 library("fddm")
 source(system.file("extdata", "Blurton_et_al_distribution.R",
@@ -247,7 +257,7 @@ The first benchmark test will record the algorithms' performances across the par
 
 We write the function that we will use to systematically benchmark each implementation at each combination of parameters.
 
-```{r bm-vec-fun, eval=TRUE}
+```{r bm-vec-fun}
 rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                              err_tol = 1e-6, times = 1000) {
 
@@ -313,7 +323,7 @@ save(bm_vec, compress = "xz", compression_level = 9,
 
 Here, we load the pre-run benchmark data and plot the results as side-by-side violin plots. The horizontal axis shows the implementation, and the vertical axis shows the benchmark time. Each individual violin plot shows a mirrored density estimate; overlaying the violin plot, the boxplot shows the median in addition to the first and third quartiles; the horizontal dashed line shows the mean.
 
-```{r bm-vec, eval=TRUE, fig.height=5, fig.width=8}
+```{r bm-vec, fig.height=5, fig.width=8}
 # load data, will be in the variable 'bm_vec'
 load(system.file("extdata", "pfddm_distribution", "bm_vec_0-2.Rds",
                  package = "fddm", mustWork = TRUE))
@@ -367,7 +377,7 @@ The second benchmark test will record the algorithms' performances across the pa
 
 We write the function that we will use to systematically benchmark each implementation at each combination of parameters.
 
-```{r bm-ind-fun, eval=TRUE}
+```{r bm-ind-fun}
 rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
                              err_tol = 1e-6, times = 100) {
   fnames <- c("Mills", "NCDF", "Blurton", "rtdists")
@@ -435,7 +445,7 @@ save(bm_ind, compress = "xz", compression_level = 9,
 
 Here, we load the pre-run benchmark data and plot the results as a series of plots that show how the benchmark times change as a result of varying the response time input to the CDF approximation. On the horizontal axis is the response time (input to the CDF approximation), and the vertical axis displays the benchmark time; note that the vertical axis is not fixed across panels. The dark line in each panel indicates the mean benchmark time; the darker shaded region in each panel shows the 10% and 90& quantiles; and the lightly shaded region shows the minimum and maximum benchmark times.
 
-```{r bm-meq-prep, eval=TRUE, fig.height=5, fig.width=8}
+```{r bm-meq-prep, fig.height=5, fig.width=8}
 # load data, will be in the variable 'bm_ind'
 load(system.file("extdata", "pfddm_distribution", "bm_ind_0-2.Rds",
                  package = "fddm", mustWork = TRUE))

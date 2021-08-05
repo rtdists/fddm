@@ -14,6 +14,16 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+```{r echo=FALSE}
+req_suggested_packages <- c("rtdists", "RWiener","microbenchmark", 
+                            "reshape2", "ggplot2", "ggforce")
+pcheck <- lapply(req_suggested_packages, requireNamespace, 
+                 quietly = TRUE)
+if (any(!unlist(pcheck))) {
+   message("Required package(s) for this vignette are not available/installed and code will not be executed.")
+   knitr::opts_chunk$set(eval = FALSE)
+}
+```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
@@ -83,7 +93,7 @@ In addition, we include two functions for benchmarking the performance of the im
 At each point in this parameter space, we run the `microbenchmark` function 1000 times for each implementation and save the median of these 1000 benchmark times. Using the median of these data should reduce the number of outliers in the data by limiting the influence of computational noise on the results. Note that for expositional purposes we will only say "benchmark times" to mean the collection of medians of the 1000 `microbenchmark` measurements recorded at each point in the parameter space. The following code chunk defines the functions that we will use to benchmark the implementations; we will be using the [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) package to time the evaluations.
 
 <a id="gon-r-code"></a><a id="bm-funcs"></a>
-```{r bm-fun, eval=TRUE}
+```{r bm-fun}
 library("fddm")
 library("rtdists")
 library("RWiener")
@@ -383,7 +393,7 @@ The first step in analyzing the benchmark data is a rough visualization of the r
 
 For this visualization we will use the benchmark data where the response times were handed over as a vector to each `fddm` call. As [discussed above](#r-loops), running the benchmark on individual response times is considerably slower as the loop over the response times resides in `R` and not in `C++`.
 
-```{r bm-violin, eval=TRUE, fig.height=5}
+```{r bm-violin, fig.height=5}
 library("reshape2")
 library("ggplot2")
 library("ggforce")
@@ -453,7 +463,7 @@ To avoid too many repetitious plots, we will only include six of the implementat
 
 The following code chunk loads the pre-run benchmark data, prepares it, and plots the benchmark times as the effective response time varies.
 
-```{r bm-meq-prep, eval=TRUE}
+```{r bm-meq-prep}
 # load data, will be in the variable 'bm_ind'
 load(system.file("extdata", "dfddm_density", "bm_ind_0-2.Rds",
                  package = "fddm", mustWork = TRUE))
@@ -558,7 +568,7 @@ library("microbenchmark")
 
 This code chunk defines the log-likelihood functions used in the optimization algorithm; all of the log-likelihood functions are the same as in the [Validity Vignette](validity.html#fit-gen-llf). The log-likelihood functions are fairly straightforward and split the responses and associated response times by the true item status (i.e., the correct response) to enable fitting distinct drift rates ($v_\ell$ for the items in which the correct response is the lower boundary and $v_u$ for the items for which the correct response is the upper boundary). In addition, the log-likelihood functions heavily penalize any combination of parameters that returns a log-density of $-\infty$ (equivalent to a regular density of $0$).
 
-```{r fit-loglik-fun, eval=TRUE}
+```{r fit-loglik-fun}
 ll_fb_SWSE_17 <- function(pars, rt, resp, truth, err_tol) {
   v <- numeric(length(rt))
   v[truth == "upper"] <- pars[[1]]
@@ -730,7 +740,7 @@ The following code chunk defines the function that will run the optimization and
 
 As in the [previous section](#den-gen), we have the `microbenchmark` function run the data fitting process multiple times for each implementation at each set of initial parameter values, and we save the median of these benchmark times. However, we only use a smaller number of repetitions here because a full optimization run entails several calls to the underlying density function and takes much longer to run. Using the median of these data reduces the impact of computational noise on the benchmark results, and again we will refer to these medians as simply the "benchmark times". We will be using the [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) package to time the evaluations.
 
-```{r fit-fun, eval=TRUE}
+```{r fit-fun}
 rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                    truth_idx = NULL, response_upper = NULL, err_tol = 1e-6,
                    times = 100, unit = "ns") {
@@ -1073,14 +1083,14 @@ save(fit, compress = "xz", compression_level = 9,
 
 We begin by loading the required packages for plotting the results.
 
-```{r fit-packages, eval=TRUE}
+```{r fit-packages}
 library("reshape2")
 library("ggplot2")
 ```
 
 Before visualizing the results of the data fitting benchmark tests, we need to provide some context for each set of parameter estimates since each run of the optimization does not necessarily converge. To add this context, we first find the minimum value of the objective function (i.e., the log-likelihood function) attained for each set of initial parameter values for each individual. Then we calculate how the objective value of each optimization run compares to that minimum; we will refer to this quantity as the difference in minimized log-likelihood. The following code chunk defines a function to perform this calculation and some other minor operations that will be helpful when plotting the results. This code chunk also applies this prep function to the pre-run benchmark data and defines some constants that we will use throughout the visualizations.
 
-```{r fitting-prep, eval=TRUE}
+```{r fitting-prep}
 fit_prep <- function(fit, eps = 1e-4) {
   nr <- nrow(fit)
   fit[["Obj_diff"]] <- rep(0, nr)
@@ -1150,7 +1160,7 @@ To help explain problematic fits, the plots will show any data point that repres
 
 The first plot will show the densities of the `microbenchmark` timings for each implementation.
 
-```{r fit-mbm, eval=TRUE, fig.height=6}
+```{r fit-mbm, fig.height=6}
 fit_mbm <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
                 measure.vars = "BmTime", value.name = "BmTime")[,-4]
 
@@ -1237,7 +1247,7 @@ If the data is known to contain only small response times, then using a small-ti
 
 The second plot will show the distribution of the number of function evaluations in the optimization process for each implementation.
 
-```{r fit-fev, eval=TRUE, fig.height=6}
+```{r fit-fev, fig.height=6}
 fit_fev <- melt(fit, id.vars = c("Algorithm", "Convergence", "Obj_diff"),
                 measure.vars = "FuncEvals", value.name = "FuncEvals")[,-4]
 
