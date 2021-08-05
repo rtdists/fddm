@@ -464,8 +464,8 @@ ggplot(mbm_ind, aes(x = RT, y = time,
                fun.max = function(z) { quantile(z, 0.9) },
                geom = "ribbon", color = NA, alpha = 0.2) +
   stat_summary(fun = mean, geom = "line") +
-  scale_x_log10(breaks = c(0.001, 0.1, 10, 1000),
-                labels = as.character(c(0.001, 0.1, 10, 1000))) +
+  scale_x_log10(breaks = c(0.1, 0.25, 0.5, 1, 2),
+                labels = as.character(c(0.1, 0.25, 0.5, 1, 2))) +
   scale_color_manual(values = Color_meq) +
   scale_fill_manual(values = Color_meq) +
   labs(subtitle = paste(
