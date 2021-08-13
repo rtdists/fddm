@@ -108,7 +108,7 @@ double fl(const double& t, const double& a, const double& v,
                    / (2 + 2 * sv*sv * t)) / (a*a * sqrt(1 + sv*sv * t));
   }
   kl = kl_Nav(t / (a*a), w, err / mult_l);
-  mult_l *= PI;
+  mult_l *= PI_CONST;
   return mult_l * large_sum_Nav(t, a, w, kl, 0.0);
 }
 
