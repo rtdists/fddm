@@ -1,4 +1,12 @@
-# fddm v0.4-1 (Release date: 2021-7-27)
+# fddm v0.4-1 (Release date: 2021-12-10)
+
+## Bug Fixes
+* Fixed 'pi' issue with `Rcpp`
+
+
+
+
+# fddm v0.4-0 (Release date: 2021-7-27)
 
 ## New Features
 * Added the function `pfddm()` to calculate the cumulative distribution function (CDF) of the DDM; it uses the same model parameters as the existing `dfddm()` function.
