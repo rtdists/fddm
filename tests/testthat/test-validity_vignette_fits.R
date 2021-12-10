@@ -93,8 +93,8 @@ test_that("Fits in validity vignette", {
     ids <- unique(df[["id"]])
     nids <- max(length(ids), 1) # if inds is null, there is only one individual
 
-    init_vals <- data.frame(v1 = c( 0,  10, -.5,  0,  0,  0,  0,  0,  0,   0,  0),
-                            v0 = c( 0, -10,  .5,  0,  0,  0,  0,  0,  0,   0,  0),
+    init_vals <- data.frame(vu = c( 0,  10, -.5,  0,  0,  0,  0,  0,  0,   0,  0),
+                            vl = c( 0, -10,  .5,  0,  0,  0,  0,  0,  0,   0,  0),
                             a  = c( 1,   1,   1, .5,  5,  1,  1,  1,  1,   1,  1),
                             t0 = c( 0,   0,   0,  0,  0,  0,  0,  0,  0,   0,  0),
                             w  = c(.5,  .5,  .5, .5, .5, .5, .5, .2, .8,  .5, .5),
