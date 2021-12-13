@@ -18,7 +18,9 @@ devtools::document()
 
 ###################
 # because Solaris and rtdists don't mix well
+rhub::validate_email("singmann@gmail.com")
 rhub::check_on_solaris(env_vars = c(`_R_CHECK_FORCE_SUGGESTS_` = "false"))
+rhub::check_for_cran(path = "../fddm_0.4-1.tar.gz",email = "singmann@gmail.com")
 
 sqrt(.Machine$double.eps)
 
