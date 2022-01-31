@@ -1,3 +1,17 @@
+# fddm v0.5-0 (Release date: 2022-2-1)
+
+## New Features
+* Added suite of `d*_dfddm()` functions to compute the partial derivatives of the PDF of the DDM; it uses the same model parameters as the existing `dfddm()` function. The new functions are:
+    - `dt_dfddm()`
+    - `da_dfddm()`
+    - `dv_dfddm()`
+    - `dt0_dfddm()`
+    - `dw_dfddm()`
+    - `dsv_dfddm()`
+
+
+
+
 # fddm v0.4-1 (Release date: 2021-12-10)
 
 ## Bug Fixes

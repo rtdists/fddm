@@ -6,6 +6,7 @@ devtools::build_manual()
 devtools::build()
 devtools::install()
 # run R CMD check
+devtools::check()
 
 
 

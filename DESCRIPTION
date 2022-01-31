@@ -1,19 +1,21 @@
 Package: fddm
 Type: Package
 Title: Fast Implementation of the Diffusion Decision Model
-Version: 0.4-1
+Version: 0.5-0
 Authors@R: c(person(given="Kendal B.", family="Foster", role=c("aut")),
              person(given="Henrik", family="Singmann", role=c("ctb", "cre"),
              email="singmann@gmail.com", comment=c(ORCID="0000-0002-4842-3657")))
-Description: Provides the probability density function (PDF) and cumulative
-  distribution function (CDF) of the diffusion decision model
-  (DDM; e.g., Ratcliff & McKoon, 2008, <doi:10.1162/neco.2008.12-06-420>)
-  with across-trial variability in the drift rate. Because the PDF and CDF of
-  the DDM both contain an infinite sum, they needs to be approximated. 'fddm'
-  implements all published approximations
+Description: Provides the probability density function (PDF), cumulative
+  distribution function (CDF), and the partial derivatives of the PDF of the
+  diffusion decision model (DDM; e.g.,
+  Ratcliff & McKoon, 2008, <doi:10.1162/neco.2008.12-06-420>) with across-trial
+  variability in the drift rate. Because the PDF, its partial derivatives, and
+  the CDF of the DDM both contain an infinite sum, they need to be approximated.
+  'fddm' implements all published approximations
   (Navarro & Fuss, 2009, <doi:10.1016/j.jmp.2009.02.003>;
   Gondan, Blurton, & Kesselmeier, 2014, <doi:10.1016/j.jmp.2014.05.002>;
-  Blurton, Kesselmeier, & Gondan, 2017, <doi:10.1016/j.jmp.2016.11.003>) plus
+  Blurton, Kesselmeier, & Gondan, 2017, <doi:10.1016/j.jmp.2016.11.003>;
+  Hartmann & Klauer, 2021, <doi:10.1016/j.jmp.2021.102550>) plus
   new approximations. All approximations are implemented purely in 'C++'
   providing faster speed than existing packages.
 License: GPL (>= 2)
@@ -30,10 +32,11 @@ Suggests:
     rmarkdown,
     microbenchmark,
     ggnewscale,
-    ggforce
+    ggforce,
+    WienR
 URL: https://github.com/rtdists/fddm
 BugReports: https://github.com/rtdists/fddm/issues
 SystemRequirements: C++11
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Encoding: UTF-8
 VignetteBuilder: knitr
