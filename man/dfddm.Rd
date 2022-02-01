@@ -11,8 +11,8 @@ dfddm(
   v,
   t0,
   w = 0.5,
-  sv = 0L,
-  sigma = 1L,
+  sv = 0,
+  sigma = 1,
   log = 0L,
   n_terms_small = "SWSE",
   summation_small = "2017",
@@ -83,7 +83,7 @@ See Details for more information. \itemize{ \item \code{a}
 \ifelse{html}{\out{&#8594;}}{\eqn{\to}} \code{a} \eqn{/} \code{sigma}
 \item \code{v} \ifelse{html}{\out{&#8594;}}{\eqn{\to}} \code{v} \eqn{/}
 \code{sigma} \item \code{sv} \ifelse{html}{\out{&#8594;}}{\eqn{\to}}
-\code{sv} \eqn{/} \code{sigma} }}
+\code{sv} \eqn{/} \code{sigma} }.}
 
 \item{log}{Logical; if \code{TRUE}, probabilities \eqn{p} are given as
 \eqn{log(p)}. Default is \code{FALSE}.}

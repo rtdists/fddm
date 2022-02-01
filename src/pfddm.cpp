@@ -80,7 +80,7 @@
 //'   \ifelse{html}{\out{&#8594;}}{\eqn{\to}} \code{a} \eqn{/} \code{sigma}
 //'   \item \code{v} \ifelse{html}{\out{&#8594;}}{\eqn{\to}} \code{v} \eqn{/}
 //'   \code{sigma} \item \code{sv} \ifelse{html}{\out{&#8594;}}{\eqn{\to}}
-//'   \code{sv} \eqn{/} \code{sigma} }
+//'   \code{sv} \eqn{/} \code{sigma} }.
 //'
 //' @param log Logical; if \code{TRUE}, probabilities \eqn{p} are given as
 //'   \eqn{log(p)}. Default is \code{FALSE}.
@@ -146,8 +146,8 @@ NumericVector pfddm(const NumericVector& rt,
                     const NumericVector& v,
                     const NumericVector& t0,
                     const NumericVector& w = 0.5,
-                    const NumericVector& sv = 0,
-                    const NumericVector& sigma = 1,
+                    const NumericVector& sv = 0.0,
+                    const NumericVector& sigma = 1.0,
                     const bool& log = 0,
                     const std::string& method = "1",
                     const NumericVector& err_tol = 0.000001)
