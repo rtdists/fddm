@@ -23,10 +23,6 @@ using Rcpp::NumericVector;
 
 
 // Constants
-
-// static const double SV_THRESH = 0; // threshold for using variable drift rate
-// static const double SL_THRESH = 0.5; // threshold for small vs large time
-// static const double LOG_100 = log(100);
 static const double FOUR_NINTHS = 0.444444444444444444444;
 static const double SQRT_2 = 1.41421356237309504880;
 static const double SQRT_3 = sqrt(3);
@@ -69,7 +65,7 @@ double sum_large_d_w(const double& taa, const double& w, const int& kl);
 
 
 
-// Partial Derviative (of the PDF) Functions
+// Partial Derivatives (of the PDF) Functions
 double pdf_dt(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& err,
               const double& sl_thresh);
@@ -88,6 +84,25 @@ double pdf_dw(const double& t, const double& a, const double& v,
 double pdf_dsv(const double& t, const double& a, const double& v,
                const double& w, const double& sv, const double& err,
                const double& sl_thresh);
+// Partial Derivatives of the log(PDF) Functions
+// double pdf_dt_log(const double& t, const double& a, const double& v,
+//                   const double& w, const double& sv, const double& err,
+//                   const double& sl_thresh);
+// double pdf_dt0_log(const double& t, const double& a, const double& v,
+//                    const double& w, const double& sv, const double& err,
+//                    const double& sl_thresh);
+// double pdf_da_log(const double& t, const double& a, const double& v,
+//                   const double& w, const double& sv, const double& err,
+//                   const double& sl_thresh);
+// double pdf_dv_log(const double& t, const double& a, const double& v,
+//                   const double& w, const double& sv, const double& err,
+//                   const double& sl_thresh);
+// double pdf_dw_log(const double& t, const double& a, const double& v,
+//                   const double& w, const double& sv, const double& err,
+//                   const double& sl_thresh);
+// double pdf_dsv_log(const double& t, const double& a, const double& v,
+//                    const double& w, const double& sv, const double& err,
+//                    const double& sl_thresh);
 
 
 

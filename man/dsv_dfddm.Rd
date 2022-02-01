@@ -96,18 +96,19 @@ partial derivative of the density function contains one infinite sum, this
 parameter defines the precision of the approximation to that infinite sum.}
 }
 \value{
-A vector containing the partial derivatives of the DDM with
+A vector containing the partial derivatives of the DDM PDF with
   precision \code{err_tol} whose length matches that of the longest input
   parameter (usually \code{rt}).
 }
 \description{
 Partial Derivative of the density function for the 5-parameter variant of
-  Ratcliff diffusion decision model (DDM) with respect to w, the inter-trial
-  variability in the drift rate. This variant contains the following
-  parameters: \code{a} (threshold separation), \code{v} (drift rate),
+  the Ratcliff diffusion decision model (DDM) with respect to w, the
+  inter-trial variability in the drift rate. This variant contains the
+  following parameters:
+  \code{a} (threshold separation), \code{v} (drift rate),
   \code{t0} (non-decision time/response time constant), \code{w}
-  (relative starting point), \code{sv} (inter-trial variability of drift), and
-  \code{sigma} (diffusion coefficient of underlying Wiener process).
+  (relative starting point), \code{sv} (inter-trial variability of drift),
+  and \code{sigma} (diffusion coefficient of underlying Wiener process).
 }
 \details{
 All of the model inputs and parameters (\code{rt}, \code{response},
@@ -132,76 +133,55 @@ above. However, other formulations of the DDM may set \code{sigma = 0.1}
 comparing the results of different formulations.
 }
 \examples{
-# minimal example
-dfddm(rt = 1.2, response = "lower", a = 1, v = -1, t0 = 0.3)
+# derivative with respect to rt (response time)
+dt_dfddm(rt = 1.2, response = "lower", a = 1, v = -1, t0 = 0.3, w = 0.5,
+         sv = 0.4, err_tol = 1e-6)
 
-# example with all function parameters set to default or a practical value
-dfddm(rt = c(1.2, 0.9, 1.1, 1.4, 0.8, 1.3),
-      response = c("lower", "upper", "upper", "lower", "upper", "lower"),
-      a = 1, v = -1, t0 = 0.2, w = 0.5, sv = 0, sigma = 1,
-      log = FALSE, n_terms_small = "SWSE", summation_small = "2017",
-      scale = "both", max_terms_large = 1, err_tol = 1e-6)
+# derivative with respect to t0 (non-decision time)
+dt0_dfddm(rt = 1.2, response = "lower", a = 1, v = -1, t0 = 0.3, w = 0.5,
+          sv = 0.4, err_tol = 1e-6)
 
-# example of mismatched input lengths
-dfddm(rt = c(1.2, 0.9, 1.1, 1.4, 0.8, 1.3),
-      response = c("lower", "upper", "upper", "lower", "upper", "lower"),
-      a = c(1, 3), v = c(-2, 2, 2, -2, 2, -2),
-      t0 = 0.3, w = c(0.4, 0.5, 0.6), sv = 0.9,
-      log = FALSE, n_terms_small = "Navarro",
-      summation_small = "2017", scale = "large",
-      err_tol = 1e-10)
+# derivative with respect to a (threshold separation)
+da_dfddm(rt = 1.2, response = "lower", a = 1, v = -1, t0 = 0.3, w = 0.5,
+         sv = 0.4, err_tol = 1e-6)
 
-# example with Wiener diffusion coefficient (sigma) not equal to 1
-dfddm(rt = c(1.2, 0.9, 1.1, 1.4, 0.8, 1.3),
-      response = c("lower", "upper", "upper", "lower", "upper", "lower"),
-      a = 1, v = -1, t0 = 0.3, w = 0.5, sv = 0, sigma = 0.1,
-      log = TRUE, n_terms_small = "SWSE",
-      summation_small = "2017", scale = "both",
-      err_tol = 1e-10)
+# derivative with respect to v (drift rate)
+dv_dfddm(rt = 1.2, response = "lower", a = 1, v = -1, t0 = 0.3, w = 0.5,
+         sv = 0.4, err_tol = 1e-6)
 
+# derivative with respect to w (relative starting point)
+dw_dfddm(rt = 1.2, response = "lower", a = 1, v = -1, t0 = 0.3, w = 0.5,
+         sv = 0.4, err_tol = 1e-6)
 
-### examples of different response inputs
+# derivative with respect to sv (inter-trial variability in the drift rate)
+dsv_dfddm(rt = 1.2, response = "lower", a = 1, v = -1, t0 = 0.3, w = 0.5,
+          sv = 0.4, err_tol = 1e-6)
 
-# integer
-resp_int <- as.integer(c(1, 2, 2, 1, 2, 1))
-dfddm(rt = c(1.2, 0.9, 1.1, 1.4, 0.8, 1.3), response = resp_int,
-      a = 1, v = -2, t0 = 0.3, w = 0.5, sv = 0.1,
-      log = FALSE, n_terms_small = "SWSE",
-      summation_small = "2017", scale = "both",
-      err_tol = 1e-10)
+#-------- Log Versions --------#
 
-# double
-resp_dbl <- as.double(c(1, 2, 2, 1, 2, 1))
-dfddm(rt = c(1.2, 0.9, 1.1, 1.4, 0.8, 1.3), response = resp_dbl,
-      a = 1, v = -2, t0 = 0.3, w = 0.5, sv = 0.1,
-      log = FALSE, n_terms_small = "SWSE",
-      summation_small = "2017", scale = "both",
-      err_tol = 1e-10)
+# # derivative with respect to rt (response time)
+# dt_log_dfddm(rt = 1.2, response = "lower", a = 1, v = -1, t0 = 0.3, w = 0.5,
+#              sv = 0.4, err_tol = 1e-6)
 
-# factor (first level is mapped to "lower")
-days <- c("Monday", "Friday", "Friday", "Monday", "Friday", "Monday")
-resp_fac <- factor(days, levels = c("Monday", "Friday"))
-dfddm(rt = c(1.2, 0.9, 1.1, 1.4, 0.8, 1.3), response = resp_fac,
-      a = 1, v = -2, t0 = 0.3, w = 0.5, sv = 0.1,
-      log = FALSE, n_terms_small = "SWSE",
-      summation_small = "2017", scale = "both",
-      err_tol = 1e-10)
+# # derivative with respect to t0 (non-decision time)
+# dt0_log_dfddm(rt = 1.2, response = "lower", a = 1, v = -1, t0 = 0.3, w = 0.5,
+#               sv = 0.4, err_tol = 1e-6)
 
-# string
-resp_str <- c("lower", "upper", "upper", "lower", "upper", "lower")
-dfddm(rt = c(1.2, 0.9, 1.1, 1.4, 0.8, 1.3), response = resp_str,
-      a = 1, v = -2, t0 = 0.3, w = 0.5, sv = 0.1,
-      log = FALSE, n_terms_small = "SWSE",
-      summation_small = "2017", scale = "both",
-      err_tol = 1e-10)
+# # derivative with respect to a (threshold separation)
+# da_log_dfddm(rt = 1.2, response = "lower", a = 1, v = -1, t0 = 0.3, w = 0.5,
+#              sv = 0.4, err_tol = 1e-6)
 
-# logical
-resp_log <- c(FALSE, TRUE, TRUE, FALSE, TRUE, FALSE)
-dfddm(rt = c(1.2, 0.9, 1.1, 1.4, 0.8, 1.3), response = resp_log,
-      a = 1, v = -2, t0 = 0.3, w = 0.5, sv = 0.1,
-      log = FALSE, n_terms_small = "SWSE",
-      summation_small = "2017", scale = "both",
-      err_tol = 1e-10)
+# # derivative with respect to v (drift rate)
+# dv_log_dfddm(rt = 1.2, response = "lower", a = 1, v = -1, t0 = 0.3, w = 0.5,
+#              sv = 0.4, err_tol = 1e-6)
+
+# # derivative with respect to w (relative starting point)
+# dw_log_dfddm(rt = 1.2, response = "lower", a = 1, v = -1, t0 = 0.3, w = 0.5,
+#              sv = 0.4, err_tol = 1e-6)
+
+# # derivative with respect to sv (inter-trial variability in the drift rate)
+# dsv_log_dfddm(rt = 1.2, response = "lower", a = 1, v = -1, t0 = 0.3, w = 0.5,
+#               sv = 0.4, err_tol = 1e-6)
 }
 \references{
 Navarro, D. J., & Fuss, I. G. (2009). Fast and accurate
