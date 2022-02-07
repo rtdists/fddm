@@ -93,7 +93,7 @@ the approximation of the infinite sum in the small-time approximation of
 the density function. Can be one of \{\code{"SWSE"}, \code{"Gondan"},
 \code{"Navarro"}\}. Only applicable if \code{scale} is one of
 \{\code{"small"}, \code{"both"}\}. See Details for more information.
-Default is \code{"Gondan"}.}
+Default is \code{"SWSE"}.}
 
 \item{summation_small}{Which style of summation to use for the small-time
 approximation to the infinite sum. Can be one of \{\code{"2017"},
@@ -118,8 +118,9 @@ in the \code{paper_analysis/extra_analysis} folder. Default value is
 
 \item{err_tol}{Allowed error tolerance of the density function. Since the
 density function contains an infinite sum, this parameter defines the
-precision of the approximation to that infinite sum. Default is
-\eqn{1e-6}.}
+precision of the approximation to that infinite sum. If the provided
+error tolerance is less than \eqn{1e-300}, it is set to \eqn{1e-300}.
+Default is \eqn{1e-6}.}
 }
 \value{
 A vector containing the densities of the DDM with precision

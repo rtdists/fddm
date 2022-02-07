@@ -89,8 +89,9 @@
 #'   partial derivative of the density function contains the sum of two
 #'   infinite sums, each approximation of these two infinite sums will have an
 #'   individual error tolerance of \code{err_tol} / 2; thus the total overall
-#'   error of the calculation will be at most \code{err_tol}. Default is
-#'   \eqn{1e-6}.
+#'   error of the calculation will be at most \code{err_tol}. If the provided
+#'   error tolerance is less than \eqn{1e-300}, it is set to \eqn{1e-300}.
+#'   Default is \eqn{1e-6}.
 #'
 #'
 #'
@@ -245,8 +246,9 @@ dt_dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl_
 #'   partial derivative of the density function contains the sum of two
 #'   infinite sums, each approximation of these two infinite sums will have an
 #'   individual error tolerance of \code{err_tol} / 2; thus the total overall
-#'   error of the calculation will be at most \code{err_tol}. Default is
-#'   \eqn{1e-6}.
+#'   error of the calculation will be at most \code{err_tol}. If the provided
+#'   error tolerance is less than \eqn{1e-300}, it is set to \eqn{1e-300}.
+#'   Default is \eqn{1e-6}.
 #'
 #'
 #'
@@ -401,8 +403,9 @@ dt0_dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl
 #'   partial derivative of the density function contains the sum of two
 #'   infinite sums, each approximation of these two infinite sums will have an
 #'   individual error tolerance of \code{err_tol} / 2; thus the total overall
-#'   error of the calculation will be at most \code{err_tol}. Default is
-#'   \eqn{1e-6}.
+#'   error of the calculation will be at most \code{err_tol}. If the provided
+#'   error tolerance is less than \eqn{1e-300}, it is set to \eqn{1e-300}.
+#'   Default is \eqn{1e-6}.
 #'
 #'
 #'
@@ -555,6 +558,8 @@ da_dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl_
 #' @param err_tol Allowed error tolerance of the overall calculation. Since the
 #'   partial derivative of the density function contains one infinite sum, this
 #'   parameter defines the precision of the approximation to that infinite sum.
+#'   If the provided error tolerance is less than \eqn{1e-300}, it is set to
+#'   \eqn{1e-300}. Default is \eqn{1e-6}.
 #'
 #'
 #'
@@ -712,8 +717,9 @@ dv_dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl_
 #'   partial derivative of the density function contains the sum of two
 #'   infinite sums, each approximation of these two infinite sums will have an
 #'   individual error tolerance of \code{err_tol} / 2; thus the total overall
-#'   error of the calculation will be at most \code{err_tol}. Default is
-#'   \eqn{1e-6}.
+#'   error of the calculation will be at most \code{err_tol}. If the provided
+#'   error tolerance is less than \eqn{1e-300}, it is set to \eqn{1e-300}.
+#'   Default is \eqn{1e-6}.
 #'
 #'
 #'
@@ -868,6 +874,8 @@ dw_dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl_
 #' @param err_tol Allowed error tolerance of the overall calculation. Since the
 #'   partial derivative of the density function contains one infinite sum, this
 #'   parameter defines the precision of the approximation to that infinite sum.
+#'   If the provided error tolerance is less than \eqn{1e-300}, it is set to
+#'   \eqn{1e-300}. Default is \eqn{1e-6}.
 #'
 #'
 #'
@@ -1014,7 +1022,7 @@ dsv_dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl
 #'   the density function. Can be one of \{\code{"SWSE"}, \code{"Gondan"},
 #'   \code{"Navarro"}\}. Only applicable if \code{scale} is one of
 #'   \{\code{"small"}, \code{"both"}\}. See Details for more information.
-#'   Default is \code{"Gondan"}.
+#'   Default is \code{"SWSE"}.
 #'
 #' @param summation_small Which style of summation to use for the small-time
 #'   approximation to the infinite sum. Can be one of \{\code{"2017"},
@@ -1039,8 +1047,9 @@ dsv_dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl
 #'
 #' @param err_tol Allowed error tolerance of the density function. Since the
 #'   density function contains an infinite sum, this parameter defines the
-#'   precision of the approximation to that infinite sum. Default is
-#'   \eqn{1e-6}.
+#'   precision of the approximation to that infinite sum. If the provided
+#'   error tolerance is less than \eqn{1e-300}, it is set to \eqn{1e-300}.
+#'   Default is \eqn{1e-6}.
 #'
 #'
 #'
@@ -1220,8 +1229,9 @@ dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, log = 
 #'
 #' @param err_tol Allowed error tolerance of the density function. Since the
 #'   density function contains an infinite sum, this parameter defines the
-#'   precision of the approximation to that infinite sum. Default is
-#'   \eqn{1e-6}.
+#'   precision of the approximation to that infinite sum. If the provided
+#'   error tolerance is less than \eqn{1e-300}, it is set to \eqn{1e-300}.
+#'   Default is \eqn{1e-6}.
 #'
 #'
 #'

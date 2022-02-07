@@ -2,6 +2,10 @@
 
 #include "parameter_checks.h"
 
+// threshold for error tolerance = 44942406.30631845 * 2.22507e-308 ~ 1e-300
+// static const double ERR_TOL_THRESH = 44942406.30631845 * std::numeric_limits<double>::min();
+static const double ERR_TOL_THRESH = 1e-300;
+
 
 void convert_responses(const SEXP& response, int& Nres, int& Nmax,
                        vector<double>& out, const double& rt0, bool& valid)
@@ -146,7 +150,7 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
                      const NumericVector& a, const NumericVector& v,
                      const NumericVector& t0, const NumericVector& w,
                      const NumericVector& sv, const NumericVector& sigma,
-                     const NumericVector& err,
+                     NumericVector& err,
                      vector<double>& out, const double& rt0)
 {
   bool valid = 1;
@@ -288,13 +292,15 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
     int bad_par = 0;
     vector<int> bad_idx;
     for (int i = 0; i < Nerr; i++) {
-      if (err[i] > 0) {
+      if (err[i] > ERR_TOL_THRESH) {
         if (isfinite(err[i])) {
           continue;
         } else {
           bad_par++;
           bad_idx.push_back(i);
         }
+      } else if (err[i] > 0) {
+        err[i] = ERR_TOL_THRESH;
       } else { // {NaN, NA} evaluate to FALSE
         bad_par++;
         bad_idx.push_back(i);

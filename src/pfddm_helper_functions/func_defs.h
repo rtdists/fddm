@@ -77,7 +77,7 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
                      const NumericVector& a, const NumericVector& v,
                      const NumericVector& t0, const NumericVector& w,
                      const NumericVector& sv, const NumericVector& sigma,
-                     const NumericVector& err,
+                     NumericVector& err,
                      vector<double>& out, const double& rt0);
 void determine_method(const string& method, DisFunc& disf,
                       double& rt0, const bool& log_prob);

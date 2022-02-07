@@ -90,7 +90,7 @@
 //'   the density function. Can be one of \{\code{"SWSE"}, \code{"Gondan"},
 //'   \code{"Navarro"}\}. Only applicable if \code{scale} is one of
 //'   \{\code{"small"}, \code{"both"}\}. See Details for more information.
-//'   Default is \code{"Gondan"}.
+//'   Default is \code{"SWSE"}.
 //'
 //' @param summation_small Which style of summation to use for the small-time
 //'   approximation to the infinite sum. Can be one of \{\code{"2017"},
@@ -115,8 +115,9 @@
 //'
 //' @param err_tol Allowed error tolerance of the density function. Since the
 //'   density function contains an infinite sum, this parameter defines the
-//'   precision of the approximation to that infinite sum. Default is
-//'   \eqn{1e-6}.
+//'   precision of the approximation to that infinite sum. If the provided
+//'   error tolerance is less than \eqn{1e-300}, it is set to \eqn{1e-300}.
+//'   Default is \eqn{1e-6}.
 //'
 //'
 //'
@@ -224,7 +225,7 @@ NumericVector dfddm(const NumericVector& rt,
                     const std::string& summation_small = "2017",
                     const std::string& scale = "both",
                     const int& max_terms_large = 1,
-                    const NumericVector& err_tol = 0.000001)
+                    NumericVector err_tol = 0.000001)
 {
   // determine which method to use
   NumFunc numf;

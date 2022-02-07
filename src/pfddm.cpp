@@ -91,8 +91,9 @@
 //'
 //' @param err_tol Allowed error tolerance of the density function. Since the
 //'   density function contains an infinite sum, this parameter defines the
-//'   precision of the approximation to that infinite sum. Default is
-//'   \eqn{1e-6}.
+//'   precision of the approximation to that infinite sum. If the provided
+//'   error tolerance is less than \eqn{1e-300}, it is set to \eqn{1e-300}.
+//'   Default is \eqn{1e-6}.
 //'
 //'
 //'
@@ -150,7 +151,7 @@ NumericVector pfddm(const NumericVector& rt,
                     const NumericVector& sigma = 1.0,
                     const bool& log = 0,
                     const std::string& method = "1",
-                    const NumericVector& err_tol = 0.000001)
+                    NumericVector err_tol = 0.000001)
 {
   // determine which method to use (also log or non-log)
   DisFunc disf;

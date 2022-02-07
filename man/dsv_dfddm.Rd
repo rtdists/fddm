@@ -93,7 +93,9 @@ variant will always be used. Default value is \eqn{0.355}.}
 
 \item{err_tol}{Allowed error tolerance of the overall calculation. Since the
 partial derivative of the density function contains one infinite sum, this
-parameter defines the precision of the approximation to that infinite sum.}
+parameter defines the precision of the approximation to that infinite sum.
+If the provided error tolerance is less than \eqn{1e-300}, it is set to
+\eqn{1e-300}. Default is \eqn{1e-6}.}
 }
 \value{
 A vector containing the partial derivatives of the DDM PDF with
