@@ -43,7 +43,7 @@ static const char EMPTYCHAR = '\0'; // literally, the empty character
 // define types for partial derivative functions
 typedef double (*ParFunc)(const double&, const double&, const double&,
                           const double&, const double&, const double&,
-                          const double&);
+                          const double&, const double&);
 
 
 
@@ -66,24 +66,24 @@ double sum_large_d_w(const double& taa, const double& w, const int& kl);
 
 
 // Partial Derivatives (of the PDF) Functions
-double pdf_dt(const double& t, const double& a, const double& v,
-              const double& w, const double& sv, const double& err,
-              const double& sl_thresh);
-double pdf_dt0(const double& t, const double& a, const double& v,
-               const double& w, const double& sv, const double& err,
-               const double& sl_thresh);
-double pdf_da(const double& t, const double& a, const double& v,
-              const double& w, const double& sv, const double& err,
-              const double& sl_thresh);
-double pdf_dv(const double& t, const double& a, const double& v,
-              const double& w, const double& sv, const double& err,
-              const double& sl_thresh);
-double pdf_dw(const double& t, const double& a, const double& v,
-              const double& w, const double& sv, const double& err,
-              const double& sl_thresh);
-double pdf_dsv(const double& t, const double& a, const double& v,
-               const double& w, const double& sv, const double& err,
-               const double& sl_thresh);
+double pdf_dt(const double& t, const double& resp, const double& a,
+              const double& v, const double& w, const double& sv,
+              const double& err, const double& sl_thresh);
+double pdf_dt0(const double& t, const double& resp, const double& a,
+               const double& v, const double& w, const double& sv,
+               const double& err, const double& sl_thresh);
+double pdf_da(const double& t, const double& resp, const double& a,
+              const double& v, const double& w, const double& sv,
+              const double& err, const double& sl_thresh);
+double pdf_dv(const double& t, const double& resp, const double& a,
+              const double& v, const double& w, const double& sv,
+              const double& err, const double& sl_thresh);
+double pdf_dw(const double& t, const double& resp, const double& a,
+              const double& v, const double& w, const double& sv,
+              const double& err, const double& sl_thresh);
+double pdf_dsv(const double& t, const double& resp, const double& a,
+               const double& v, const double& w, const double& sv,
+               const double& err, const double& sl_thresh);
 // Partial Derivatives of the log(PDF) Functions
 // double pdf_dt_log(const double& t, const double& a, const double& v,
 //                   const double& w, const double& sv, const double& err,
