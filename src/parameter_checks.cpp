@@ -2,9 +2,7 @@
 
 #include "parameter_checks.h"
 
-// threshold for error tolerance = 44942406.30631845 * 2.22507e-308 ~ 1e-300
-// static const double ERR_TOL_THRESH = 44942406.30631845 * std::numeric_limits<double>::min();
-static const double ERR_TOL_THRESH = 1e-300;
+static const double ERR_TOL_THRESH = 1e-300; // threshold for error tolerance
 
 
 void convert_responses(const SEXP& response, int& Nres, int& Nmax,
