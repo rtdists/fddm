@@ -99,8 +99,9 @@
 //'   partial derivative of the density function contains the sum of two
 //'   infinite sums, each approximation of these two infinite sums will have an
 //'   individual error tolerance of \code{err_tol} / 2; thus the total overall
-//'   error of the calculation will be at most \code{err_tol}. Default is
-//'   \eqn{1e-6}.
+//'   error of the calculation will be at most \code{err_tol}. If the provided
+//'   error tolerance is less than \eqn{1e-300}, it is set to \eqn{1e-300}.
+//'   Default is \eqn{1e-6}.
 //'
 //'
 //'
@@ -270,8 +271,9 @@ NumericVector dt_dfddm(const NumericVector& rt,
 //'   partial derivative of the density function contains the sum of two
 //'   infinite sums, each approximation of these two infinite sums will have an
 //'   individual error tolerance of \code{err_tol} / 2; thus the total overall
-//'   error of the calculation will be at most \code{err_tol}. Default is
-//'   \eqn{1e-6}.
+//'   error of the calculation will be at most \code{err_tol}. If the provided
+//'   error tolerance is less than \eqn{1e-300}, it is set to \eqn{1e-300}.
+//'   Default is \eqn{1e-6}.
 //'
 //'
 //'
@@ -441,8 +443,9 @@ NumericVector dt0_dfddm(const NumericVector& rt,
 //'   partial derivative of the density function contains the sum of two
 //'   infinite sums, each approximation of these two infinite sums will have an
 //'   individual error tolerance of \code{err_tol} / 2; thus the total overall
-//'   error of the calculation will be at most \code{err_tol}. Default is
-//'   \eqn{1e-6}.
+//'   error of the calculation will be at most \code{err_tol}. If the provided
+//'   error tolerance is less than \eqn{1e-300}, it is set to \eqn{1e-300}.
+//'   Default is \eqn{1e-6}.
 //'
 //'
 //'
@@ -610,6 +613,8 @@ NumericVector da_dfddm(const NumericVector& rt,
 //' @param err_tol Allowed error tolerance of the overall calculation. Since the
 //'   partial derivative of the density function contains one infinite sum, this
 //'   parameter defines the precision of the approximation to that infinite sum.
+//'   If the provided error tolerance is less than \eqn{1e-300}, it is set to
+//'   \eqn{1e-300}. Default is \eqn{1e-6}.
 //'
 //'
 //'
@@ -782,8 +787,9 @@ NumericVector dv_dfddm(const NumericVector& rt,
 //'   partial derivative of the density function contains the sum of two
 //'   infinite sums, each approximation of these two infinite sums will have an
 //'   individual error tolerance of \code{err_tol} / 2; thus the total overall
-//'   error of the calculation will be at most \code{err_tol}. Default is
-//'   \eqn{1e-6}.
+//'   error of the calculation will be at most \code{err_tol}. If the provided
+//'   error tolerance is less than \eqn{1e-300}, it is set to \eqn{1e-300}.
+//'   Default is \eqn{1e-6}.
 //'
 //'
 //'
@@ -953,6 +959,8 @@ NumericVector dw_dfddm(const NumericVector& rt,
 //' @param err_tol Allowed error tolerance of the overall calculation. Since the
 //'   partial derivative of the density function contains one infinite sum, this
 //'   parameter defines the precision of the approximation to that infinite sum.
+//'   If the provided error tolerance is less than \eqn{1e-300}, it is set to
+//'   \eqn{1e-300}. Default is \eqn{1e-6}.
 //'
 //'
 //'

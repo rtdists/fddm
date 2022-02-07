@@ -94,8 +94,9 @@ variant will always be used. Default value is \eqn{0.5}.}
 partial derivative of the density function contains the sum of two
 infinite sums, each approximation of these two infinite sums will have an
 individual error tolerance of \code{err_tol} / 2; thus the total overall
-error of the calculation will be at most \code{err_tol}. Default is
-\eqn{1e-6}.}
+error of the calculation will be at most \code{err_tol}. If the provided
+error tolerance is less than \eqn{1e-300}, it is set to \eqn{1e-300}.
+Default is \eqn{1e-6}.}
 }
 \value{
 A vector containing the partial derivatives of the DDM PDF with

@@ -12,7 +12,7 @@ vector<double> partial_pdf(const ParFunc& parf,
                            const NumericVector& sv,
                            const NumericVector& sigma,
                            const double& sl_thresh,
-                           const NumericVector& err_tol)
+                           NumericVector err_tol)
 {
   // determine lengths of parameter inputs, except response
   int Nrt  = rt.length();
