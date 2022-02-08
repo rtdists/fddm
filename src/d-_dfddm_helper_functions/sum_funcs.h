@@ -2,6 +2,8 @@
 
 
 
+//----------------- Regular (non-log) ----------------------------------------//
+
 ///////////////////////////////// Small Time ///////////////////////////////////
 // sum for small time (not differentiated)
 // adapted from (Blurton et al 2017)
@@ -148,12 +150,6 @@ double sum_small_d_w(const double& taa, const double& w, const int& ks)
 }
 
 
-// sum for log-differentiated
-// double sum_small_log_d(const double& taa, const double& w, const double& err)
-// { // note: taa = t / (a*a)
-  
-// }
-
 
 ///////////////////////////////// Large Time ///////////////////////////////////
 // sum for large time (not differentiated)
@@ -191,3 +187,13 @@ double sum_large_d_w(const double& taa, const double& w, const int& kl)
   }
   return sum;
 }
+
+
+
+//----------------- Logged Versions ------------------------------------------//
+
+// sum for log-differentiated
+// double sum_small_log_d(const double& taa, const double& w, const double& err)
+// { // note: taa = t / (a*a)
+  
+// }
