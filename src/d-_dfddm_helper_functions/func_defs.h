@@ -85,24 +85,24 @@ double pdf_dsv(const double& t, const double& resp, const double& a,
                const double& v, const double& w, const double& sv,
                const double& err, const double& sl_thresh);
 // Partial Derivatives of the log(PDF) Functions
-// double pdf_dt_log(const double& t, const double& a, const double& v,
-//                   const double& w, const double& sv, const double& err,
-//                   const double& sl_thresh);
-// double pdf_dt0_log(const double& t, const double& a, const double& v,
-//                    const double& w, const double& sv, const double& err,
-//                    const double& sl_thresh);
-// double pdf_da_log(const double& t, const double& a, const double& v,
-//                   const double& w, const double& sv, const double& err,
-//                   const double& sl_thresh);
-// double pdf_dv_log(const double& t, const double& a, const double& v,
-//                   const double& w, const double& sv, const double& err,
-//                   const double& sl_thresh);
-// double pdf_dw_log(const double& t, const double& a, const double& v,
-//                   const double& w, const double& sv, const double& err,
-//                   const double& sl_thresh);
-// double pdf_dsv_log(const double& t, const double& a, const double& v,
-//                    const double& w, const double& sv, const double& err,
-//                    const double& sl_thresh);
+// double pdf_dt_log(const double& t, const double& resp, const double& a,
+//                   const double& v, const double& w, const double& sv,
+//                   const double& err, const double& sl_thresh);
+// double pdf_dt0_log(const double& t, const double& resp, const double& a,
+//                    const double& v, const double& w, const double& sv,
+//                    const double& err, const double& sl_thresh);
+// double pdf_da_log(const double& t, const double& resp, const double& a,
+//                   const double& v, const double& w, const double& sv,
+//                   const double& err, const double& sl_thresh);
+// double pdf_dv_log(const double& t, const double& resp, const double& a,
+//                   const double& v, const double& w, const double& sv,
+//                   const double& err, const double& sl_thresh);
+// double pdf_dw_log(const double& t, const double& resp, const double& a,
+//                   const double& v, const double& w, const double& sv,
+//                   const double& err, const double& sl_thresh);
+// double pdf_dsv_log(const double& t, const double& resp, const double& a,
+//                    const double& v, const double& w, const double& sv,
+//                    const double& err, const double& sl_thresh);
 
 
 

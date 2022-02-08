@@ -187,9 +187,9 @@ double pdf_dsv(const double& t, const double& resp, const double& a,
 
 //----------------- Logged Versions ------------------------------------------//
 
-// double pdf_dt_log(const double& t, const double& a, const double& v,
-//                   const double& w, const double& sv, const double& err,
-//                   const double& sl_thresh)
+// double pdf_dt_log(const double& t, const double& resp, const double& a,
+//                   const double& v, const double& w, const double& sv,
+//                   const double& err, const double& sl_thresh)
 // {
 //   double taa = t / (a*a);
 //   double nnt = 1 + sv*sv * t;
@@ -211,10 +211,10 @@ double pdf_dsv(const double& t, const double& resp, const double& a,
 
 
 
-// double pdf_dt0_log(const double& t, const double& a, const double& v,
-//                    const double& w, const double& sv, const double& err,
-//                    const double& sl_thresh)
-// {
+// double pdf_dt0_log(const double& t, const double& resp, const double& a,
+//                    const double& v, const double& w, const double& sv,
+//                    const double& err, const double& sl_thresh)
+// { // note: resp is not used
 //   double taa = t / (a*a);
 //   double nnt = 1 + sv*sv * t;
 //   double nawvaw = sv*sv * a*a * w*w - 2 * v * a * w;
@@ -235,9 +235,9 @@ double pdf_dsv(const double& t, const double& resp, const double& a,
 
 
 
-// double pdf_da_log(const double& t, const double& a, const double& v,
-//                   const double& w, const double& sv, const double& err,
-//                   const double& sl_thresh)
+// double pdf_da_log(const double& t, const double& resp, const double& a,
+//                   const double& v, const double& w, const double& sv,
+//                   const double& err, const double& sl_thresh)
 // {
 //   double taa = t / (a*a);
 //   double nnt = 1 + sv*sv * t;
@@ -258,18 +258,18 @@ double pdf_dsv(const double& t, const double& resp, const double& a,
 
 
 
-// double pdf_dv_log(const double& t, const double& a, const double& v,
-//                   const double& w, const double& sv, const double& err,
-//                   const double& sl_thresh)
+// double pdf_dv_log(const double& t, const double& resp, const double& a,
+//                   const double& v, const double& w, const double& sv,
+//                   const double& err, const double& sl_thresh)
 // {
 //   return -1 * (a * w + v * t) / (1 + sv*sv * t);
 // }
 
 
 
-// double pdf_dw_log(const double& t, const double& a, const double& v,
-//                   const double& w, const double& sv, const double& err,
-//                   const double& sl_thresh)
+// double pdf_dw_log(const double& t, const double& resp, const double& a,
+//                   const double& v, const double& w, const double& sv,
+//                   const double& err, const double& sl_thresh)
 // {
 //   double taa = t / (a*a);
 //   double nnt = 1 + sv*sv * t;
@@ -288,9 +288,9 @@ double pdf_dsv(const double& t, const double& resp, const double& a,
 
 
 
-// double pdf_dsv_log(const double& t, const double& a, const double& v,
-//                   const double& w, const double& sv, const double& err,
-//                   const double& sl_thresh)
+// double pdf_dsv_log(const double& t, const double& resp, const double& a,
+//                    const double& v, const double& w, const double& sv,
+//                    const double& err, const double& sl_thresh)
 // {
 //   if (sv <= 0) { // check that the derivative actually makes sense
 //     warning("dsv_dfddm warning: function parameter 'sv' = 0.0; the derivative does not make sense; returning a NaN.");
