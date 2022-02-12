@@ -2,7 +2,6 @@
 
 #include "parameter_checks.h"
 
-static const double ERR_TOL_THRESH = 1e-300; // threshold for error tolerance
 
 
 void convert_responses(const SEXP& response, int& Nres, int& Nmax,
@@ -290,15 +289,13 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
     int bad_par = 0;
     vector<int> bad_idx;
     for (int i = 0; i < Nerr; i++) {
-      if (err[i] > ERR_TOL_THRESH) {
+      if (err[i] > 0) {
         if (isfinite(err[i])) {
           continue;
         } else {
           bad_par++;
           bad_idx.push_back(i);
         }
-      } else if (err[i] > 0) {
-        err[i] = ERR_TOL_THRESH;
       } else { // {NaN, NA} evaluate to FALSE
         bad_par++;
         bad_idx.push_back(i);

@@ -23,7 +23,7 @@ using Rcpp::NumericVector;
 
 
 // Constants
-
+static const double ERR_TOL_THRESH = 1e-300; // near minimum value of a double
 static const double SV_THRESH = 0; // threshold for using variable drift rate
 static const double LOG_100 = log(100);
 static const double PI_CONST = 3.14159265358979323846; // define pi like C++
@@ -46,7 +46,6 @@ typedef double (*DenFunc)(const double&, const double&, const double&,
 
 
 // Number of Terms
-
 int ks_Gon(const double& t, const double& w, const double& err);
 int ks_Nav(const double& t, const double& w, const double& err);
 int kl_Nav(const double& t, const double& w, const double& err);
@@ -54,7 +53,6 @@ int kl_Nav(const double& t, const double& w, const double& err);
 
 
 // Infinite Summation Approximations
-
 double small_sum_eps_17(const double& t, const double& a, const double& w,
                         const int& ks, const double& err);
 double small_sum_eps_14(const double& t, const double& a, const double& w,
