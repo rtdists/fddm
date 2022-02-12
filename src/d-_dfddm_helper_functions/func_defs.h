@@ -62,6 +62,7 @@ double sum_small_d_w(const double& taa, const double& w, const int& ks);
 double sum_large(const double& taa, const double& w, const int& kl);
 double sum_large_d(const double& taa, const double& w, const int& kl);
 double sum_large_d_w(const double& taa, const double& w, const int& kl);
+// double sum_small_log_d(const double& taa, const double& w, const double& err);
 
 
 

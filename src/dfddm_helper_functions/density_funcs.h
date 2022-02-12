@@ -10,8 +10,8 @@
 // Stop When Small Enough
 double ff(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& err,
-          const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf)
-{ // note: max_terms_large, numf are not used
+          const double& switch_thresh, const NumFunc& numf, const SumFunc& sumf)
+{ // note: switch_thresh, numf are not used
   double mult, sum_err;
 
   // calculate multiplicative term outside sum
@@ -30,9 +30,9 @@ double ff(const double& t, const double& a, const double& v,
 
 double ff_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& err,
-              const int& max_terms_large,
+              const double& switch_thresh,
               const NumFunc& numf, const SumFunc& sumf)
-{ // note: max_terms_large, numf are not used
+{ // note: switch_thresh, numf are not used
   double mult, sum_err;
 
   // calculate multiplicative term outside sum
@@ -54,8 +54,8 @@ double ff_log(const double& t, const double& a, const double& v,
 // Gondan et al and Navarro et al
 double fs(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& err,
-          const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf)
-{ // note: max_terms_large is not used
+          const double& switch_thresh, const NumFunc& numf, const SumFunc& sumf)
+{ // note: switch_thresh is not used
   double mult_s, sum_err;
   int ks;
 
@@ -76,9 +76,9 @@ double fs(const double& t, const double& a, const double& v,
 
 double fs_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& err,
-              const int& max_terms_large,
+              const double& switch_thresh,
               const NumFunc& numf, const SumFunc& sumf)
-{ // note: max_terms_large is not used
+{ // note: switch_thresh is not used
   double mult_s, sum_err;
   int ks;
 
@@ -110,8 +110,8 @@ double fs_log(const double& t, const double& a, const double& v,
 // Navarro et al
 double fl(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& err,
-          const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf)
-{ // note: max_terms_large, numf, sumf are not used
+          const double& switch_thresh, const NumFunc& numf, const SumFunc& sumf)
+{ // note: switch_thresh, numf, sumf are not used
   double mult_l, sum_err;
   int kl;
 
@@ -132,9 +132,9 @@ double fl(const double& t, const double& a, const double& v,
 
 double fl_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& err,
-              const int& max_terms_large,
+              const double& switch_thresh,
               const NumFunc& numf, const SumFunc& sumf)
-{ // note: max_terms_large, numf, sumf are not used
+{ // note: switch_thresh, numf, sumf are not used
   double mult_l, sum_err;
   int kl;
 
@@ -163,7 +163,7 @@ double fl_log(const double& t, const double& a, const double& v,
 // Stop When Small Enough
 double fc(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& err,
-          const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf)
+          const double& switch_thresh, const NumFunc& numf, const SumFunc& sumf)
 { // note: numf is not used
   double mult, sum_err;
 
@@ -180,7 +180,7 @@ double fc(const double& t, const double& a, const double& v,
   int kl = kl_Nav(t / (a*a), w, sum_err);
 
   // choose large vs small time
-  if (kl <= max_terms_large) {
+  if (kl <= switch_thresh) {
     return PI_CONST * mult * large_sum_Nav(t, a, w, kl, 0.0);
   } else {
     if (sv <= SV_THRESH) { // no sv
@@ -199,7 +199,7 @@ double fc(const double& t, const double& a, const double& v,
 
 double fc_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& err,
-              const int& max_terms_large,
+              const double& switch_thresh,
               const NumFunc& numf, const SumFunc& sumf)
 { // note: numf is not used
   double mult, sum_err;
@@ -217,7 +217,7 @@ double fc_log(const double& t, const double& a, const double& v,
   int kl = kl_Nav(t / (a*a), w, sum_err);
 
   // choose large vs small time
-  if (kl <= max_terms_large) {
+  if (kl <= switch_thresh) {
     return LOG_PI + mult + log(large_sum_Nav(t, a, w, kl, 0.0));
   } else {
     if (sv <= SV_THRESH) { // no sv
@@ -238,8 +238,8 @@ double fc_log(const double& t, const double& a, const double& v,
 // Gondan et al and Navarro et al
 double fb(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& err,
-          const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf)
-{ // note: max_terms_large is not used
+          const double& switch_thresh, const NumFunc& numf, const SumFunc& sumf)
+{ // note: switch_thresh is not used
   double mult_s, mult_l, sum_err_s, sum_err_l;
   int ks, kl;
 
@@ -272,9 +272,9 @@ double fb(const double& t, const double& a, const double& v,
 
 double fb_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& err,
-              const int& max_terms_large,
+              const double& switch_thresh,
               const NumFunc& numf, const SumFunc& sumf)
-{ // note: max_terms_large is not used
+{ // note: switch_thresh is not used
   double mult_s, mult_l, sum_err_s, sum_err_l;
   int ks, kl;
 

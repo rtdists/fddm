@@ -41,7 +41,7 @@ typedef double (*SumFunc)(const double&, const double&, const double&,
                           const int&, const double&);
 typedef double (*DenFunc)(const double&, const double&, const double&,
                           const double&, const double&, const double&,
-                          const int&, const NumFunc&, const SumFunc&);
+                          const double&, const NumFunc&, const SumFunc&);
 
 
 
@@ -69,38 +69,43 @@ double large_sum_Nav(const double& t, const double& a, const double& w,
 // Density Functions
 double ff(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& err,
-          const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf);
+          const double& switch_thresh,
+          const NumFunc& numf, const SumFunc& sumf);
 double ff_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& err,
-              const int& max_terms_large,
+              const double& switch_thresh,
               const NumFunc& numf, const SumFunc& sumf);
 double fs(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& err,
-          const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf);
+          const double& switch_thresh,
+          const NumFunc& numf, const SumFunc& sumf);
 double fs_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& err,
-              const int& max_terms_large,
+              const double& switch_thresh,
               const NumFunc& numf, const SumFunc& sumf);
 double fl(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& err,
-          const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf);
+          const double& switch_thresh,
+          const NumFunc& numf, const SumFunc& sumf);
 double fl_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& err,
-              const int& max_terms_large,
+              const double& switch_thresh,
               const NumFunc& numf, const SumFunc& sumf);
 double fc(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& err,
-          const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf);
+          const double& switch_thresh,
+          const NumFunc& numf, const SumFunc& sumf);
 double fc_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& err,
-              const int& max_terms_large,
+              const double& switch_thresh,
               const NumFunc& numf, const SumFunc& sumf);
 double fb(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& err,
-          const int& max_terms_large, const NumFunc& numf, const SumFunc& sumf);
+          const double& switch_thresh,
+          const NumFunc& numf, const SumFunc& sumf);
 double fb_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& err,
-              const int& max_terms_large,
+              const double& switch_thresh,
               const NumFunc& numf, const SumFunc& sumf);
 
 
@@ -130,6 +135,6 @@ void calculate_pdf(const int& Nrt, const int& Na, const int& Nv, const int& Nt0,
                    const NumericVector& t0, const NumericVector& w,
                    const NumericVector& sv, const NumericVector& sigma,
                    const NumericVector& err, vector<double>& out,
-                   const int& max_terms_large,
+                   const double& switch_thresh,
                    const NumFunc& numf, const SumFunc& sumf,
                    const DenFunc& denf, const double& rt0);

@@ -104,14 +104,19 @@
 //'   \eqn{*}\code{a}\eqn{) < 0.009}). See Details for more information. Default
 //'   is \code{"both"}.
 //'
-//' @param max_terms_large Maximum number of terms to use for the "large-time"
-//'   variant when \code{n_terms_small = "SWSE", scale = "both"}. Allowed values
-//'   are any non-negative integer. \code{max_terms_large = 0} indicates that
-//'   the "small-time" variant will always be used instead of the "large-time"
-//'   variant. The \code{fddm} GitHub has plots showing the relative
-//'   efficiencies of several options for the \code{max_terms_large} parameter
-//'   in the \code{paper_analysis/extra_analysis} folder. Default value is
-//'   \eqn{1}.
+//' @param switch_thresh Threshold for determining whether the effective
+//'   response time (\code{rt}\eqn{/(}\code{a} \eqn{*}\code{a}\eqn{)}) is
+//'   "large" or "small". If the effective response time is greater than this
+//'   parameter, it is considered "large", and the "large-time" variant of the
+//'   PDF is used; otherwise, the effective response time is considered "small",
+//'   and the "small-time" variant of the PDF is used. See Details for more
+//'   information. Note that if \code{switch_thresh}\eqn{ \le 0}, then the
+//'   effective response time is always treated as "large"; contrarily, if
+//'   \code{switch_thresh} =
+//'   \ifelse{html}{\out{-<font style="vertical-align: middle;",
+//'   size="5em">&#8734;</font>}}{\eqn{-\infty}}
+//'   then the effective response time is always treated as "small". Default is
+//'   0.8 seconds.
 //'
 //' @param err_tol Allowed error tolerance of the density function. Since the
 //'   density function contains an infinite sum, this parameter defines the
@@ -181,6 +186,19 @@
 //' currently recommended because it is the fastest and most stable algorithm
 //' when used with \code{scale = "both"}.
 //'
+//' \code{switch_thresh} - This parameter determines what effective response
+//' times (\code{rt}\eqn{/(}\code{a} \eqn{*}\code{a}\eqn{)}) are "large" and
+//' "small". The \code{fddm} GitHub contains plots showing the relative
+//' efficiencies of a range of values for the \code{switch_thresh} parameter in
+//' the \code{paper_analysis} folder.
+//' When \code{n_terms_small = "SWSE", scale = "both"}, this parameter controls
+//' the maximum number of terms to be used for the "large-time" variant of the
+//' PDF. In this scenario, we recommend to use the previous default value of
+//' /code{1}. The \code{fddm} GitHub also contains plots that show the relative
+//' efficiencies of a range of values for this use scenario in the
+//' \code{paper_analysis} folder. Note that this parameter changed with the
+//' release of \code{fddm} version 0.5-0.
+//'
 //'
 //'
 //' @references Navarro, D. J., & Fuss, I. G. (2009). Fast and accurate
@@ -224,7 +242,7 @@ NumericVector dfddm(const NumericVector& rt,
                     const std::string& n_terms_small = "SWSE",
                     const std::string& summation_small = "2017",
                     const std::string& scale = "both",
-                    const int& max_terms_large = 1,
+                    const double& switch_thresh = 0.8,
                     NumericVector err_tol = 0.000001)
 {
   // determine which method to use
@@ -266,7 +284,7 @@ NumericVector dfddm(const NumericVector& rt,
   // loop through all inputs, the vector `out` gets updated
   calculate_pdf(Nrt, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr,
                 Nmax, rt, a, v, t0, w, sv, sigma,
-                err_tol, out, max_terms_large,
+                err_tol, out, switch_thresh,
                 numf, sumf, denf, rt0);
 
 

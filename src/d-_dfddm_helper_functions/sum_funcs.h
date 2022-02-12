@@ -192,8 +192,42 @@ double sum_large_d_w(const double& taa, const double& w, const int& kl)
 
 //----------------- Logged Versions ------------------------------------------//
 
-// sum for log-differentiated
+// // sum for small time (log-differentiated)
 // double sum_small_log_d(const double& taa, const double& w, const double& err)
 // { // note: taa = t / (a*a)
-  
+//   // calculate denominator so that the last term is negative (error is positive)
+//   int minterms = sqrt(taa) - w; // min number of terms, truncates toward 0
+//   double gamma = -0.5 / taa;
+//   double denominator = w * exp(gamma * w*w); // initialize with j=0 term
+//   double term, rj;
+//   int j = 0;
+//   while (j < minterms) { // j starts at 0
+//     j++;
+//     rj = j + 1 - w;
+//     denominator -= rj * exp(gamma * rj*rj);
+//     j++;
+//     rj = j + w;
+//     denominator += rj * exp(gamma * rj*rj);
+//   }
+//   j++; // need at least the next term to check if small enough
+//   rj = j + 1 - w; // j is now odd
+//   term = rj * exp(gamma * rj*rj);
+//   denominator -= term;
+//   while (term > err) { // go until small enough, must end on a negative (odd) term
+//     j++;
+//     rj = j + w;
+//     denominator += rj * exp(gamma * rj*rj);
+//     j++;
+//     rj = j + 1 - w;
+//     term = rj * exp(gamma * rj*rj);
+//     denominator -= term;
+//   }
+
+//   // calculate S3 (numerator) with error tolerance err*denominator
+//   double numerator = sum_small_d(taa, w, err * denominator);
+
+//   // return S3/S1
+//   Rcpp::Rcout << "numerator = " << numerator << std::endl;
+//   Rcpp::Rcout << "denominator = " << denominator << std::endl;
+//   return numerator / denominator;
 // }

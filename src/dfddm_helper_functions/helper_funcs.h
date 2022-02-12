@@ -128,7 +128,7 @@ void calculate_pdf(const int& Nrt, const int& Na, const int& Nv, const int& Nt0,
                    const NumericVector& t0, const NumericVector& w,
                    const NumericVector& sv, const NumericVector& sigma,
                    const NumericVector& err, vector<double>& out,
-                   const int& max_terms_large,
+                   const double& switch_thresh,
                    const NumFunc& numf, const SumFunc& sumf,
                    const DenFunc& denf, const double& rt0)
 {
@@ -140,10 +140,10 @@ void calculate_pdf(const int& Nrt, const int& Na, const int& Nv, const int& Nt0,
         if (t > 0 && isfinite(t)) { // sort response and calculate density
           if (out[i] == 1) { // response is "lower" so use unchanged parameters
               out[i] = denf(t, a[i % Na], v[i % Nv], w[i % Nw], sv[i % Nsv],
-                          err[i % Nerr], max_terms_large, numf, sumf);
+                          err[i % Nerr], switch_thresh, numf, sumf);
           } else { // response is "upper" so use alternate parameters
             out[i] = denf(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw], sv[i % Nsv],
-                          err[i % Nerr], max_terms_large, numf, sumf);
+                          err[i % Nerr], switch_thresh, numf, sumf);
           }
         } else { // {NaN, NA} evaluate to FALSE
           if (isnan(t)) {
@@ -163,12 +163,12 @@ void calculate_pdf(const int& Nrt, const int& Na, const int& Nv, const int& Nt0,
               out[i] = denf(t, a[i % Na]/sigma[i % Nsig],
                             v[i % Nv]/sigma[i % Nsig], w[i % Nw],
                             sv[i % Nsv]/sigma[i % Nsig], err[i % Nerr],
-                            max_terms_large, numf, sumf);
+                            switch_thresh, numf, sumf);
           } else { // response is "upper" so use alternate parameters
             out[i] = denf(t, a[i % Na]/sigma[i % Nsig],
                           -v[i % Nv]/sigma[i % Nsig], 1 - w[i % Nw],
                           sv[i % Nsv]/sigma[i % Nsig], err[i % Nerr],
-                          max_terms_large, numf, sumf);
+                          switch_thresh, numf, sumf);
           }
         } else { // {NaN, NA} evaluate to FALSE
           if (isnan(t)) {
