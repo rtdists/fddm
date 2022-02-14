@@ -159,8 +159,63 @@ double fl_log(const double& t, const double& a, const double& v,
 ///////////////////////////////// Both Times ///////////////////////////////////
 //////////                                                            //////////
 
+// switch_mech = "eff_rt"
+double ft(const double& t, const double& a, const double& v,
+          const double& w, const double& sv, const double& err,
+          const double& switch_thresh, const NumFunc& numf, const SumFunc& sumf)
+{ // note: numf is not used
+  double mult;
 
-// Stop When Small Enough
+  if (t / (a*a) > switch_thresh) { // use large time
+    if (sv <= SV_THRESH) { // no sv
+      mult = exp(-v * a * w - v*v * t / 2) / (a*a);
+    } else { // sv
+      mult = exp((sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
+                  / (2 + 2 * sv*sv * t)) / (a*a * sqrt(1 + sv*sv * t));
+    }
+    int kl = kl_Nav(t / (a*a), w, err / mult);
+    return PI_CONST * mult * large_sum_Nav(t, a, w, kl, 0.0);
+  } else { // use small time
+    if (sv <= SV_THRESH) { // no sv
+      mult = a * exp(-v * a * w - v * v * t / 2) / (t * SQRT_2PI * sqrt(t));
+    } else { // sv
+      mult = a * exp((sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
+                       / (2 + 2 * sv*sv * t))
+             / (t * SQRT_2PI * sqrt(t + sv*sv * t*t));
+    }
+    return mult * sumf(t, a, w, 0, err / mult);
+  }
+}
+
+double ft_log(const double& t, const double& a, const double& v,
+              const double& w, const double& sv, const double& err,
+              const double& switch_thresh,
+              const NumFunc& numf, const SumFunc& sumf)
+{ // note: numf is not used
+  double mult;
+
+  if (t / (a*a) > switch_thresh) { // use large time
+    if (sv <= SV_THRESH) { // no sv
+      mult = - v * a * w - v * v * t / 2 - 2 * log(a);
+    } else { // sv
+      mult = (sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
+      / (2 + 2 * sv*sv * t) - 0.5 * log(1 + sv*sv * t) - 2 * log(a);
+    }
+    int kl = kl_Nav(t / (a*a), w, err / exp(mult));
+    return LOG_PI + mult + log(large_sum_Nav(t, a, w, kl, 0.0));
+  } else { // use small time
+    if (sv <= SV_THRESH) { // no sv
+      mult = log(a) - LOG_2PI_2 - 1.5 * log(t) - v * a * w - v*v * t / 2;
+    } else { // sv
+      mult = log(a) - 1.5 * log(t) - LOG_2PI_2 - 0.5 * log(1 + sv*sv * t)
+      + (sv*sv * a*a * w*w - 2 * v * a * w - v*v * t)
+      / (2 + 2 * sv*sv * t);
+    }
+    return mult + log(sumf(t, a, w, 0, err / exp(mult)));
+  }
+}
+
+// switch_mech = "terms_large"
 double fc(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& err,
           const double& switch_thresh, const NumFunc& numf, const SumFunc& sumf)
@@ -235,7 +290,7 @@ double fc_log(const double& t, const double& a, const double& v,
 }
 
 
-// Gondan et al and Navarro et al
+// switch_mech = "terms"
 double fb(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& err,
           const double& switch_thresh, const NumFunc& numf, const SumFunc& sumf)

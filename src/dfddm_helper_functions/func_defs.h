@@ -91,6 +91,14 @@ double fl_log(const double& t, const double& a, const double& v,
               const double& w, const double& sv, const double& err,
               const double& switch_thresh,
               const NumFunc& numf, const SumFunc& sumf);
+double ft(const double& t, const double& a, const double& v,
+          const double& w, const double& sv, const double& err,
+          const double& switch_thresh,
+          const NumFunc& numf, const SumFunc& sumf);
+double ft_log(const double& t, const double& a, const double& v,
+              const double& w, const double& sv, const double& err,
+              const double& switch_thresh,
+              const NumFunc& numf, const SumFunc& sumf);
 double fc(const double& t, const double& a, const double& v,
           const double& w, const double& sv, const double& err,
           const double& switch_thresh,
@@ -113,7 +121,7 @@ double fb_log(const double& t, const double& a, const double& v,
 // Helper Functions
 void determine_method(const std::string& n_terms_small,
                       const std::string& summation_small,
-                      const std::string& scale,
+                      const std::string& switch_mech, double& switch_thresh,
                       NumFunc& numf, SumFunc& sumf, DenFunc& denf,
                       double& rt0, const bool& log_prob);
 void convert_responses(const SEXP& response, int& Nres, int& Nmax,
@@ -125,7 +133,7 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
                      const NumericVector& a, const NumericVector& v,
                      const NumericVector& t0, const NumericVector& w,
                      const NumericVector& sv, const NumericVector& sigma,
-                     NumericVector& err,
+                     const NumericVector& err,
                      vector<double>& out, const double& rt0);
 void calculate_pdf(const int& Nrt, const int& Na, const int& Nv, const int& Nt0,
                    const int& Nw, const int& Nsv, const int& Nsig,
