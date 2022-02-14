@@ -11,7 +11,6 @@ void determine_method(const string& n_terms_small,
   if (log_prob) { // calculate log(density)
     rt0 = -std::numeric_limits<double>::infinity();
     if (switch_mech == "eff_rt") {
-      if (switch_thresh < 0) switch_thresh = 0.8; // default for this mechanism
       denf = &ft_log;
       if (summation_small == "2017") {
         sumf = &small_sum_eps_17;
@@ -22,7 +21,7 @@ void determine_method(const string& n_terms_small,
              summation_small);
       }
     } else if (switch_mech == "terms_large") {
-      if (switch_thresh < 0) switch_thresh = 1; // default for this mechanism
+      switch_thresh = ceil(switch_thresh); // default = ceil(0.8) = 1
       denf = &fc_log;
       if (summation_small == "2017") {
         sumf = &small_sum_eps_17;
@@ -38,6 +37,8 @@ void determine_method(const string& n_terms_small,
         numf = &ks_Gon;
       } else if (n_terms_small == "Navarro") {
         numf = &ks_Nav;
+      } else if (n_terms_small == "SWSE") {
+        stop("dfddm error: function parameter 'n_terms_small' must be changed from default value if `switch_mech = 'terms'`");
       } else {
         stop("dfddm error: invalid function parameter 'n_terms_small': %s.",
              n_terms_small);
@@ -89,7 +90,6 @@ void determine_method(const string& n_terms_small,
   } else { // calculate regular (non-log) density
     rt0 = 0;
     if (switch_mech == "eff_rt") {
-      if (switch_thresh < 0) switch_thresh = 0.8; // default for this mechanism
       denf = &ft;
       if (summation_small == "2017") {
         sumf = &small_sum_eps_17;
@@ -100,7 +100,7 @@ void determine_method(const string& n_terms_small,
              summation_small);
       }
     } else if (switch_mech == "terms_large") {
-      if (switch_thresh < 0) switch_thresh = 1; // default for this mechanism
+      switch_thresh = ceil(switch_thresh); // default = ceil(0.8) = 1
       denf = &fc;
       if (summation_small == "2017") {
         sumf = &small_sum_eps_17;
