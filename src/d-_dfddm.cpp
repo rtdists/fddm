@@ -25,8 +25,7 @@
 //'
 //' @param rt A vector of response times (in seconds). If a response time is
 //'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-//'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-//'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+//'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 //'
 //' @param response Binary response(s) that correspond(s) to either the "lower"
 //'   or "upper" threshold. This model parameter can either be a singular value
@@ -197,8 +196,7 @@ NumericVector dt_dfddm(const NumericVector& rt,
 //'
 //' @param rt A vector of response times (in seconds). If a response time is
 //'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-//'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-//'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+//'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 //'
 //' @param response Binary response(s) that correspond(s) to either the "lower"
 //'   or "upper" threshold. This model parameter can either be a singular value
@@ -369,8 +367,7 @@ NumericVector dt0_dfddm(const NumericVector& rt,
 //'
 //' @param rt A vector of response times (in seconds). If a response time is
 //'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-//'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-//'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+//'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 //'
 //' @param response Binary response(s) that correspond(s) to either the "lower"
 //'   or "upper" threshold. This model parameter can either be a singular value
@@ -540,8 +537,7 @@ NumericVector da_dfddm(const NumericVector& rt,
 //'
 //' @param rt A vector of response times (in seconds). If a response time is
 //'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-//'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-//'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+//'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 //'
 //' @param response Binary response(s) that correspond(s) to either the "lower"
 //'   or "upper" threshold. This model parameter can either be a singular value
@@ -709,8 +705,7 @@ NumericVector dv_dfddm(const NumericVector& rt,
 //'
 //' @param rt A vector of response times (in seconds). If a response time is
 //'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-//'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-//'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+//'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 //'
 //' @param response Binary response(s) that correspond(s) to either the "lower"
 //'   or "upper" threshold. This model parameter can either be a singular value
@@ -886,8 +881,7 @@ NumericVector dw_dfddm(const NumericVector& rt,
 //'
 //' @param rt A vector of response times (in seconds). If a response time is
 //'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-//'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-//'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+//'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 //'
 //' @param response Binary response(s) that correspond(s) to either the "lower"
 //'   or "upper" threshold. This model parameter can either be a singular value
@@ -1058,8 +1052,7 @@ NumericVector dsv_dfddm(const NumericVector& rt,
 // //'
 // //' @param rt A vector of response times (in seconds). If a response time is
 // //'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-// //'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-// //'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+// //'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 // //'
 // //' @param response Binary response(s) that correspond(s) to either the "lower"
 // //'   or "upper" threshold. This model parameter can either be a singular value
@@ -1229,8 +1222,7 @@ NumericVector dsv_dfddm(const NumericVector& rt,
 // //'
 // //' @param rt A vector of response times (in seconds). If a response time is
 // //'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-// //'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-// //'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+// //'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 // //'
 // //' @param response Binary response(s) that correspond(s) to either the "lower"
 // //'   or "upper" threshold. This model parameter can either be a singular value
@@ -1400,8 +1392,7 @@ NumericVector dsv_dfddm(const NumericVector& rt,
 // //'
 // //' @param rt A vector of response times (in seconds). If a response time is
 // //'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-// //'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-// //'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+// //'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 // //'
 // //' @param response Binary response(s) that correspond(s) to either the "lower"
 // //'   or "upper" threshold. This model parameter can either be a singular value
@@ -1572,8 +1563,7 @@ NumericVector dsv_dfddm(const NumericVector& rt,
 // //'
 // //' @param rt A vector of response times (in seconds). If a response time is
 // //'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-// //'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-// //'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+// //'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 // //'
 // //' @param response Binary response(s) that correspond(s) to either the "lower"
 // //'   or "upper" threshold. This model parameter can either be a singular value
@@ -1740,8 +1730,7 @@ NumericVector dsv_dfddm(const NumericVector& rt,
 // //'
 // //' @param rt A vector of response times (in seconds). If a response time is
 // //'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-// //'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-// //'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+// //'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 // //'
 // //' @param response Binary response(s) that correspond(s) to either the "lower"
 // //'   or "upper" threshold. This model parameter can either be a singular value
@@ -1916,8 +1905,7 @@ NumericVector dsv_dfddm(const NumericVector& rt,
 // //'
 // //' @param rt A vector of response times (in seconds). If a response time is
 // //'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-// //'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-// //'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+// //'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 // //'
 // //' @param response Binary response(s) that correspond(s) to either the "lower"
 // //'   or "upper" threshold. This model parameter can either be a singular value

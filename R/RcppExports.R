@@ -15,8 +15,7 @@
 #'
 #' @param rt A vector of response times (in seconds). If a response time is
 #'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-#'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-#'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+#'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 #'
 #' @param response Binary response(s) that correspond(s) to either the "lower"
 #'   or "upper" threshold. This model parameter can either be a singular value
@@ -172,8 +171,7 @@ dt_dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl_
 #'
 #' @param rt A vector of response times (in seconds). If a response time is
 #'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-#'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-#'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+#'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 #'
 #' @param response Binary response(s) that correspond(s) to either the "lower"
 #'   or "upper" threshold. This model parameter can either be a singular value
@@ -329,8 +327,7 @@ dt0_dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl
 #'
 #' @param rt A vector of response times (in seconds). If a response time is
 #'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-#'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-#'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+#'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 #'
 #' @param response Binary response(s) that correspond(s) to either the "lower"
 #'   or "upper" threshold. This model parameter can either be a singular value
@@ -485,8 +482,7 @@ da_dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl_
 #'
 #' @param rt A vector of response times (in seconds). If a response time is
 #'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-#'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-#'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+#'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 #'
 #' @param response Binary response(s) that correspond(s) to either the "lower"
 #'   or "upper" threshold. This model parameter can either be a singular value
@@ -639,8 +635,7 @@ dv_dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl_
 #'
 #' @param rt A vector of response times (in seconds). If a response time is
 #'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-#'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-#'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+#'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 #'
 #' @param response Binary response(s) that correspond(s) to either the "lower"
 #'   or "upper" threshold. This model parameter can either be a singular value
@@ -801,8 +796,7 @@ dw_dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl_
 #'
 #' @param rt A vector of response times (in seconds). If a response time is
 #'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-#'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-#'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+#'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 #'
 #' @param response Binary response(s) that correspond(s) to either the "lower"
 #'   or "upper" threshold. This model parameter can either be a singular value
@@ -953,8 +947,7 @@ dsv_dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl
 #'
 #' @param rt A vector of response times (in seconds). If a response time is
 #'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-#'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-#'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+#'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 #'
 #' @param response Binary response(s) that correspond(s) to either the "lower"
 #'   or "upper" threshold. This model parameter can either be a singular value
@@ -1025,7 +1018,7 @@ dsv_dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl
 #'   probability scale.
 #'
 #' @param switch_mech Which switching mechanism to use in the choice of the
-#'   "large-time" or "small-time" density function to use. Can be one of
+#'   "large-time" or "small-time" density function. Can be one of
 #'   \{\code{"eff_rt"}, \code{"terms_large"}, \code{"terms"}, \code{"small"},
 #'   \code{"large"}\}. Note that the large-time approximation is unstable for
 #'   small effective response times (\eqn{(}\code{rt}\eqn{-}\code{t0}\eqn{)}
@@ -1043,13 +1036,12 @@ dsv_dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl
 #'   the density function is used. The default is \eqn{0.8}.
 #'   If \code{switch_mech = "terms_large"}, this parameter is treated as
 #'   \eqn{ceiling(}\code{switch_thresh}\eqn{)}; the smallest integer that is
-#'   nott less than \code{switch_thresh}. In this case, the default is
+#'   not less than \code{switch_thresh}. In this case, the default is
 #'   \eqn{ceiling(0.8) = 1}. See the \code{switch_mech} section of Details for
 #'   more information.
 #'   Note that if \code{switch_thresh}\eqn{ \le 0}, then the effective response
 #'   time is always treated as "large"; contrarily, if \code{switch_thresh} =
-#'   \ifelse{html}{\out{<font style="vertical-align: middle;",
-#'   size="5em">&#8734;</font>}}{\eqn{-\infty}} then the effective response
+#'   \ifelse{html}{\out{&#8734}}{\eqn{-\infty}} then the effective response
 #'   time is always treated as "small". However, it is better to simply set
 #'   \code{switch_mech = "large"} or \code{switch_mech = "small"} to always use
 #'   the "large-time" or "small-time" variant, respectively.
@@ -1079,7 +1071,8 @@ dsv_dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl
 #' All of the model inputs and parameters (\code{rt}, \code{response},
 #' \code{a}, \code{v}, \code{t0}, \code{w}, \code{sv}, \code{sigma}) can be
 #' input as a single value or as a vector of values. If input as a vector of
-#' values, then the standard \code{R} input wrapping will occur.
+#' values, then the standard \code{R} recycling rules apply to ensure all 
+#' inputs are of the same length.
 #'
 #' The default settings of \code{switch_mech = "eff_rt"},
 #' \code{switch_thresh = "0.8"}, \code{n_terms_small = "SWSE"},
@@ -1119,11 +1112,11 @@ dsv_dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl
 #'
 #' \code{switch_mech} - The density function for the DDM has traditionally been
 #' written in two forms: a "large-time" variant, and a "small-time" variant
-#' (Navarro and Fuss (2009), the first reference). These two forms are more
+#' (Navarro and Fuss, 2009). These two forms are more
 #' efficient at calculating the density for large and small response times,
-#' respectively. The parameter \code{switch_mech} indicates how the user would
-#' like to choose which of these two variants is used, given the other
-#' parameters input to the density function. \code{switch_mech = "small"} uses
+#' respectively. The parameter \code{switch_mech} determines how \code{dfddm}  
+#' decides which of these two variants is used. 
+#' \code{switch_mech = "small"} uses
 #' only the "small-time" variant, and \code{switch_mech = "large"} uses only
 #' the "large-time" variant. The "large-time" variant is unstable for small
 #' effective response times (\eqn{(}\code{rt}\eqn{-}\code{t0}\eqn{)} \eqn{/
@@ -1225,8 +1218,7 @@ dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, err_to
 #'
 #' @param rt A vector of response times (in seconds). If a response time is
 #'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-#'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-#'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+#'   \ifelse{html}{\out{-&#8734}}{\eqn{-\infty}} if log = TRUE.
 #'
 #' @param response Binary response(s) that correspond(s) to either the "lower"
 #'   or "upper" threshold. This model parameter can either be a singular value

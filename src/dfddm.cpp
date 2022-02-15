@@ -21,8 +21,7 @@
 //'
 //' @param rt A vector of response times (in seconds). If a response time is
 //'   non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-//'   \ifelse{html}{\out{-<font style="vertical-align: middle;"
-//'   size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.
+//'   \ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.
 //'
 //' @param response Binary response(s) that correspond(s) to either the "lower"
 //'   or "upper" threshold. This model parameter can either be a singular value
@@ -116,8 +115,7 @@
 //'   more information.
 //'   Note that if \code{switch_thresh}\eqn{ \le 0}, then the effective response
 //'   time is always treated as "large"; contrarily, if \code{switch_thresh} =
-//'   \ifelse{html}{\out{<font style="vertical-align: middle;",
-//'   size="5em">&#8734;</font>}}{\eqn{-\infty}} then the effective response
+//'   \ifelse{html}{\out{&#8734}}{\eqn{-\infty}} then the effective response
 //'   time is always treated as "small". However, it is better to simply set
 //'   \code{switch_mech = "large"} or \code{switch_mech = "small"} to always use
 //'   the "large-time" or "small-time" variant, respectively.

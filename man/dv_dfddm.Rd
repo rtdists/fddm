@@ -20,8 +20,7 @@ dv_dfddm(
 \arguments{
 \item{rt}{A vector of response times (in seconds). If a response time is
 non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
-\ifelse{html}{\out{-<font style="vertical-align: middle;"
-size="5em">&#8734;</font>}}{\eqn{-\infty}} if log = TRUE.}
+\ifelse{html}{\out{-&#8734;}}{\eqn{-\infty}} if log = TRUE.}
 
 \item{response}{Binary response(s) that correspond(s) to either the "lower"
 or "upper" threshold. This model parameter can either be a singular value
