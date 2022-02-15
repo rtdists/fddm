@@ -93,7 +93,7 @@
 //'   probability scale.
 //'
 //' @param switch_mech Which switching mechanism to use in the choice of the
-//'   "large-time" or "small-time" density function to use. Can be one of
+//'   "large-time" or "small-time" density function. Can be one of
 //'   \{\code{"eff_rt"}, \code{"terms_large"}, \code{"terms"}, \code{"small"},
 //'   \code{"large"}\}. Note that the large-time approximation is unstable for
 //'   small effective response times (\eqn{(}\code{rt}\eqn{-}\code{t0}\eqn{)}
@@ -111,7 +111,7 @@
 //'   the density function is used. The default is \eqn{0.8}.
 //'   If \code{switch_mech = "terms_large"}, this parameter is treated as
 //'   \eqn{ceiling(}\code{switch_thresh}\eqn{)}; the smallest integer that is
-//'   nott less than \code{switch_thresh}. In this case, the default is
+//'   not less than \code{switch_thresh}. In this case, the default is
 //'   \eqn{ceiling(0.8) = 1}. See the \code{switch_mech} section of Details for
 //'   more information.
 //'   Note that if \code{switch_thresh}\eqn{ \le 0}, then the effective response
@@ -147,7 +147,8 @@
 //' All of the model inputs and parameters (\code{rt}, \code{response},
 //' \code{a}, \code{v}, \code{t0}, \code{w}, \code{sv}, \code{sigma}) can be
 //' input as a single value or as a vector of values. If input as a vector of
-//' values, then the standard \code{R} input wrapping will occur.
+//' values, then the standard \code{R} recycling rules apply to ensure all 
+//' inputs are of the same length.
 //'
 //' The default settings of \code{switch_mech = "eff_rt"},
 //' \code{switch_thresh = "0.8"}, \code{n_terms_small = "SWSE"},
@@ -187,11 +188,11 @@
 //'
 //' \code{switch_mech} - The density function for the DDM has traditionally been
 //' written in two forms: a "large-time" variant, and a "small-time" variant
-//' (Navarro and Fuss (2009), the first reference). These two forms are more
+//' (Navarro and Fuss, 2009). These two forms are more
 //' efficient at calculating the density for large and small response times,
-//' respectively. The parameter \code{switch_mech} indicates how the user would
-//' like to choose which of these two variants is used, given the other
-//' parameters input to the density function. \code{switch_mech = "small"} uses
+//' respectively. The parameter \code{switch_mech} determines how \code{dfddm}  
+//' decides which of these two variants is used. 
+//' \code{switch_mech = "small"} uses
 //' only the "small-time" variant, and \code{switch_mech = "large"} uses only
 //' the "large-time" variant. The "large-time" variant is unstable for small
 //' effective response times (\eqn{(}\code{rt}\eqn{-}\code{t0}\eqn{)} \eqn{/
