@@ -132,7 +132,7 @@ It remains to find the value of $k_\ell^\text{Nav}$ that ensures the truncated s
 \end{equation}
 
 <p class="method">
-This method is often viewed as the most inefficient of the available options in the literature; however, this method proves to be extremely efficient in particular areas of the parameter space (typically for large $t'$). The argument used to implement this method in `dfddm` is to set the parameter `scale = "large"` in the function call. In this case the other parameters, `n_terms_small` and `summation_small`, must be set to any string that does not start with `S` or `s` to avoid any potential clashes with overridden options.
+This method is often viewed as the most inefficient of the available options in the literature; however, this method proves to be extremely efficient in particular areas of the parameter space (typically for large $t'$). To implement this method in `dfddm`, the user must set the parameter `switch_mech = "large"` in the function call; in this case, the other parameters are ignored.
 </p>
 
 
@@ -159,7 +159,7 @@ Similarly to their large-time solution, @navarro2009fast provide an expression f
 \end{equation}
 
 <p class="method">
-To use this method, set `n_terms_small = "Navarro"` and keep `scale = "small"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
+To use this method, set `switch_mech = "small"` and `n_terms_small = "Navarro"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 
 
@@ -176,7 +176,7 @@ After @navarro2009fast published their paper, @gondan2014even introduced another
 \end{equation}
 
 <p class="method">
-To use this method, set `n_terms_small = "Gondan"` and keep `scale = "small"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
+To use this method, set `switch_mech = "small"` and `n_terms_small = "Gondan"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 
 
@@ -185,7 +185,7 @@ To use this method, set `n_terms_small = "Gondan"` and keep `scale = "small"` in
 If we consider the terms of the infinite sum as the sequence defined above, the series alternates in sign $(+, -, +, \dots)$; moreover, the series eventually decreases monotonically (in absolute value) due to the exponential term. Combining and exploiting these two mathematical properties has been the cornerstone of the previous approximations, but we will instead truncate the sum using a method suggested by @gondan2014even. This method does not pre-calculate the number of terms required to achieve the given error tolerance. Instead, the general idea of this method is to take full advantage of the alternating and decreasing nature of the terms in the infinite sum by applying a handy theorem (commonly known as the alternating series test) to place an upper bound on the truncation error after including so many terms. It has been proven that this upper bound is in fact the absolute value of the next term in the sequence, thus we can truncate the infinite sum once one of its terms is less than the desired error tolerance, $\epsilon$. Hence we do not consider the number of terms in the sum, rather just that the terms in the summation will eventually be small enough. The validity of this method is proven in the paper that accompanies the `fddm` package.
 
 <p class="method">
-To use this method, set `n_terms_small = "SWSE"` and keep `scale = "small"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
+To use this method, set `swich_mech = "terms_large"` and `n_terms_small = "SWSE"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 </div>
 
@@ -209,7 +209,7 @@ To use this method of evaluating the PDF, set the optional parameter `scale = "b
 \end{equation}
 
 <p class="method">
-To use this method, set `n_terms_small = "Navarro"` and keep `scale = "both"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
+To use this method, set `switch_mech = "terms"` and `n_terms_small = "Navarro"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 
 
@@ -222,7 +222,7 @@ This combination of methods has not been explored in the literature before, but 
 \end{equation}
 
 <p class="method">
-To use this method, set `n_terms_small = "Gondan"` and keep `scale = "both"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
+To use this method, set `switch_mech = "terms"` and `n_terms_small = "Gondan"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 
 
@@ -233,7 +233,7 @@ To use this method, set `n_terms_small = "Gondan"` and keep `scale = "both"` in 
 This method uses the SWSE approximation to the small-time density function in conjunction with the Navarro large-time approximation to achieve consistent performance across the parameter space. Since the SWSE approximation to the small-time density function does not explicitly calculate $k_s$, we only calculate $k_\ell^{\text{Nav}}$ and compare it to the new optional parameter `max_terms_large`. If $k_\ell^{\text{Nav}}$ $\le$ `max_terms_large`, then the Navarro large-time approximation is used. On the other hand, if $k_\ell^{\text{Nav}}$ $>$ `max_terms_large`, then the SWSE small-time approximation is used. The user can set the optional parameter `max_terms_large` to any non-negative integer to alter the behavior of this method; the default value for this parameter is $1$. Again, the validity of this method is proven in the paper that accompanies the `fddm` package. Note that in the `fddm` paper, the parameter `max_terms_large` is labelled $\delta$.
 
 <p class="method">
-Since this is the default implementation, all three of the optional parameters (`n_terms_small`, `scale`, and `summation_small`) can be ignored. For completeness, set `n_terms_small = "SWSE"` and keep `scale = "both"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance. This method uses a fourth optional parameter, `max_terms_large`, and we recommend ignoring this parameter so that it retains its default value.
+Since this is the default implementation, all three of the optional parameters (`switch_mech`, `n_terms_small`, and `summation_small`) can be ignored. For completeness, set `switch_mech = "terms_large"` and `n_terms_small = "SWSE"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance. This method uses a fourth optional parameter, `switch_thresh`, and we recommend ignoring this parameter so that it retains its default value.
 </p>
 </div>
 

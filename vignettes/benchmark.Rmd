@@ -101,7 +101,7 @@ source(system.file("extdata", "Gondan_et_al_density.R",
                    package = "fddm", mustWork = TRUE))
 library("microbenchmark")
 
-rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
+rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5,
                              err_tol = 1e-6, times = 100, unit = "ns") {
 
   fnames <- c("fs_SWSE_17", "fs_SWSE_14", "fb_SWSE_17", "fb_SWSE_14",
@@ -112,111 +112,107 @@ rt_benchmark_vec <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
   nV <- length(V)
   nA <- length(A)
   nW <- length(W)
-  nSV <- length(SV)
   resp <- rep(resp, length(RT)) # for RWiener
 
   # Initialize the dataframe to contain the microbenchmark results
-  mbm_res <- data.frame(matrix(ncol = 4+nf, nrow = nV*nA*nW*nSV))
-  colnames(mbm_res) <- c('V', 'A', 'W', 'SV', fnames)
+  mbm_res <- data.frame(matrix(ncol = 3+nf, nrow = nV*nA*nW*nSV))
+  colnames(mbm_res) <- c('V', 'A', 'W', fnames)
   row_idx <- 1
 
   # Loop through each combination of parameters and record microbenchmark results
   for (v in 1:nV) {
     for (a in 1:nA) {
       for (w in 1:nW) {
-        for (sv in 1:nSV) {
-          mbm <- microbenchmark(
-          fs_SWSE_17 = dfddm(rt = RT, response = resp, a = A[a],
-                             v = V[v], t0 = t0, w = W[w],
-                             log = FALSE, n_terms_small = "SWSE",
-                             summation_small = "2017", scale = "small",
-                             err_tol = err_tol),
-          fs_SWSE_14 = dfddm(rt = RT, response = resp, a = A[a],
-                             v = V[v], t0 = t0, w = W[w],
-                             log = FALSE, n_terms_small = "SWSE",
-                             summation_small = "2014", scale = "small",
-                             err_tol = err_tol),
-          fb_SWSE_17 = dfddm(rt = RT, response = resp, a = A[a],
-                             v = V[v], t0 = t0, w = W[w],
-                             log = FALSE, n_terms_small = "SWSE",
-                             summation_small = "2017", scale = "both",
-                             err_tol = err_tol),
-          fb_SWSE_14 = dfddm(rt = RT, response = resp, a = A[a],
-                             v = V[v], t0 = t0, w = W[w],
-                             log = FALSE, n_terms_small = "SWSE",
-                             summation_small = "2014", scale = "both",
-                             err_tol = err_tol),
-          fs_Gon_17 = dfddm(rt = RT, response = resp, a = A[a],
-                            v = V[v], t0 = t0, w = W[w],
-                            log = FALSE, n_terms_small = "Gondan",
-                            summation_small = "2017", scale = "small",
-                            err_tol = err_tol),
-          fs_Gon_14 = dfddm(rt = RT, response = resp, a = A[a],
-                            v = V[v], t0 = t0, w = W[w],
-                            log = FALSE, n_terms_small = "Gondan",
-                            summation_small = "2014", scale = "small",
-                            err_tol = err_tol),
-          fb_Gon_17 = dfddm(rt = RT, response = resp, a = A[a],
-                            v = V[v], t0 = t0, w = W[w],
-                            log = FALSE, n_terms_small = "Gondan",
-                            summation_small = "2017", scale = "both",
-                            err_tol = err_tol),
-          fb_Gon_14 = dfddm(rt = RT, response = resp, a = A[a],
-                            v = V[v], t0 = t0, w = W[w],
-                            log = FALSE, n_terms_small = "Gondan",
-                            summation_small = "2014", scale = "both",
-                            err_tol = err_tol),
-          fs_Nav_17 = dfddm(rt = RT, response = resp, a = A[a],
-                            v = V[v], t0 = t0, w = W[w],
-                            log = FALSE, n_terms_small = "Navarro",
-                            summation_small = "2017", scale = "small",
-                            err_tol = err_tol),
-          fs_Nav_14 = dfddm(rt = RT, response = resp, a = A[a],
-                            v = V[v], t0 = t0, w = W[w],
-                            log = FALSE, n_terms_small = "Navarro",
-                            summation_small = "2014", scale = "small",
-                            err_tol = err_tol),
-          fb_Nav_17 = dfddm(rt = RT, response = resp, a = A[a],
-                            v = V[v], t0 = t0, w = W[w],
-                            log = FALSE, n_terms_small = "Navarro",
-                            summation_small = "2017", scale = "both",
-                            err_tol = err_tol),
-          fb_Nav_14 = dfddm(rt = RT, response = resp, a = A[a],
-                            v = V[v], t0 = t0, w = W[w],
-                            log = FALSE, n_terms_small = "Navarro",
-                            summation_small = "2014", scale = "both",
-                            err_tol = err_tol),
-          fl_Nav_09 = dfddm(rt = RT, response = resp, a = A[a],
-                            v = V[v], t0 = t0, w = W[w],
-                            log = FALSE, n_terms_small = "Navarro",
-                            scale = "large", err_tol = err_tol),
-          RWiener = dwiener(RT, resp = resp, alpha = A[a],
-                            delta = V[v], tau = t0, beta = W[w],
-                            give_log = FALSE),
-          Gondan = fs(t = RT-t0, a = A[a], v = V[v],
-                      w = W[w], eps = err_tol), # only "lower" resp
-          rtdists = ddiffusion(RT, resp, a = A[a], v = V[v],
-                               t0 = t0, z = W[w]*A[a]),
-          times = times, unit = unit)
+        mbm <- microbenchmark(
+        fs_SWSE_17 = dfddm(rt = RT, response = resp, a = A[a],
+                           v = V[v], t0 = t0, w = W[w],
+                           err_tol = err_tol, log = FALSE,
+                           switch_mech = "small", n_terms_small = "SWSE",
+                           summation_small = "2017"),
+        fs_SWSE_14 = dfddm(rt = RT, response = resp, a = A[a],
+                           v = V[v], t0 = t0, w = W[w],
+                           err_tol = err_tol, log = FALSE,
+                           switch_mech = "small", n_terms_small = "SWSE",
+                           summation_small = "2014"),
+        fb_SWSE_17 = dfddm(rt = RT, response = resp, a = A[a],
+                           v = V[v], t0 = t0, w = W[w],
+                           err_tol = err_tol, log = FALSE,
+                           switch_mech = "terms_large", n_terms_small = "SWSE",
+                           summation_small = "2017", switch_thresh = 0.8),
+        fb_SWSE_14 = dfddm(rt = RT, response = resp, a = A[a],
+                           v = V[v], t0 = t0, w = W[w],
+                           err_tol = err_tol, log = FALSE,
+                           switch_mech = "terms_large", n_terms_small = "SWSE",
+                           summation_small = "2014", switch_thresh = 0.8),
+        fs_Gon_17 = dfddm(rt = RT, response = resp, a = A[a],
+                          v = V[v], t0 = t0, w = W[w],
+                          err_tol = err_tol, log = FALSE,
+                          switch_mech = "small", n_terms_small = "Gondan",
+                          summation_small = "2017"),
+        fs_Gon_14 = dfddm(rt = RT, response = resp, a = A[a],
+                          v = V[v], t0 = t0, w = W[w],
+                          err_tol = err_tol, log = FALSE,
+                          switch_mech = "small", n_terms_small = "Gondan",
+                          summation_small = "2014"),
+        fb_Gon_17 = dfddm(rt = RT, response = resp, a = A[a],
+                          v = V[v], t0 = t0, w = W[w],
+                          err_tol = err_tol, log = FALSE,
+                          switch_mech = "terms", n_terms_small = "Gondan",
+                          summation_small = "2017"),
+        fb_Gon_14 = dfddm(rt = RT, response = resp, a = A[a],
+                          v = V[v], t0 = t0, w = W[w],
+                          err_tol = err_tol, log = FALSE,
+                          switch_mech = "terms", n_terms_small = "Gondan",
+                          summation_small = "2014"),
+        fs_Nav_17 = dfddm(rt = RT, response = resp, a = A[a],
+                          v = V[v], t0 = t0, w = W[w],
+                          err_tol = err_tol, log = FALSE,
+                          switch_mech = "small", n_terms_small = "Navarro",
+                          summation_small = "2017"),
+        fs_Nav_14 = dfddm(rt = RT, response = resp, a = A[a],
+                          v = V[v], t0 = t0, w = W[w],
+                          err_tol = err_tol, log = FALSE,
+                          switch_mech = "small", n_terms_small = "Navarro",
+                          summation_small = "2014"),
+        fb_Nav_17 = dfddm(rt = RT, response = resp, a = A[a],
+                          v = V[v], t0 = t0, w = W[w],
+                          err_tol = err_tol, log = FALSE,
+                          switch_mech = "terms", n_terms_small = "Navarro",
+                          summation_small = "2017"),
+        fb_Nav_14 = dfddm(rt = RT, response = resp, a = A[a],
+                          v = V[v], t0 = t0, w = W[w],
+                          err_tol = err_tol, log = FALSE,
+                          switch_mech = "terms", n_terms_small = "Navarro",
+                          summation_small = "2014"),
+        fl_Nav_09 = dfddm(rt = RT, response = resp, a = A[a],
+                          v = V[v], t0 = t0, w = W[w],
+                          err_tol = err_tol, log = FALSE,
+                          switch_mech = "large"),
+        RWiener = dwiener(RT, resp = resp, alpha = A[a],
+                          delta = V[v], tau = t0, beta = W[w],
+                          give_log = FALSE),
+        Gondan = fs(t = RT-t0, a = A[a], v = V[v],
+                    w = W[w], eps = err_tol), # only "lower" resp
+        rtdists = ddiffusion(RT, resp, a = A[a], v = V[v],
+                              t0 = t0, z = W[w]*A[a]),
+        times = times, unit = unit)
         # add the v, a, and w values to the dataframe
         mbm_res[row_idx, 1] <- V[v]
         mbm_res[row_idx, 2] <- A[a]
         mbm_res[row_idx, 3] <- W[w]
-        mbm_res[row_idx, 4] <- SV[sv]
         # add the median microbenchmark results to the dataframe
         for (i in 1:nf) {
-          mbm_res[row_idx, 4+i] <- median(mbm[mbm[,1] == fnames[i],2])
+          mbm_res[row_idx, 3+i] <- median(mbm[mbm[,1] == fnames[i],2])
         }
         # iterate start value
         row_idx = row_idx + 1
-        }
       }
     }
   }
   return(mbm_res)
 }
 
-rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
+rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5,
                              err_tol = 1e-6, times = 100, unit = "ns") {
   fnames <- c("fs_SWSE_17", "fs_SWSE_14", "fb_SWSE_17", "fb_SWSE_14",
               "fs_Gon_17", "fs_Gon_14", "fb_Gon_17", "fb_Gon_14",
@@ -227,11 +223,10 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
   nV <- length(V)
   nA <- length(A)
   nW <- length(W)
-  nSV <- length(SV)
 
   # Initialize the dataframe to contain the microbenchmark results
-  mbm_res <- data.frame(matrix(ncol = 5+nf, nrow = nRT*nV*nA*nW*nSV))
-  colnames(mbm_res) <- c('RT', 'V', 'A', 'W', 'SV', fnames)
+  mbm_res <- data.frame(matrix(ncol = 4+nf, nrow = nRT*nV*nA*nW*nSV))
+  colnames(mbm_res) <- c('RT', 'V', 'A', 'W', fnames)
   row_idx <- 1
 
   # Loop through each combination of parameters and record microbenchmark results
@@ -239,93 +234,90 @@ rt_benchmark_ind <- function(RT, resp, V, A, t0 = 1e-4, W = 0.5, SV = 0.0,
     for (v in 1:nV) {
       for (a in 1:nA) {
         for (w in 1:nW) {
-          for (sv in 1:nSV) {
-            mbm <- microbenchmark(
-            fs_SWSE_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "SWSE",
-                              summation_small = "2017", scale = "small",
-                              err_tol = err_tol),
-            fs_SWSE_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "SWSE",
-                              summation_small = "2014", scale = "small",
-                              err_tol = err_tol),
-            fb_SWSE_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "SWSE",
-                              summation_small = "2017", scale = "both",
-                              err_tol = err_tol),
-            fb_SWSE_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "SWSE",
-                              summation_small = "2014", scale = "both",
-                              err_tol = err_tol),
-            fs_Gon_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Gondan",
-                              summation_small = "2017", scale = "small",
-                              err_tol = err_tol),
-            fs_Gon_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Gondan",
-                              summation_small = "2014", scale = "small",
-                              err_tol = err_tol),
-            fb_Gon_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Gondan",
-                              summation_small = "2017", scale = "both",
-                              err_tol = err_tol),
-            fb_Gon_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Gondan",
-                              summation_small = "2014", scale = "both",
-                              err_tol = err_tol),
-            fs_Nav_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Navarro",
-                              summation_small = "2017", scale = "small",
-                              err_tol = err_tol),
-            fs_Nav_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Navarro",
-                              summation_small = "2014", scale = "small",
-                              err_tol = err_tol),
-            fb_Nav_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Navarro",
-                              summation_small = "2017", scale = "both",
-                              err_tol = err_tol),
-            fb_Nav_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Navarro",
-                              summation_small = "2014", scale = "both",
-                              err_tol = err_tol),
-            fl_Nav_09 = dfddm(rt = RT[rt], response = resp, a = A[a],
-                              v = V[v], t0 = t0, w = W[w],
-                              log = FALSE, n_terms_small = "Navarro",
-                              scale = "large", err_tol = err_tol),
-            RWiener = dwiener(RT[rt], resp = resp, alpha = A[a],
-                              delta = V[v], tau = t0, beta = W[w],
-                              give_log = FALSE),
-            Gondan = fs(t = RT[rt]-t0, a = A[a], v = V[v],
-                        w = W[w], eps = err_tol), # only "lower" resp
-            rtdists = ddiffusion(RT[rt], resp, a = A[a], v = V[v],
-                                 t0 = t0, z = W[w]*A[a]),
-            times = times, unit = unit)
+          mbm <- microbenchmark(
+          fs_SWSE_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                             v = V[v], t0 = t0, w = W[w],
+                             err_tol = err_tol, log = FALSE,
+                             switch_mech = "small", n_terms_small = "SWSE",
+                             summation_small = "2017"),
+          fs_SWSE_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                             v = V[v], t0 = t0, w = W[w],
+                             err_tol = err_tol, log = FALSE,
+                             switch_mech = "small", n_terms_small = "SWSE",
+                             summation_small = "2014"),
+          fb_SWSE_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                             v = V[v], t0 = t0, w = W[w],
+                             err_tol = err_tol, log = FALSE,
+                             switch_mech = "terms_large", n_terms_small = "SWSE",
+                             summation_small = "2017", switch_thresh = 0.8),
+          fb_SWSE_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                             v = V[v], t0 = t0, w = W[w],
+                             err_tol = err_tol, log = FALSE,
+                             switch_mech = "terms_large", n_terms_small = "SWSE",
+                             summation_small = "2014", switch_thresh = 0.8),
+          fs_Gon_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                            v = V[v], t0 = t0, w = W[w],
+                            err_tol = err_tol, log = FALSE,
+                            switch_mech = "small", n_terms_small = "Gondan",
+                            summation_small = "2017"),
+          fs_Gon_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                            v = V[v], t0 = t0, w = W[w],
+                            err_tol = err_tol, log = FALSE,
+                            switch_mech = "small", n_terms_small = "Gondan",
+                            summation_small = "2014"),
+          fb_Gon_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                            v = V[v], t0 = t0, w = W[w],
+                            err_tol = err_tol, log = FALSE,
+                            switch_mech = "terms", n_terms_small = "Gondan",
+                            summation_small = "2017"),
+          fb_Gon_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                            v = V[v], t0 = t0, w = W[w],
+                            err_tol = err_tol, log = FALSE,
+                            switch_mech = "terms", n_terms_small = "Gondan",
+                            summation_small = "2014"),
+          fs_Nav_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                            v = V[v], t0 = t0, w = W[w],
+                            err_tol = err_tol, log = FALSE,
+                            switch_mech = "small", n_terms_small = "Navarro",
+                            summation_small = "2017"),
+          fs_Nav_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                            v = V[v], t0 = t0, w = W[w],
+                            err_tol = err_tol, log = FALSE,
+                            switch_mech = "small", n_terms_small = "Navarro",
+                            summation_small = "2014"),
+          fb_Nav_17 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                            v = V[v], t0 = t0, w = W[w],
+                            err_tol = err_tol, log = FALSE,
+                            switch_mech = "terms", n_terms_small = "Navarro",
+                            summation_small = "2017"),
+          fb_Nav_14 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                            v = V[v], t0 = t0, w = W[w],
+                            err_tol = err_tol, log = FALSE,
+                            switch_mech = "terms", n_terms_small = "Navarro",
+                            summation_small = "2014"),
+          fl_Nav_09 = dfddm(rt = RT[rt], response = resp, a = A[a],
+                            v = V[v], t0 = t0, w = W[w],
+                            err_tol = err_tol, log = FALSE,
+                            switch_mech = "large"),
+          RWiener = dwiener(RT[rt], resp = resp, alpha = A[a],
+                            delta = V[v], tau = t0, beta = W[w],
+                            give_log = FALSE),
+          Gondan = fs(t = RT[rt]-t0, a = A[a], v = V[v],
+                      w = W[w], eps = err_tol), # only "lower" resp
+          rtdists = ddiffusion(RT[rt], resp, a = A[a], v = V[v],
+                                t0 = t0, z = W[w]*A[a]),
+          times = times, unit = unit)
           # add the v, a, and w values to the dataframe
           mbm_res[row_idx, 1] <- RT[rt]
           mbm_res[row_idx, 2] <- V[v]
           mbm_res[row_idx, 3] <- A[a]
           mbm_res[row_idx, 4] <- W[w]
-          mbm_res[row_idx, 5] <- SV[sv]
           # add the median microbenchmark results to the dataframe
           for (i in 1:nf) {
-            mbm_res[row_idx, 5+i] <- median(mbm[mbm[,1] == fnames[i],2])
+            mbm_res[row_idx, 4+i] <- median(mbm[mbm[,1] == fnames[i],2])
           }
           # iterate start value
           row_idx = row_idx + 1
-          }
         }
       }
     }
@@ -345,15 +337,14 @@ A <- seq(0.5, 3.5, by = 0.5)
 V <- c(-5, -2, 0, 2, 5)
 t0 <- 1e-4 # must be nonzero for RWiener
 W <- seq(0.3, 0.7, by = 0.1)
-SV <- c(0, 1, 2, 3.5)
 err_tol <- 1e-6 # this is the setting from rtdists
 
 # Run benchmark tests
 bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
-                           W = W, SV = SV, err_tol = err_tol,
+                           W = W, err_tol = err_tol,
                            times = 1000, unit = "ns")
 bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
-                           W = W, SV = SV, err_tol = err_tol,
+                           W = W, err_tol = err_tol,
                            times = 100, unit = "ns")
 ```
 
@@ -364,19 +355,19 @@ A <- seq(0.5, 3.5, by = 0.5)
 V <- c(-5, -2, 0, 2, 5)
 t0 <- 1e-4 # must be nonzero for RWiener
 W <- seq(0.3, 0.7, by = 0.1)
-SV <- c(0, 1, 2, 3.5)
+# SV <- c(0, 1, 2, 3.5)
 err_tol <- 1e-6 # this is the setting from rtdists
 
 # Run benchmark tests
 bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
-                           W = W, SV = SV, err_tol = err_tol,
+                           W = W, err_tol = err_tol,
                            times = 1000, unit = "ns")
 save(bm_vec, compress = "xz", compression_level = 9,
      file = "inst/extdata/bm_vec_0-2.Rds")
 # load(system.file("extdata", "dfddm_density", "bm_vec_0-2.Rds",
 #                  package = "fddm", mustWork = TRUE))
 bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
-                           W = W, SV = SV, err_tol = err_tol,
+                           W = W, err_tol = err_tol,
                            times = 100, unit = "ns")
 save(bm_ind, compress = "xz", compression_level = 9,
      file = "inst/extdata/bm_ind_0-2.Rds")
@@ -574,9 +565,9 @@ ll_fb_SWSE_17 <- function(pars, rt, resp, truth, err_tol) {
   v[truth == "upper"] <- pars[[1]]
   v[truth == "lower"] <- pars[[2]]
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
-                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                n_terms_small = "SWSE", summation_small = "2017",
-                scale = "both", err_tol = err_tol)
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], err_tol = 1e-6,
+                log = TRUE, switch_mech = "terms_large", switch_thresh = 0.8,
+                n_terms_small = "SWSE", summation_small = "2017")
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -585,9 +576,9 @@ ll_fb_SWSE_14 <- function(pars, rt, resp, truth, err_tol) {
   v[truth == "upper"] <- pars[[1]]
   v[truth == "lower"] <- pars[[2]]
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
-                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                n_terms_small = "SWSE", summation_small = "2014",
-                scale = "both", err_tol = err_tol)
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], err_tol = 1e-6,
+                log = TRUE, switch_mech = "terms_large", switch_thresh = 0.8,
+                n_terms_small = "SWSE", summation_small = "2014")
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -596,9 +587,9 @@ ll_fb_Gon_17 <- function(pars, rt, resp, truth, err_tol) {
   v[truth == "upper"] <- pars[[1]]
   v[truth == "lower"] <- pars[[2]]
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
-                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                n_terms_small = "Gondan", summation_small = "2017",
-                scale = "both", err_tol = err_tol)
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], err_tol = 1e-6,
+                log = TRUE, switch_mech = "terms", n_terms_small = "Gondan",
+                summation_small = "2017")
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -607,9 +598,9 @@ ll_fb_Gon_14 <- function(pars, rt, resp, truth, err_tol) {
   v[truth == "upper"] <- pars[[1]]
   v[truth == "lower"] <- pars[[2]]
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
-                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                n_terms_small = "Gondan", summation_small = "2014",
-                scale = "both", err_tol = err_tol)
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], err_tol = 1e-6,
+                log = TRUE, switch_mech = "terms", n_terms_small = "Gondan",
+                summation_small = "2014")
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -618,9 +609,9 @@ ll_fb_Nav_17 <- function(pars, rt, resp, truth, err_tol) {
   v[truth == "upper"] <- pars[[1]]
   v[truth == "lower"] <- pars[[2]]
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
-                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                n_terms_small = "Navarro", summation_small = "2017",
-                scale = "both", err_tol = err_tol)
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], err_tol = 1e-6,
+                log = TRUE, switch_mech = "terms", n_terms_small = "Navarro",
+                summation_small = "2017")
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -629,9 +620,9 @@ ll_fb_Nav_14 <- function(pars, rt, resp, truth, err_tol) {
   v[truth == "upper"] <- pars[[1]]
   v[truth == "lower"] <- pars[[2]]
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
-                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                n_terms_small = "Navarro", summation_small = "2014",
-                scale = "both", err_tol = err_tol)
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], err_tol = 1e-6,
+                log = TRUE, switch_mech = "terms", n_terms_small = "Navarro",
+                summation_small = "2014")
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -640,9 +631,9 @@ ll_fs_SWSE_17 <- function(pars, rt, resp, truth, err_tol) {
   v[truth == "upper"] <- pars[[1]]
   v[truth == "lower"] <- pars[[2]]
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
-                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                n_terms_small = "SWSE", summation_small = "2017",
-                scale = "small", err_tol = err_tol)
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], err_tol = 1e-6,
+                log = TRUE, switch_mech = "small", n_terms_small = "SWSE",
+                summation_small = "2017")
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -651,9 +642,9 @@ ll_fs_SWSE_14 <- function(pars, rt, resp, truth, err_tol) {
   v[truth == "upper"] <- pars[[1]]
   v[truth == "lower"] <- pars[[2]]
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
-                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                n_terms_small = "SWSE", summation_small = "2014",
-                scale = "small", err_tol = err_tol)
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], err_tol = 1e-6,
+                log = TRUE, switch_mech = "small", n_terms_small = "SWSE",
+                summation_small = "2014")
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -662,9 +653,9 @@ ll_fs_Gon_17 <- function(pars, rt, resp, truth, err_tol) {
   v[truth == "upper"] <- pars[[1]]
   v[truth == "lower"] <- pars[[2]]
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
-                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                n_terms_small = "Gondan", summation_small = "2017",
-                scale = "small", err_tol = err_tol)
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], err_tol = 1e-6,
+                log = TRUE, switch_mech = "small", n_terms_small = "Gondan",
+                summation_small = "2017")
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -673,9 +664,9 @@ ll_fs_Gon_14 <- function(pars, rt, resp, truth, err_tol) {
   v[truth == "upper"] <- pars[[1]]
   v[truth == "lower"] <- pars[[2]]
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
-                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                n_terms_small = "Gondan", summation_small = "2014",
-                scale = "small", err_tol = err_tol)
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], err_tol = 1e-6,
+                log = TRUE, switch_mech = "small", n_terms_small = "Gondan",
+                summation_small = "2014")
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -684,9 +675,9 @@ ll_fs_Nav_17 <- function(pars, rt, resp, truth, err_tol) {
   v[truth == "upper"] <- pars[[1]]
   v[truth == "lower"] <- pars[[2]]
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
-                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                n_terms_small = "Navarro", summation_small = "2017",
-                scale = "small", err_tol = err_tol)
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], err_tol = 1e-6,
+                log = TRUE, switch_mech = "small", n_terms_small = "Navarro",
+                summation_small = "2017")
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -695,9 +686,9 @@ ll_fs_Nav_14 <- function(pars, rt, resp, truth, err_tol) {
   v[truth == "upper"] <- pars[[1]]
   v[truth == "lower"] <- pars[[2]]
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
-                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                n_terms_small = "Navarro", summation_small = "2014",
-                scale = "small", err_tol = err_tol)
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], err_tol = 1e-6,
+                log = TRUE, switch_mech = "small", n_terms_small = "Navarro",
+                summation_small = "2014")
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 
@@ -706,8 +697,8 @@ ll_fl_Nav_09 <- function(pars, rt, resp, truth, err_tol) {
   v[truth == "upper"] <- pars[[1]]
   v[truth == "lower"] <- pars[[2]]
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
-                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                n_terms_small = "Navarro", scale = "large", err_tol = err_tol)
+                t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], err_tol = 1e-6,
+                log = TRUE, switch_mech = "large")
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }
 

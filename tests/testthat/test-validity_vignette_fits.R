@@ -1,6 +1,7 @@
 context("Comparing saved with new fits (validity vignette)")
 
 test_that("Fits in validity vignette", {
+  testthat::skp()
   testthat::skip_on_cran()
   testthat::skip_if_not_installed("rtdists")
   library("rtdists")
@@ -10,9 +11,9 @@ test_that("Fits in validity vignette", {
     v[truth == "upper"] <- pars[[1]]
     v[truth == "lower"] <- pars[[2]]
     dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
-                  t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                  n_terms_small = "SWSE", summation_small = "2017",
-                  scale = "both", err_tol = err_tol)
+                  t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], err_tol = 1e-6,
+                  log = TRUE, switch_mech = "terms_large", switch_thresh = 0.8,
+                  n_terms_small = "SWSE", summation_small = "2017")
     return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
   }
 
@@ -21,9 +22,9 @@ test_that("Fits in validity vignette", {
     v[truth == "upper"] <- pars[[1]]
     v[truth == "lower"] <- pars[[2]]
     dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
-                  t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                  n_terms_small = "Gondan", summation_small = "2017",
-                  scale = "both", err_tol = err_tol)
+                  t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], err_tol = 1e-6,
+                  log = TRUE, switch_mech = "terms", n_terms_small = "Gondan",
+                  summation_small = "2017")
     return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
   }
 
@@ -32,9 +33,9 @@ test_that("Fits in validity vignette", {
     v[truth == "upper"] <- pars[[1]]
     v[truth == "lower"] <- pars[[2]]
     dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v,
-                  t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], log = TRUE,
-                  n_terms_small = "Navarro", summation_small = "2017",
-                  scale = "both", err_tol = err_tol)
+                  t0 = pars[[4]], w = pars[[5]], sv = pars[[6]], err_tol = 1e-6,
+                  log = TRUE, switch_mech = "terms", n_terms_small = "Navarro",
+                  summation_small = "2017")
     return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
   }
 
@@ -184,6 +185,7 @@ test_that("Fits in validity vignette", {
   med_dec <- med_dec[which(med_dec[["rt"]] >= 0),]
   newfit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
                    truth_idx = 5, response_upper = "blast", err_tol = 1e-6)
-  load(system.file("extdata", "dfddm_density", "valid_fit.Rds", package = "fddm", mustWork = TRUE))
+  load(system.file("extdata", "dfddm_density", "valid_fit.Rds",
+                   package = "fddm", mustWork = TRUE))
   expect_equal(newfit[["Objective"]], fit[["Objective"]], tolerance = 0.01)
 })

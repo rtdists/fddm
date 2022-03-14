@@ -155,8 +155,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // pfddm
-NumericVector pfddm(const NumericVector& rt, const SEXP& response, const NumericVector& a, const NumericVector& v, const NumericVector& t0, const NumericVector& w, const NumericVector& sv, const NumericVector& sigma, const bool& log, const std::string& method, NumericVector err_tol);
-RcppExport SEXP _fddm_pfddm(SEXP rtSEXP, SEXP responseSEXP, SEXP aSEXP, SEXP vSEXP, SEXP t0SEXP, SEXP wSEXP, SEXP svSEXP, SEXP sigmaSEXP, SEXP logSEXP, SEXP methodSEXP, SEXP err_tolSEXP) {
+NumericVector pfddm(const NumericVector& rt, const SEXP& response, const NumericVector& a, const NumericVector& v, const NumericVector& t0, const NumericVector& w, const NumericVector& sv, const NumericVector& sigma, NumericVector err_tol, const bool& log, const std::string& method);
+RcppExport SEXP _fddm_pfddm(SEXP rtSEXP, SEXP responseSEXP, SEXP aSEXP, SEXP vSEXP, SEXP t0SEXP, SEXP wSEXP, SEXP svSEXP, SEXP sigmaSEXP, SEXP err_tolSEXP, SEXP logSEXP, SEXP methodSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -168,10 +168,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const NumericVector& >::type w(wSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type sv(svSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type err_tol(err_tolSEXP);
     Rcpp::traits::input_parameter< const bool& >::type log(logSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type method(methodSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type err_tol(err_tolSEXP);
-    rcpp_result_gen = Rcpp::wrap(pfddm(rt, response, a, v, t0, w, sv, sigma, log, method, err_tol));
+    rcpp_result_gen = Rcpp::wrap(pfddm(rt, response, a, v, t0, w, sv, sigma, err_tol, log, method));
     return rcpp_result_gen;
 END_RCPP
 }

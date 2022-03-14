@@ -101,7 +101,7 @@ ll_fun <- function(pars, rt, resp, truth, err_tol) {
   v[truth == "lower"] <- pars[[2]]
 
   dens <- dfddm(rt = rt, response = resp, a = pars[[3]], v = v, t0 = pars[[4]],
-                w = pars[[5]], sv = pars[[6]], log = TRUE, err_tol = 1e-6)
+                w = pars[[5]], sv = pars[[6]], err_tol = 1e-6, log = TRUE)
 
   return( ifelse(any(!is.finite(dens)), 1e6, -sum(dens)) )
 }

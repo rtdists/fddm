@@ -36,6 +36,8 @@ dfddm(rt = numeric(), response = "lower", a = 1, v = -2, t0 = 0.3)
 ### random stuff
 use_testthat()
 devtools::test()
+devtools::check(vignettes = FALSE)
+devtools::clean_dll()
 
 usethis::use_package("ggnewscale", type = "Suggests")
 

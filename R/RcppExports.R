@@ -1336,7 +1336,7 @@ dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, err_to
 #' @useDynLib fddm, .registration = TRUE
 #' @import Rcpp
 #' @export
-pfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, log = 0L, method = "1", err_tol = 0.000001) {
-    .Call(`_fddm_pfddm`, rt, response, a, v, t0, w, sv, sigma, log, method, err_tol)
+pfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, err_tol = 0.000001, log = FALSE, method = "Mills") {
+    .Call(`_fddm_pfddm`, rt, response, a, v, t0, w, sv, sigma, err_tol, log, method)
 }
 

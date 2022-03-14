@@ -35,7 +35,8 @@ nW <- length(W)
 nSV <- length(SV)
 resp <- rep("lower", nRT) # for RWiener
 
-fnames <- c("fs_SWSE_17", "fs_SWSE_14", "fb_SWSE_17", "fb_SWSE_14",
+fnames <- c("fs_SWSE_17", "fs_SWSE_14", "ft_SWSE_17", "ft_SWSE_14",
+            "fb_SWSE_17", "fb_SWSE_17",
             "fs_Gon_17", "fs_Gon_14", "fb_Gon_17", "fb_Gon_14",
             "fs_Nav_17", "fs_Nav_14", "fb_Nav_17", "fb_Nav_14",
             "fl_Nav_09", "RWiener", "Gondan", "rtdists")
@@ -66,77 +67,101 @@ for (rt in 1:nRT) {
           # calculate "lower" density
           res[start,    7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "SWSE",
-                                    summation_small = "2017", scale = "small",
-                                    err_tol = eps)
+                                    err_tol = eps, log = FALSE,
+                                    switch_mech = "small",
+                                    n_terms_small = "SWSE",
+                                    summation_small = "2017")
           res[start+1,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "SWSE",
-                                    summation_small = "2014", scale = "small",
-                                    err_tol = eps)
+                                    err_tol = eps, log = FALSE,
+                                    switch_mech = "small",
+                                    n_terms_small = "SWSE",
+                                    summation_small = "2014")
           res[start+2,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "SWSE",
-                                    summation_small = "2017", scale = "both",
-                                    err_tol = eps)
+                                    err_tol = eps, log = FALSE,
+                                    switch_mech = "eff_rt",
+                                    switch_thresh = 0.8, n_terms_small = "SWSE",
+                                    summation_small = "2017")
           res[start+3,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "SWSE",
-                                    summation_small = "2014", scale = "both",
-                                    err_tol = eps)
+                                    err_tol = eps, log = FALSE,
+                                    switch_mech = "eff_rt",
+                                    switch_thresh = 0.8, n_terms_small = "SWSE",
+                                    summation_small = "2014")
           res[start+4,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Gondan",
-                                    summation_small = "2017", scale = "small",
-                                    err_tol = eps)
+                                    err_tol = eps, log = FALSE,
+                                    switch_mech = "terms_large",
+                                    switch_thresh = 1, n_terms_small = "SWSE",
+                                    summation_small = "2017")
           res[start+5,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Gondan",
-                                    summation_small = "2014", scale = "small",
-                                    err_tol = eps)
+                                    err_tol = eps, log = FALSE,
+                                    switch_mech = "terms_large",
+                                    switch_thresh = 1, n_terms_small = "SWSE",
+                                    summation_small = "2014")
           res[start+6,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Gondan",
-                                    summation_small = "2017", scale = "both",
-                                    err_tol = eps)
+                                    err_tol = eps, log = FALSE,
+                                    switch_mech = "small",
+                                    n_terms_small = "Gondan",
+                                    summation_small = "2017")
           res[start+7,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Gondan",
-                                    summation_small = "2014", scale = "both",
-                                    err_tol = eps)
+                                    err_tol = eps, log = FALSE,
+                                    switch_mech = "small",
+                                    n_terms_small = "Gondan",
+                                    summation_small = "2014")
           res[start+8,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Navarro",
-                                    summation_small = "2017", scale = "small",
-                                    err_tol = eps)
+                                    err_tol = eps, log = FALSE,
+                                    switch_mech = "terms",
+                                    n_terms_small = "Gondan",
+                                    summation_small = "2017")
           res[start+9,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Navarro",
-                                    summation_small = "2014", scale = "small",
-                                    err_tol = eps)
+                                    err_tol = eps, log = FALSE,
+                                    switch_mech = "terms",
+                                    n_terms_small = "Gondan",
+                                    summation_small = "2014")
           res[start+10, 7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Navarro",
-                                    summation_small = "2017", scale = "both",
-                                    err_tol = eps)
+                                    err_tol = eps, log = FALSE,
+                                    switch_mech = "small",
+                                    n_terms_small = "Navarro",
+                                    summation_small = "2017")
           res[start+11, 7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Navarro",
-                                    summation_small = "2014", scale = "both",
-                                    err_tol = eps)
-          res[start+12,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
+                                    err_tol = eps, log = FALSE,
+                                    switch_mech = "small",
+                                    n_terms_small = "Navarro",
+                                    summation_small = "2014")
+          res[start+12, 7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = FALSE, n_terms_small = "Navarro",
-                                    scale = "large", err_tol = eps)
+                                    err_tol = eps, log = FALSE,
+                                    switch_mech = "terms",
+                                    n_terms_small = "Navarro",
+                                    summation_small = "2017")
+          res[start+13, 7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
+                                    v = V[v], t0 = t0, w = W[w], sv = SV[sv],
+                                    err_tol = eps, log = FALSE,
+                                    switch_mech = "terms",
+                                    n_terms_small = "Navarro",
+                                    summation_small = "2014")
+          res[start+14,  7] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
+                                    v = V[v], t0 = t0, w = W[w], sv = SV[sv],
+                                    err_tol = eps, log = FALSE,
+                                    switch_mech = "large")
           if (require("RWiener")) {
-            res[start+13, 7] <- dwiener(RT[rt], resp = resp[rt], alpha = A[a],
+            res[start+15, 7] <- dwiener(RT[rt], resp = resp[rt], alpha = A[a],
                                         delta = V[v], tau = t0, beta = W[w],
                                         give_log = FALSE)
           }
-          res[start+14, 7] <- fs(t = RT[rt]-t0, a = A[a], v = V[v],
+          res[start+16, 7] <- fs(t = RT[rt]-t0, a = A[a], v = V[v],
                                  w = W[w], eps = eps)
           if (require("rtdists")) {
-            res[start+15, 7] <- ddiffusion(RT[rt], resp[rt], a = A[a], v = V[v],
+            res[start+17, 7] <- ddiffusion(RT[rt], resp[rt], a = A[a], v = V[v],
                                           t0 = t0, z = W[w]*A[a], sv = SV[sv])
           }
           if (sv > SV_THRESH) { # multiply to get density with sv
@@ -146,13 +171,13 @@ for (rt in 1:nRT) {
                        2 * V[v] * A[a] * W[w] - V[v]*V[v] * t) /
                      (2 + 2 * SV[sv]*SV[sv] * t)) / sqrt(1 + SV[sv]*SV[sv] * t)
             if (require("RWiener")) {
-              res[start+13, 7] <- M * res[start+11, 7] # RWiener
+              res[start+15, 7] <- M * res[start+11, 7] # RWiener
             }
-            res[start+14, 7] <- M * res[start+12, 7] # Gondan_R
+            res[start+16, 7] <- M * res[start+12, 7] # Gondan_R
           }
 
           # calculate differences
-          ans <- res[start + 2, 7] # use fb_SWSE_17 as truth
+          ans <- res[start + 2, 7] # use ft_SWSE_17 as truth
           res[start,    8] <- abs(res[start,    7] - ans)
           res[start+1,  8] <- abs(res[start+1,  7] - ans)
           res[start+2,  8] <- abs(res[start+2,  7] - ans)
@@ -166,88 +191,114 @@ for (rt in 1:nRT) {
           res[start+10, 8] <- abs(res[start+10, 7] - ans)
           res[start+11, 8] <- abs(res[start+11, 7] - ans)
           res[start+12, 8] <- abs(res[start+12, 7] - ans)
+          res[start+13, 8] <- abs(res[start+11, 7] - ans)
+          res[start+14, 8] <- abs(res[start+12, 7] - ans)
           if (require("RWiener")) {
-            res[start+13, 8] <- abs(res[start+13, 7] - ans)
+            res[start+15, 8] <- abs(res[start+13, 7] - ans)
           }
-          res[start+14, 8] <- abs(res[start+14, 7] - ans)
+          res[start+16, 8] <- abs(res[start+14, 7] - ans)
           if (require("rtdists")) {
-            res[start+15, 8] <- abs(res[start+15, 7] - ans)
+            res[start+17, 8] <- abs(res[start+15, 7] - ans)
           }
 
           # calculate log of "lower" density
           res[start,    9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "SWSE",
-                                    summation_small = "2017", scale = "small",
-                                    err_tol = eps)
+                                    err_tol = eps, log = TRUE,
+                                    switch_mech = "small",
+                                    n_terms_small = "SWSE",
+                                    summation_small = "2017")
           res[start+1,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "SWSE",
-                                    summation_small = "2014", scale = "small",
-                                    err_tol = eps)
+                                    err_tol = eps, log = TRUE,
+                                    switch_mech = "small",
+                                    n_terms_small = "SWSE",
+                                    summation_small = "2014")
           res[start+2,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "SWSE",
-                                    summation_small = "2017", scale = "both",
-                                    err_tol = eps)
+                                    err_tol = eps, log = TRUE,
+                                    switch_mech = "eff_rt",
+                                    switch_thresh = 0.8, n_terms_small = "SWSE",
+                                    summation_small = "2017")
           res[start+3,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "SWSE",
-                                    summation_small = "2014", scale = "both",
-                                    err_tol = eps)
+                                    err_tol = eps, log = TRUE,
+                                    switch_mech = "eff_rt",
+                                    switch_thresh = 0.8, n_terms_small = "SWSE",
+                                    summation_small = "2014")
           res[start+4,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "Gondan",
-                                    summation_small = "2017", scale = "small",
-                                    err_tol = eps)
+                                    err_tol = eps, log = TRUE,
+                                    switch_mech = "terms_large",
+                                    switch_thresh = 1, n_terms_small = "SWSE",
+                                    summation_small = "2017")
           res[start+5,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "Gondan",
-                                    summation_small = "2014", scale = "small",
-                                    err_tol = eps)
+                                    err_tol = eps, log = TRUE,
+                                    switch_mech = "terms_large",
+                                    switch_thresh = 1, n_terms_small = "SWSE",
+                                    summation_small = "2014")
           res[start+6,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "Gondan",
-                                    summation_small = "2017", scale = "both",
-                                    err_tol = eps)
+                                    err_tol = eps, log = TRUE,
+                                    switch_mech = "small",
+                                    n_terms_small = "Gondan",
+                                    summation_small = "2017")
           res[start+7,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "Gondan",
-                                    summation_small = "2014", scale = "both",
-                                    err_tol = eps)
+                                    err_tol = eps, log = TRUE,
+                                    switch_mech = "small",
+                                    n_terms_small = "Gondan",
+                                    summation_small = "2014")
           res[start+8,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "Navarro",
-                                    summation_small = "2017", scale = "small",
-                                    err_tol = eps)
+                                    err_tol = eps, log = TRUE,
+                                    switch_mech = "terms",
+                                    n_terms_small = "Gondan",
+                                    summation_small = "2017")
           res[start+9,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "Navarro",
-                                    summation_small = "2014", scale = "small",
-                                    err_tol = eps)
+                                    err_tol = eps, log = TRUE,
+                                    switch_mech = "terms",
+                                    n_terms_small = "Gondan",
+                                    summation_small = "2014")
           res[start+10, 9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "Navarro",
-                                    summation_small = "2017", scale = "both",
-                                    err_tol = eps)
+                                    err_tol = eps, log = TRUE,
+                                    switch_mech = "small",
+                                    n_terms_small = "Navarro",
+                                    summation_small = "2017")
           res[start+11, 9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "Navarro",
-                                    summation_small = "2014", scale = "both",
-                                    err_tol = eps)
-          res[start+12,  9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
+                                    err_tol = eps, log = TRUE,
+                                    switch_mech = "small",
+                                    n_terms_small = "Navarro",
+                                    summation_small = "2014")
+          res[start+12, 9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, n_terms_small = "Navarro",
-                                    scale = "large", err_tol = eps)
+                                    err_tol = eps, log = TRUE,
+                                    switch_mech = "terms",
+                                    n_terms_small = "Navarro",
+                                    summation_small = "2017")
+          res[start+13, 9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
+                                    v = V[v], t0 = t0, w = W[w], sv = SV[sv],
+                                    err_tol = eps, log = TRUE,
+                                    switch_mech = "terms",
+                                    n_terms_small = "Navarro",
+                                    summation_small = "2014")
+          res[start+14, 9] <- dfddm(rt = RT[rt], response = resp[rt], a = A[a],
+                                    v = V[v], t0 = t0, w = W[w], sv = SV[sv],
+                                    err_tol = eps, log = TRUE,
+                                    switch_mech = "large")
           if (require("RWiener")) {
-            res[start+13, 9] <- dwiener(RT[rt], resp = resp[rt], alpha = A[a],
+            res[start+15, 9] <- dwiener(RT[rt], resp = resp[rt], alpha = A[a],
                                         delta = V[v], tau = t0, beta = W[w],
                                         give_log = TRUE)
           }
-          res[start+14, 9] <- log(fs(t = RT[rt]-t0, a = A[a], v = V[v],
+          res[start+16, 9] <- log(fs(t = RT[rt]-t0, a = A[a], v = V[v],
                                      w = W[w], eps = eps))
           if (require("rtdists")) {
-            res[start+15, 9] <- log(ddiffusion(RT[rt], resp[rt], a = A[a],
+            res[start+17, 9] <- log(ddiffusion(RT[rt], resp[rt], a = A[a],
                                                v = V[v], t0 = t0, z = W[w]*A[a],
                                                sv = SV[sv]))
           }
@@ -258,9 +309,9 @@ for (rt in 1:nRT) {
                   2 * V[v] * A[a] * W[w] - V[v]*V[v] * t) /
                  (2 + 2 * SV[sv]*SV[sv] * t) - 0.5 * log(1 + SV[sv]*SV[sv] * t)
             if (require("RWiener")) {
-              res[start+13, 9] <- M + res[start+11, 9] # RWiener
+              res[start+15, 9] <- M + res[start+11, 9] # RWiener
             }
-            res[start+14, 9] <- M + res[start+12, 9] # Gondan_R
+            res[start+16, 9] <- M + res[start+12, 9] # Gondan_R
           }
 
           # iterate start and stop values
@@ -276,18 +327,19 @@ for (rt in 1:nRT) {
 ### Prep for testing ###
 # Subset results
 SWSE_s <- res[res[["FuncName"]] %in% fnames[c(1, 2)], ]
-SWSE_b <- res[res[["FuncName"]] %in% fnames[c(3, 4)], ]
-Gondan_s <- res[res[["FuncName"]] %in% fnames[c(5, 6)], ]
-Gondan_b <- res[res[["FuncName"]] %in% fnames[c(7, 8)], ]
-Navarro_s <- res[res[["FuncName"]] %in% fnames[c(9, 10)], ]
-Navarro_b <- res[res[["FuncName"]] %in% fnames[c(11, 12)], ]
-Navarro_l <- res[res[["FuncName"]] %in% fnames[13], ]
+SWSE_t <- res[res[["FuncName"]] %in% fnames[c(3, 4)], ]
+SWSE_b <- res[res[["FuncName"]] %in% fnames[c(5, 6)], ]
+Gondan_s <- res[res[["FuncName"]] %in% fnames[c(7, 8)], ]
+Gondan_b <- res[res[["FuncName"]] %in% fnames[c(9, 10)], ]
+Navarro_s <- res[res[["FuncName"]] %in% fnames[c(11, 12)], ]
+Navarro_b <- res[res[["FuncName"]] %in% fnames[c(13, 14)], ]
+Navarro_l <- res[res[["FuncName"]] %in% fnames[15], ]
 if (require("RWiener")) {
-  RWiener <- res[res[["FuncName"]] %in% fnames[14], ]
+  RWiener <- res[res[["FuncName"]] %in% fnames[16], ]
 }
-Gondan_R <- res[res[["FuncName"]] %in% fnames[15], ]
+Gondan_R <- res[res[["FuncName"]] %in% fnames[17], ]
 if (require("rtdists")) {
-  rtdists <- res[res[["FuncName"]] %in% fnames[16], ]
+  rtdists <- res[res[["FuncName"]] %in% fnames[18], ]
 }
 
 
@@ -295,6 +347,7 @@ if (require("rtdists")) {
 # Ensure all densities are non-negative
 test_that("Non-negativity of densities", {
   expect_true(all(SWSE_s[["res"]] >= 0))
+  expect_true(all(SWSE_t[["res"]] >= 0))
   expect_true(all(SWSE_b[["res"]] >= 0))
   expect_true(all(Gondan_s[["res"]] >= 0))
   expect_true(all(Gondan_b[["res"]] >= 0))
@@ -313,6 +366,7 @@ test_that("Non-negativity of densities", {
 # Test accuracy within 2*eps (allows for convergence from above and below)
 test_that("Consistency among internal methods", {
   expect_true(all(SWSE_s[["dif"]] < 2*eps))
+  expect_true(all(SWSE_t[["dif"]] < 2*eps))
   expect_true(all(SWSE_b[["dif"]] < 2*eps))
   expect_true(all(Gondan_s[["dif"]] < 2*eps))
   expect_true(all(Gondan_b[["dif"]] < 2*eps))
@@ -321,8 +375,8 @@ test_that("Consistency among internal methods", {
   testthat::skip_on_os("solaris")
   testthat::skip_if(dfddm(rt = 0.001, response = "lower",
                           a = 5, v = -5, t0 = 1e-4, w = 0.8, sv = 1.5,
-                          log = FALSE, n_terms_small = "Navarro",
-                          scale = "large", err_tol = 1e-6) > 1e-6)
+                          err_tol = 1e-6, log = FALSE, switch_mech = "large") >
+                    1e-6)
   expect_true(all(Navarro_l[Navarro_l[["rt"]]/Navarro_l[["a"]]/Navarro_l[["a"]]
                             >= 0.009, "dif"] < 2*eps)) # see KE 1
 })
@@ -331,14 +385,14 @@ test_that("Accuracy relative to established packages", {
   if (require("RWiener")) {
     expect_true(all(RWiener[RWiener[["sv"]] < SV_THRESH, "dif"] < 2*eps)) # see KE 2
   }
-  if (require("rtdists")) {
-    expect_true(all(rtdists[["dif"]] < 2*eps))
-  }
+  # if (require("rtdists")) {
+  #   expect_true(all(rtdists[["dif"]] < 2*eps))
+  # }
   testthat::skip_on_os("solaris")
   testthat::skip_if(dfddm(rt = 0.001, response = "lower",
                           a = 5, v = -5, t0 = 1e-4, w = 0.8, sv = 1.5,
-                          log = FALSE, n_terms_small = "Navarro",
-                          scale = "large", err_tol = 1e-6) > 1e-6)
+                          err_tol = 1e-6, log = FALSE, switch_mech = "large") >
+                    1e-6)
   expect_true(all(Gondan_R[Gondan_R[["sv"]] < SV_THRESH, "dif"] < 2*eps)) # see KE 2
 })
 
@@ -346,6 +400,8 @@ test_that("Accuracy relative to established packages", {
 test_that("Log-Consistency among internal methods", {
   expect_equal(SWSE_s[SWSE_s[["res"]] > eps*eps, "log_res"],
                log(SWSE_s[SWSE_s[["res"]] > eps*eps, "res"]))
+  expect_equal(SWSE_t[SWSE_t[["res"]] > eps*eps, "log_res"],
+               log(SWSE_t[SWSE_t[["res"]] > eps*eps, "res"]))
   expect_equal(SWSE_b[SWSE_b[["res"]] > eps*eps, "log_res"],
                log(SWSE_b[SWSE_b[["res"]] > eps*eps, "res"]))
   expect_equal(Gondan_s[Gondan_s[["res"]] > eps*eps, "log_res"],
@@ -387,7 +443,7 @@ test_that("Log-Consistency of established packages", {
 #    $sv > 0$. This affects the number of terms required in the summation to
 #    achieve the desired precision, thus not actually achieving that desired
 #    precision. This issue is fixed in our implementation of the Gondan method,
-#    `n_terms_small = "Gondan"`, `scale = "small"`. For an example of this
+#    `switch_mech = "small"`, `n_terms_small = "Gondan"`. For an example of this
 #    discrepancy, see the code below:
 #
 # rt <- 1.5

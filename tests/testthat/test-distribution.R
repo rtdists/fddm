@@ -59,10 +59,10 @@ for (rt in 1:nRT) {
           # calculate "lower" density
           res[start,   7] <- pfddm(rt = RT[rt], response = resp, a = A[a],
                                    v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                   log = FALSE, method = "Mills", err_tol = eps)
+                                   err_tol = eps, log = FALSE, method = "Mills")
           res[start+1, 7] <- pfddm(rt = RT[rt], response = resp, a = A[a],
                                    v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                   log = FALSE, method = "NCDF", err_tol = eps)
+                                   err_tol = eps, log = FALSE, method = "NCDF")
           res[start+2, 7] <- G_0(t = RT[rt]-t0, a = A[a], nu = V[v], w = W[w],
                                  eta2 = SV[sv]*SV[sv], sigma2 = 1, eps = eps)
           # if (require("rtdists")) {
@@ -83,10 +83,10 @@ for (rt in 1:nRT) {
           # calculate log of "lower" density
           res[start,    9] <- pfddm(rt = RT[rt], response = resp, a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, method = "Mills", err_tol = eps)
+                                    err_tol = eps, log = TRUE, method = "Mills")
           res[start+1,  9] <- pfddm(rt = RT[rt], response = resp, a = A[a],
                                     v = V[v], t0 = t0, w = W[w], sv = SV[sv],
-                                    log = TRUE, method = "NCDF", err_tol = eps)
+                                    err_tol = eps, log = TRUE, method = "NCDF")
           res[start+2, 9] <- log(G_0(t = RT[rt]-t0, a = A[a], nu = V[v],
                                      w = W[w], eta2 = SV[sv]*SV[sv], sigma2 = 1,
                                      eps = eps))

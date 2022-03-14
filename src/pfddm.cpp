@@ -148,9 +148,9 @@ NumericVector pfddm(const NumericVector& rt,
                     const NumericVector& w = 0.5,
                     const NumericVector& sv = 0.0,
                     const NumericVector& sigma = 1.0,
-                    const bool& log = 0,
-                    const std::string& method = "1",
-                    NumericVector err_tol = 0.000001)
+                    NumericVector err_tol = 0.000001,
+                    const bool& log = false,
+                    const std::string& method = "Mills")
 {
   // determine which method to use (also log or non-log)
   DisFunc disf;
