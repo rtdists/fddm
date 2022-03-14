@@ -3,9 +3,6 @@
 #include "parameter_checks.h"
 #include "dfddm_helper_functions/func_defs.h"
 #include "dfddm_helper_functions/helper_funcs.h"
-#include "dfddm_helper_functions/density_funcs.h"
-#include "dfddm_helper_functions/sum_funcs.h"
-#include "dfddm_helper_functions/num_funcs.h"
 
 
 

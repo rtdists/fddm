@@ -53,8 +53,7 @@ int kl_Har_w(const double& taa, const double& t, const double& err)
 ///////////////////////////////// Small Time ///////////////////////////////////
 // number of terms required for the small-time sum for w, differentiated
 // (Hartmann and Klauer 2021)
-int ks_Har_w(const double& taa, const double& w,
-             const double& err)
+int ks_Har_w(const double& taa, const double& w, const double& err)
 {
   float k1 = 0.5 * w + 0.5 * SQRT_3 * sqrt(taa);
   double ueps = -LOG_2 - LOG_PI - 2 * log(err) - 2 * log(taa);

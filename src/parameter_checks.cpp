@@ -113,7 +113,7 @@ void convert_responses(const SEXP& response, int& Nres, int& Nmax,
     } else if (type == 16) {
       warning_text = warning_text.append("strings (characters), and a value other than 'L' or 'U' (case insensitive)");
     } else if (type == 10) {
-      warning_text = warning_text.append("booleans (logicals), and a value other than TRUE or FALSE was");
+      warning_text = warning_text.append("booleans (logicals), and a value other than TRUE or FALSE");
     } else {
       warning_text = warning_text.append("some unknown type");
     }

@@ -1,5 +1,7 @@
 // Helper functions for the density function dfddm
 
+#include "density_funcs.h" // src/dfddm_helper_functions/density_funcs.h
+
 
 
 void determine_method(const string& n_terms_small,
