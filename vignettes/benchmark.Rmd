@@ -418,8 +418,8 @@ ggplot(mbm_vec, aes(x = factor(FuncName, levels = Names_vec), y = time,
                     color = factor(FuncName, levels = Names_vec),
                     fill = factor(FuncName, levels = Names_vec))) +
   geom_violin(trim = TRUE, alpha = 0.5) +
-  scale_color_manual(values = Outline_vec, guide = FALSE) +
-  scale_fill_manual(values = Color_vec, guide = FALSE) +
+  scale_color_manual(values = Outline_vec, guide = "none") +
+  scale_fill_manual(values = Color_vec, guide = "none") +
   geom_boxplot(width = 0.15, fill = "white", alpha = 0.5) +
   stat_summary(fun = mean, geom = "errorbar",
                aes(ymax = ..y.., ymin = ..y..),
@@ -1185,14 +1185,14 @@ ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
     bquote(f[s] ~ Nav[17]), bquote(f[s] ~ Nav[14]),
     bquote(f[l] ~ "Nav"), "rtdists")) +
   coord_cartesian(ylim = c(mi, ma*1.05)) +
-  scale_color_manual(values = Outline, guide = FALSE) +
-  scale_fill_manual(values = Color, guide = FALSE) +
+  scale_color_manual(values = Outline, guide = "none") +
+  scale_fill_manual(values = Color, guide = "none") +
   scale_shape_manual(values = Shape,
                      name = "Convergence Code",
                      breaks = c(0, 1),
                      labels = c("Success", "Failure")) +
-  scale_size_manual(values = Sizes, guide = FALSE) +
-  scale_discrete_manual(aesthetics = "stroke", values = Stroke, guide = FALSE) +
+  scale_size_manual(values = Sizes, guide = "none") +
+  scale_discrete_manual(aesthetics = "stroke", values = Stroke, guide = "none") +
   ggnewscale::new_scale_fill() +
   scale_fill_manual(values = Fills,
                     name = paste("Difference in", "Log-likelihood", "from MLE",
@@ -1268,14 +1268,14 @@ ggplot(fit_fev, aes(x = factor(Algorithm, levels = Names),
     bquote(f[s] ~ Gon[17]), bquote(f[s] ~ Gon[14]),
     bquote(f[s] ~ Nav[17]), bquote(f[s] ~ Nav[14]),
     bquote(f[l] ~ "Nav"), "rtdists")) +
-  scale_color_manual(values = Outline, guide = FALSE) +
-  scale_fill_manual(values = Color, guide = FALSE) +
+  scale_color_manual(values = Outline, guide = "none") +
+  scale_fill_manual(values = Color, guide = "none") +
   scale_shape_manual(values = Shape,
                      name = "Convergence Code",
                      breaks = c(0, 1),
                      labels = c("Success", "Failure")) +
-  scale_size_manual(values = Sizes, guide = FALSE) +
-  scale_discrete_manual(aesthetics = "stroke", values = Stroke, guide = FALSE) +
+  scale_size_manual(values = Sizes, guide = "none") +
+  scale_discrete_manual(aesthetics = "stroke", values = Stroke, guide = "none") +
   ggnewscale::new_scale_fill() +
   scale_fill_manual(values = Fills,
                     name = paste("Difference in", "Log-likelihood", "from MLE",

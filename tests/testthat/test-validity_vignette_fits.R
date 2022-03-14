@@ -1,7 +1,7 @@
 context("Comparing saved with new fits (validity vignette)")
 
 test_that("Fits in validity vignette", {
-  testthat::skp()
+  testthat::skip("skipping validity fit for now")
   testthat::skip_on_cran()
   testthat::skip_if_not_installed("rtdists")
   library("rtdists")
