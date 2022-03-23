@@ -48,12 +48,14 @@ Mills <- data.frame(
   log_res = pfddm(rt = rt, response = "lower", a = a, v = v, t0 = t0, w = w,
                   sv = sv, err_tol = eps, log = TRUE, method = "Mills")
 )
+suppressWarnings( # warnings can be produced for large a, sv
 NCDF <- data.frame(
   res = pfddm(rt = rt, response = "lower", a = a, v = v, t0 = t0, w = w,
               sv = sv, err_tol = eps, log = FALSE, method = "NCDF"),
   dif = numeric(N),
   log_res = pfddm(rt = rt, response = "lower", a = a, v = v, t0 = t0, w = w,
                   sv = sv, err_tol = eps, log = TRUE, method = "NCDF")
+)
 )
 
 # non-fddm methods
