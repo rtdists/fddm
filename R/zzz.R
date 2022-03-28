@@ -11,3 +11,5 @@
 	  "************")
 	}
 }
+
+loadModule("fddmFit", TRUE)

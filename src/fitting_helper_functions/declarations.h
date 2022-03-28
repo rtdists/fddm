@@ -1,0 +1,81 @@
+// All function declarations and constant definitions
+// included from src/fitting_helper_functions/class_methods.h
+
+#include <cmath>
+
+using std::exp;
+using std::log;
+using std::sqrt;
+using std::max;
+using std::isfinite;
+using std::isnan;
+
+
+//--------------------------- Constants --------------------------------------//
+static const double ERR_TOL_THRESH = 1e-300; // near minimum value of a double
+static const double SV_THRESH = 0; // threshold for using variable drift rate
+
+static const double FOUR_NINTHS = 0.444444444444444444444;
+static const double SQRT_2 = 1.41421356237309504880;
+static const double SQRT_3 = sqrt(3);
+static const double LOG_2 = 0.693147180559945309417;
+
+static const double PI_CONST = 3.14159265358979323846; // define pi like C++
+static const double LOG_PI = log(PI_CONST);
+static const double LOG_2PI_2 = 0.5 * log(2 * PI_CONST);
+static const double O_PI = 0.318309886183790671538;
+static const double PI2 = PI_CONST * PI_CONST;
+static const double SQRT_2PI = sqrt(2 * PI_CONST);
+static const double SQRT_1_2PI = 1 / SQRT_2PI;
+static const double SQRT_2_PI = sqrt(2 * O_PI);
+static const double SQRT_2_1_PI = SQRT_2 * O_PI;
+
+// static const int INT_MAX = 2147483647; // already in cmath or Rcpp
+//----------------------------------------------------------------------------//
+
+
+
+//--------------------------- Function Declarations --------------------------//
+
+// Parameter and Input Checks
+vector<double> check_rt(const vector<double>& rt, int& Nrt);
+vector<double> convert_responses(const SEXP& response, const int& Nrt);
+double check_err_tol(const double& err_tol);
+double check_switch_thresh(const double& switch_thresh);
+bool invalid_parameters(vector<double>& parameters,
+                        const vector<double>& temp_params);
+
+// PDF (likelihood)
+double ft(const double& t, const double& a, const double& v,
+          const double& w, const double& sv, const double& err,
+          const double& switch_thresh);
+double ft_log(const double& t, const double& a, const double& v,
+              const double& w, const double& sv, const double& err,
+              const double& switch_thresh);
+
+// Derivatives of PDF
+double da(const double& t, const double& a, const double& v, const double& w,
+          const double& sv, const double& err, const double& sl_thresh);
+double dv(const double& t, const double& a, const double& v, const double& w,
+          const double& sv, const double& err, const double& sl_thresh);
+double dt0(const double& t, const double& a, const double& v, const double& w,
+           const double& sv, const double& err, const double& sl_thresh);
+double dw(const double& t, const double& a, const double& v, const double& w,
+          const double& sv, const double& err, const double& sl_thresh);
+double dsv(const double& t, const double& a, const double& v, const double& w,
+           const double& sv, const double& err, const double& sl_thresh);
+
+// Infinite Sum Approximations
+double small_sum(const double& taa, const double& w, const double& err);
+double small_sum_dat(const double& taa, const double& w, const double& err);
+double small_sum_dw(const double& taa, const double& w, const int& ks);
+double large_sum(const double& taa, const double& w, const int& kl);
+double large_sum_dat(const double& taa, const double& w, const int& kl);
+double large_sum_dw(const double& taa, const double& w, const int& kl);
+
+// Required Number of Terms for Infinite Sum Approximations
+int kl_pdf(const double& taa, const double& err);
+int kl_dat(const double& taa, const double& t, const double& err);
+int kl_dw(const double& taa, const double& t, const double& err);
+int ks_dw(const double& taa, const double& w, const double& err);
+//----------------------------------------------------------------------------//

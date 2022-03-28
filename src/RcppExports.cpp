@@ -176,6 +176,8 @@ BEGIN_RCPP
 END_RCPP
 }
 
+RcppExport SEXP _rcpp_module_boot_fddmFit();
+
 static const R_CallMethodDef CallEntries[] = {
     {"_fddm_dt_dfddm", (DL_FUNC) &_fddm_dt_dfddm, 10},
     {"_fddm_dt0_dfddm", (DL_FUNC) &_fddm_dt0_dfddm, 10},
@@ -185,6 +187,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fddm_dsv_dfddm", (DL_FUNC) &_fddm_dsv_dfddm, 10},
     {"_fddm_dfddm", (DL_FUNC) &_fddm_dfddm, 14},
     {"_fddm_pfddm", (DL_FUNC) &_fddm_pfddm, 11},
+    {"_rcpp_module_boot_fddmFit", (DL_FUNC) &_rcpp_module_boot_fddmFit, 0},
     {NULL, NULL, 0}
 };
 
