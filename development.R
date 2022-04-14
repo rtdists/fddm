@@ -40,6 +40,7 @@ devtools::check(vignettes = FALSE)
 devtools::clean_dll()
 
 usethis::use_package("ggnewscale", type = "Suggests")
+usethis::use_rcpp_eigen()
 
 usethis::use_build_ignore("development.R")
 usethis::use_build_ignore("examples/")

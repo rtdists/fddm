@@ -1206,7 +1206,7 @@ dfddm <- function(rt, response, a, v, t0, w = 0.5, sv = 0.0, sigma = 1.0, err_to
     .Call(`_fddm_dfddm`, rt, response, a, v, t0, w, sv, sigma, err_tol, log, switch_mech, switch_thresh, n_terms_small, summation_small)
 }
 
-#' @export fddmFit
+#' @export fddm_fit
 NULL
 
 #' Distribution of Ratcliff Diffusion Decision Model

@@ -12,4 +12,4 @@
 	}
 }
 
-loadModule("fddmFit", TRUE)
+loadModule("fddm_fit", TRUE)

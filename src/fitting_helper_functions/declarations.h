@@ -9,6 +9,8 @@ using std::sqrt;
 using std::max;
 using std::isfinite;
 using std::isnan;
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
 
 
 //--------------------------- Constants --------------------------------------//
@@ -40,10 +42,18 @@ static const double SQRT_2_1_PI = SQRT_2 * O_PI;
 // Parameter and Input Checks
 vector<double> check_rt(const vector<double>& rt, int& Nrt);
 vector<double> convert_responses(const SEXP& response, const int& Nrt);
+void unpack_and_check_mod_mats(const vector<MatrixXd>& model_matrices,
+                               MatrixXd& mm_v, MatrixXd& mm_a, MatrixXd& mm_t0,
+                               MatrixXd& mm_w, MatrixXd& mm_sv,
+                               VectorXd& v, VectorXd& a, VectorXd& t0,
+                               VectorXd& w, VectorXd& sv,
+                               vector<int>& form_len, const int& Nrt);
 double check_err_tol(const double& err_tol);
 double check_switch_thresh(const double& switch_thresh);
-bool invalid_parameters(vector<double>& parameters,
-                        const vector<double>& temp_params);
+bool invalid_parameters(const VectorXd& v, const VectorXd& a,
+                        const VectorXd& t0, const VectorXd& w,
+                        const VectorXd& sv, const int& Nrt,
+                        const vector<int>& form_len);
 
 // PDF (likelihood)
 double ft(const double& t, const double& a, const double& v,
