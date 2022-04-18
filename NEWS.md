@@ -1,3 +1,9 @@
+# fddm v0.6-0 (Release date: 2022-X-X)
+
+
+## Other Changes
+* character variables in med_dec transformed to factors.
+
 # fddm v0.5-1 (Release date: 2022-3-15)
 
 ## New Features
@@ -6,7 +12,7 @@
 ## Bug Fixes
 * Fixed HTML deprecation in documentation
 
-# Other Changes
+## Other Changes
 * Changed the function parameters in `dfddm()` that determine how the method of calculation is chosen.
 
 
