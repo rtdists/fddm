@@ -14,6 +14,7 @@ devtools::check()
 ###
 library("devtools")
 devtools::load_all(recompile = TRUE)
+devtools::load_all()
 library("fddm")
 devtools::document()
 
@@ -30,7 +31,6 @@ rt <- seq(1,3,by=0.5)
 eps <- 1e-6
 dfddm(rt, 1, 1, 0.4, 0, 0.5, 0, T, "Gondan", "2017", "small", eps)
 dfddm(rt = numeric(), response = "lower", a = 1, v = -2, t0 = 0.3)
-
 
 
 ### random stuff

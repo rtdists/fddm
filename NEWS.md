@@ -1,5 +1,7 @@
 # fddm v0.6-0 (Release date: 2022-X-X)
 
+## New Features
+* added function ddm() which permits formula-based fitting of DDM using analytic gradient.
 
 ## Other Changes
 * character variables in med_dec transformed to factors.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ddm.R
 \name{ddm}
 \alias{ddm}
-\title{Fitting function for the DDM}
+\title{Estimation of 5-Parameter DDM}
 \usage{
 ddm(
   drift,
@@ -11,41 +11,185 @@ ddm(
   bias = 0.5,
   sv = 0,
   data,
-  args_method = list(),
+  optim = "nlminb",
+  args_optim = list(),
   args_ddm = list(err_tol = 1e-06, switch_thresh = 0.8),
-  use_gradient = TRUE
+  use_gradient = TRUE,
+  compiled_model = TRUE,
+  model = TRUE,
+  mmatrix = TRUE,
+  response = TRUE,
+  na.action,
+  subset,
+  contrasts = NULL
 )
 }
 \arguments{
-\item{drift}{Formula for the drift rate (v)}
+\item{drift}{Two-sided formula. The left-hand side describes the response,
+the right-hand side provides a symbolic description of the regression model
+underlying the drift rate (v). The left-hand side needs to specify the
+column in the data containing response time and corresponding binary
+decision, concatenated by \code{+} , e.g., \code{rt + response ~ ...}}
 
-\item{boundary}{Formula for the boundary separation (a).}
+\item{boundary, ndt, bias, sv}{Either a one-sided formula providing a symbolic
+description of the regression model or a scalar number given the value this
+parameter should be fixed to. Boundary separation (a), non-decision time
+(t0), relative initial bias (w), or inter-trial variability in the drift
+rate (sv)}
 
-\item{bias}{Formula for the relative initial bias (w).}
+\item{data, na.action, subset}{arguments controlling formula processing via
+\code{\link{model.frame}}.}
 
-\item{sv}{Formula for the inter-trial variability in the drift rate (sv).}
+\item{optim}{character string or fitting function indicating which numerical
+optimisation method should be used. The default \code{"nlminb"} uses the
+corresponding function.}
 
-\item{ntd}{Formula for the non-decision time (t0).}
+\item{args_optim}{additional control arguments passed to \code{control}
+argument of optimisation function specified in \code{optim}.}
+
+\item{args_ddm}{additional arguments passed to density function.}
+
+\item{use_gradient}{logical. Should gradient be used during numerical
+optimisation? Default is \code{TRUE}.}
+
+\item{compiled_model, model, mmatrix, response}{logicals. If \code{TRUE} the
+corresponding components of the fit (the compiled model object, the model
+frame, the model matrix, the response matrix) are returned.}
+
+\item{contrasts}{optional list. See the contrasts.arg of
+\code{\link{model.matrix.default}}}
 }
 \value{
-Currently, it's just the output from nlminb.
+Object of class \code{ddm} for which a number of common methods such
+  as \code{print}, \code{coef}, and \code{logLik} are implemented, see
+  \code{\link{ddm-methods}}.
 }
 \description{
-This function fits the DDM to the data that is provided, using formulas for
-the DDM parameters if desired.
+Fit the 5-parameter DDM (Diffusion Decision Model) via maximum likelihood
+estimation. The model for each DDM parameter can be specified symbolically
+using R's formulas interface. With the exception of the drift rate (which is
+always estimated) all parameters can be either fixed or estimates.
+}
+\details{
+\code{ddm} uses \code{\link{model.matrix}} for transforming the symbolic description of the regression model underlying each parameter into estimated coefficients. The following provides a few examples:
+
+\itemize{
+  \item \code{~ 1} estimates a single coefficient, named \code{(Intercept)}
+  \item \code{~ condition} estimates the intercept plus k - 1 coefficients
+  for a factor with k levels (e.g., intercept plus one coefficient if
+  condition has two levels). The interpretation of the coefficients depend on
+  the factor contrasts employed, which are usually based on the contrasts
+  specified in \code{options("contrasts")}. For the default \code{treatment}
+  contrasts (\code{\link{contr.treatment}}), the intercept corresponds to the
+  first factor level and the additional coefficients correspond to the
+  difference from the intercept (i.e., first factor level). When using
+  \code{contr.sum} the intercept correspond to the grand mean and the
+  additional coefficients correspond to the differences from the grand mean.
+  \item code{~ 0 + condition} estimates no intercept but one coefficient per
+  factor level. This specification can also be used to get one coefficient
+  per cell for a multi-factorial design, e.g., \code{~ 0 +
+  condition1:condition2}.
+  \item code{~ 0 + condition1 + condition1:condition2} estimates one
+  "intercept" per level of \code{condition1} factor (which is not called
+  intercept) plus k - 1 difference parameters from the condition-specific
+  intercept for the k-levels of \code{condition2}. The interpretation of the
+  difference parameters again depends on the contrasts used (e.g., treatment
+  vs. sum-to-zero contrasts, see examples). This formula specification can
+  often make sense for the drift rate when \code{condition1} is the factor
+  (such as item type) mapped to upper and lower response boundary of the DDM
+  and \code{condition2} is another factor by which we want the drift rate to
+  differ. This essentially gives one overall drift rate per response boundary
+  plus the differences from this overall one (note again that with treatment
+  contrasts this overall drift rate is the first factor level of
+  \code{condition2}).
+}
+
+To get meaningful results it is necessary to estimate separate drift rates
+for the different condition/item-types that are mapped onto the upper and
+lower boundary of the diffusion model.
+
+If a non-default fitting function is used, it needs to minimise the negative
+log-likelihood, accept the following arguments, \code{init, objective,
+gradient, lower, upper, control} , and return a list with the following
+arguments \code{coefficients, loglik, converged, optim} (where
+\code{converged} is boolean and \code{optim} can be an arbitrary list with
+additional information).
 }
 \examples{
 # prepare data
 data(med_dec, package = "fddm")
-med_dec <- med_dec[which(med_dec[["rt"]] >= 0), ]
-p1 <- med_dec[med_dec[["id"]] == 2 &
-                      med_dec[["group"]] == "experienced", ]
-p1[["response"]] <- as.factor(p1[["response"]])
+med_dec <- med_dec[which(med_dec[["rt"]] >= 0), ] ## only use valid RTs
+## select data from one participant
+p1 <- med_dec[med_dec[["id"]] == 2 & med_dec[["group"]] == "experienced", ]
+head(p1)
 
-# example fit with gradient information
-ddm(rt + response ~ 0 + classification:difficulty, data = p1)
+## one drift rate per classification by difficulty design cell 
+fit1 <- ddm(rt + response ~ 0 + classification:difficulty, data = p1)
+fit1
 
-# example fit without gradient without gradient information
-ddm(rt + response ~ 0 + classification:difficulty, data = p1,
-    use_gradient = FALSE)
+## set default contrasts (just in case contrasts have been changed)
+op <- options(contrasts=c('contr.treatment', 'contr.poly'))
+## one drift rate "intercept" per classification condition (blast vs. non-blast) 
+## corresponding to first level of difficulty factor 
+## plus one further coefficient per classification condition corresponding to 
+## difference from "intercept"
+fit1b <- ddm(rt + response ~ 0 + classification + classification:difficulty, 
+             data = p1)
+fit1b
+options(op) # reset contrasts
+
+## set orthogonal sum-to-zero contrasts
+op <- options(contrasts=c('contr.sum', 'contr.poly'))
+## one drift rate "intercept" per classification condition (blast vs. non-blast) 
+## corresponding to mean drift rate for the classification condition 
+## plus one further coefficient per classification condition corresponding to 
+## difference from "intercept"
+fit1c <- ddm(rt + response ~ 0 + classification + classification:difficulty, 
+             data = p1)
+fit1c
+options(op) ## reset contrasts
+
+## all three variants produce same fit, only meaning of parameters differs 
+logLik(fit1)
+logLik(fit1b)
+logLik(fit1c)
+
+## all models estimate same drift rates, but in different parametrisation:
+coef(fit1)  ## drift rates per design cell
+## same drift rates based on fit1b: 
+c(coef(fit1b)[1:2], 
+  coef(fit1b)[1] + coef(fit1b)[3], coef(fit1b)[2] + coef(fit1b)[4])
+## same drift rates based on fit1c: 
+c(coef(fit1c)[1] + coef(fit1c)[3], coef(fit1c)[2] + coef(fit1c)[4], 
+  coef(fit1c)[1] - coef(fit1c)[3], coef(fit1c)[2] - coef(fit1c)[4])
+
+# we can estimate a model that freely estimates response bias 
+# (instead of fixing it at 0.5)
+fit2 <- ddm(rt + response ~ 0 + classification:difficulty, bias = ~1, data = p1)
+fit2
+## Note: estimating bias only makes sense in situations like here where the 
+## response boundaries do not correspond to correct/incorrect but to the 
+## actual responses participants gave (here: blast vs. non-blast classification)
+
+## now let's perform a likelihood ratio test to check if estimating response
+## bias freely leads to a significant increase in model fit?
+if (requireNamespace("lmtest")) { ## requires package lmtest
+  lmtest::lrtest(fit1, fit2)
+  ## does not look like it (p = 0.1691)
+}
+
+
+# we can also make a DDM parameter, such as boundary, depend on a numeric
+# variable, such as block number
+fit3 <- ddm(rt + response ~ 0 + classification:difficulty, 
+            boundary = ~ block, data = p1)
+fit3
+
+## does making boundary depend on block leads to a significant increase in model
+## fit?
+if (requireNamespace("lmtest")) { ## requires package lmtest
+  lmtest::lrtest(fit1, fit3)
+  ## does not look like it (p = 0.198)
+}
+
 }
