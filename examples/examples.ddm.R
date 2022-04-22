@@ -12,9 +12,9 @@ fit1
 ## set default contrasts (just in case contrasts have been changed)
 op <- options(contrasts=c('contr.treatment', 'contr.poly'))
 ## one drift rate "intercept" per classification condition (blast vs. non-blast) 
-## corresponding to first level of difficulty factor 
+## corresponding to first level of difficulty factor (easy)
 ## plus one further coefficient per classification condition corresponding to 
-## difference from "intercept"
+## difference from "intercept" (hard - easy)
 fit1b <- ddm(rt + response ~ 0 + classification + classification:difficulty, 
              data = p1)
 fit1b
@@ -25,7 +25,7 @@ op <- options(contrasts=c('contr.sum', 'contr.poly'))
 ## one drift rate "intercept" per classification condition (blast vs. non-blast) 
 ## corresponding to mean drift rate for the classification condition 
 ## plus one further coefficient per classification condition corresponding to 
-## difference from "intercept"
+## difference from "intercept" (hard/easy - mean drift rate)
 fit1c <- ddm(rt + response ~ 0 + classification + classification:difficulty, 
              data = p1)
 fit1c
