@@ -23,7 +23,7 @@ NULL
 ## some of the methods are implemented based on the corresponding methods 
 ## in package betareg: https://cran.r-project.org/package=betareg
 
-## MISSING METHODS: vcov, residuals, summary, print.summary
+## MISSING METHODS: vcov, residuals, summary, print.summary, predict
 
 #' @rdname ddm-methods
 #' @export
@@ -33,7 +33,7 @@ print.ddm <- function(x, digits = max(3, getOption("digits") - 3), ...)
       deparse(x$call, width.cutoff = floor(getOption("width") * 0.85)), 
       "", sep = "\n")
   
-  cat("DDM fit with",  length(x$coefficients), "estimated and", 
+  cat("DDM with",  length(x$coefficients), "estimated and", 
       length(x$fixed_dpar), "fixed distributional parameters.\n")
   if (length(x$fixed_dpar) > 0) {
     cat("Fixed:", 

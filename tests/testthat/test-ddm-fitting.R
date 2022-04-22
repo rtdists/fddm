@@ -42,7 +42,7 @@ test_that("printing shows coefficients", {
                 regexp = "drift coefficients (identity link):", fixed = TRUE)
   
   expect_output(print(fit1), 
-                regexp = "DDM fit with 3 estimated and 2 fixed distributional parameters.\nFixed: bias = 0.5, sv = 0",
+                regexp = "DDM with 3 estimated and 2 fixed distributional parameters.\nFixed: bias = 0.5, sv = 0",
                 fixed = TRUE)
   expect_output(print(fit1), 
                 regexp = "boundary coefficients (identity link):", fixed = TRUE)
@@ -50,7 +50,7 @@ test_that("printing shows coefficients", {
                 regexp = "ndt coefficients (identity link):", fixed = TRUE)
   
   expect_output(print(fit2), 
-                regexp = "DDM fit with 4 estimated and 1 fixed distributional parameters.\nFixed: sv = 0",
+                regexp = "DDM with 4 estimated and 1 fixed distributional parameters.\nFixed: sv = 0",
                 fixed = TRUE)
   expect_output(print(fit2), 
                 regexp = "bias coefficients (identity link):", fixed = TRUE)
@@ -58,7 +58,7 @@ test_that("printing shows coefficients", {
                 regexp = "ndt coefficients (identity link):", fixed = TRUE)
   
   expect_output(print(fit6), 
-                regexp = "DDM fit with 5 estimated and 0 fixed distributional parameters.",
+                regexp = "DDM with 5 estimated and 0 fixed distributional parameters.",
                 fixed = TRUE)
   expect_output(print(fit6), 
                 regexp = "ndt coefficients (identity link):", fixed = TRUE)
@@ -68,7 +68,7 @@ test_that("printing shows coefficients", {
                 regexp = "sv coefficients (identity link):", fixed = TRUE)
 })
 
-test_that("correct sitributional parameters are estimated", {
+test_that("correct distributional parameters are estimated", {
   expect_equal(fit0$dpar, "drift")
   expect_equal(fit1$dpar, c("drift", "boundary", "ndt"))
   expect_equal(fit2$dpar, c("drift", "boundary", "ndt", "bias"))
