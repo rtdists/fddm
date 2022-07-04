@@ -116,8 +116,7 @@ print.summary.ddm <- function(x, digits = max(3, getOption("digits") - 3), ...)
 
   cat(paste("drift coefficients (", x$link$drift$name,
             " link):\n", sep = ""))
-  print.default(format(x$coefficients$drift, digits = digits),
-                print.gap = 2, quote = FALSE)
+  printCoefmat(x$coefficients$drift, digits = digits)
   cat("\n")
 
   if (NROW(x$coefficients) > 1) {
@@ -125,8 +124,7 @@ print.summary.ddm <- function(x, digits = max(3, getOption("digits") - 3), ...)
       cur_par <- names(x$coefficients)[par + 1]
       cat(paste(cur_par, " coefficients (", x$link[[cur_par]]$name,
                 " link):\n", sep = ""))
-      print.default(format(x$coefficients[[cur_par]], digits = digits),
-                    print.gap = 2, quote = FALSE)
+      printCoefmat(x$coefficients[[cur_par]], digits = digits)
       cat("\n")
     }
   }
