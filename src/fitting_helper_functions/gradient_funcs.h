@@ -3,6 +3,30 @@
 
 
 
+double dv(const double& t, const double& a, const double& v, const double& w,
+          const double& sv, const double& err, const double& sl_thresh)
+{
+  double taa = t / (a*a);
+  double nnt = 1 / (1 + sv*sv * t);
+  double sqtnnt = sqrt(nnt);
+  double arg = a * w + v * t;
+  double mexp = exp(0.5 * (sv*sv * a*a * w*w - 2 * v * a * w - v*v * t) * nnt);
+  double mult, sum_err;
+
+  if (taa > sl_thresh) { // use large-time
+    mult = -mexp * arg * nnt * sqtnnt / (a*a);
+    sum_err = err / fabs(mult);
+    if (sum_err < ERR_TOL_THRESH) sum_err = ERR_TOL_THRESH;
+    int kl = kl_pdf(taa, sum_err);
+    return mult * PI_CONST * large_sum(taa, w, kl);
+  } else { // use small-time
+    mult = -mexp * arg * a * SQRT_1_2PI * nnt * sqtnnt / (t * sqrt(t));
+    sum_err = err / fabs(mult);
+    if (sum_err < ERR_TOL_THRESH) sum_err = ERR_TOL_THRESH;
+    return mult * small_sum(taa, w, sum_err);
+  }
+}
+
 double da(const double& t, const double& a, const double& v, const double& w,
           const double& sv, const double& err, const double& sl_thresh)
 {
@@ -36,30 +60,6 @@ double da(const double& t, const double& a, const double& v, const double& w,
     if (sum_err2 < ERR_TOL_THRESH) sum_err2 = ERR_TOL_THRESH;
     return m1 * small_sum(taa, w, 0.5 * sum_err1) +
            m2 * small_sum_dat(taa, w, 0.5 * sum_err2);
-  }
-}
-
-double dv(const double& t, const double& a, const double& v, const double& w,
-          const double& sv, const double& err, const double& sl_thresh)
-{
-  double taa = t / (a*a);
-  double nnt = 1 / (1 + sv*sv * t);
-  double sqtnnt = sqrt(nnt);
-  double arg = a * w + v * t;
-  double mexp = exp(0.5 * (sv*sv * a*a * w*w - 2 * v * a * w - v*v * t) * nnt);
-  double mult, sum_err;
-
-  if (taa > sl_thresh) { // use large-time
-    mult = -mexp * arg * nnt * sqtnnt / (a*a);
-    sum_err = err / fabs(mult);
-    if (sum_err < ERR_TOL_THRESH) sum_err = ERR_TOL_THRESH;
-    int kl = kl_pdf(taa, sum_err);
-    return mult * PI_CONST * large_sum(taa, w, kl);
-  } else { // use small-time
-    mult = -mexp * arg * a * SQRT_1_2PI * nnt * sqtnnt / (t * sqrt(t));
-    sum_err = err / fabs(mult);
-    if (sum_err < ERR_TOL_THRESH) sum_err = ERR_TOL_THRESH;
-    return mult * small_sum(taa, w, sum_err);
   }
 }
 

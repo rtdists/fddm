@@ -47,6 +47,26 @@ int kl_dw(const double& taa, const double& t, const double& err)
   }
 }
 
+// for Large-Time 2nd derivative wrt a, t0
+int kl_dat2(const double& taa, const double& err)
+{ // note: taa = t / (a*a)
+  // need to check that err is small enough for Lambert W function to hold...
+  // if (err > 32 * O_PI*O_PI*O_PI*O_PI*O_PI*O_PI * exp(-2.0) / (taa*taa*taa)) {
+  //   return INT_MAX; ... but idk what to do if it's not
+  // }
+  double sqttaa = sqrt(taa);
+  float k1 = SQRT_5 * O_PI / sqttaa;
+  double u2 = 3*LOG_PI - LOG_4RT2 + 1.5*log(taa) + 0.5*log(err);
+  float k2 = 2 * O_PI * sqrt(-u2 + SQRT_2 * sqrt(-u2 - 1)) / sqttaa;
+  double u3 = LOG_5_112 + 6*LOG_PI + 3*log(taa) + log(err);
+  float k3 = SQRT_2 * O_PI * sqrt(-u3 + SQRT_2 * sqrt(-u3 - 1)) / sqttaa;
+  if (k1 > INT_MAX || k2 > INT_MAX || k3 > INT_MAX) {
+    return INT_MAX;
+  } else {
+    return ceil(max({k1, k2, k3}));
+  }
+}
+
 
 
 //--------------------- Small-Time -------------------------------------------//
@@ -62,3 +82,4 @@ int ks_dw(const double& taa, const double& w, const double& err)
     return ceil(max(k1, k2));
   }
 }
+
