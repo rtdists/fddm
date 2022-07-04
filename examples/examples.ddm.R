@@ -18,7 +18,7 @@ op <- options(contrasts=c('contr.treatment', 'contr.poly'))
 ## difference from "intercept" (hard - easy)
 fit1b <- ddm(rt + response ~ 0 + classification + classification:difficulty, 
              data = p1)
-fit1b
+summary(fit1b)
 options(op) # reset contrasts
 
 ## set orthogonal sum-to-zero contrasts
@@ -29,7 +29,7 @@ op <- options(contrasts=c('contr.sum', 'contr.poly'))
 ## difference from "intercept" (hard/easy - mean drift rate)
 fit1c <- ddm(rt + response ~ 0 + classification + classification:difficulty, 
              data = p1)
-fit1c
+summary(fit1c)
 options(op) ## reset contrasts
 
 ## all three variants produce same fit, only meaning of parameters differs 
@@ -45,6 +45,20 @@ c(coef(fit1b)[1:2],
 ## same drift rates based on fit1c: 
 c(coef(fit1c)[1] + coef(fit1c)[3], coef(fit1c)[2] + coef(fit1c)[4], 
   coef(fit1c)[1] - coef(fit1c)[3], coef(fit1c)[2] - coef(fit1c)[4])
+
+## We can also use the traditional ANOVA style parametrisation with one overall
+## intercept plus deviations. This makes the coefficients difficult to
+## interpret, but allows us to get an ANOVA table using other packages, such as
+## car::Anova(). Note, this also require sum-to-zero contrasts.
+op <- options(contrasts=c('contr.sum', 'contr.poly'))
+fit1d <- ddm(rt + response ~ classification*difficulty, 
+             data = p1)
+summary(fit1d)
+if (requireNamespace("car")) { ## requires package car
+  car::Anova(fit1d, type= "III")
+}
+options(op) ## reset contrasts
+
 
 # we can estimate a model that freely estimates response bias 
 # (instead of fixing it at 0.5)
