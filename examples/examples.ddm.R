@@ -7,6 +7,7 @@ head(p1)
 
 ## one drift rate per classification by difficulty design cell 
 fit1 <- ddm(rt + response ~ 0 + classification:difficulty, data = p1)
+summary(fit1)
 fit1
 
 ## set default contrasts (just in case contrasts have been changed)

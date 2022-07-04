@@ -4,7 +4,9 @@
 \alias{ddm-methods}
 \alias{print.ddm}
 \alias{summary.ddm}
+\alias{print.summary.ddm}
 \alias{coef.ddm}
+\alias{vcov.ddm}
 \alias{model.frame.ddm}
 \alias{model.matrix.ddm}
 \alias{terms.ddm}
@@ -16,7 +18,11 @@
 
 \method{summary}{ddm}(object, ...)
 
+\method{print}{summary.ddm}(x, digits = max(3, getOption("digits") - 3), ...)
+
 \method{coef}{ddm}(object, dpar = c("drift", "boundary", "ndt", "bias", "sv", "full"), ...)
+
+\method{vcov}{ddm}(object, dpar = c("drift", "boundary", "ndt", "bias", "sv"), ...)
 
 \method{model.frame}{ddm}(formula, ...)
 
