@@ -89,8 +89,8 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
                 optim = "nlminb",
                 args_optim = list(),
                 args_ddm = list(err_tol = 1e-6, switch_thresh = 0.8),
-                use_gradient = TRUE, 
-                compiled_model = TRUE, model = TRUE, 
+                use_gradient = TRUE,
+                compiled_model = TRUE, model = TRUE,
                 mmatrix = TRUE, response = TRUE,
                 na.action, subset,
                 contrasts = NULL) {
@@ -163,8 +163,8 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   for (i in seq_along(formula_mm)) {
     rterms[[i]] <- terms(full_formula, lhs = 0, rhs = i)
     formula_mm[[i]] <- model.matrix(
-      object = rterms[[i]], 
-      data = mf, 
+      object = rterms[[i]],
+      data = mf,
       contrasts.arg = contrasts
     )
   }
@@ -222,16 +222,16 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
     if (ncols[[par_name]] >= 1 & nrow(all_mm[[i]]) > 1) {
       # check estimability
       rank_warn <- FALSE
-      #par_rank <- qr(all_mm[[i]])[["rank"]]
+      # par_rank <- qr(all_mm[[i]])[["rank"]]
       while (qr(all_mm[[i]])[["rank"]] < ncol(all_mm[[i]])) {
-        all_mm[[i]] <- all_mm[[i]][, seq_len(qr(all_mm[[i]])[["rank"]]), 
+        all_mm[[i]] <- all_mm[[i]][, seq_len(qr(all_mm[[i]])[["rank"]]),
                                    drop = FALSE]
         rank_warn <- TRUE
-      } 
+      }
       if (rank_warn) {
         warning("model matrix for ", par_name, " was rank deficient; ",
                 ncols[[par_name]] - ncol(all_mm[[i]]),
-                " column(s) dropped from right side.", 
+                " column(s) dropped from right side.",
                 call. = FALSE)
         ncols[[par_name]] <- ncol(all_mm[[i]])
       }
@@ -259,12 +259,12 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   #-------------------- Run Optimization --------------------------------------#
   if (optim == "nlminb") fit_fun <- fit_nlminb
   opt <- fit_fun(
-    init = init_vals, 
+    init = init_vals,
     objective = f$calculate_loglik,
     gradient = if (use_gradient) f$calculate_gradient else NULL,
     lower = lower_bds, upper = upper_bds,
     control = args_optim)
-  
+
   ## prepare coefficient list:
   all_coef <- opt$coefficients
   names(all_coef) <- unlist(lapply(formula_mm,  colnames))
@@ -272,9 +272,18 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   coef_map <- rep(names(coef_lengths), coef_lengths)
   coef_map <- factor(coef_map, levels = unique(coef_map))
   opt$coefficients <- split(all_coef, coef_map)
-  
+
   coef_list <- vector("list", length(all_ddm_formulas))
   names(coef_list) <- names(all_ddm_formulas)
+
+  ## calculate variance-covariance matrix and get standard errors
+  f$calculate_vcov(all_coef)
+  vcov_temp <- list(
+    drift = f$vcov_v,
+    boundary = f$vcov_a,
+    ndt = f$vcov_t0,
+    bias = f$vcov_w,
+    sv = f$vcov_sv)
 
   ## prepare output object
   rval <- list(
@@ -282,7 +291,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
     dpar = names(all_ddm_formulas),
     fixed_dpar = all_ddm_constants,
     loglik = opt$loglik,
-    vcov = NULL,
+    vcov = vcov_temp[names(all_ddm_formulas)],
     nobs = nrow(response_df),
     npar = length(init_vals),
     df.residual = nrow(response_df) - length(init_vals)
@@ -292,7 +301,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   rval$dpar_formulas <- all_ddm_formulas
   rval$na.action <- attr(mf, "na.action")
   rval$terms <- c(rterms, full = mt)
-  rval$levels <- c(lapply(rterms, .getXlevels, m = mf), 
+  rval$levels <- c(lapply(rterms, .getXlevels, m = mf),
                    full = list(.getXlevels(mt, mf)))
   rval$contrasts <- lapply(formula_mm, attr, which = "contrasts")
   rval$args_ddm <- args_ddm
@@ -311,7 +320,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
     rval$model <- mf
   }
   if (response) {
-    rval$response <- Formula::model.part(full_formula, mf, 
+    rval$response <- Formula::model.part(full_formula, mf,
                                          lhs = 1, rhs = 0)
   }
   if (mmatrix) {
