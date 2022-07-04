@@ -110,11 +110,15 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   par_is_formula <- vapply(all_ddm_pars, FUN = inherits, FUN.VALUE = NA,
                            what = "formula")
   # check formulas:
-  all_ddm_formulas <- all_ddm_pars[par_is_formula]
+  all_ddm_formulas <- all_ddm_pars
+  all_ddm_formulas[!par_is_formula] <- 
+    lapply(all_ddm_formulas[!par_is_formula], 
+           FUN = function(x) ~ 0)
+  #all_ddm_formulas <- all_ddm_pars[par_is_formula]
   
   ## uses Formula package: https://cran.r-project.org/package=Formula
   full_formula <- do.call(Formula::as.Formula, args = unname(all_ddm_formulas))
-  attr(full_formula, "ddm_parameters") <- names(all_ddm_formulas)
+  #attr(full_formula, "ddm_parameters") <- names(all_ddm_formulas)
   
   ## see: https://developer.r-project.org/model-fitting-functions.html
   mf <- match.call(expand.dots = FALSE)
@@ -152,14 +156,14 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   response_vec <- response_df[[resp_column]]
 
   drift[[2]] <- NULL
-  mm_formulas <- all_ddm_formulas
+  mm_formulas <- all_ddm_formulas[par_is_formula]
   mm_formulas[["drift"]] <- drift
 
   #-------------------- Create Model Matrices ---------------------------------#
   formula_mm <- vector("list", length(full_formula)[2])
-  names(formula_mm) <- names(mm_formulas)
+  names(formula_mm) <- names(all_ddm_pars)
   rterms <- vector("list", length(full_formula)[2])
-  names(rterms) <- names(mm_formulas)
+  names(rterms) <- names(all_ddm_pars)
   for (i in seq_along(formula_mm)) {
     rterms[[i]] <- terms(full_formula, lhs = 0, rhs = i)
     formula_mm[[i]] <- model.matrix(
@@ -168,13 +172,10 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
       contrasts.arg = contrasts
     )
   }
-  # formula_mm <- lapply(all_ddm_formulas, model.matrix, 
-  #                      data = mf, contrasts.arg = contrasts)
-  miss_mm <- lapply(all_ddm_constants,
+  all_mm <- formula_mm
+  all_mm[!par_is_formula] <- lapply(all_ddm_constants,
                     FUN = function(x) matrix(x, nrow = 1, ncol = 1))
-  all_mm <- c(formula_mm, miss_mm)
-  all_mm <- all_mm[names(all_ddm_pars)] # ensure correct order
-  
+
   ### link function (currently only uses identity, so no argument yet)
   all_links <- list(
     drift = "identity",
@@ -258,6 +259,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
 
   #-------------------- Run Optimization --------------------------------------#
   if (optim == "nlminb") fit_fun <- fit_nlminb
+  else fit_fun <- optim
   opt <- fit_fun(
     init = init_vals,
     objective = f$calculate_loglik,
@@ -288,7 +290,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   ## prepare output object
   rval <- list(
     coefficients = opt$coefficients,
-    dpar = names(all_ddm_formulas),
+    dpar = names(formula_mm),
     fixed_dpar = all_ddm_constants,
     loglik = opt$loglik,
     vcov = vcov_temp[names(all_ddm_formulas)],
