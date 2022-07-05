@@ -61,6 +61,8 @@ addition to the five DDM parameters \code{c("drift", "boundary", "ndt",
 for all estimated parameters.}
 
 \item{formula}{see \code{\link{model.frame}}}
+
+\item{data, trms, xlev, grid}{arguments needed for \pkg{emmeans} support.}
 }
 \description{
 Implemented S3 methods for objects of class \code{ddm} as returned by

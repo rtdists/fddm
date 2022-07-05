@@ -11,6 +11,7 @@
 #'   for all estimated parameters.
 #' @param digits minimal number of significant digits, see
 #'   \code{\link{print.default}}.
+#' @param data,trms,xlev,grid arguments needed for \pkg{emmeans} support.
 #' @param ... further arguments passed to or from other methods.
 #' 
 #' @details The methods should fail with an informative error if a
@@ -68,6 +69,7 @@ print.ddm <- function(x, digits = max(3, getOption("digits") - 3), ...)
 }
 
 #' @rdname ddm-methods
+#' @importFrom stats pnorm
 #' @export
 summary.ddm <- function(object, ...) {
   ## extend coefficient table for each dpar
@@ -98,6 +100,7 @@ summary.ddm <- function(object, ...) {
 
 
 #' @rdname ddm-methods
+#' @importFrom stats printCoefmat
 #' @export
 print.summary.ddm <- function(x, digits = max(3, getOption("digits") - 3), ...)
 {
@@ -231,6 +234,7 @@ update.ddm <- function(object, ...) {
 ## per estimated ddm parameter.
 
 #' @rdname ddm-methods
+#' @importFrom stats delete.response model.frame
 recover_data.ddm <- function(object, data, ...) {
   fcall = object$call
   #browser()
@@ -238,6 +242,7 @@ recover_data.ddm <- function(object, data, ...) {
                frame = frame, data = model.frame(object), ...)
 }
 
+#' @importFrom stats vcov na.pass
 #' @rdname ddm-methods
 emm_basis.ddm <- function(object, trms, xlev, grid, 
                           dpar = c("drift", "boundary", "ndt", "bias", "sv"), 
