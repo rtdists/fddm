@@ -5,6 +5,43 @@ med_dec <- med_dec[which(med_dec[["rt"]] >= 0), ] ## only use valid RTs
 p1 <- med_dec[med_dec[["id"]] == 2 & med_dec[["group"]] == "experienced", ]
 head(p1)
 
+
+##---------------------------------------------------------------
+##        Easiest: Fitting using car::Anova() and emmeans       -
+##---------------------------------------------------------------
+
+## Because we use an ANOVA approach, we set orthogonal sum-to-zero contrasts
+op <- options(contrasts=c('contr.sum', 'contr.poly'))
+
+fit0 <- ddm(rt + response ~ classification*difficulty, data = p1)
+summary(fit0)
+
+## to get most out of it, we need extra packages:
+## for ANOVA table, we use package car:
+if (requireNamespace("car")) { ## requires package car
+car::Anova(fit0, type= "III") 
+}
+
+## for more tests, we use emmeans:
+if (requireNamespace("emmeans")) { 
+# get conditional main effects of difficulty (for each level of classification):
+emmeans::joint_tests(fit0, by = "classification")
+
+# get mean drift rates per condition:
+em1 <- emmeans::emmeans(fit0, "difficulty", by = "classification")
+em1
+# compare mean drift rates per condition
+pairs(em1)
+update(pairs(em1), by = NULL, adjust = "holm")
+}
+
+options(op) # reset contrasts
+
+
+##----------------------------------------------------------------
+##              Fitting with custom parametrisation              -
+##----------------------------------------------------------------
+
 ## one drift rate per classification by difficulty design cell 
 fit1 <- ddm(rt + response ~ 0 + classification:difficulty, data = p1)
 summary(fit1)
@@ -32,10 +69,11 @@ fit1c <- ddm(rt + response ~ 0 + classification + classification:difficulty,
 summary(fit1c)
 options(op) ## reset contrasts
 
-## all three variants produce same fit, only meaning of parameters differs 
+## all variants produce same fit, only meaning of parameters differs 
 logLik(fit1)
 logLik(fit1b)
 logLik(fit1c)
+logLik(fit0) ## also model above
 
 ## all models estimate same drift rates, but in different parametrisation:
 coef(fit1)  ## drift rates per design cell
@@ -45,20 +83,6 @@ c(coef(fit1b)[1:2],
 ## same drift rates based on fit1c: 
 c(coef(fit1c)[1] + coef(fit1c)[3], coef(fit1c)[2] + coef(fit1c)[4], 
   coef(fit1c)[1] - coef(fit1c)[3], coef(fit1c)[2] - coef(fit1c)[4])
-
-## We can also use the traditional ANOVA style parametrisation with one overall
-## intercept plus deviations. This makes the coefficients difficult to
-## interpret, but allows us to get an ANOVA table using other packages, such as
-## car::Anova(). Note, this also require sum-to-zero contrasts.
-op <- options(contrasts=c('contr.sum', 'contr.poly'))
-fit1d <- ddm(rt + response ~ classification*difficulty, 
-             data = p1)
-summary(fit1d)
-if (requireNamespace("car")) { ## requires package car
-  car::Anova(fit1d, type= "III")
-}
-options(op) ## reset contrasts
-
 
 # we can estimate a model that freely estimates response bias 
 # (instead of fixing it at 0.5)

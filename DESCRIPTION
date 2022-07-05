@@ -36,6 +36,9 @@ Suggests:
     ggnewscale,
     ggforce,
     WienR,
+    emmeans,
+    estimability,
+    car,
     lmtest
 URL: https://github.com/rtdists/fddm
 BugReports: https://github.com/rtdists/fddm/issues

@@ -12,6 +12,8 @@
 \alias{terms.ddm}
 \alias{logLik.ddm}
 \alias{update.ddm}
+\alias{recover_data.ddm}
+\alias{emm_basis.ddm}
 \title{Methods for ddm objects}
 \usage{
 \method{print}{ddm}(x, digits = max(3, getOption("digits") - 3), ...)
@@ -33,6 +35,17 @@
 \method{logLik}{ddm}(object, ...)
 
 \method{update}{ddm}(object, ...)
+
+recover_data.ddm(object, data, ...)
+
+emm_basis.ddm(
+  object,
+  trms,
+  xlev,
+  grid,
+  dpar = c("drift", "boundary", "ndt", "bias", "sv"),
+  ...
+)
 }
 \arguments{
 \item{digits}{minimal number of significant digits, see

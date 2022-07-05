@@ -229,3 +229,33 @@ update.ddm <- function(object, ...) {
 }
 ## note: update method could be structured similar to ddm call with one formula
 ## per estimated ddm parameter.
+
+#' @rdname ddm-methods
+recover_data.ddm <- function(object, data, ...) {
+  fcall = object$call
+  #browser()
+  emmeans::recover_data(fcall, trms = delete.response(terms(object)), "na.omit",
+               frame = frame, data = model.frame(object), ...)
+}
+
+#' @rdname ddm-methods
+emm_basis.ddm <- function(object, trms, xlev, grid, 
+                          dpar = c("drift", "boundary", "ndt", "bias", "sv"), 
+                          ...) {
+  dpar <- match.arg(dpar)
+  #browser()
+  bhat = object$coefficients[[dpar]]
+  nm = if(is.null(names(bhat))) row.names(bhat) else names(bhat)
+  m = suppressWarnings(model.frame(trms, grid, na.action = na.pass, xlev = xlev))
+  X = model.matrix(trms, m, contrasts.arg = object$contrasts[[dpar]])
+  assign = attr(X, "assign")
+  X = X[, nm, drop = FALSE]
+  bhat = as.numeric(bhat) 
+  V = vcov(object, ...)
+  nbasis = estimability::all.estble
+  misc = list()
+  dfargs = list(df = object$df.residual)
+  dffun = function(k, dfargs) dfargs$df
+  list(X=X, bhat=bhat, nbasis=nbasis, V=V, dffun=dffun, dfargs=dfargs, misc=misc,
+       model.matrix = emmeans::.cmpMM(object$qr, assign = assign))
+}
