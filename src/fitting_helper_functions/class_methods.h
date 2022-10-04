@@ -197,8 +197,8 @@ VectorXd fddm_fit::calc_gradient(const VectorXd& temp_coefs)
 }
 
 
-// Variance-Covariance Matrix Function
-void fddm_fit::calc_vcov(const VectorXd& temp_coefs)
+// Log-Hessian Function
+void fddm_fit::calc_hessians(const VectorXd& temp_coefs)
 {
   // if MLE coefficients do not match the stored ones, must recalculate
   // parameter vectors, likelihood, gradient
@@ -206,12 +206,13 @@ void fddm_fit::calc_vcov(const VectorXd& temp_coefs)
     double not_used = calc_loglik(temp_coefs); // stored in `likelihood`
   }
   
-  // calculate (negative) hessians and (negative) sum over all data
-  vcov_v = MatrixXd::Zero(form_len[0], form_len[0]);
-  vcov_a = MatrixXd::Zero(form_len[1], form_len[1]);
-  vcov_t0 = MatrixXd::Zero(form_len[2], form_len[2]);
-  vcov_w = MatrixXd::Zero(form_len[3], form_len[3]);
-  vcov_sv = MatrixXd::Zero(form_len[4], form_len[4]);
+  // calculate hessians and sum over all data
+  // the second derivative of log(f(x)) is a mess, see paper for details
+  hess_v = MatrixXd::Zero(form_len[0], form_len[0]);
+  hess_a = MatrixXd::Zero(form_len[1], form_len[1]);
+  hess_t0 = MatrixXd::Zero(form_len[2], form_len[2]);
+  hess_w = MatrixXd::Zero(form_len[3], form_len[3]);
+  hess_sv = MatrixXd::Zero(form_len[4], form_len[4]);
   RowVectorXd mm_v_row = RowVectorXd::Zero(form_len[0]);
   VectorXd mm_v_col = VectorXd::Zero(form_len[0]);
   RowVectorXd mm_a_row = RowVectorXd::Zero(form_len[1]);
@@ -233,7 +234,7 @@ void fddm_fit::calc_vcov(const VectorXd& temp_coefs)
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_v_row = mm_v.row(i);
           mm_v_col = mm_v.row(i);
-          vcov_v -= mm_v_col * dd * mm_v_row;
+          hess_v -= mm_v_col * dd * mm_v_row;
         }
         if (form_len[1] > 0) {
           d1 = da(t, a[i], v[i], w[i], sv[i], err_tol, switch_thresh);
@@ -241,7 +242,7 @@ void fddm_fit::calc_vcov(const VectorXd& temp_coefs)
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_a_row = mm_a.row(i);
           mm_a_col = mm_a.row(i);
-          vcov_a -= mm_a_col * dd * mm_a_row;
+          hess_a -= mm_a_col * dd * mm_a_row;
         }
         if (form_len[2] > 0) {
           d1 = dt0(t, a[i], v[i], w[i], sv[i], err_tol, switch_thresh);
@@ -249,7 +250,7 @@ void fddm_fit::calc_vcov(const VectorXd& temp_coefs)
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_t0_row = mm_t0.row(i);
           mm_t0_col = mm_t0.row(i);
-          vcov_t0 -= mm_t0_col * dd * mm_t0_row;
+          hess_t0 -= mm_t0_col * dd * mm_t0_row;
         }
         if (form_len[3] > 0) {
           d1 = dw(t, a[i], v[i], w[i], sv[i], err_tol, switch_thresh);
@@ -257,7 +258,7 @@ void fddm_fit::calc_vcov(const VectorXd& temp_coefs)
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_w_row = mm_w.row(i);
           mm_w_col = mm_w.row(i);
-          vcov_w -= mm_w_col * dd * mm_w_row;
+          hess_w -= mm_w_col * dd * mm_w_row;
         }
         if (form_len[4] > 0) {
           d1 = dsv(t, a[i], v[i], w[i], sv[i], err_tol, switch_thresh);
@@ -265,7 +266,7 @@ void fddm_fit::calc_vcov(const VectorXd& temp_coefs)
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_sv_row = mm_sv.row(i);
           mm_sv_col = mm_sv.row(i);
-          vcov_sv -= mm_sv_col * dd * mm_sv_row;
+          hess_sv -= mm_sv_col * dd * mm_sv_row;
         }
       } else { // response is "upper" so use alternate parameters
         // note: chain rule negation not needed because squared or negated twice
@@ -275,7 +276,7 @@ void fddm_fit::calc_vcov(const VectorXd& temp_coefs)
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_v_row = mm_v.row(i);
           mm_v_col = mm_v.row(i);
-          vcov_v -= mm_v_col * dd * mm_v_row;
+          hess_v -= mm_v_col * dd * mm_v_row;
         }
         if (form_len[1] > 0) {
           d1 = da(t, a[i], -v[i], 1-w[i], sv[i], err_tol, switch_thresh);
@@ -283,7 +284,7 @@ void fddm_fit::calc_vcov(const VectorXd& temp_coefs)
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_a_row = mm_a.row(i);
           mm_a_col = mm_a.row(i);
-          vcov_a -= mm_a_col * dd * mm_a_row;
+          hess_a -= mm_a_col * dd * mm_a_row;
         }
         if (form_len[2] > 0) {
           d1 = dt0(t, a[i], -v[i], 1-w[i], sv[i], err_tol, switch_thresh);
@@ -291,7 +292,7 @@ void fddm_fit::calc_vcov(const VectorXd& temp_coefs)
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_t0_row = mm_t0.row(i);
           mm_t0_col = mm_t0.row(i);
-          vcov_t0 -= mm_t0_col * dd * mm_t0_row;
+          hess_t0 -= mm_t0_col * dd * mm_t0_row;
         }
         if (form_len[3] > 0) {
           d1 = dw(t, a[i], -v[i], 1-w[i], sv[i], err_tol, switch_thresh);
@@ -299,7 +300,7 @@ void fddm_fit::calc_vcov(const VectorXd& temp_coefs)
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_w_row = mm_w.row(i);
           mm_w_col = mm_w.row(i);
-          vcov_w -= mm_w_col * dd * mm_w_row;
+          hess_w -= mm_w_col * dd * mm_w_row;
         }
         if (form_len[4] > 0) {
           d1 = dsv(t, a[i], -v[i], 1-w[i], sv[i], err_tol, switch_thresh);
@@ -307,29 +308,52 @@ void fddm_fit::calc_vcov(const VectorXd& temp_coefs)
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_sv_row = mm_sv.row(i);
           mm_sv_col = mm_sv.row(i);
-          vcov_sv -= mm_sv_col * dd * mm_sv_row;
+          hess_sv -= mm_sv_col * dd * mm_sv_row;
         }
       }
     } else {
-      // vcov_v = std::numeric_limits<double>::quiet_NaN();
-      // vcov_a = std::numeric_limits<double>::quiet_NaN();
-      // vcov_t0 = std::numeric_limits<double>::quiet_NaN();
-      // vcov_w = std::numeric_limits<double>::quiet_NaN();
-      // vcov_sv = std::numeric_limits<double>::quiet_NaN();
+      hess_v = MatrixXd::Constant(form_len[0], form_len[0],
+                                  std::numeric_limits<double>::quiet_NaN());
+      hess_a = MatrixXd::Constant(form_len[1], form_len[1],
+                                  std::numeric_limits<double>::quiet_NaN());
+      hess_t0 = MatrixXd::Constant(form_len[2], form_len[2],
+                                   std::numeric_limits<double>::quiet_NaN());
+      hess_w = MatrixXd::Constant(form_len[3], form_len[3],
+                                  std::numeric_limits<double>::quiet_NaN());
+      hess_sv = MatrixXd::Constant(form_len[4], form_len[4],
+                                   std::numeric_limits<double>::quiet_NaN());
     }
   }
-
-  // invert negative hessians to get variance-covariance matrix
-  vcov_v = vcov_v.inverse();
-  vcov_a = vcov_a.inverse();
-  vcov_t0 = vcov_t0.inverse();
-  vcov_w = vcov_w.inverse();
-  vcov_sv = vcov_sv.inverse();
 }
 
 
+// Variance-Covariance Matrix Function
+void fddm_fit::calc_vcov()
+{
+  // check if Hessians have been calculated
+  if (hess_v.rows() < 1 && hess_a.rows() < 1 && hess_t0.rows() < 1 &&
+      hess_w.rows() < 1 && hess_sv.rows() < 1) {
+    calc_hessians(coefs);
+  }
+
+  // negate and invert hessians to get variance-covariance matrices
+  vcov_v = -hess_v.inverse();
+  vcov_a = -hess_a.inverse();
+  vcov_t0 = -hess_t0.inverse();
+  vcov_w = -hess_w.inverse();
+  vcov_sv = -hess_sv.inverse();
+}
+
+
+// Standard Error Function
 VectorXd fddm_fit::calc_std_err()
 {
+  // check if variance-covariance matrices have been calculated
+  if (vcov_v.rows() < 1 && vcov_a.rows() < 1 && vcov_t0.rows() < 1 &&
+      vcov_w.rows() < 1 && vcov_sv.rows() < 1) {
+    calc_vcov();
+  }
+
   // calculate standard errors
   VectorXd std_err(Ncoefs);
   int par_idx = 0;

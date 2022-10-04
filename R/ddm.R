@@ -95,9 +95,9 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
                 na.action, subset,
                 contrasts = NULL) {
   cl <- match.call()
-  
+
   ## prepare single formula for model.frame
-  
+
   #-------------------- Extract and Check Formulas ----------------------------#
   all_ddm_pars <- list(
     drift = drift,
@@ -114,12 +114,12 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   all_ddm_formulas[!par_is_formula] <- 
     lapply(all_ddm_formulas[!par_is_formula], 
            FUN = function(x) ~ 0)
-  #all_ddm_formulas <- all_ddm_pars[par_is_formula]
-  
+  # all_ddm_formulas <- all_ddm_pars[par_is_formula]
+
   ## uses Formula package: https://cran.r-project.org/package=Formula
   full_formula <- do.call(Formula::as.Formula, args = unname(all_ddm_formulas))
-  #attr(full_formula, "ddm_parameters") <- names(all_ddm_formulas)
-  
+  # attr(full_formula, "ddm_parameters") <- names(all_ddm_formulas)
+
   ## see: https://developer.r-project.org/model-fitting-functions.html
   mf <- match.call(expand.dots = FALSE)
   mf$formula <- full_formula
@@ -149,7 +149,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
     lhs = 1,
     drop = TRUE
   )
-  
+
   rt_column <- all.vars(drift[[2]][[2]])
   rt <- response_df[[rt_column]]
   resp_column <- all.vars(drift[[2]][[3]])
@@ -267,6 +267,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
     lower = lower_bds, upper = upper_bds,
     control = args_optim)
 
+  #-------------------- Prepare Output ----------------------------------------#
   ## prepare coefficient list:
   all_coef <- opt$coefficients
   names(all_coef) <- unlist(lapply(formula_mm,  colnames))
@@ -278,8 +279,15 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   coef_list <- vector("list", length(all_ddm_formulas))
   names(coef_list) <- names(all_ddm_formulas)
 
-  ## calculate variance-covariance matrix and get standard errors
-  f$calculate_vcov(all_coef)
+  ## calculate Hessian and variance-covariance matrix
+  f$calculate_hessians(all_coef)
+  hess_temp <- list(
+    drift = f$hess_v,
+    boundary = f$hess_a,
+    ndt = f$hess_t0,
+    bias = f$hess_w,
+    sv = f$hess_sv)
+  f$calculate_vcov()
   vcov_temp <- list(
     drift = f$vcov_v,
     boundary = f$vcov_a,
@@ -293,6 +301,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
     dpar = names(formula_mm),
     fixed_dpar = all_ddm_constants,
     loglik = opt$loglik,
+    hessians = hess_temp[names(all_ddm_formulas)],
     vcov = vcov_temp[names(all_ddm_formulas)],
     nobs = nrow(response_df),
     npar = length(init_vals),

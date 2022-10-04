@@ -23,6 +23,7 @@ using Rcpp::NumericVector;
 
 
 // Constants
+static const double ERR_TOL_THRESH = 1e-300; // near minimum value of a double
 static const double FOUR_NINTHS = 0.444444444444444444444;
 static const double SQRT_2 = 1.41421356237309504880;
 static const double SQRT_3 = sqrt(3);
@@ -67,23 +68,23 @@ double sum_large_d_w(const double& taa, const double& w, const int& kl);
 
 
 // Partial Derivatives (of the PDF) Functions
-double pdf_dt(const double& t, const double& resp, const double& a,
-              const double& v, const double& w, const double& sv,
+double pdf_dt(const double& t, const double& resp, const double& v,
+              const double& a, const double& w, const double& sv,
               const double& err, const double& sl_thresh);
-double pdf_dt0(const double& t, const double& resp, const double& a,
-               const double& v, const double& w, const double& sv,
+double pdf_dt0(const double& t, const double& resp, const double& v,
+               const double& a, const double& w, const double& sv,
                const double& err, const double& sl_thresh);
-double pdf_da(const double& t, const double& resp, const double& a,
-              const double& v, const double& w, const double& sv,
+double pdf_da(const double& t, const double& resp, const double& v,
+              const double& a, const double& w, const double& sv,
               const double& err, const double& sl_thresh);
-double pdf_dv(const double& t, const double& resp, const double& a,
-              const double& v, const double& w, const double& sv,
+double pdf_dv(const double& t, const double& resp, const double& v,
+              const double& a, const double& w, const double& sv,
               const double& err, const double& sl_thresh);
-double pdf_dw(const double& t, const double& resp, const double& a,
-              const double& v, const double& w, const double& sv,
+double pdf_dw(const double& t, const double& resp, const double& v,
+              const double& a, const double& w, const double& sv,
               const double& err, const double& sl_thresh);
-double pdf_dsv(const double& t, const double& resp, const double& a,
-               const double& v, const double& w, const double& sv,
+double pdf_dsv(const double& t, const double& resp, const double& v,
+               const double& a, const double& w, const double& sv,
                const double& err, const double& sl_thresh);
 // Partial Derivatives of the log(PDF) Functions
 // double pdf_dt_log(const double& t, const double& resp, const double& a,
@@ -110,11 +111,11 @@ double pdf_dsv(const double& t, const double& resp, const double& a,
 // Helper Functions
 void convert_responses(const SEXP& response, int& Nres, int& Nmax,
                        vector<double>& out, const double& rt0, bool& valid);
-bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
+bool parameter_check(const int& Nrt, int& Nres, const int& Nv, const int& Na,
                      const int& Nt0, const int& Nw, const int& Nsv,
                      const int& Nsig, const int& Nerr, int& Nmax,
                      const NumericVector& rt, const SEXP& response,
-                     const NumericVector& a, const NumericVector& v,
+                     const NumericVector& v, const NumericVector& a,
                      const NumericVector& t0, const NumericVector& w,
                      const NumericVector& sv, const NumericVector& sigma,
                      const NumericVector& err,
@@ -122,8 +123,8 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
 vector<double> partial_pdf(const ParFunc& parf,
                            const NumericVector& rt,
                            const SEXP& response,
-                           const NumericVector& a,
                            const NumericVector& v,
+                           const NumericVector& a,
                            const NumericVector& t0,
                            const NumericVector& w,
                            const NumericVector& sv,

@@ -140,11 +140,11 @@ void convert_responses(const SEXP& response, int& Nres, int& Nmax,
 
 
 
-bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
+bool parameter_check(const int& Nrt, int& Nres, const int& Nv, const int& Na,
                      const int& Nt0, const int& Nw, const int& Nsv,
                      const int& Nsig, const int& Nerr, int& Nmax,
                      const NumericVector& rt, const SEXP& response,
-                     const NumericVector& a, const NumericVector& v,
+                     const NumericVector& v, const NumericVector& a,
                      const NumericVector& t0, const NumericVector& w,
                      const NumericVector& sv, const NumericVector& sigma,
                      const NumericVector& err,
@@ -160,6 +160,23 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
   
   // response, checks and converts responses
   convert_responses(response, Nres, Nmax, out, rt0, valid);
+  
+  // v
+  if (Nv < 1) {
+    warning("dfddm warning: model parameter 'v' is empty; empty vector returned.");
+    valid = 0;
+  } else {
+    for (int i = 0; i < Nv; i++) {
+      if (isfinite(v[i])) {
+        continue;
+      } else { // NaN, NA, Inf, -Inf are not finite
+        double naan = isnan(v[i]) ? v[i] : rt0; // v = {Inf, -Inf} implies PDF = 0 (or log(0) )
+        for (int j = i; j < Nmax; j += Nv) {
+          out[j] = naan;
+        }
+      }
+    }
+  }
   
   // a
   if (Na < 1) {
@@ -178,23 +195,6 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
       } else { // {NaN, NA} evaluate to FALSE
         double naan = isnan(a[i]) ? a[i] : NAN;
         for (int j = i; j < Nmax; j += Na) {
-          out[j] = naan;
-        }
-      }
-    }
-  }
-  
-  // v
-  if (Nv < 1) {
-    warning("dfddm warning: model parameter 'v' is empty; empty vector returned.");
-    valid = 0;
-  } else {
-    for (int i = 0; i < Nv; i++) {
-      if (isfinite(v[i])) {
-        continue;
-      } else { // NaN, NA, Inf, -Inf are not finite
-        double naan = isnan(v[i]) ? v[i] : rt0; // v = {Inf, -Inf} implies PDF = 0 (or log(0) )
-        for (int j = i; j < Nmax; j += Nv) {
           out[j] = naan;
         }
       }

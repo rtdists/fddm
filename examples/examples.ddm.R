@@ -11,7 +11,7 @@ head(p1)
 ##---------------------------------------------------------------
 
 ## Because we use an ANOVA approach, we set orthogonal sum-to-zero contrasts
-op <- options(contrasts=c('contr.sum', 'contr.poly'))
+op <- options(contrasts = c('contr.sum', 'contr.poly'))
 
 fit0 <- ddm(rt + response ~ classification*difficulty, data = p1)
 summary(fit0)
@@ -19,11 +19,11 @@ summary(fit0)
 ## to get most out of it, we need extra packages:
 ## for ANOVA table, we use package car:
 if (requireNamespace("car")) { ## requires package car
-car::Anova(fit0, type= "III") 
+car::Anova(fit0, type = "III")
 }
 
 ## for more tests, we use emmeans:
-if (requireNamespace("emmeans")) { 
+if (requireNamespace("emmeans")) {
 # get conditional main effects of difficulty (for each level of classification):
 emmeans::joint_tests(fit0, by = "classification")
 
@@ -42,34 +42,34 @@ options(op) # reset contrasts
 ##              Fitting with custom parametrisation              -
 ##----------------------------------------------------------------
 
-## one drift rate per classification by difficulty design cell 
+## one drift rate per classification by difficulty design cell
 fit1 <- ddm(rt + response ~ 0 + classification:difficulty, data = p1)
 summary(fit1)
 fit1
 
 ## set default contrasts (just in case contrasts have been changed)
-op <- options(contrasts=c('contr.treatment', 'contr.poly'))
-## one drift rate "intercept" per classification condition (blast vs. non-blast) 
+op <- options(contrasts = c('contr.treatment', 'contr.poly'))
+## one drift rate "intercept" per classification condition (blast vs. non-blast)
 ## corresponding to first level of difficulty factor (easy)
-## plus one further coefficient per classification condition corresponding to 
+## plus one further coefficient per classification condition corresponding to
 ## difference from "intercept" (hard - easy)
-fit1b <- ddm(rt + response ~ 0 + classification + classification:difficulty, 
+fit1b <- ddm(rt + response ~ 0 + classification + classification:difficulty,
              data = p1)
 summary(fit1b)
 options(op) # reset contrasts
 
 ## set orthogonal sum-to-zero contrasts
-op <- options(contrasts=c('contr.sum', 'contr.poly'))
-## one drift rate "intercept" per classification condition (blast vs. non-blast) 
-## corresponding to mean drift rate for the classification condition 
-## plus one further coefficient per classification condition corresponding to 
+op <- options(contrasts = c('contr.sum', 'contr.poly'))
+## one drift rate "intercept" per classification condition (blast vs. non-blast)
+## corresponding to mean drift rate for the classification condition
+## plus one further coefficient per classification condition corresponding to
 ## difference from "intercept" (hard/easy - mean drift rate)
-fit1c <- ddm(rt + response ~ 0 + classification + classification:difficulty, 
+fit1c <- ddm(rt + response ~ 0 + classification + classification:difficulty,
              data = p1)
 summary(fit1c)
 options(op) ## reset contrasts
 
-## all variants produce same fit, only meaning of parameters differs 
+## all variants produce same fit, only meaning of parameters differs
 logLik(fit1)
 logLik(fit1b)
 logLik(fit1c)
@@ -77,19 +77,19 @@ logLik(fit0) ## also model above
 
 ## all models estimate same drift rates, but in different parametrisation:
 coef(fit1)  ## drift rates per design cell
-## same drift rates based on fit1b: 
-c(coef(fit1b)[1:2], 
+## same drift rates based on fit1b:
+c(coef(fit1b)[1:2],
   coef(fit1b)[1] + coef(fit1b)[3], coef(fit1b)[2] + coef(fit1b)[4])
-## same drift rates based on fit1c: 
-c(coef(fit1c)[1] + coef(fit1c)[3], coef(fit1c)[2] + coef(fit1c)[4], 
+## same drift rates based on fit1c:
+c(coef(fit1c)[1] + coef(fit1c)[3], coef(fit1c)[2] + coef(fit1c)[4],
   coef(fit1c)[1] - coef(fit1c)[3], coef(fit1c)[2] - coef(fit1c)[4])
 
-# we can estimate a model that freely estimates response bias 
+# we can estimate a model that freely estimates response bias
 # (instead of fixing it at 0.5)
 fit2 <- ddm(rt + response ~ 0 + classification:difficulty, bias = ~1, data = p1)
 fit2
-## Note: estimating bias only makes sense in situations like here where the 
-## response boundaries do not correspond to correct/incorrect but to the 
+## Note: estimating bias only makes sense in situations like here where the
+## response boundaries do not correspond to correct/incorrect but to the
 ## actual responses participants gave (here: blast vs. non-blast classification)
 
 ## now let's perform a likelihood ratio test to check if estimating response
@@ -102,7 +102,7 @@ if (requireNamespace("lmtest")) { ## requires package lmtest
 
 # we can also make a DDM parameter, such as boundary, depend on a numeric
 # variable, such as block number
-fit3 <- ddm(rt + response ~ 0 + classification:difficulty, 
+fit3 <- ddm(rt + response ~ 0 + classification:difficulty,
             boundary = ~ block, data = p1)
 fit3
 
@@ -112,4 +112,3 @@ if (requireNamespace("lmtest")) { ## requires package lmtest
   lmtest::lrtest(fit1, fit3)
   ## does not look like it (p = 0.198)
 }
-

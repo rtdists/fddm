@@ -22,11 +22,11 @@ using Rcpp::LogicalVector;
 void convert_responses(const SEXP& response, int& Nres, int& Nmax,
                        vector<double>& out, const double& rt0, bool& valid);
 
-bool parameter_check(const int& Nrt, int& Nres, const int& Na, const int& Nv,
+bool parameter_check(const int& Nrt, int& Nres, const int& Nv, const int& Na,
                      const int& Nt0, const int& Nw, const int& Nsv,
                      const int& Nsig, const int& Nerr, int& Nmax,
                      const NumericVector& rt, const SEXP& response,
-                     const NumericVector& a, const NumericVector& v,
+                     const NumericVector& v, const NumericVector& a,
                      const NumericVector& t0, const NumericVector& w,
                      const NumericVector& sv, const NumericVector& sigma,
                      const NumericVector& err,

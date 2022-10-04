@@ -9,8 +9,8 @@
 //' Density of Ratcliff Diffusion Decision Model
 //'
 //' Density function for the Ratcliff diffusion decision model (DDM) with
-//' following parameters: \code{a} (threshold separation), \code{v} (drift
-//' rate), \code{t0} (non-decision time/response time constant), \code{w}
+//' following parameters: \code{v} (drift rate), \code{a} (threshold
+//' separation), \code{t0} (non-decision time/response time constant), \code{w}
 //' (relative starting point), \code{sv} (inter-trial variability of drift), and
 //' \code{sigma} (diffusion coefficient of underlying Wiener process).
 //'
@@ -37,10 +37,6 @@
 //'         TRUE \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper");
 //'     }
 //'
-//' @param a Threshold separation. Amount of information that is considered for
-//'   a decision. Large values indicate a conservative decisional style. Allowed
-//'   range: \eqn{0 <} \code{a}. Typical range: \eqn{0.5 <} \code{a} \eqn{< 2}.
-//'
 //' @param v Drift rate. Average slope of the information accumulation process.
 //'   The drift gives information about the speed and direction of the
 //'   accumulation of information. Large (absolute) values of drift indicate a
@@ -49,6 +45,10 @@
 //'   value indicates that the received information supports the response linked
 //'   to the lower threshold. Allowed range: \code{v} is a real number. Typical
 //'   range: \eqn{-5 <} \code{v} \eqn{< 5}.
+//'
+//' @param a Threshold separation. Amount of information that is considered for
+//'   a decision. Large values indicate a conservative decisional style. Allowed
+//'   range: \eqn{0 <} \code{a}. Typical range: \eqn{0.5 <} \code{a} \eqn{< 2}.
 //'
 //' @param t0 Non-decision time or response time constant (in seconds). Lower
 //'   bound for the duration of all non-decisional processes (encoding and
@@ -140,7 +140,7 @@
 //' @details
 //'
 //' All of the model inputs and parameters (\code{rt}, \code{response},
-//' \code{a}, \code{v}, \code{t0}, \code{w}, \code{sv}, \code{sigma}) can be
+//' \code{v}, \code{a}, \code{t0}, \code{w}, \code{sv}, \code{sigma}) can be
 //' input as a single value or as a vector of values. If input as a vector of
 //' values, then the standard \code{R} recycling rules apply to ensure all 
 //' inputs are of the same length.
@@ -161,7 +161,7 @@
 //' parameter \code{sv} to some non-negative value, i.e., \code{sv} \eqn{> 0}.
 //'
 //' \code{sigma} - The default value of this parameter is \code{1} because it
-//' only scales the parameters \code{a}, \code{v}, and \code{sv}, as shown
+//' only scales the parameters \code{v}, \code{a}, and \code{sv}, as shown
 //' above. However, other formulations of the DDM may set \code{sigma = 0.1}
 //' (see Ratcliff (1978), the fourth reference), so care must be taken when
 //' comparing the results of different formulations.
@@ -276,8 +276,8 @@
 // [[Rcpp::export]]
 NumericVector dfddm(const NumericVector& rt,
                     const SEXP& response,
-                    const NumericVector& a,
                     const NumericVector& v,
+                    const NumericVector& a,
                     const NumericVector& t0,
                     const NumericVector& w = 0.5,
                     const NumericVector& sv = 0.0,
@@ -301,14 +301,14 @@ NumericVector dfddm(const NumericVector& rt,
 
   // determine lengths of parameter inputs, except response
   int Nrt  = rt.length();
-  int Na   = a.length();
   int Nv   = v.length();
+  int Na   = a.length();
   int Nt0  = t0.length();
   int Nw   = w.length();
   int Nsv  = sv.length();
   int Nsig = sigma.length();
   int Nerr = err_tol.length();
-  int Nmax = max({Nrt, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr}); // include Nres later
+  int Nmax = max({Nrt, Nv, Na, Nt0, Nw, Nsv, Nsig, Nerr}); // include Nres later
   int Nres;
 
 
@@ -317,8 +317,8 @@ NumericVector dfddm(const NumericVector& rt,
 
 
   // check for invalid inputs, invalid inputs get marked in the vector `out`
-  if (!parameter_check(Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr, Nmax,
-                       rt, response, a, v, t0, w, sv, sigma, err_tol,
+  if (!parameter_check(Nrt, Nres, Nv, Na, Nt0, Nw, Nsv, Nsig, Nerr, Nmax,
+                       rt, response, v, a, t0, w, sv, sigma, err_tol,
                        out, rt0)) {
     NumericVector empty_out(0);
     return empty_out;
@@ -326,8 +326,8 @@ NumericVector dfddm(const NumericVector& rt,
 
 
   // loop through all inputs, the vector `out` gets updated
-  calculate_pdf(Nrt, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr,
-                Nmax, rt, a, v, t0, w, sv, sigma,
+  calculate_pdf(Nrt, Nv, Na, Nt0, Nw, Nsv, Nsig, Nerr,
+                Nmax, rt, v, a, t0, w, sv, sigma,
                 err_tol, out, switch_thresh,
                 numf, sumf, denf, rt0);
 
