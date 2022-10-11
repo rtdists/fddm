@@ -21,7 +21,7 @@ Description: Provides the probability density function (PDF), cumulative
   new approximations. All approximations are implemented purely in 'C++'
   providing faster speed than existing packages.
 License: GPL (>= 2)
-Imports: Rcpp (>= 1.0.1), RcppEigen, stats, methods, Formula, numDeriv
+Imports: Rcpp (>= 1.0.1), RcppEigen, stats, methods, Formula
 LinkingTo: Rcpp, RcppEigen
 Depends: R (>= 3.5.0)
 Suggests:
