@@ -2,6 +2,7 @@
 // included from src/fitting_helper_functions/class_methods.h
 
 
+
 double dv2(const double& t, const double& v, const double& a, const double& w,
            const double& sv, const double& err, const double& sl_thresh)
 {
@@ -30,6 +31,7 @@ double dv2(const double& t, const double& v, const double& a, const double& w,
 double da2(const double& t, const double& v, const double& a, const double& w,
            const double& sv, const double& err, const double& sl_thresh)
 {
+
   double taa = t / (a*a);
   double ot = 1 / t;
   double sqtot = sqrt(ot);
