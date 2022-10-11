@@ -9,7 +9,16 @@ devtools::install()
 devtools::check()
 
 
-
+### TODO ###
+tests for hessian
+update vignettes
+update other documentation
+--reorder arguments pdf and derivs, v before a
+--v1.0
+dfddm docs link to fitting function
+--add hessian slot (with vcov)
+documentation for ddm function with list of slots (and describe a little bit)
+maybe write "how to get started beginner's guide to fitting the DDM"
 
 ###
 library("devtools")
@@ -25,12 +34,6 @@ rhub::check_on_solaris(env_vars = c(`_R_CHECK_FORCE_SUGGESTS_` = "false"))
 rhub::check_for_cran(path = "../fddm_0.4-1.tar.gz",email = "singmann@gmail.com")
 
 sqrt(.Machine$double.eps)
-
-### preliminary testing
-rt <- seq(1,3,by=0.5)
-eps <- 1e-6
-dfddm(rt, 1, 1, 0.4, 0, 0.5, 0, T, "Gondan", "2017", "small", eps)
-dfddm(rt = numeric(), response = "lower", a = 1, v = -2, t0 = 0.3)
 
 
 ### random stuff

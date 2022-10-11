@@ -3,7 +3,7 @@
 
 
 // 1. with sv Mills ratio
-double Fs_mills(const double& t, const double& a, const double& v,
+double Fs_mills(const double& t, const double& v, const double& a,
                 const double& w, const double& sv, const double& err)
 {
   double mult = exp( (sv*sv * a*a * w*w - 2 * v * a * w - v*v * t) /
@@ -13,7 +13,7 @@ double Fs_mills(const double& t, const double& a, const double& v,
   return (out < 1) ? out : 1; // occasionally cdf is slightly larger than 1
 }
 
-double Fs_mills_log(const double& t, const double& a, const double& v,
+double Fs_mills_log(const double& t, const double& v, const double& a,
                     const double& w, const double& sv, const double& err)
 {
   double mult = (sv*sv * a*a * w*w - 2 * v * a * w - v*v * t) /
@@ -30,7 +30,7 @@ double Fs_mills_log(const double& t, const double& a, const double& v,
 
 
 // 2. with sv normal CDF
-double Fs_ncdf(const double& t, const double& a, const double& v,
+double Fs_ncdf(const double& t, const double& v, const double& a,
                const double& w, const double& sv, const double& err)
 {
   double mult = exp(0.5 * sv*sv * a*a * w*w - v * a * w);
@@ -39,7 +39,7 @@ double Fs_ncdf(const double& t, const double& a, const double& v,
   return (out < 1) ? out : 1; // occasionally cdf is slightly larger than 1
 }
 
-double Fs_ncdf_log(const double& t, const double& a, const double& v,
+double Fs_ncdf_log(const double& t, const double& v, const double& a,
                    const double& w, const double& sv, const double& err)
 {
   double mult = 0.5 * sv*sv * a*a * w*w - v * a * w;

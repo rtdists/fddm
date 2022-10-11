@@ -171,11 +171,11 @@ void determine_method(const string& n_terms_small,
 
 
 
-void calculate_pdf(const int& Nrt, const int& Na, const int& Nv, const int& Nt0,
+void calculate_pdf(const int& Nrt, const int& Nv, const int& Na, const int& Nt0,
                    const int& Nw, const int& Nsv, const int& Nsig,
                    const int& Nerr, const int& Nmax,
                    const NumericVector& rt,
-                   const NumericVector& a, const NumericVector& v,
+                   const NumericVector& v, const NumericVector& a,
                    const NumericVector& t0, const NumericVector& w,
                    const NumericVector& sv, const NumericVector& sigma,
                    const NumericVector& err, vector<double>& out,
@@ -190,10 +190,10 @@ void calculate_pdf(const int& Nrt, const int& Na, const int& Nv, const int& Nt0,
         t = rt[i % Nrt] - t0[i % Nt0]; // response time minus non-decision time
         if (t > 0 && isfinite(t)) { // sort response and calculate density
           if (out[i] == 1) { // response is "lower" so use unchanged parameters
-              out[i] = denf(t, a[i % Na], v[i % Nv], w[i % Nw], sv[i % Nsv],
+            out[i] = denf(t, v[i % Nv], a[i % Na], w[i % Nw], sv[i % Nsv],
                           err[i % Nerr], switch_thresh, numf, sumf);
           } else { // response is "upper" so use alternate parameters
-            out[i] = denf(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw], sv[i % Nsv],
+            out[i] = denf(t, -v[i % Nv], a[i % Na], 1 - w[i % Nw], sv[i % Nsv],
                           err[i % Nerr], switch_thresh, numf, sumf);
           }
         } else { // {NaN, NA} evaluate to FALSE
@@ -211,13 +211,13 @@ void calculate_pdf(const int& Nrt, const int& Na, const int& Nv, const int& Nt0,
         t = rt[i % Nrt] - t0[i % Nt0]; // response time minus non-decision time
         if (t > 0 && isfinite(t)) { // sort response and calculate density
           if (out[i] == 1) { // response is "lower" so use unchanged parameters
-              out[i] = denf(t, a[i % Na]/sigma[i % Nsig],
-                            v[i % Nv]/sigma[i % Nsig], w[i % Nw],
-                            sv[i % Nsv]/sigma[i % Nsig], err[i % Nerr],
-                            switch_thresh, numf, sumf);
+            out[i] = denf(t, v[i % Nv]/sigma[i % Nsig],
+                          a[i % Na]/sigma[i % Nsig], w[i % Nw],
+                          sv[i % Nsv]/sigma[i % Nsig], err[i % Nerr],
+                          switch_thresh, numf, sumf);
           } else { // response is "upper" so use alternate parameters
-            out[i] = denf(t, a[i % Na]/sigma[i % Nsig],
-                          -v[i % Nv]/sigma[i % Nsig], 1 - w[i % Nw],
+            out[i] = denf(t, -v[i % Nv]/sigma[i % Nsig],
+                          a[i % Na]/sigma[i % Nsig], 1 - w[i % Nw],
                           sv[i % Nsv]/sigma[i % Nsig], err[i % Nerr],
                           switch_thresh, numf, sumf);
           }

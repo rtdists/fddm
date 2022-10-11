@@ -5,8 +5,8 @@
 vector<double> partial_pdf(const ParFunc& parf,
                            const NumericVector& rt,
                            const SEXP& response,
-                           const NumericVector& a,
                            const NumericVector& v,
+                           const NumericVector& a,
                            const NumericVector& t0,
                            const NumericVector& w,
                            const NumericVector& sv,
@@ -16,14 +16,14 @@ vector<double> partial_pdf(const ParFunc& parf,
 {
   // determine lengths of parameter inputs, except response
   int Nrt  = rt.length();
-  int Na   = a.length();
   int Nv   = v.length();
+  int Na   = a.length();
   int Nt0  = t0.length();
   int Nw   = w.length();
   int Nsv  = sv.length();
   int Nsig = sigma.length();
   int Nerr = err_tol.length();
-  int Nmax = max({Nrt, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr}); // include Nres later
+  int Nmax = max({Nrt, Nv, Na, Nt0, Nw, Nsv, Nsig, Nerr}); // include Nres later
   int Nres;
 
   // initialize output, resized in convert_responses() inside parameter_check()
@@ -31,8 +31,8 @@ vector<double> partial_pdf(const ParFunc& parf,
 
   // check for invalid inputs, invalid inputs get marked in the vector `out`
   double rt0 = 0;
-  if (!parameter_check(Nrt, Nres, Na, Nv, Nt0, Nw, Nsv, Nsig, Nerr, Nmax,
-                       rt, response, a, v, t0, w, sv, sigma, err_tol,
+  if (!parameter_check(Nrt, Nres, Nv, Na, Nt0, Nw, Nsv, Nsig, Nerr, Nmax,
+                       rt, response, v, a, t0, w, sv, sigma, err_tol,
                        out, rt0)) {
     vector<double> empty_out(0);
     return empty_out;
@@ -46,13 +46,11 @@ vector<double> partial_pdf(const ParFunc& parf,
         t = rt[i % Nrt] - t0[i % Nt0]; // response time minus non-decision time
         if (t > 0 && isfinite(t)) {
           if (out[i] == 1) { // response is "lower" so use unchanged parameters
-            out[i] = parf(t, out[i], a[i % Na], v[i % Nv], w[i % Nw],
-                          sv[i % Nsv], err_tol[i % Nerr],
-                          sl_thresh);
+            out[i] = parf(t, out[i], v[i % Nv], a[i % Na], w[i % Nw],
+                          sv[i % Nsv], err_tol[i % Nerr], sl_thresh);
           } else { // response is "upper" so use alternate parameters
-            out[i] = parf(t, out[i], a[i % Na], -v[i % Nv], 1 - w[i % Nw],
-                          sv[i % Nsv], err_tol[i % Nerr],
-                          sl_thresh);
+            out[i] = parf(t, out[i], -v[i % Nv], a[i % Na], 1 - w[i % Nw],
+                          sv[i % Nsv], err_tol[i % Nerr], sl_thresh);
           }
         } else { // {NaN, NA} evaluate to FALSE
           if (isnan(t)) {
@@ -69,13 +67,13 @@ vector<double> partial_pdf(const ParFunc& parf,
               t = rt[i % Nrt] - t0[i % Nt0]; // response time minus non-decision time
               if (t > 0 && isfinite(t)) {
                   if (out[i] == 1) { // response is "lower" so use unchanged parameters
-                      out[i] = parf(t, out[i], a[i % Na]/sigma[i % Nsig],
-                                    v[i % Nv]/sigma[i % Nsig], w[i % Nw],
+                      out[i] = parf(t, out[i], v[i % Nv]/sigma[i % Nsig],
+                                    a[i % Na]/sigma[i % Nsig], w[i % Nw],
                                     sv[i % Nsv]/sigma[i % Nsig],
                                     err_tol[i % Nerr], sl_thresh);
                   } else { // response is "upper" so use alternate parameters
-                      out[i] = parf(t, out[i], a[i % Na]/sigma[i % Nsig],
-                                    -v[i % Nv]/sigma[i % Nsig], 1 - w[i % Nw],
+                      out[i] = parf(t, out[i], -v[i % Nv]/sigma[i % Nsig],
+                                    a[i % Na]/sigma[i % Nsig], 1 - w[i % Nw],
                                     sv[i % Nsv]/sigma[i % Nsig],
                                     err_tol[i % Nerr], sl_thresh);
                   }

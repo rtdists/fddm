@@ -57,7 +57,7 @@ test_that("Accuracy relative to WienR", {
   df[["diff"]] <- df[["res_WienR"]] - df[["res_fddm"]]
 
   # agreement with WienR
-  expect_true(sum(abs(df[["diff"]]) <= 4*err) / nrow(df) > 0.98)
+  expect_true(sum(abs(df[["diff"]]) <= 4*err) / nrow(df) > 0.97)
 
   # disagreements with WienR (WienR precision not guaranteed for sv > 0)
   df_bad <- df[abs(df[["diff"]]) > 4*err & df[["sv"]] == 0, ]
@@ -76,7 +76,7 @@ test_that("Accuracy relative to WienR", {
   df[["diff"]] <- df[["res_WienR"]] - df[["res_fddm"]]
 
   # agreement with WienR
-  expect_true(sum(abs(df[["diff"]]) <= 4*err) / nrow(df) > 0.98)
+  expect_true(sum(abs(df[["diff"]]) <= 4*err) / nrow(df) > 0.97)
 
   # disagreements with WienR (WienR precision not guaranteed for sv > 0)
   df_bad <- df[abs(df[["diff"]]) > 4*err & df[["sv"]] == 0, ]

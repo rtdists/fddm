@@ -5,8 +5,8 @@
 
 //----------------- Regular (non-log) ----------------------------------------//
 
-double pdf_dt(const double& t, const double& resp, const double& a,
-              const double& v, const double& w, const double& sv,
+double pdf_dt(const double& t, const double& resp, const double& v,
+              const double& a, const double& w, const double& sv,
               const double& err, const double& sl_thresh)
 { // note: resp is not used
   double taa = t / (a*a);
@@ -36,8 +36,8 @@ double pdf_dt(const double& t, const double& resp, const double& a,
 
 
 
-double pdf_dt0(const double& t, const double& resp, const double& a,
-               const double& v, const double& w, const double& sv,
+double pdf_dt0(const double& t, const double& resp, const double& v,
+               const double& a, const double& w, const double& sv,
                const double& err, const double& sl_thresh)
 { // note: resp is not used; also, this is just the negative of dt
   double taa = t / (a*a);
@@ -67,8 +67,32 @@ double pdf_dt0(const double& t, const double& resp, const double& a,
 
 
 
-double pdf_da(const double& t, const double& resp, const double& a,
-              const double& v, const double& w, const double& sv,
+double pdf_dv(const double& t, const double& resp, const double& v,
+              const double& a, const double& w, const double& sv,
+              const double& err, const double& sl_thresh)
+{ // note: resp = {1: "lower", 2: "upper"}
+  double taa = t / (a*a);
+  double nnt = 1 / (1 + sv*sv * t);
+  double sqtnnt = sqrt(nnt);
+  double arg = a * w + v * t;
+  double mexp = exp(0.5 * (sv*sv * a*a * w*w - 2 * v * a * w - v*v * t) * nnt);
+  double mult = (resp < 1.5) ? 1 : -1; // chain rule for "upper" response
+
+  if (taa > sl_thresh) { // use large-time
+    mult *= -mexp * arg * nnt * sqtnnt / (a*a);
+    int kl = kl_Nav(taa, err / fabs(mult));
+    return mult * PI_CONST * sum_large(taa, w, kl);
+  } else { // use small-time
+    mult *= -mexp * arg * a * SQRT_1_2PI * nnt * sqtnnt /
+            (t * sqrt(t));
+    return mult * sum_small(taa, w, err / fabs(mult));
+  }
+}
+
+
+
+double pdf_da(const double& t, const double& resp, const double& v,
+              const double& a, const double& w, const double& sv,
               const double& err, const double& sl_thresh)
 { // note: resp is not used
   double taa = t / (a*a);
@@ -98,32 +122,8 @@ double pdf_da(const double& t, const double& resp, const double& a,
 
 
 
-double pdf_dv(const double& t, const double& resp, const double& a,
-              const double& v, const double& w, const double& sv,
-              const double& err, const double& sl_thresh)
-{ // note: resp = {1: "lower", 2: "upper"}
-  double taa = t / (a*a);
-  double nnt = 1 / (1 + sv*sv * t);
-  double sqtnnt = sqrt(nnt);
-  double arg = a * w + v * t;
-  double mexp = exp(0.5 * (sv*sv * a*a * w*w - 2 * v * a * w - v*v * t) * nnt);
-  double mult = (resp < 1.5) ? 1 : -1; // chain rule for "upper" response
-
-  if (taa > sl_thresh) { // use large-time
-    mult *= -mexp * arg * nnt * sqtnnt / (a*a);
-    int kl = kl_Nav(taa, err / fabs(mult));
-    return mult * PI_CONST * sum_large(taa, w, kl);
-  } else { // use small-time
-    mult *= -mexp * arg * a * SQRT_1_2PI * nnt * sqtnnt /
-            (t * sqrt(t));
-    return mult * sum_small(taa, w, err / fabs(mult));
-  }
-}
-
-
-
-double pdf_dw(const double& t, const double& resp, const double& a,
-              const double& v, const double& w, const double& sv,
+double pdf_dw(const double& t, const double& resp, const double& v,
+              const double& a, const double& w, const double& sv,
               const double& err, const double& sl_thresh)
 { // note: resp = {1: "lower", 2: "upper"}
   double out;
@@ -158,8 +158,8 @@ double pdf_dw(const double& t, const double& resp, const double& a,
 
 
 
-double pdf_dsv(const double& t, const double& resp, const double& a,
-               const double& v, const double& w, const double& sv,
+double pdf_dsv(const double& t, const double& resp, const double& v,
+               const double& a, const double& w, const double& sv,
                const double& err, const double& sl_thresh)
 { // note: resp is not used
   if (sv <= 0) { // check that the derivative actually makes sense

@@ -24,6 +24,11 @@ class fddm_fit {
     double switch_thresh {0.8};
     vector<double> likelihood {};
     VectorXd coefs {};
+    MatrixXd hess_v {};
+    MatrixXd hess_a {};
+    MatrixXd hess_t0 {};
+    MatrixXd hess_w {};
+    MatrixXd hess_sv {};
     MatrixXd vcov_v {};
     MatrixXd vcov_a {};
     MatrixXd vcov_t0 {};
@@ -51,7 +56,8 @@ class fddm_fit {
     // methods
     double calc_loglik(const VectorXd& temp_params);
     VectorXd calc_gradient(const VectorXd& temp_params);
-    void calc_vcov(const VectorXd& temp_params);
+    void calc_hessians(const VectorXd& temp_params);
+    void calc_vcov();
     VectorXd calc_std_err();
 };
 
@@ -74,6 +80,11 @@ RCPP_MODULE(fddm_fit) {
     .field("switch_thresh", &fddm_fit::switch_thresh)
     .field("likelihood", &fddm_fit::likelihood)
     .field("coefficients", &fddm_fit::coefs)
+    .field("hess_v", &fddm_fit::hess_v)
+    .field("hess_a", &fddm_fit::hess_a)
+    .field("hess_t0", &fddm_fit::hess_t0)
+    .field("hess_w", &fddm_fit::hess_w)
+    .field("hess_sv", &fddm_fit::hess_sv)
     .field("vcov_v", &fddm_fit::vcov_v)
     .field("vcov_a", &fddm_fit::vcov_a)
     .field("vcov_t0", &fddm_fit::vcov_t0)
@@ -81,6 +92,7 @@ RCPP_MODULE(fddm_fit) {
     .field("vcov_sv", &fddm_fit::vcov_sv)
     .method("calculate_loglik", &fddm_fit::calc_loglik)
     .method("calculate_gradient", &fddm_fit::calc_gradient)
+    .method("calculate_hessians", &fddm_fit::calc_hessians)
     .method("calculate_vcov", &fddm_fit::calc_vcov)
     .method("calculate_standard_error", &fddm_fit::calc_std_err)
   ;

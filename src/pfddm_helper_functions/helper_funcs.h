@@ -57,11 +57,11 @@ double prob_lower(const double& a, const double& v, const double& w,
 
 
 
-void calculate_cdf(const int& Nrt, const int& Na, const int& Nv, const int& Nt0,
+void calculate_cdf(const int& Nrt, const int& Nv, const int& Na, const int& Nt0,
                    const int& Nw, const int& Nsv, const int& Nsig,
                    const int& Nerr, const int& Nmax,
                    const NumericVector& rt,
-                   const NumericVector& a, const NumericVector& v,
+                   const NumericVector& v, const NumericVector& a,
                    const NumericVector& t0, const NumericVector& w,
                    const NumericVector& sv, const NumericVector& sigma,
                    const NumericVector& err, vector<double>& out,
@@ -77,10 +77,10 @@ void calculate_cdf(const int& Nrt, const int& Na, const int& Nv, const int& Nt0,
             t = 32; // see zedonked/scratch_prob_upper.R for reason it's 32
           }
           if (out[i] == 1) { // response is "lower" so use unchanged parameters
-            out[i] = disf(t, a[i % Na], v[i % Nv], w[i % Nw], sv[i % Nsv],
+            out[i] = disf(t, v[i % Nv], a[i % Na], w[i % Nw], sv[i % Nsv],
                           err[i % Nerr]);
           } else { // response is "upper" so use alternate parameters
-            out[i] = disf(t, a[i % Na], -v[i % Nv], 1 - w[i % Nw],
+            out[i] = disf(t, -v[i % Nv], a[i % Na], 1 - w[i % Nw],
                           sv[i % Nsv], err[i % Nerr]);
           }
         } else { // {NaN, NA} evaluate to FALSE
@@ -101,12 +101,12 @@ void calculate_cdf(const int& Nrt, const int& Na, const int& Nv, const int& Nt0,
             t = 32; // see zedonked/scratch_prob_upper.R for reason it's 32
           }
           if (out[i] == 1) { // response is "lower" so use unchanged parameters
-            out[i] = disf(t, a[i % Na]/sigma[i % Nsig],
-                          v[i % Nv]/sigma[i % Nsig], w[i % Nw],
+            out[i] = disf(t, v[i % Nv]/sigma[i % Nsig],
+                          a[i % Na]/sigma[i % Nsig], w[i % Nw],
                           sv[i % Nsv]/sigma[i % Nsig], err[i % Nerr]);
           } else { // response is "upper" so use alternate parameters
-            out[i] = disf(t, a[i % Na]/sigma[i % Nsig],
-                          -v[i % Nv]/sigma[i % Nsig], 1 - w[i % Nw],
+            out[i] = disf(t, -v[i % Nv]/sigma[i % Nsig],
+                          a[i % Na]/sigma[i % Nsig], 1 - w[i % Nw],
                           sv[i % Nsv]/sigma[i % Nsig], err[i % Nerr]);
           }
         } else { // {NaN, NA} evaluate to FALSE

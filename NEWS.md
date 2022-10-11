@@ -1,9 +1,10 @@
-# fddm v0.6-0 (Release date: 2022-X-X)
+# fddm v1.0-0 (Release date: 2022-7-11)
 
 ## New Features
-* added function ddm() which permits formula-based fitting of DDM using analytic gradient.
+* added function `ddm()` which permits formula-based fitting of DDM using analytic gradient.
 
 ## Other Changes
+* the order of the arguments `v` and `a` to functions `dfddm()`, `pfddm()`, and the PDF derivatives `d*_ddm()` were changed. Previously, it was `...ddm(..., a, v, ...)`, and now it is `...ddm(..., v, a, ...)`
 * character variables in med_dec transformed to factors.
 
 # fddm v0.5-1 (Release date: 2022-3-15)
