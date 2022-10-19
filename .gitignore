@@ -1,7 +1,8 @@
-
 *.ini
+.Rprofile
 .Rproj.user
 .Rhistory
+.lib/*
 src/*.o
 src/*.dll
 src/*.so
