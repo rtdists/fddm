@@ -259,8 +259,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
            args_ddm[["err_tol"]], args_ddm[["switch_thresh"]])
 
   #-------------------- Run Optimization --------------------------------------#
-  if (optim == "nlminb") fit_fun <- fit_nlminb
-  else fit_fun <- optim
+  fit_fun <- if (optim == "nlminb") fit_nlminb else optim
   opt <- fit_fun(
     init = init_vals,
     objective = f$calculate_loglik,

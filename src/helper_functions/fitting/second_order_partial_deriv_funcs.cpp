@@ -87,13 +87,9 @@ double dt02(const double& t, const double& v, const double& a, const double& w,
   double nnt = 1 + sv*sv * t;
   double nnt34 = 3 + 4 * sv*sv * t;
   double nnt35 = 3 + 5 * sv*sv * t;
-  double nnt38 = 3 + 8 * sv*sv * t;
-  double nnt58 = 5 + 8 * sv*sv * t;
   double nnt78 = 7 + 8 * sv*sv * t;
   double onnt = 1 / nnt;
   double sqtonnt = sqrt(onnt);
-  double nawv = sv*sv*a*w - v;
-  double nawvaw = sv*sv*a*a*w*w - v*a*w;
   double naw2vaw = sv*sv*a*a*w*w - 2*v*a*w;
   double arg = naw2vaw - v*v*t;
   double phi = (sv*sv*a*w - v)*(sv*sv*a*w - v);

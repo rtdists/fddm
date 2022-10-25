@@ -75,7 +75,7 @@ summary.ddm <- function(object, ...) {
   ## extend coefficient table for each dpar
   dpars <- object$dpar
   tbl <- list()
-  for (i in 1:length(dpars)) {
+  for (i in seq_along(dpars)) {
     cf <- object$coefficients[[dpars[i]]]
     se <- sqrt(diag(object$vcov[[dpars[i]]]))
     if (dpars[i] == "drift") {
