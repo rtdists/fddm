@@ -1,6 +1,6 @@
 // Functions to evaluate the DDM CDF for specific criteria
 
-#include "sum_funcs.h"
+#include "declarations.h"
 
 
 

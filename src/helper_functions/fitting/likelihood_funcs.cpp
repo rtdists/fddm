@@ -1,5 +1,7 @@
 // Functions to evaluate the DDM PDF
 
+#include "declarations.h"
+
 
 // Density Function (non-log)
 double pdf(const double& t, const double& a, const double& v, const double& w,

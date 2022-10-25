@@ -1,5 +1,9 @@
 // Function to calculate the partial derivative of the DDM PDF
 
+#include "declarations.h"
+#include "partial_decs.h"
+
+
 vector<double> partial_pdf(const ParFunc& parf,
                            const NumericVector& rt,
                            const SEXP& response,

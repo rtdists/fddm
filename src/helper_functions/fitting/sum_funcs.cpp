@@ -1,6 +1,8 @@
 // Functions to approximate the infinite sum in the density function and its
 // derivatives
 
+#include "declarations.h"
+
 
 //--------- Small Time ---------------------------------------------//
 // for Small-Time PDF

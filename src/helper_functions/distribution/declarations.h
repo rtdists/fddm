@@ -2,6 +2,9 @@
 // This file must have a .h extension rather than .hpp extension because then
 // R CMD Check will fail
 
+#ifndef DIST_DECS_H
+#define DIST_DECS_H
+
 #include <Rcpp.h>
 // [[Rcpp::plugins(cpp11)]]
 #include <cmath>
@@ -12,9 +15,12 @@ using std::log;
 using std::exp;
 using std::erf;
 using std::sqrt;
+using std::max;
 using std::isfinite;
 using std::isnan;
 using std::isnormal;
+using Rcpp::stop;
+using Rcpp::warning;
 using Rcpp::NumericVector;
 
 
@@ -92,3 +98,5 @@ void calculate_cdf(const int& Nrt, const int& Nv, const int& Na, const int& Nt0,
                    const NumericVector& sv, const NumericVector& sigma,
                    const NumericVector& err, vector<double>& out,
                    const double& rt0, const DisFunc& disf);
+
+#endif // DIST_DECS_H

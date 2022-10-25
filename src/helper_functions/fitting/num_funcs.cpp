@@ -1,6 +1,8 @@
 // Functions to determine the number of terms required for approximating the
 // infinite sum in the density function and its derivatives
 
+#include "declarations.h"
+
 
 //--------- Small Time ---------------------------------------------//
 // for derivative wrt w

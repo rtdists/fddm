@@ -1,5 +1,6 @@
 // Functions to calculate (or approximate) Mills ratio
 
+#include "declarations.h"
 
 
 double r_mills(const double& x)

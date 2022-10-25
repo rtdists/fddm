@@ -3,6 +3,7 @@
 // scaled time t := t / (a * a), which is input in the function calls in the
 // density functions in src/density_funcs.cpp.
 
+#include "declarations.h"
 
 
 //////////                                                           //////////

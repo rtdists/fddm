@@ -2,6 +2,9 @@
 // This file must have a .h extension rather than .hpp extension because then
 // R CMD Check will fail
 
+#ifndef PDF_DECS_H
+#define PDF_DECS_H
+
 #include <Rcpp.h>
 // [[Rcpp::plugins(cpp11)]]
 #include <cmath>
@@ -119,11 +122,6 @@ double fb_log(const double& t, const double& v, const double& a,
 
 
 // Helper Functions
-void determine_method(const std::string& n_terms_small,
-                      const std::string& summation_small,
-                      const std::string& switch_mech, double& switch_thresh,
-                      NumFunc& numf, SumFunc& sumf, DenFunc& denf,
-                      double& rt0, const bool& log_prob);
 void convert_responses(const SEXP& response, int& Nres, int& Nmax,
                        vector<double>& out, const double& rt0, bool& valid);
 bool parameter_check(const int& Nrt, int& Nres, const int& Nv, const int& Na,
@@ -135,6 +133,11 @@ bool parameter_check(const int& Nrt, int& Nres, const int& Nv, const int& Na,
                      const NumericVector& sv, const NumericVector& sigma,
                      const NumericVector& err,
                      vector<double>& out, const double& rt0);
+void determine_method(const std::string& n_terms_small,
+                      const std::string& summation_small,
+                      const std::string& switch_mech, double& switch_thresh,
+                      NumFunc& numf, SumFunc& sumf, DenFunc& denf,
+                      double& rt0, const bool& log_prob);
 void calculate_pdf(const int& Nrt, const int& Nv, const int& Na, const int& Nt0,
                    const int& Nw, const int& Nsv, const int& Nsig,
                    const int& Nerr, const int& Nmax,
@@ -146,3 +149,5 @@ void calculate_pdf(const int& Nrt, const int& Nv, const int& Na, const int& Nt0,
                    const double& switch_thresh,
                    const NumFunc& numf, const SumFunc& sumf,
                    const DenFunc& denf, const double& rt0);
+
+#endif // PDF_DECS_H

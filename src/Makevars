@@ -1,0 +1,31 @@
+PKG_CPPFLAGS = -w -std=c++11 -I../inst/include/ -O3
+
+# Include all .cpp files in src/ and its subdirectories
+SOURCES=dfddm.cpp pfddm.cpp d-_dfddm.cpp fddm_fit_export.cpp RcppExports.cpp\
+helper_functions/parameter_checks.cpp\
+helper_functions/dfddm/density_funcs.cpp\
+helper_functions/dfddm/helper_funcs.cpp\
+helper_functions/dfddm/num_funcs.cpp\
+helper_functions/dfddm/sum_funcs.cpp\
+helper_functions/distribution/distribution_funcs.cpp\
+helper_functions/distribution/helper_funcs.cpp\
+helper_functions/distribution/mills_funcs.cpp\
+helper_functions/distribution/sum_funcs.cpp\
+helper_functions/fitting/checks.cpp\
+helper_functions/fitting/class_methods.cpp\
+helper_functions/fitting/helper_funcs.cpp\
+helper_functions/fitting/likelihood_funcs.cpp\
+helper_functions/fitting/num_funcs.cpp\
+helper_functions/fitting/partial_deriv_funcs.cpp\
+helper_functions/fitting/second_order_partial_deriv_funcs.cpp\
+helper_functions/fitting/sum_funcs.cpp
+
+# Obtain the object files
+OBJECTS=$(SOURCES:.cpp=.o) 
+
+# Make the shared object
+all: $(SHLIB)
+
+# Provide recipe to remove all objects
+clean:
+	@rm -f $(OBJECTS)

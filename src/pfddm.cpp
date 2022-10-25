@@ -1,8 +1,6 @@
 // Distribution function for the Ratcliff Diffusion Decision Model (DDM)
 
 #include "helper_functions/distribution/declarations.h"
-#include "helper_functions/distribution/helper_funcs.h"
-#include "helper_functions/distribution/distribution_funcs.h"
 
 
 

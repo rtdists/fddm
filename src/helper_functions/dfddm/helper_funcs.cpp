@@ -1,6 +1,6 @@
 // Helper functions for the density function dfddm
 
-#include "../parameter_checks.h"
+#include "declarations.h"
 
 
 

@@ -1,6 +1,6 @@
 // Helper functions for the distribution function pfddm
 
-#include "../parameter_checks.h"
+#include "declarations.h"
 
 
 

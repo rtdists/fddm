@@ -1,11 +1,7 @@
 // Partial Derivatives of the Density function for the Ratcliff DDM
 
+#include "helper_functions/fitting/partial_decs.h"
 #include "helper_functions/fitting/declarations.h"
-#include "helper_functions/fitting/addl_decs.h"
-#include "helper_functions/fitting/helper_funcs.h"
-#include "helper_functions/fitting/partial_deriv_funcs.h"
-#include "helper_functions/fitting/sum_funcs.h"
-#include "helper_functions/fitting/num_funcs.h"
 
 
 

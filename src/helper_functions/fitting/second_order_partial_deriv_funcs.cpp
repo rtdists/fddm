@@ -1,5 +1,7 @@
 // Functions to evaluate the second order partial derivatives of the DDM PDF
 
+#include "declarations.h"
+
 
 double dv2(const double& t, const double& v, const double& a, const double& w,
            const double& sv, const double& err, const double& sl_thresh)

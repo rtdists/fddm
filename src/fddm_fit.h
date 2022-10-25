@@ -1,6 +1,9 @@
 // Log-likelihood and gradient function for the Ratcliff DDM
-#include "helper_functions/fitting/class_methods.h"
 
+#ifndef FDDM_FIT_H
+#define FDDM_FIT_H
+
+#include "helper_functions/fitting/declarations.h"
 
 
 //' @export fddm_fit
@@ -55,43 +58,7 @@ class fddm_fit {
     VectorXd calc_std_err();
 };
 
-
-
-RCPP_MODULE(fddm_fit) {
-  using namespace Rcpp;
-
-  class_<fddm_fit>( "fddm_fit")
-    .constructor<vector<double>, SEXP, vector<MatrixXd>, double, double>("Constructor given response times, responses, model matrices, error tolerance, and switching threshold")
-    .field("rt", &fddm_fit::rt)
-    .field("response", &fddm_fit::response)
-    .field("modmat_v", &fddm_fit::mm_v)
-    .field("modmat_a", &fddm_fit::mm_a)
-    .field("modmat_t0", &fddm_fit::mm_t0)
-    .field("modmat_w", &fddm_fit::mm_w)
-    .field("modmat_sv", &fddm_fit::mm_sv)
-    .field("err_tol", &fddm_fit::err_tol)
-    .field("switch_thresh", &fddm_fit::switch_thresh)
-    .field("likelihood", &fddm_fit::likelihood)
-    .field("coefficients", &fddm_fit::coefs)
-    .field("hess_v", &fddm_fit::hess_v)
-    .field("hess_a", &fddm_fit::hess_a)
-    .field("hess_t0", &fddm_fit::hess_t0)
-    .field("hess_w", &fddm_fit::hess_w)
-    .field("hess_sv", &fddm_fit::hess_sv)
-    .field("vcov_v", &fddm_fit::vcov_v)
-    .field("vcov_a", &fddm_fit::vcov_a)
-    .field("vcov_t0", &fddm_fit::vcov_t0)
-    .field("vcov_w", &fddm_fit::vcov_w)
-    .field("vcov_sv", &fddm_fit::vcov_sv)
-    .method("calculate_loglik", &fddm_fit::calc_loglik)
-    .method("calculate_gradient", &fddm_fit::calc_gradient)
-    .method("calculate_hessians", &fddm_fit::calc_hessians)
-    .method("calculate_vcov", &fddm_fit::calc_vcov)
-    .method("calculate_standard_error", &fddm_fit::calc_std_err)
-  ;
-}
-
-
+#endif // FDDM_FIT_H
 
 // This class requires inputs of:
 //

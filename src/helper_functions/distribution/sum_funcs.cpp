@@ -1,6 +1,6 @@
 // Functions to approximate the infinite sum in the distribution function
 
-#include "mills_funcs.h"
+#include "declarations.h"
 
 
 

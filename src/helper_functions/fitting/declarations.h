@@ -1,9 +1,14 @@
 // Function declarations and constant definitions for fitting the DDM
+
+#ifndef FITTING_DECS_H
+#define FITTING_DECS_H
+
 #include <Rcpp.h>
 // [[Rcpp::plugins(cpp11)]]
 #include <RcppEigen.h>
 // [[Rcpp::depends(RcppEigen)]]
 #include <vector>
+
 #include <cmath>
 
 using std::exp;
@@ -117,3 +122,5 @@ int kl_dw(const double& taa, const double& t, const double& err);
 int kl_dat2(const double& taa, const double& err);
 int ks_dw(const double& taa, const double& w, const double& err);
 //----------------------------------------------------------------------------//
+
+#endif // FITTING_DECS_H

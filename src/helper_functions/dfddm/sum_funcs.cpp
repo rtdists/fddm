@@ -1,5 +1,6 @@
 // Functions to approximate the infinite sum in the density function
 
+#include "declarations.h"
 
 
 //////////                                                           //////////

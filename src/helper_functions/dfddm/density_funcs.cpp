@@ -1,7 +1,6 @@
 // Functions to evaluate the DDM PDF for specific criteria
 
-#include "num_funcs.h"
-#include "sum_funcs.h"
+#include "declarations.h"
 
 
 

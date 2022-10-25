@@ -3,10 +3,10 @@
 .Rproj.user
 .Rhistory
 .lib/*
-src/*.o
-src/*.dll
-src/*.so
-src/Makevars
+src/**/*.o
+src/**/*.dll
+src/**/*.so
+# src/Makevars
 inst/doc
 doc
 Meta

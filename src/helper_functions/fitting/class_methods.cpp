@@ -1,12 +1,7 @@
 // Methods for the fddm_fit class
 
+#include "../../fddm_fit.h"
 #include "declarations.h" // namespaces, function declarations, constant definitions
-#include "checks.h"
-#include "likelihood_funcs.h"
-#include "partial_deriv_funcs.h"
-#include "second_order_partial_deriv_funcs.h"
-#include "sum_funcs.h"
-#include "num_funcs.h"
 
 
 

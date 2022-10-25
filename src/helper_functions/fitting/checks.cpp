@@ -1,5 +1,7 @@
 // Functions to check valid parameter values in DDM likelihood and gradient
 
+#include "declarations.h"
+
 
 
 vector<double> check_rt(const vector<double>& rt, int& Nrt) {
