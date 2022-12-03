@@ -3,7 +3,7 @@
 #include "declarations.h"
 
 
-double dv(const double& t, const double& a, const double& v, const double& w,
+double dv(const double& t, const double& v, const double& a, const double& w,
           const double& sv, const double& err, const double& sl_thresh)
 {
   double taa = t / (a*a);
@@ -27,7 +27,7 @@ double dv(const double& t, const double& a, const double& v, const double& w,
   }
 }
 
-double da(const double& t, const double& a, const double& v, const double& w,
+double da(const double& t, const double& v, const double& a, const double& w,
           const double& sv, const double& err, const double& sl_thresh)
 {
   double taa = t / (a*a);
@@ -63,7 +63,7 @@ double da(const double& t, const double& a, const double& v, const double& w,
   }
 }
 
-double dt(const double& t, const double& a, const double& v, const double& w,
+double dt(const double& t, const double& v, const double& a, const double& w,
            const double& sv, const double& err, const double& sl_thresh)
 { // negative of dt0
   double taa = t / (a*a);
@@ -99,7 +99,7 @@ double dt(const double& t, const double& a, const double& v, const double& w,
   }
 }
 
-double dt0(const double& t, const double& a, const double& v, const double& w,
+double dt0(const double& t, const double& v, const double& a, const double& w,
            const double& sv, const double& err, const double& sl_thresh)
 { // negative of dt
   double taa = t / (a*a);
@@ -135,7 +135,7 @@ double dt0(const double& t, const double& a, const double& v, const double& w,
   }
 }
 
-double dw(const double& t, const double& a, const double& v, const double& w,
+double dw(const double& t, const double& v, const double& a, const double& w,
           const double& sv, const double& err, const double& sl_thresh)
 {
   double out;
@@ -173,7 +173,7 @@ double dw(const double& t, const double& a, const double& v, const double& w,
   return out;
 }
 
-double dsv(const double& t, const double& a, const double& v, const double& w,
+double dsv(const double& t, const double& v, const double& a, const double& w,
            const double& sv, const double& err, const double& sl_thresh)
 {
   double taa = t / (a*a);

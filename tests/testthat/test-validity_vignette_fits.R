@@ -71,9 +71,9 @@ test_that("Fits in validity vignette", {
                        stringsAsFactors = FALSE)
 
       if (!is.null(id_idx)) { # relabel identification tags
-        for (i in 1:length(id_idx)) {
+        for (i in seq_along(id_idx)) {
           idi <- unique(data[,id_idx[i]])
-          for (j in 1:length(idi)) {
+          for (j in seq_along(idi)) {
             df[["id"]][data[,id_idx[i]] == idi[j]] <- paste(
               df[["id"]][data[,id_idx[i]] == idi[j]], idi[j], sep = " ")
           }

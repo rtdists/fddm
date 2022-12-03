@@ -1,5 +1,6 @@
 # Include all .cpp files in src/ and its subdirectories
-SOURCES=dfddm.cpp pfddm.cpp d-_dfddm.cpp fddm_fit_export.cpp RcppExports.cpp\
+SOURCES=dfddm.cpp pfddm.cpp d-_dfddm.cpp d-2_dfddm.cpp\
+fddm_fit_export.cpp RcppExports.cpp\
 helper_functions/parameter_checks.cpp\
 helper_functions/dfddm/density_funcs.cpp\
 helper_functions/dfddm/helper_funcs.cpp\

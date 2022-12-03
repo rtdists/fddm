@@ -4,7 +4,7 @@
 
 
 // Density Function (non-log)
-double pdf(const double& t, const double& a, const double& v, const double& w,
+double pdf(const double& t, const double& v, const double& a, const double& w,
            const double& sv, const double& err, const double& switch_thresh)
 {
   double mult, sum_err;

@@ -76,33 +76,33 @@ bool invalid_parameters(const VectorXd& v, const VectorXd& a,
                         const vector<int>& form_len);
 
 // PDF (likelihood)
-double pdf(const double& t, const double& a, const double& v, const double& w,
+double pdf(const double& t, const double& v, const double& a, const double& w,
            const double& sv, const double& err, const double& switch_thresh);
 
 // Derivatives of PDF
-double dv(const double& t, const double& a, const double& v, const double& w,
+double dv(const double& t, const double& v, const double& a, const double& w,
           const double& sv, const double& err, const double& sl_thresh);
-double da(const double& t, const double& a, const double& v, const double& w,
+double da(const double& t, const double& v, const double& a, const double& w,
           const double& sv, const double& err, const double& sl_thresh);
-double dt(const double& t, const double& a, const double& v, const double& w,
+double dt(const double& t, const double& v, const double& a, const double& w,
           const double& sv, const double& err, const double& sl_thresh);
-double dt0(const double& t, const double& a, const double& v, const double& w,
+double dt0(const double& t, const double& v, const double& a, const double& w,
            const double& sv, const double& err, const double& sl_thresh);
-double dw(const double& t, const double& a, const double& v, const double& w,
+double dw(const double& t, const double& v, const double& a, const double& w,
           const double& sv, const double& err, const double& sl_thresh);
-double dsv(const double& t, const double& a, const double& v, const double& w,
+double dsv(const double& t, const double& v, const double& a, const double& w,
            const double& sv, const double& err, const double& sl_thresh);
 
 // Second Order Derivatives of PDF
-double dv2(const double& t, const double& a, const double& v, const double& w,
+double dv2(const double& t, const double& v, const double& a, const double& w,
            const double& sv, const double& err, const double& sl_thresh);
-double da2(const double& t, const double& a, const double& v, const double& w,
+double da2(const double& t, const double& v, const double& a, const double& w,
            const double& sv, const double& err, const double& sl_thresh);
-double dt02(const double& t, const double& a, const double& v, const double& w,
+double dt02(const double& t, const double& v, const double& a, const double& w,
             const double& sv, const double& err, const double& sl_thresh);
-double dw2(const double& t, const double& a, const double& v, const double& w,
+double dw2(const double& t, const double& v, const double& a, const double& w,
            const double& sv, const double& err, const double& sl_thresh);
-double dsv2(const double& t, const double& a, const double& v, const double& w,
+double dsv2(const double& t, const double& v, const double& a, const double& w,
             const double& sv, const double& err, const double& sl_thresh);
 
 // Infinite Sum Approximations

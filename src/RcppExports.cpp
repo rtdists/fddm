@@ -11,6 +11,126 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// dv2_dfddm
+NumericVector dv2_dfddm(const NumericVector& rt, const SEXP& response, const NumericVector& v, const NumericVector& a, const NumericVector& t0, const NumericVector& w, const NumericVector& sv, const NumericVector& sigma, const double& sl_thresh, const NumericVector& err_tol);
+RcppExport SEXP _fddm_dv2_dfddm(SEXP rtSEXP, SEXP responseSEXP, SEXP vSEXP, SEXP aSEXP, SEXP t0SEXP, SEXP wSEXP, SEXP svSEXP, SEXP sigmaSEXP, SEXP sl_threshSEXP, SEXP err_tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< const SEXP& >::type response(responseSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type v(vSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type sv(svSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type sl_thresh(sl_threshSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type err_tol(err_tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(dv2_dfddm(rt, response, v, a, t0, w, sv, sigma, sl_thresh, err_tol));
+    return rcpp_result_gen;
+END_RCPP
+}
+// da2_dfddm
+NumericVector da2_dfddm(const NumericVector& rt, const SEXP& response, const NumericVector& v, const NumericVector& a, const NumericVector& t0, const NumericVector& w, const NumericVector& sv, const NumericVector& sigma, const double& sl_thresh, const NumericVector& err_tol);
+RcppExport SEXP _fddm_da2_dfddm(SEXP rtSEXP, SEXP responseSEXP, SEXP vSEXP, SEXP aSEXP, SEXP t0SEXP, SEXP wSEXP, SEXP svSEXP, SEXP sigmaSEXP, SEXP sl_threshSEXP, SEXP err_tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< const SEXP& >::type response(responseSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type v(vSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type sv(svSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type sl_thresh(sl_threshSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type err_tol(err_tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(da2_dfddm(rt, response, v, a, t0, w, sv, sigma, sl_thresh, err_tol));
+    return rcpp_result_gen;
+END_RCPP
+}
+// dt2_dfddm
+NumericVector dt2_dfddm(const NumericVector& rt, const SEXP& response, const NumericVector& v, const NumericVector& a, const NumericVector& t0, const NumericVector& w, const NumericVector& sv, const NumericVector& sigma, const double& sl_thresh, const NumericVector& err_tol);
+RcppExport SEXP _fddm_dt2_dfddm(SEXP rtSEXP, SEXP responseSEXP, SEXP vSEXP, SEXP aSEXP, SEXP t0SEXP, SEXP wSEXP, SEXP svSEXP, SEXP sigmaSEXP, SEXP sl_threshSEXP, SEXP err_tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< const SEXP& >::type response(responseSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type v(vSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type sv(svSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type sl_thresh(sl_threshSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type err_tol(err_tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(dt2_dfddm(rt, response, v, a, t0, w, sv, sigma, sl_thresh, err_tol));
+    return rcpp_result_gen;
+END_RCPP
+}
+// dt02_dfddm
+NumericVector dt02_dfddm(const NumericVector& rt, const SEXP& response, const NumericVector& v, const NumericVector& a, const NumericVector& t0, const NumericVector& w, const NumericVector& sv, const NumericVector& sigma, const double& sl_thresh, const NumericVector& err_tol);
+RcppExport SEXP _fddm_dt02_dfddm(SEXP rtSEXP, SEXP responseSEXP, SEXP vSEXP, SEXP aSEXP, SEXP t0SEXP, SEXP wSEXP, SEXP svSEXP, SEXP sigmaSEXP, SEXP sl_threshSEXP, SEXP err_tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< const SEXP& >::type response(responseSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type v(vSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type sv(svSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type sl_thresh(sl_threshSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type err_tol(err_tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(dt02_dfddm(rt, response, v, a, t0, w, sv, sigma, sl_thresh, err_tol));
+    return rcpp_result_gen;
+END_RCPP
+}
+// dw2_dfddm
+NumericVector dw2_dfddm(const NumericVector& rt, const SEXP& response, const NumericVector& v, const NumericVector& a, const NumericVector& t0, const NumericVector& w, const NumericVector& sv, const NumericVector& sigma, const double& sl_thresh, const NumericVector& err_tol);
+RcppExport SEXP _fddm_dw2_dfddm(SEXP rtSEXP, SEXP responseSEXP, SEXP vSEXP, SEXP aSEXP, SEXP t0SEXP, SEXP wSEXP, SEXP svSEXP, SEXP sigmaSEXP, SEXP sl_threshSEXP, SEXP err_tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< const SEXP& >::type response(responseSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type v(vSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type sv(svSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type sl_thresh(sl_threshSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type err_tol(err_tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(dw2_dfddm(rt, response, v, a, t0, w, sv, sigma, sl_thresh, err_tol));
+    return rcpp_result_gen;
+END_RCPP
+}
+// dsv2_dfddm
+NumericVector dsv2_dfddm(const NumericVector& rt, const SEXP& response, const NumericVector& v, const NumericVector& a, const NumericVector& t0, const NumericVector& w, const NumericVector& sv, const NumericVector& sigma, const double& sl_thresh, const NumericVector& err_tol);
+RcppExport SEXP _fddm_dsv2_dfddm(SEXP rtSEXP, SEXP responseSEXP, SEXP vSEXP, SEXP aSEXP, SEXP t0SEXP, SEXP wSEXP, SEXP svSEXP, SEXP sigmaSEXP, SEXP sl_threshSEXP, SEXP err_tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type rt(rtSEXP);
+    Rcpp::traits::input_parameter< const SEXP& >::type response(responseSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type v(vSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type t0(t0SEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type sv(svSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type sl_thresh(sl_threshSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type err_tol(err_tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(dsv2_dfddm(rt, response, v, a, t0, w, sv, sigma, sl_thresh, err_tol));
+    return rcpp_result_gen;
+END_RCPP
+}
 // dv_dfddm
 NumericVector dv_dfddm(const NumericVector& rt, const SEXP& response, const NumericVector& v, const NumericVector& a, const NumericVector& t0, const NumericVector& w, const NumericVector& sv, const NumericVector& sigma, const double& sl_thresh, const NumericVector& err_tol);
 RcppExport SEXP _fddm_dv_dfddm(SEXP rtSEXP, SEXP responseSEXP, SEXP vSEXP, SEXP aSEXP, SEXP t0SEXP, SEXP wSEXP, SEXP svSEXP, SEXP sigmaSEXP, SEXP sl_threshSEXP, SEXP err_tolSEXP) {
@@ -180,6 +300,12 @@ END_RCPP
 RcppExport SEXP _rcpp_module_boot_fddm_fit();
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_fddm_dv2_dfddm", (DL_FUNC) &_fddm_dv2_dfddm, 10},
+    {"_fddm_da2_dfddm", (DL_FUNC) &_fddm_da2_dfddm, 10},
+    {"_fddm_dt2_dfddm", (DL_FUNC) &_fddm_dt2_dfddm, 10},
+    {"_fddm_dt02_dfddm", (DL_FUNC) &_fddm_dt02_dfddm, 10},
+    {"_fddm_dw2_dfddm", (DL_FUNC) &_fddm_dw2_dfddm, 10},
+    {"_fddm_dsv2_dfddm", (DL_FUNC) &_fddm_dsv2_dfddm, 10},
     {"_fddm_dv_dfddm", (DL_FUNC) &_fddm_dv_dfddm, 10},
     {"_fddm_da_dfddm", (DL_FUNC) &_fddm_da_dfddm, 10},
     {"_fddm_dt_dfddm", (DL_FUNC) &_fddm_dt_dfddm, 10},
