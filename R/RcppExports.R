@@ -619,7 +619,7 @@ dt2_dfddm <- function(rt, response, v, a, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl
 #' @useDynLib fddm, .registration = TRUE
 #' @import Rcpp
 #' @export
-dt02_dfddm <- function(rt, response, v, a, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl_thresh = 0.5, err_tol = 0.000001) {
+dt02_dfddm <- function(rt, response, v, a, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl_thresh = 0.44, err_tol = 0.000001) {
     .Call(`_fddm_dt02_dfddm`, rt, response, v, a, t0, w, sv, sigma, sl_thresh, err_tol)
 }
 
@@ -779,7 +779,7 @@ dt02_dfddm <- function(rt, response, v, a, t0, w = 0.5, sv = 0.0, sigma = 1.0, s
 #' @useDynLib fddm, .registration = TRUE
 #' @import Rcpp
 #' @export
-dw2_dfddm <- function(rt, response, v, a, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl_thresh = 1.0, err_tol = 0.000001) {
+dw2_dfddm <- function(rt, response, v, a, t0, w = 0.5, sv = 0.0, sigma = 1.0, sl_thresh = 0.5, err_tol = 0.000001) {
     .Call(`_fddm_dw2_dfddm`, rt, response, v, a, t0, w, sv, sigma, sl_thresh, err_tol)
 }
 

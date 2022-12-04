@@ -678,7 +678,7 @@ NumericVector dt02_dfddm(const NumericVector& rt,
                          const NumericVector& w = 0.5,
                          const NumericVector& sv = 0.0,
                          const NumericVector& sigma = 1.0,
-                         const double& sl_thresh = 0.5, // with sum derivative
+                         const double& sl_thresh = 0.44, // with sum derivative
                          const NumericVector& err_tol = 0.000001)
 { // this is the same as dt2 because dt = -dt0, so dt^2 = dt0^2
   ParFunc parf = &dt02;
@@ -853,7 +853,7 @@ NumericVector dw2_dfddm(const NumericVector& rt,
                         const NumericVector& w = 0.5,
                         const NumericVector& sv = 0.0,
                         const NumericVector& sigma = 1.0,
-                        const double& sl_thresh = 1.0,
+                        const double& sl_thresh = 0.5,
                         const NumericVector& err_tol = 0.000001)
 {
   ParFunc parf = &dw2;

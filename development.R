@@ -10,7 +10,8 @@ devtools::check()
 
 
 ### TODO ###
-tests for hessian
+--determine sl_thresh for second partials
+--tests for hessian
 update vignettes
 update other documentation
 --reorder arguments pdf and derivs, v before a
