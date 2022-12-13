@@ -220,7 +220,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   upper_bds <- numeric()
   for (i in seq_along(all_mm)) {
     par_name <- names(all_mm[i])[1]
-    if (ncols[[par_name]] >= 1 & nrow(all_mm[[i]]) > 1) {
+    if (ncols[[par_name]] >= 1 && nrow(all_mm[[i]]) > 1) {
       # check estimability
       rank_warn <- FALSE
       # par_rank <- qr(all_mm[[i]])[["rank"]]
