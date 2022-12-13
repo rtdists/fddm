@@ -13,7 +13,8 @@ devtools::check()
 --determine sl_thresh for second partials
 --tests for hessian
 update vignettes
-update other documentation
+--update other documentation
+update example in README to include ddm() function
 --reorder arguments pdf and derivs, v before a
 --v1.0
 dfddm docs link to fitting function

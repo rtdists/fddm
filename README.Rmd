@@ -20,7 +20,13 @@ knitr::opts_chunk$set(
 [![R build status](https://github.com/rtdists/fddm/workflows/R-CMD-check/badge.svg)](https://github.com/rtdists/fddm/actions)
 <!-- badges: end -->
 
-`fddm` provides function `dfddm()` which evaluates the density function (or probability density function, PDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full PDF, which contains an infinite sum. Our implementation of the DDM has the following parameters: *a &#1013; (0, <font style="vertical-align: middle;" size="5em">&#8734;</font>)* (threshold separation), *v &#1013; (-<font style="vertical-align: middle;" size="5em">&#8734;</font>, <font style="vertical-align: middle;" size="5em">&#8734;</font>)* (drift rate), *t<sub>0</sub> &#1013; [0, <font style="vertical-align: middle;" size="5em">&#8734;</font>)* (non-decision time/response time constant), *w &#1013; (0, 1)* (relative starting point), *sv &#1013; (0, <font style="vertical-align: middle;" size="5em">&#8734;</font>)* (inter-trial-variability of drift), and *sigma &#1013; (0, <font style="vertical-align: middle;" size="5em">&#8734;</font>)* (diffusion coefficient of the underlying Wiener Process).
+`fddm` provides the function `dfddm()`, which evaluates the density function (or probability density function, PDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full PDF, which contains an infinite sum.
+`fddm` also provides the family of functions `d*_dfddm()`, which evaluate the first-order partial derivatives of the DDM density function with respect to the parameter indicated by the `*` in the function name; the available parameters are listed below.
+Similarly, `fddm` provides the family of functions `d*2_dfddm()`, which evaluate the second-order partial derivatives of the DDM density function for the same parameters.
+Based on the density function and its partial derivatives, `fddm` provides the function `ddm()`, which fits the DDM to provided data.
+`fddm` also provides the function `pfddm()`, which evaluates the distribution function (or cumulative distribution function, CDF) for the DDM using two different methods for approximating the CDF.
+
+Our implementation of the DDM has the following parameters: *a &#1013; (0, <font style="vertical-align: middle;" size="5em">&#8734;</font>)* (threshold separation), *v &#1013; (-<font style="vertical-align: middle;" size="5em">&#8734;</font>, <font style="vertical-align: middle;" size="5em">&#8734;</font>)* (drift rate), *t<sub>0</sub> &#1013; [0, <font style="vertical-align: middle;" size="5em">&#8734;</font>)* (non-decision time/response time constant), *w &#1013; (0, 1)* (relative starting point), *sv &#1013; (0, <font style="vertical-align: middle;" size="5em">&#8734;</font>)* (inter-trial-variability of drift), and *sigma &#1013; (0, <font style="vertical-align: middle;" size="5em">&#8734;</font>)* (diffusion coefficient of the underlying Wiener Process).
 
 ## Installation
 
@@ -36,6 +42,7 @@ And the development version from [GitHub](https://github.com/) with:
 # install.packages("devtools")
 devtools::install_github("rtdists/fddm")
 ```
+
 ## Example
 As a preliminary example, we will fit the DDM to the data from one participant in the `med_dec` data that comes with `fddm`. This dataset contains the accuracy condition reported in Trueblood et al. (2018), which investigates medical decision making among medical professionals (pathologists) and novices (i.e., undergraduate students). The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The dataset contains 200 decisions per participant, based on pictures of 100 true cancerous cells and pictures of 100 true non-cancerous cells. Here we use the data collected from the trials of one experienced medical professional (pathologist). First, we load the `fddm` package, remove any invalid responses from the data, and select the individual whose data we will use for fitting.
 
@@ -54,6 +61,7 @@ onep[["resp"]] <- ifelse(onep[["response"]] == "blast", "upper", "lower")
 onep[["truth"]] <- ifelse(onep[["classification"]] == "blast", "upper", "lower")
 ```
 
+### Simple Fitting with `nlminb`
 For fitting, we need a simple likelihood function; here we will use a straightforward log of sum of densities of the study responses and associated response times. This log-likelihood function will fit the standard parameters in the DDM, but it will fit two versions of the drift rate *v*: one for when the correct response is `"blast"` (*v<sub>u</sub>*), and another for when the correct response is `"non-blast"` (*v<sub>l</sub>*). A detailed explanation of the log-likelihood function is provided in the Example Vignette (`vignette("example", package = "fddm")`). Note that this likelihood function returns the negative log-likelihood as we can simply minimize this function to get the maximum likelihood estimate.
 
 ```{r simp-ll, eval=TRUE}
@@ -77,8 +85,27 @@ We then pass the data and log-likelihood function to an optimization function wi
 ```{r show-simp-fit, eval=TRUE, warning=FALSE}
 fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun,
               rt = onep[["rt"]], resp = onep[["resp"]], truth = onep[["truth"]],
-              # limits:   vu,   vl,   a,  t0, w,  sv
-              lower = c(-Inf, -Inf, .01,   0, 0,   0),
+              # limits:   vu,   vl,   a,                t0, w,  sv
+              lower = c(-Inf, -Inf, .01,                 0, 0,   0),
               upper = c( Inf,  Inf, Inf, min(onep[["rt"]]), 1, Inf))
 fit
+```
+
+### Fitting with `ddm()`
+Because we use an ANOVA approach, we set orthogonal sum-to-zero contrasts
+```{r set-contrasts, eval=TRUE}
+op <- options(contrasts = c('contr.sum', 'contr.poly'))
+```
+
+Now we can use the `ddm()` function to fit the DDM to the data. Note that we are using formula notation to indicate the interaction between variables for the drift rate.
+
+```{r show-ddm-fit, eval=TRUE}
+fit0 <- ddm(rt + response ~ classification*difficulty, data = onep)
+summary(fit0)
+```
+
+We can reset the contrasts.
+
+```{r reset-contrasts, eval=TRUE}
+options(op) # reset contrasts
 ```

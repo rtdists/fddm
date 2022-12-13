@@ -254,11 +254,11 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   formula_mm <- all_mm[par_is_formula]
 
   #-------------------- Create fddm_fit Object --------------------------------#
-  browser()
   f <- new(fddm_fit, rt, response_vec, all_mm,
            args_ddm[["err_tol"]], args_ddm[["switch_thresh"]])
 
   #-------------------- Run Optimization --------------------------------------#
+  browser() # there's something going on with fit_fun <- fit_nlminb and the gradient
   fit_fun <- if (optim == "nlminb") fit_nlminb else optim
   opt <- fit_fun(
     init = init_vals,

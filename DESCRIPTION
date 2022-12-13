@@ -8,8 +8,9 @@ Authors@R: c(person(given="Kendal B.", family="Foster", role=c("aut")),
              person(given = "Achim", family = "Zeileis", role = "ctb", 
              comment = "methods partially taken from betareg"))
 Description: Provides the probability density function (PDF), cumulative
-  distribution function (CDF), and the partial derivatives of the PDF of the
-  diffusion decision model (DDM; e.g.,
+  distribution function (CDF), the first-order and second-order partial
+  derivatives of the PDF, and a fitting function for the diffusion decision
+  model (DDM; e.g.,
   Ratcliff & McKoon, 2008, <doi:10.1162/neco.2008.12-06-420>) with across-trial
   variability in the drift rate. Because the PDF, its partial derivatives, and
   the CDF of the DDM both contain an infinite sum, they need to be approximated.
