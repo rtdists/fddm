@@ -151,7 +151,8 @@ Density function for the Ratcliff diffusion decision model (DDM) with
 following parameters: \code{v} (drift rate), \code{a} (threshold
 separation), \code{t0} (non-decision time/response time constant), \code{w}
 (relative starting point), \code{sv} (inter-trial variability of drift), and
-\code{sigma} (diffusion coefficient of underlying Wiener process).
+\code{sigma} (diffusion coefficient of underlying Wiener process). If you
+are looking to fit the DDM, see [ddm()].
 }
 \details{
 All of the model inputs and parameters (\code{rt}, \code{response},
@@ -338,4 +339,7 @@ Navarro, D. J., & Fuss, I. G. (2009). Fast and accurate
 
   Ratcliff, R. (1978). A theory of memory retrieval. Psychological review,
   85(2), 59.
+}
+\seealso{
+[ddm()]
 }

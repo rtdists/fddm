@@ -323,7 +323,7 @@ void fddm_fit::calc_vcov()
     calc_hessians(coefs);
   }
 
-  // negate and invert hessians to get variance-covariance matrices
+  // (already negated) and invert hessians to get variance-covariance matrices
   vcov_v = hess_v.inverse();
   vcov_a = hess_a.inverse();
   vcov_t0 = hess_t0.inverse();

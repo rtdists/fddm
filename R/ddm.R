@@ -30,9 +30,11 @@
 #'   frame, the model matrix, the response matrix) are returned.
 #' @param contrasts optional list. See the contrasts.arg of
 #'   \code{\link{model.matrix.default}}
-#' 
-#' @details \code{ddm} uses \code{\link{model.matrix}} for transforming the symbolic description of the regression model underlying each parameter into estimated coefficients. The following provides a few examples:
-#' 
+#'
+#' @details \code{ddm} uses \code{\link{model.matrix}} for transforming the
+#'   symbolic description of the regression model underlying each parameter into
+#'   estimated coefficients. The following provides a few examples:
+#'
 #' \itemize{
 #'   \item \code{~ 1} estimates a single coefficient, named \code{(Intercept)}
 #'   \item \code{~ condition} estimates the intercept plus k - 1 coefficients
@@ -63,11 +65,11 @@
 #'   contrasts this overall drift rate is the first factor level of
 #'   \code{condition2}).
 #' }
-#' 
+#'
 #' To get meaningful results it is necessary to estimate separate drift rates
 #' for the different condition/item-types that are mapped onto the upper and
 #' lower boundary of the diffusion model.
-#' 
+#'
 #' If a non-default fitting function is used, it needs to minimise the negative
 #' log-likelihood, accept the following arguments, \code{init, objective,
 #' gradient, lower, upper, control} , and return a list with the following
@@ -77,9 +79,64 @@
 #'
 #' @example examples/examples.ddm.R
 #'
-#' @return Object of class \code{ddm} for which a number of common methods such
-#'   as \code{print}, \code{coef}, and \code{logLik} are implemented, see
+#' @return Object of class \code{ddm} (i.e., a list with components as listed
+#'   below) for which a number of common methods such as \code{print},
+#'   \code{coef}, and \code{logLik} are implemented, see
 #'   \code{\link{ddm-methods}}.
+#'   \itemize{
+#'     \item \code{coefficients} a named list whose elements are the values of
+#'           the estimated model parameters
+#'     \item \code{dpar} a character vector containing the names of the
+#'           estimated model parameters
+#'     \item \code{fixed_dpar} a named list whose elements are the values of the
+#'           fixed model parameters
+#'     \item \code{loglik} the value of the log-likelihood function at the
+#'           optimized parameter values
+#'     \item \code{hessians} a named list whose elements are the individual
+#'           Hessians for each of the model parameters
+#'     \item \code{vcov} a named list whose elements are the individual
+#'           variance-covariance matrices for each of the model parameters
+#'     \item \code{nobs} the number of observations in the data used for fitting
+#'     \item \code{npar} the number of parameters used to fit the model (i.e.,
+#'           the estimated model parameters plus any hyperparameters)
+#'     \item \code{df.residual} the residual degrees of freedom (the number of
+#'           observations - the number of parameters)
+#'     \item \code{call} the original function call to \code{ddm}
+#'     \item \code{formula} the formulas used in the model (\code{1} indicates
+#'           that the model parameter was estimated with a single coefficient;
+#'           \code{0} indicates that the model parameter was fixed)
+#'     \item \code{dpar_formulas} a named list whose elements are the formulas
+#'           for the model parameters (\code{1} indicates that the model
+#'           parameter was estimated with a single coefficient; \code{0}
+#'           indicates that the model parameter was fixed)
+#'     \item \code{na.action} na.action
+#'     \item \code{terms} a named list whose elements are , and whose last
+#'           element is named \code{full} and shows the breakdown of the model
+#'           with all model parameters
+#'     \item \code{levels} a named list whose elements are the levels associated
+#'           with any parameters that are factors (the elements are \code{NULL}
+#'           if the parameter is not a factor), and whose last element is named
+#'           \code{FULL} and shows all of the levels used in the model
+#'     \item \code{contrasts} a named list whose elements are the type of
+#'           contrasts used in the model
+#'     \item \code{args_ddm} a named list whose elements are the optional
+#'           arguments used in the calculation of the DDM log-likelihood
+#'           function
+#'     \item \code{link} a named list whose elements show information about the
+#'           link function used for each model parameter (currently the only
+#'           link function is the identity function)
+#'     \item \code{converged} a logical indicating whether the optimization
+#'           converged (\code{TRUE}) or not (\code{FALSE})
+#'     \item \code{optim_info} a named list whose elements are information about
+#'           the optimization process (e.g., the name of the algorithm used,
+#'           the final value of the objective function, the number of
+#'           evaluations of the gradient function, etc.)
+#'     \item \code{compiled_model} C++ object that contains the compiled model
+#'     \item \code{model} the data used in the model (might need to check this)
+#'     \item \code{response} the response data used in the model
+#'     \item \code{mmatrix} a named list whose elements are the model matrices
+#'           for each of the estimated parameters
+#'   }
 #'
 #' @importFrom stats .getXlevels make.link model.frame model.matrix nlminb terms
 #' @importFrom methods new
@@ -111,8 +168,8 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
                            what = "formula")
   # check formulas:
   all_ddm_formulas <- all_ddm_pars
-  all_ddm_formulas[!par_is_formula] <- 
-    lapply(all_ddm_formulas[!par_is_formula], 
+  all_ddm_formulas[!par_is_formula] <-
+    lapply(all_ddm_formulas[!par_is_formula],
            FUN = function(x) ~ 0)
   # all_ddm_formulas <- all_ddm_pars[par_is_formula]
 
@@ -127,7 +184,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
                  "offset"), names(mf), 0)
   mf <- mf[c(1, m)]
   mf$drop.unused.levels <- TRUE
-  mf[[1]] <- quote(stats::model.frame) 
+  mf[[1]] <- quote(stats::model.frame)
   mf <- eval.parent(mf)
   mt <- attr(mf, "terms")
 
@@ -258,7 +315,6 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
            args_ddm[["err_tol"]], args_ddm[["switch_thresh"]])
 
   #-------------------- Run Optimization --------------------------------------#
-  browser() # there's something going on with fit_fun <- fit_nlminb and the gradient
   fit_fun <- if (optim == "nlminb") fit_nlminb else optim
   opt <- fit_fun(
     init = init_vals,

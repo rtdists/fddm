@@ -10,7 +10,8 @@
 //' following parameters: \code{v} (drift rate), \code{a} (threshold
 //' separation), \code{t0} (non-decision time/response time constant), \code{w}
 //' (relative starting point), \code{sv} (inter-trial variability of drift), and
-//' \code{sigma} (diffusion coefficient of underlying Wiener process).
+//' \code{sigma} (diffusion coefficient of underlying Wiener process). If you
+//' are looking to fit the DDM, see [ddm()].
 //'
 //'
 //'
@@ -267,6 +268,8 @@
 //' @return A vector containing the densities of the DDM with precision
 //'   \code{err_tol} whose length matches that of the longest input parameter
 //'   (usually \code{rt}).
+//'
+//' @seealso [ddm()]
 //'
 //' @useDynLib fddm, .registration = TRUE
 //' @import Rcpp

@@ -12,15 +12,14 @@ devtools::check()
 ### TODO ###
 --determine sl_thresh for second partials
 --tests for hessian
-update vignettes
 --update other documentation
-update example in README to include ddm() function
+--update example in README to include ddm() function
 --reorder arguments pdf and derivs, v before a
 --v1.0
-dfddm docs link to fitting function
 --add hessian slot (with vcov)
-documentation for ddm function with list of slots (and describe a little bit)
-maybe write "how to get started beginner's guide to fitting the DDM"
+--documentation for ddm function with list of slots (and describe a little bit)
+--dfddm docs link to fitting function
+update vignettes (maybe write "how to get started beginner's guide to fitting the DDM")
 lingering issues:
   - standard errors are all the same (model matrix input is 1's and -1's so the main diagonal of the Hessian is always the same)
 
