@@ -7,7 +7,7 @@
 
 RCPP_MODULE(fddm_fit) {
   Rcpp::class_<fddm_fit>( "fddm_fit")
-    .constructor<vector<double>, SEXP, vector<MatrixXd>, double, double>("Constructor given response times, responses, model matrices, error tolerance, and switching threshold")
+    .constructor<vector<double>, SEXP, vector<MatrixXd>, double>("Constructor given response times, responses, model matrices, error tolerance, and switching threshold")
     .field("rt", &fddm_fit::rt)
     .field("response", &fddm_fit::response)
     .field("modmat_v", &fddm_fit::mm_v)
@@ -16,7 +16,6 @@ RCPP_MODULE(fddm_fit) {
     .field("modmat_w", &fddm_fit::mm_w)
     .field("modmat_sv", &fddm_fit::mm_sv)
     .field("err_tol", &fddm_fit::err_tol)
-    .field("switch_thresh", &fddm_fit::switch_thresh)
     .field("likelihood", &fddm_fit::likelihood)
     .field("coefficients", &fddm_fit::coefs)
     .field("hess_v", &fddm_fit::hess_v)
@@ -45,7 +44,6 @@ RCPP_MODULE(fddm_fit) {
 // 2. response (associated responses)
 // 3. list of model matrices (in order: v, a, t0, w, sv)
 // 4. [optional] error_tolerance (for likelihood calculation)
-// 5. [optional] switching threshold (for likelihood calculation)
 //
 //
 // Note on model matrices:

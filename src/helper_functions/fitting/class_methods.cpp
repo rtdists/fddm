@@ -9,8 +9,7 @@
 fddm_fit::fddm_fit(const vector<double>& rt_vector,
                    const SEXP& response_vector,
                    const vector<MatrixXd>& model_matrices,
-                   const double& error_tolerance,
-                   const double& switching_threshold)
+                   const double& error_tolerance)
   {
   rt = check_rt(rt_vector, Nrt); // also sets Nrt
   response = convert_responses(response_vector, Nrt);
@@ -23,7 +22,6 @@ fddm_fit::fddm_fit(const vector<double>& rt_vector,
   unpack_and_check_mod_mats(model_matrices, mm_v, mm_a, mm_t0, mm_w, mm_sv,
                             v, a, t0, w, sv, form_len, Nrt);
   err_tol = check_err_tol(error_tolerance);
-  switch_thresh = check_switch_thresh(switching_threshold);
   // Resize coefs
   for (int i = 0; i < 5; i++) { Ncoefs += form_len[i]; }
   coefs.resize(Ncoefs);
@@ -77,10 +75,9 @@ double fddm_fit::calc_loglik(const VectorXd& temp_coefs)
     t = rt[i] - t0[i];
     if (t > 0 && isfinite(t)) {
       if (response[i] == 1) { // response is "lower"
-        likelihood[i] = pdf(t, v[i], a[i], w[i], sv[i], err_tol, switch_thresh);
+        likelihood[i] = pdf(t, v[i], a[i], w[i], sv[i], err_tol);
       } else { // response is "upper" so use alternate parameters
-        likelihood[i] = pdf(t, -v[i], a[i], 1-w[i], sv[i], err_tol,
-                           switch_thresh);
+        likelihood[i] = pdf(t, -v[i], a[i], 1-w[i], sv[i], err_tol);
       }
       ll -= log(likelihood[i]); // faster than doing exp(loglik)
     } else {
@@ -111,62 +108,62 @@ VectorXd fddm_fit::calc_gradient(const VectorXd& temp_coefs)
     if (t > 0 && isfinite(t)) { // maybe don't have to check b/c same in lik calc?
       if (response[i] == 1) { // response is "lower"
         if (form_len[0] > 0) {
-          temp_grad = dv(t, v[i], a[i], w[i], sv[i], err_tol, switch_thresh)
+          temp_grad = dv(t, v[i], a[i], w[i], sv[i], err_tol)
                       / likelihood[i];
           gradient.segment(grad_idx, form_len[0]) -= temp_grad * mm_v.row(i);
           grad_idx += form_len[0];
         }
         if (form_len[1] > 0) {
-          temp_grad = da(t, v[i], a[i], w[i], sv[i], err_tol, switch_thresh)
+          temp_grad = da(t, v[i], a[i], w[i], sv[i], err_tol)
                       / likelihood[i];
           gradient.segment(grad_idx, form_len[1]) -= temp_grad * mm_a.row(i);
           grad_idx += form_len[1];
         }
         if (form_len[2] > 0) {
-          temp_grad = dt0(t, v[i], a[i], w[i], sv[i], err_tol, switch_thresh)
+          temp_grad = dt0(t, v[i], a[i], w[i], sv[i], err_tol)
                       / likelihood[i];
           gradient.segment(grad_idx, form_len[2]) -= temp_grad * mm_t0.row(i);
           grad_idx += form_len[2];
         }
         if (form_len[3] > 0) {
-          temp_grad = dw(t, v[i], a[i], w[i], sv[i], err_tol, switch_thresh)
+          temp_grad = dw(t, v[i], a[i], w[i], sv[i], err_tol)
                       / likelihood[i];
           gradient.segment(grad_idx, form_len[3]) -= temp_grad * mm_w.row(i);
           grad_idx += form_len[3];
         }
         if (form_len[4] > 0) {
-          temp_grad = dsv(t, v[i], a[i], w[i], sv[i], err_tol, switch_thresh)
+          temp_grad = dsv(t, v[i], a[i], w[i], sv[i], err_tol)
                       / likelihood[i];
           gradient.segment(grad_idx, form_len[4]) -= temp_grad * mm_sv.row(i);
           grad_idx += form_len[4];
         }
       } else { // response is "upper" so use alternate parameters
         if (form_len[0] > 0) { // chain rule negates derivative
-          temp_grad = dv(t, -v[i], a[i], 1-w[i], sv[i], err_tol, switch_thresh)
+          temp_grad = dv(t, -v[i], a[i], 1-w[i], sv[i], err_tol)
                       / likelihood[i];
           gradient.segment(grad_idx, form_len[0]) += temp_grad * mm_v.row(i);
           grad_idx += form_len[0];
         }
         if (form_len[1] > 0) {
-          temp_grad = da(t, -v[i], a[i], 1-w[i], sv[i], err_tol, switch_thresh)
+          temp_grad = da(t, -v[i], a[i], 1-w[i], sv[i], err_tol)
                       / likelihood[i];
           gradient.segment(grad_idx, form_len[1]) -= temp_grad * mm_a.row(i);
           grad_idx += form_len[1];
         }
         if (form_len[2] > 0) {
-          temp_grad = dt0(t, -v[i], a[i], 1-w[i], sv[i], err_tol, switch_thresh)
+          temp_grad = dt0(t, -v[i], a[i], 1-w[i], sv[i], err_tol)
                       / likelihood[i];
           gradient.segment(grad_idx, form_len[2]) -= temp_grad * mm_t0.row(i);
           grad_idx += form_len[2];
         }
         if (form_len[3] > 0) { // chain rule negates derivative
-          temp_grad = dw(t, -v[i], a[i], 1-w[i], sv[i], err_tol, switch_thresh)
+          temp_grad = dw(t, -v[i], a[i], 1-w[i], sv[i], err_tol)
                       / likelihood[i];
           gradient.segment(grad_idx, form_len[3]) += temp_grad * mm_w.row(i);
           grad_idx += form_len[3];
         }
         if (form_len[4] > 0) {
-          temp_grad = dsv(t, -v[i], a[i], 1-w[i], sv[i], err_tol, switch_thresh)
+          temp_grad = dsv(t, -v[i], a[i], 1-w[i], sv[i], err_tol)
                       / likelihood[i];
           gradient.segment(grad_idx, form_len[4]) -= temp_grad * mm_sv.row(i);
           grad_idx += form_len[4];
@@ -216,40 +213,40 @@ void fddm_fit::calc_hessians(const VectorXd& temp_coefs)
     if (t > 0 && isfinite(t)) { // maybe don't have to check b/c same in lik calc?
       if (response[i] == 1) { // response is "lower"
         if (form_len[0] > 0) {
-          d1 = dv(t, v[i], a[i], w[i], sv[i], err_tol, switch_thresh);
-          d2 = dv2(t, v[i], a[i], w[i], sv[i], err_tol, switch_thresh);
+          d1 = dv(t, v[i], a[i], w[i], sv[i], err_tol);
+          d2 = dv2(t, v[i], a[i], w[i], sv[i], err_tol);
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_v_row = mm_v.row(i);
           mm_v_col = mm_v.row(i);
           hess_v -= mm_v_col * dd * mm_v_row;
         }
         if (form_len[1] > 0) {
-          d1 = da(t, v[i], a[i], w[i], sv[i], err_tol, switch_thresh);
-          d2 = da2(t, v[i], a[i], w[i], sv[i], err_tol, switch_thresh);
+          d1 = da(t, v[i], a[i], w[i], sv[i], err_tol);
+          d2 = da2(t, v[i], a[i], w[i], sv[i], err_tol);
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_a_row = mm_a.row(i);
           mm_a_col = mm_a.row(i);
           hess_a -= mm_a_col * dd * mm_a_row;
         }
         if (form_len[2] > 0) {
-          d1 = dt0(t, v[i], a[i], w[i], sv[i], err_tol, switch_thresh);
-          d2 = dt02(t, v[i], a[i], w[i], sv[i], err_tol, switch_thresh);
+          d1 = dt0(t, v[i], a[i], w[i], sv[i], err_tol);
+          d2 = dt02(t, v[i], a[i], w[i], sv[i], err_tol);
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_t0_row = mm_t0.row(i);
           mm_t0_col = mm_t0.row(i);
           hess_t0 -= mm_t0_col * dd * mm_t0_row;
         }
         if (form_len[3] > 0) {
-          d1 = dw(t, v[i], a[i], w[i], sv[i], err_tol, switch_thresh);
-          d2 = dw2(t, v[i], a[i], w[i], sv[i], err_tol, switch_thresh);
+          d1 = dw(t, v[i], a[i], w[i], sv[i], err_tol);
+          d2 = dw2(t, v[i], a[i], w[i], sv[i], err_tol);
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_w_row = mm_w.row(i);
           mm_w_col = mm_w.row(i);
           hess_w -= mm_w_col * dd * mm_w_row;
         }
         if (form_len[4] > 0) {
-          d1 = dsv(t, v[i], a[i], w[i], sv[i], err_tol, switch_thresh);
-          d2 = dsv2(t, v[i], a[i], w[i], sv[i], err_tol, switch_thresh);
+          d1 = dsv(t, v[i], a[i], w[i], sv[i], err_tol);
+          d2 = dsv2(t, v[i], a[i], w[i], sv[i], err_tol);
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_sv_row = mm_sv.row(i);
           mm_sv_col = mm_sv.row(i);
@@ -258,40 +255,40 @@ void fddm_fit::calc_hessians(const VectorXd& temp_coefs)
       } else { // response is "upper" so use alternate parameters
         // note: chain rule negation not needed because squared or negated twice
         if (form_len[0] > 0) {
-          d1 = dv(t, -v[i], a[i], 1-w[i], sv[i], err_tol, switch_thresh);
-          d2 = dv2(t, -v[i], a[i], 1-w[i], sv[i], err_tol, switch_thresh);
+          d1 = dv(t, -v[i], a[i], 1-w[i], sv[i], err_tol);
+          d2 = dv2(t, -v[i], a[i], 1-w[i], sv[i], err_tol);
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_v_row = mm_v.row(i);
           mm_v_col = mm_v.row(i);
           hess_v -= mm_v_col * dd * mm_v_row;
         }
         if (form_len[1] > 0) {
-          d1 = da(t, -v[i], a[i], 1-w[i], sv[i], err_tol, switch_thresh);
-          d2 = da2(t, -v[i], a[i], 1-w[i], sv[i], err_tol, switch_thresh);
+          d1 = da(t, -v[i], a[i], 1-w[i], sv[i], err_tol);
+          d2 = da2(t, -v[i], a[i], 1-w[i], sv[i], err_tol);
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_a_row = mm_a.row(i);
           mm_a_col = mm_a.row(i);
           hess_a -= mm_a_col * dd * mm_a_row;
         }
         if (form_len[2] > 0) {
-          d1 = dt0(t, -v[i], a[i], 1-w[i], sv[i], err_tol, switch_thresh);
-          d2 = dt02(t, -v[i], a[i], 1-w[i], sv[i], err_tol, switch_thresh);
+          d1 = dt0(t, -v[i], a[i], 1-w[i], sv[i], err_tol);
+          d2 = dt02(t, -v[i], a[i], 1-w[i], sv[i], err_tol);
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_t0_row = mm_t0.row(i);
           mm_t0_col = mm_t0.row(i);
           hess_t0 -= mm_t0_col * dd * mm_t0_row;
         }
         if (form_len[3] > 0) {
-          d1 = dw(t, -v[i], a[i], 1-w[i], sv[i], err_tol, switch_thresh);
-          d2 = dw2(t, -v[i], a[i], 1-w[i], sv[i], err_tol, switch_thresh);
+          d1 = dw(t, -v[i], a[i], 1-w[i], sv[i], err_tol);
+          d2 = dw2(t, -v[i], a[i], 1-w[i], sv[i], err_tol);
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_w_row = mm_w.row(i);
           mm_w_col = mm_w.row(i);
           hess_w -= mm_w_col * dd * mm_w_row;
         }
         if (form_len[4] > 0) {
-          d1 = dsv(t, -v[i], a[i], 1-w[i], sv[i], err_tol, switch_thresh);
-          d2 = dsv2(t, -v[i], a[i], 1-w[i], sv[i], err_tol, switch_thresh);
+          d1 = dsv(t, -v[i], a[i], 1-w[i], sv[i], err_tol);
+          d2 = dsv2(t, -v[i], a[i], 1-w[i], sv[i], err_tol);
           dd = (likelihood[i] * d2 - d1*d1) / (likelihood[i]*likelihood[i]);
           mm_sv_row = mm_sv.row(i);
           mm_sv_col = mm_sv.row(i);

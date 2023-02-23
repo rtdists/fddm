@@ -284,14 +284,6 @@ double check_err_tol(const double& err_tol) {
 }
 
 
-double check_switch_thresh(const double& switch_thresh) {
-  if (isnan(switch_thresh)) {
-    stop("fddm_fit error: function parameter 'switch_thresh' is a NaN: %f.", switch_thresh);
-  }
-  return switch_thresh;
-}
-
-
 bool invalid_parameters(const VectorXd& v, const VectorXd& a,
                         const VectorXd& t0, const VectorXd& w,
                         const VectorXd& sv, const int& Nrt,

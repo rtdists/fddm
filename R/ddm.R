@@ -145,7 +145,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
                 data,
                 optim = "nlminb",
                 args_optim = list(),
-                args_ddm = list(err_tol = 1e-6, switch_thresh = 0.8),
+                args_ddm = list(err_tol = 1e-6),
                 use_gradient = TRUE,
                 compiled_model = TRUE, model = TRUE,
                 mmatrix = TRUE, response = TRUE,
@@ -311,8 +311,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   formula_mm <- all_mm[par_is_formula]
 
   #-------------------- Create fddm_fit Object --------------------------------#
-  f <- new(fddm_fit, rt, response_vec, all_mm,
-           args_ddm[["err_tol"]], args_ddm[["switch_thresh"]])
+  f <- new(fddm_fit, rt, response_vec, all_mm, args_ddm[["err_tol"]])
 
   #-------------------- Run Optimization --------------------------------------#
   fit_fun <- if (optim == "nlminb") fit_nlminb else optim

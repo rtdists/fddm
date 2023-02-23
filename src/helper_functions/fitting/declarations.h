@@ -69,7 +69,6 @@ void unpack_and_check_mod_mats(const vector<MatrixXd>& model_matrices,
                                VectorXd& w, VectorXd& sv,
                                vector<int>& form_len, const int& Nrt);
 double check_err_tol(const double& err_tol);
-double check_switch_thresh(const double& switch_thresh);
 bool invalid_parameters(const VectorXd& v, const VectorXd& a,
                         const VectorXd& t0, const VectorXd& w,
                         const VectorXd& sv, const int& Nrt,
@@ -77,33 +76,39 @@ bool invalid_parameters(const VectorXd& v, const VectorXd& a,
 
 // PDF (likelihood)
 double pdf(const double& t, const double& v, const double& a, const double& w,
-           const double& sv, const double& err, const double& switch_thresh);
+           const double& sv, const double& err,
+           const double& switch_thresh = 0.8);
 
 // Derivatives of PDF
 double dv(const double& t, const double& v, const double& a, const double& w,
-          const double& sv, const double& err, const double& sl_thresh);
+          const double& sv, const double& err,
+          const double& sl_thresh = 0.355);
 double da(const double& t, const double& v, const double& a, const double& w,
-          const double& sv, const double& err, const double& sl_thresh);
+          const double& sv, const double& err, const double& sl_thresh = 0.5);
 double dt(const double& t, const double& v, const double& a, const double& w,
-          const double& sv, const double& err, const double& sl_thresh);
+          const double& sv, const double& err, const double& sl_thresh = 0.5);
 double dt0(const double& t, const double& v, const double& a, const double& w,
-           const double& sv, const double& err, const double& sl_thresh);
+           const double& sv, const double& err, const double& sl_thresh = 0.5);
 double dw(const double& t, const double& v, const double& a, const double& w,
-          const double& sv, const double& err, const double& sl_thresh);
+          const double& sv, const double& err, const double& sl_thresh = 1.0);
 double dsv(const double& t, const double& v, const double& a, const double& w,
-           const double& sv, const double& err, const double& sl_thresh);
+           const double& sv, const double& err,
+           const double& sl_thresh = 0.355);
 
 // Second Order Derivatives of PDF
 double dv2(const double& t, const double& v, const double& a, const double& w,
-           const double& sv, const double& err, const double& sl_thresh);
+           const double& sv, const double& err,
+           const double& sl_thresh = 0.355);
 double da2(const double& t, const double& v, const double& a, const double& w,
-           const double& sv, const double& err, const double& sl_thresh);
+           const double& sv, const double& err, const double& sl_thresh = 0.5);
 double dt02(const double& t, const double& v, const double& a, const double& w,
-            const double& sv, const double& err, const double& sl_thresh);
+            const double& sv, const double& err,
+            const double& sl_thresh = 0.44);
 double dw2(const double& t, const double& v, const double& a, const double& w,
-           const double& sv, const double& err, const double& sl_thresh);
+           const double& sv, const double& err, const double& sl_thresh = 0.5);
 double dsv2(const double& t, const double& v, const double& a, const double& w,
-            const double& sv, const double& err, const double& sl_thresh);
+            const double& sv, const double& err,
+            const double& sl_thresh = 0.355);
 
 // Infinite Sum Approximations
 double small_sum(const double& taa, const double& w, const double& err);

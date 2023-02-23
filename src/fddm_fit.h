@@ -18,7 +18,6 @@ class fddm_fit {
     MatrixXd mm_w {};
     MatrixXd mm_sv {};
     double err_tol {0.000001};
-    double switch_thresh {0.8};
     vector<double> likelihood {};
     VectorXd coefs {};
     MatrixXd hess_v {};
@@ -47,8 +46,7 @@ class fddm_fit {
     fddm_fit(const vector<double>& rt_vector,
              const SEXP& response_vector,
              const vector<MatrixXd>& model_matrices,
-             const double& error_tolerance,
-             const double& switching_threshold);
+             const double& error_tolerance);
 
     // methods
     double calc_loglik(const VectorXd& temp_params);
@@ -66,7 +64,6 @@ class fddm_fit {
 // 2. response (associated responses)
 // 3. list of model matrices (in order: v, a, t0, w, sv)
 // 4. [optional] error_tolerance (for likelihood calculation)
-// 5. [optional] switching threshold (for likelihood calculation)
 //
 //
 // Note on model matrices:
