@@ -2,7 +2,7 @@
 #'
 #' Fit the 5-parameter DDM (Diffusion Decision Model) via maximum likelihood
 #' estimation. The model for each DDM parameter can be specified symbolically
-#' using R's formulas interface. With the exception of the drift rate (which is
+#' using R's formula interface. With the exception of the drift rate (which is
 #' always estimated) all parameters can be either fixed or estimates.
 #'
 #' @param drift Two-sided formula. The left-hand side describes the response,

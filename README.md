@@ -11,11 +11,23 @@ status](https://travis-ci.org/rtdists/fddm.svg?branch=master)](https://travis-ci
 status](https://github.com/rtdists/fddm/workflows/R-CMD-check/badge.svg)](https://github.com/rtdists/fddm/actions)
 <!-- badges: end -->
 
-`fddm` provides function `dfddm()` which evaluates the density function
-(or probability density function, PDF) for the Ratcliff diffusion
-decision model (DDM) using different methods for approximating the full
-PDF, which contains an infinite sum. Our implementation of the DDM has
-the following parameters: *a ϵ (0,
+`fddm` provides the function `dfddm()`, which evaluates the density
+function (or probability density function, PDF) for the Ratcliff
+diffusion decision model (DDM) using different methods for approximating
+the full PDF, which contains an infinite sum. `fddm` also provides the
+family of functions `d*_dfddm()`, which evaluate the first-order partial
+derivatives of the DDM density function with respect to the parameter
+indicated by the `*` in the function name; the available parameters are
+listed below. Similarly, `fddm` provides the family of functions
+`d*2_dfddm()`, which evaluate the second-order partial derivatives of
+the DDM density function for the same parameters. Based on the density
+function and its partial derivatives, `fddm` provides the function
+`ddm()`, which fits the DDM to provided data. `fddm` also provides the
+function `pfddm()`, which evaluates the distribution function (or
+cumulative distribution function, CDF) for the DDM using two different
+methods for approximating the CDF.
+
+Our implementation of the DDM has the following parameters: *a ϵ (0,
 <font style="vertical-align: middle;" size="5em">∞</font>)* (threshold
 separation), *v ϵ
 (-<font style="vertical-align: middle;" size="5em">∞</font>,
@@ -66,15 +78,15 @@ med_dec <- med_dec[which(med_dec[["rt"]] >= 0), ]
 onep <- med_dec[ med_dec[["id"]] == "2" & med_dec[["group"]] == "experienced", ]
 str(onep)
 #> 'data.frame':    200 obs. of  9 variables:
-#>  $ id            : int  2 2 2 2 2 2 2 2 2 2 ...
-#>  $ group         : chr  "experienced" "experienced" "experienced" "experienced" ...
+#>  $ id            : Factor w/ 37 levels "1","2","3","4",..: 2 2 2 2 2 2 2 2 2 2 ...
+#>  $ group         : Factor w/ 3 levels "experienced",..: 1 1 1 1 1 1 1 1 1 1 ...
 #>  $ block         : int  3 3 3 3 3 3 3 3 3 3 ...
 #>  $ trial         : int  1 2 3 4 5 6 7 8 9 10 ...
-#>  $ classification: chr  "blast" "non-blast" "non-blast" "non-blast" ...
-#>  $ difficulty    : chr  "easy" "easy" "hard" "hard" ...
-#>  $ response      : chr  "blast" "non-blast" "blast" "non-blast" ...
+#>  $ classification: Factor w/ 2 levels "blast","non-blast": 1 2 2 2 1 1 1 1 2 1 ...
+#>  $ difficulty    : Factor w/ 2 levels "easy","hard": 1 1 2 2 1 1 2 2 1 2 ...
+#>  $ response      : Factor w/ 2 levels "blast","non-blast": 1 2 1 2 1 1 1 1 2 1 ...
 #>  $ rt            : num  0.853 0.575 1.136 0.875 0.748 ...
-#>  $ stimulus      : chr  "blastEasy/BL_10166384.jpg" "nonBlastEasy/16258001115A_069.jpg" "nonBlastHard/BL_11504083.jpg" "nonBlastHard/MY_9455143.jpg" ...
+#>  $ stimulus      : Factor w/ 312 levels "blastEasy/AuerRod.jpg",..: 7 167 246 273 46 31 132 98 217 85 ...
 ```
 
 We further prepare the data by defining upper and lower responses and
@@ -85,7 +97,57 @@ onep[["resp"]] <- ifelse(onep[["response"]] == "blast", "upper", "lower")
 onep[["truth"]] <- ifelse(onep[["classification"]] == "blast", "upper", "lower")
 ```
 
-For fitting, we need a simple likelihood function; here we will use a
+### Easy Fitting with Built-in `ddm()`
+
+Because we use an ANOVA approach, we set orthogonal sum-to-zero
+contrasts
+
+``` r
+op <- options(contrasts = c('contr.sum', 'contr.poly'))
+```
+
+Now we can use the `ddm()` function to fit the DDM to the data. Note
+that we are using formula notation to indicate the interaction between
+variables for the drift rate.
+
+``` r
+fit0 <- ddm(rt + response ~ classification*difficulty, data = onep)
+summary(fit0)
+#> 
+#> Call:
+#> ddm(drift = rt + response ~ classification * difficulty, data = onep)
+#> 
+#> DDM fit with 3 estimated and 2 fixed distributional parameters.
+#> Fixed: bias = 0.5, sv = 0 
+#> 
+#> drift coefficients (identity link):
+#>                             Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)                  -0.5924     0.1168  -5.073 3.91e-07 ***
+#> classification1              -2.6447     0.1168 -22.647  < 2e-16 ***
+#> difficulty1                   0.2890     0.1168   2.475   0.0133 *  
+#> classification1:difficulty1  -1.4987     0.1168 -12.834  < 2e-16 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> boundary coefficients (identity link):
+#>             Estimate Std. Error
+#> (Intercept)    2.064      0.058
+#> 
+#> ndt coefficients (identity link):
+#>             Estimate Std. Error
+#> (Intercept)   0.3938      0.007
+```
+
+We can reset the contrasts.
+
+``` r
+options(op) # reset contrasts
+```
+
+### Alternative Fitting Method with `nlminb`
+
+**using ddm() is more convenient and faster **add intro sentence For
+fitting, we need a simple likelihood function; here we will use a
 straightforward log of sum of densities of the study responses and
 associated response times. This log-likelihood function will fit the
 standard parameters in the DDM, but it will fit two versions of the
@@ -125,26 +187,27 @@ basically instantaneous using this setup.
 ``` r
 fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun,
               rt = onep[["rt"]], resp = onep[["resp"]], truth = onep[["truth"]],
-              # limits:   vu,   vl,   a,  t0, w,  sv
-              lower = c(-Inf, -Inf, .01,   0, 0,   0),
+              # limits:   vu,   vl,   a,                t0, w,  sv
+              lower = c(-Inf, -Inf, .01,                 0, 0,   0),
               upper = c( Inf,  Inf, Inf, min(onep[["rt"]]), 1, Inf))
 fit
 #> $par
-#> [1]  5.6813040 -2.1886617  2.7909124  0.3764464  0.4010116  2.2812984
+#> [1]  1.308771e+00 -5.262772e-01  1.567463e+00  4.002167e-01  4.845589e-01
+#> [6]  4.788276e-10
 #> 
 #> $objective
-#> [1] 42.47181
+#> [1] 96.88019
 #> 
 #> $convergence
-#> [1] 0
+#> [1] 1
 #> 
 #> $iterations
-#> [1] 46
+#> [1] 150
 #> 
 #> $evaluations
 #> function gradient 
-#>       75      335 
+#>      160     1067 
 #> 
 #> $message
-#> [1] "relative convergence (4)"
+#> [1] "iteration limit reached without convergence (10)"
 ```

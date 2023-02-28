@@ -25,6 +25,7 @@ update vignettes (maybe write "how to get started beginner's guide to fitting th
 
 removed switching threshold from ddm() arguments- ok
 should we do something different for the initial values for fitting? - EZdiffusion for start values, but tricky to deal with multiple coefficients for a parameter (e.g. v)
+there is also the possibility of adding more link functions (instead of just the identity)
 
 
 ###

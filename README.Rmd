@@ -54,33 +54,39 @@ onep <- med_dec[ med_dec[["id"]] == "2" & med_dec[["group"]] == "experienced", ]
 str(onep)
 ```
 
-We further prepare the data by defining upper and lower responses and the correct response bounds.
-
-```{r prep-data, eval=TRUE}
-onep[["resp"]] <- ifelse(onep[["response"]] == "blast", "upper", "lower")
-onep[["truth"]] <- ifelse(onep[["classification"]] == "blast", "upper", "lower")
-```
-
 ### Easy Fitting with Built-in `ddm()`
-Because we use an ANOVA approach, we set orthogonal sum-to-zero contrasts
+The `ddm()` function fits the 5-parameter DDM to the user-supplied data via maximum likelihood estimation. Each DDM parameter can be modeled using R's formula interface; the model parameters can either be fixed or estimated, except for the drift rate which is always estimated.
+
+We will demonstrate a simple example of how to fit the DDM to the `onep` dataset from the above code chunks.
+
+Because we use an ANOVA approach, we set orthogonal sum-to-zero contrasts.
 ```{r set-contrasts, eval=TRUE}
 op <- options(contrasts = c('contr.sum', 'contr.poly'))
 ```
 
-Now we can use the `ddm()` function to fit the DDM to the data. Note that we are using formula notation to indicate the interaction between variables for the drift rate.
+Now we can use the `ddm()` function to fit the DDM to the data. Note that we are using formula notation to indicate the interaction between variables for the drift rate. The first argument of the `ddm()` function is the formula indicating how the drift rate should be modeled. By default, the boundary separation and non-decision time are estimated, and the initial bias and inter-trial variability in the drift rate are held fixed.
 
 ```{r show-ddm-fit, eval=TRUE}
 fit0 <- ddm(rt + response ~ classification*difficulty, data = onep)
 summary(fit0)
 ```
 
-We can reset the contrasts.
+This output first shows the input to the function call and which parameters are held fixed; this information is useful to verify that the formula inputs to the `ddm()` function call were correct. For the model of the drift rate that we input, we can see the estimates and summary statistics for each coefficient. Below this, we can see the simple estimates for the boundary separation and non-decision time (default behavior).
+
+We can reset the contrasts after fitting.
 
 ```{r reset-contrasts, eval=TRUE}
 options(op) # reset contrasts
 ```
 
-### Alternative Fitting Method with `nlminb`
+### Alternative Fitting Method with `nlminb()`
+Although we strongly recommend using the `ddm()` function for fitting the DDM to data because it is faster and more convenient, we will also show how to use the probability density function in a manual optimization setup. We further prepare the data by defining upper and lower responses and the correct response bounds.
+
+```{r prep-data, eval=TRUE}
+onep[["resp"]] <- ifelse(onep[["response"]] == "blast", "upper", "lower")
+onep[["truth"]] <- ifelse(onep[["classification"]] == "blast", "upper", "lower")
+```
+
 For fitting, we need a simple likelihood function; here we will use a straightforward log of sum of densities of the study responses and associated response times. This log-likelihood function will fit the standard parameters in the DDM, but it will fit two versions of the drift rate *v*: one for when the correct response is `"blast"` (*v<sub>u</sub>*), and another for when the correct response is `"non-blast"` (*v<sub>l</sub>*). A detailed explanation of the log-likelihood function is provided in the Example Vignette (`vignette("example", package = "fddm")`). Note that this likelihood function returns the negative log-likelihood as we can simply minimize this function to get the maximum likelihood estimate.
 
 ```{r simp-ll, eval=TRUE}
@@ -103,6 +109,7 @@ We then pass the data and log-likelihood function to an optimization function wi
 
 ```{r show-simp-fit, eval=TRUE, warning=FALSE}
 fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun,
+              control = list(iter.max = 300, eval.max = 300),
               rt = onep[["rt"]], resp = onep[["resp"]], truth = onep[["truth"]],
               # limits:   vu,   vl,   a,                t0, w,  sv
               lower = c(-Inf, -Inf, .01,                 0, 0,   0),
