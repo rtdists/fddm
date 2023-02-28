@@ -39,7 +39,6 @@ Suggests:
     WienR,
     emmeans,
     estimability,
-    car,
     lmtest,
     numDeriv
 URL: https://github.com/rtdists/fddm
