@@ -51,8 +51,8 @@ class fddm_fit {
     // methods
     double calc_loglik(const VectorXd& temp_params);
     VectorXd calc_gradient(const VectorXd& temp_params);
-    void calc_hessians(const VectorXd& temp_params);
-    void calc_vcov();
+    List calc_hessians(const VectorXd& temp_params);
+    List calc_vcov();
     VectorXd calc_std_err();
 };
 

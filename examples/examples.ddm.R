@@ -6,9 +6,9 @@ p1 <- med_dec[med_dec[["id"]] == 2 & med_dec[["group"]] == "experienced", ]
 head(p1)
 
 
-##---------------------------------------------------------------
-##        Easiest: Fitting using car::Anova() and emmeans       -
-##---------------------------------------------------------------
+##----------------------------------------------
+##        Easiest: Fitting using emmeans       -
+##----------------------------------------------
 
 ## Because we use an ANOVA approach, we set orthogonal sum-to-zero contrasts
 op <- options(contrasts = c('contr.sum', 'contr.poly'))
@@ -16,14 +16,10 @@ op <- options(contrasts = c('contr.sum', 'contr.poly'))
 fit0 <- ddm(rt + response ~ classification*difficulty, data = p1)
 summary(fit0)
 
-## to get most out of it, we need extra packages:
-## for ANOVA table, we use package car:
-if (requireNamespace("car")) { ## requires package car
-car::Anova(fit0, type = "III")
-}
-
 ## for more tests, we use emmeans:
 if (requireNamespace("emmeans")) {
+# for ANOVA table:
+emmeans::joint_tests(fit0)
 # get conditional main effects of difficulty (for each level of classification):
 emmeans::joint_tests(fit0, by = "classification")
 

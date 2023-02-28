@@ -19,6 +19,8 @@ using std::isfinite;
 using std::isnan;
 using std::string;
 using std::to_string;
+using Rcpp::List;
+using Rcpp::Named;
 using Rcpp::stop;
 using Rcpp::warning;
 using std::vector;

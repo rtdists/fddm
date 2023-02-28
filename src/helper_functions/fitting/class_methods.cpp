@@ -28,7 +28,7 @@ fddm_fit::fddm_fit(const vector<double>& rt_vector,
 }
 
 
-// Log-likelihood Function
+// Log-likelihood Function (negated)
 double fddm_fit::calc_loglik(const VectorXd& temp_coefs)
 {
   // Store the input parameters for later checking (in gradient)
@@ -68,7 +68,7 @@ double fddm_fit::calc_loglik(const VectorXd& temp_coefs)
     return rt0;
   }
 
-  // Calculate loglikelihood and -sum over all data
+  // Calculate (negative) loglikelihood and (-)sum over all data
   double ll = 0.0;
   double t;
   for (int i = 0; i < Nrt; i++) {
@@ -89,7 +89,7 @@ double fddm_fit::calc_loglik(const VectorXd& temp_coefs)
 }
 
 
-// Log-gradient Function
+// Log-gradient Function (negated)
 VectorXd fddm_fit::calc_gradient(const VectorXd& temp_coefs)
 {
   // check if new coefficients match the stored ones
@@ -97,7 +97,7 @@ VectorXd fddm_fit::calc_gradient(const VectorXd& temp_coefs)
     double not_used = calc_loglik(temp_coefs); // stored in `likelihood`
   } // if they match, can reuse the likelihood
   
-  // calculate gradient and -sum over all data
+  // calculate (negative) gradient and (-)sum over all data
   // note that d/dx(log(f(x))) = d/dx(f(x)) / f(x) (why dividing by likelihood)
   VectorXd gradient = VectorXd::Zero(Ncoefs);
   int grad_idx;
@@ -181,8 +181,8 @@ VectorXd fddm_fit::calc_gradient(const VectorXd& temp_coefs)
 }
 
 
-// Log-Hessian Function
-void fddm_fit::calc_hessians(const VectorXd& temp_coefs)
+// Log-Hessian Function (negated)
+List fddm_fit::calc_hessians(const VectorXd& temp_coefs)
 {
   // if MLE coefficients do not match the stored ones, must recalculate
   // parameter vectors, likelihood, gradient
@@ -190,7 +190,7 @@ void fddm_fit::calc_hessians(const VectorXd& temp_coefs)
     double not_used = calc_loglik(temp_coefs); // stored in `likelihood`
   }
   
-  // calculate hessians and sum over all data
+  // calculate (negative) hessians and (-)sum over all data
   // the second derivative of log(f(x)) is a mess, see paper for details
   hess_v = MatrixXd::Zero(form_len[0], form_len[0]);
   hess_a = MatrixXd::Zero(form_len[1], form_len[1]);
@@ -308,11 +308,18 @@ void fddm_fit::calc_hessians(const VectorXd& temp_coefs)
                                    std::numeric_limits<double>::quiet_NaN());
     }
   }
+
+  // return an R list (via Rcpp::List) of the Hessians
+  return List::create(Named("drift") = -hess_v,
+                      Named("boundary") = -hess_a,
+                      Named("ndt") = -hess_t0,
+                      Named("bias") = -hess_w,
+                      Named("sv") = -hess_sv);
 }
 
 
 // Variance-Covariance Matrix Function
-void fddm_fit::calc_vcov()
+List fddm_fit::calc_vcov()
 {
   // check if Hessians have been calculated
   if (hess_v.rows() < 1 && hess_a.rows() < 1 && hess_t0.rows() < 1 &&
@@ -320,12 +327,19 @@ void fddm_fit::calc_vcov()
     calc_hessians(coefs);
   }
 
-  // (already negated) and invert hessians to get variance-covariance matrices
+  // invert (already negated) hessians to get variance-covariance matrices
   vcov_v = hess_v.inverse();
   vcov_a = hess_a.inverse();
   vcov_t0 = hess_t0.inverse();
   vcov_w = hess_w.inverse();
   vcov_sv = hess_sv.inverse();
+
+  // return an R list (via Rcpp::List) of the variance-covariance matrices
+  return List::create(Named("drift") = vcov_v,
+                      Named("boundary") = vcov_a,
+                      Named("ndt") = vcov_t0,
+                      Named("bias") = vcov_w,
+                      Named("sv") = vcov_sv);
 }
 
 

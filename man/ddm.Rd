@@ -13,7 +13,7 @@ ddm(
   data,
   optim = "nlminb",
   args_optim = list(),
-  args_ddm = list(err_tol = 1e-06, switch_thresh = 0.8),
+  args_ddm = list(err_tol = 1e-06),
   use_gradient = TRUE,
   compiled_model = TRUE,
   model = TRUE,
@@ -112,11 +112,105 @@ Object of class \code{ddm} (i.e., a list with components as listed
           the optimization process (e.g., the name of the algorithm used,
           the final value of the objective function, the number of
           evaluations of the gradient function, etc.)
-    \item \code{compiled_model} C++ object that contains the compiled model
     \item \code{model} the data used in the model (might need to check this)
     \item \code{response} the response data used in the model
     \item \code{mmatrix} a named list whose elements are the model matrices
           for each of the estimated parameters
+    \item \code{compiled_model} C++ object that contains the compiled model
+          (see list below for more details)
+  }
+  The C++ object accessible via the \code{compiled_model} component of the
+  above R object of class \code{ddm} contains the following components:
+  \itemize{
+    \item \code{rt} a numeric vector of the response time data used in the
+          model
+    \item \code{response} an integer vector of the response data used in the
+          model (coded such that \code{1} corresponds to the "lower" boundary
+          and \code{2} corresponds to the "upper" boundary)
+    \item \code{err_tol} the error tolerance used in the calculations for
+          fitting the DDM
+    \item \code{coefficients} a numeric vector containing the current set of
+          coefficients for the formulas provided to the \code{ddm()} function
+          call; the coefficients correspond to the DDM parameters in the
+          following order: \code{v}, \code{a}, \code{t0}, \code{w}, \code{sv}
+    \item \code{likelihood} a double containing the log-likelihood for the
+          current set of \code{coefficients} (note this can be changed by
+          calling the function \code{calculate_loglik()} below)
+    \item \code{modmat_v} a numeric matrix containing the model matrix for
+          \code{v}, the drift rate, determined by the formula input to the
+          argument \code{drift} in the \code{ddm()} function call
+    \item \code{modmat_a} a numeric matrix containing the model matrix for
+          \code{a}, the boundary separation, determined by the formula input
+          to the argument \code{boundary} in the \code{ddm()} function call
+    \item \code{modmat_t0} a numeric matrix containing the model matrix for
+          \code{t0}, the non-decision time, determined by the formula input
+          to the argument \code{ndt} in the \code{ddm()} function call
+    \item \code{modmat_w} a numeric matrix containing the model matrix for
+          \code{w}, the inital bias, determined by the formula input to the
+          argument \code{bias} in the \code{ddm()} function call
+    \item \code{modmat_sv} a numeric matrix containing the model matrix for
+          \code{sv}, the inter-trial variability in the drift rate,
+          determined by the formula input to the argument \code{sv} in the
+          \code{ddm()} function call
+    \item \code{hess_v} a numeric matrix containing the Hessian for \code{v},
+          the drift rate, whose dimensions are determined by the formula
+          input to the argument \code{drift} in the \code{ddm()} function
+          call
+    \item \code{hess_a} a numeric matrix containing the Hessian for \code{a},
+          the boundary separation, whose dimensions are determined by the
+          formula input to the argument \code{drift} in the \code{ddm()}
+          function call
+    \item \code{hess_t0} a numeric matrix containing the Hessian for
+          \code{t0}, the non-decision time, whose dimensions are determined
+          by the formula input to the argument \code{drift} in the
+          \code{ddm()} function call
+    \item \code{hess_w} a numeric matrix containing the Hessian for \code{w},
+          the initial bias, whose dimensions are determined by the formula
+          input to the argument \code{drift} in the \code{ddm()} function
+          call
+    \item \code{hess_sv} a numeric matrix containing the Hessian for
+          \code{sv}, the inter-trial variability in the drift rate, whose
+          dimensions are determined by the formula input to the argument
+          \code{drift} in the \code{ddm()} function call
+    \item \code{vcov_v} a numeric matrix containing the variance-covariance
+          matrix for \code{v}, the drift rate, whose dimensions are
+          determined by the formula input to the argument \code{drift} in the
+          \code{ddm()} function call
+    \item \code{vcov_a} a numeric matrix containing the variance-covariance
+          matrix for \code{a}, the boundary separation, whose dimensions are
+          determined by the formula input to the argument \code{boundary} in
+          the \code{ddm()} function call
+    \item \code{vcov_t0} a numeric matrix containing the variance-covariance
+          matrix for \code{t0}, the non-decision time, whose dimensions are
+          determined by the formula input to the argument \code{ndt} in the
+          \code{ddm()} function call
+    \item \code{vcov_w} a numeric matrix containing the variance-covariance
+          matrix for \code{w}, the inital bias, whose dimensions are
+          determined by the formula input to the argument \code{bias} in the
+          \code{ddm()} function call
+    \item \code{vcov_sv} a numeric matrix containing the variance-covariance
+          matrix for \code{v}, the inter-trial variability in the drift rate,
+          whose dimensions are determined by the formula input to the
+          argument \code{sv} in the \code{ddm()} function call
+    \item \code{calculate_loglik} calculates and returns a double containing
+          the negated log-likelihood (note that this will overwrite the
+          \code{likelihood} component of the C++ object)
+    \item \code{calculate_gradient} calculates and returns a numeric vector
+          of the negated gradients for the provided coefficient values; the
+          gradients are stored in the same manner as their corresponding
+          \code{coefficents} (note that this will overwrite the
+          \code{likelihood}) component of the C++ object)
+    \item \code{calculate_hessians} calculates and returns a named list of
+          the negated Hessians for each model parameter for the provided
+          coefficient values (note that this will overwrite the
+          \code{likelihood} component of the C++ object)
+    \item \code{calculate_vcov} calculates and returns a named list of the
+          variance-covariance matrices for each model parameter for the
+          stored \code{coefficients}
+    \item \code{calculate_standard_error} calculates and returns a numeric
+          vector of the standard errors of the stored \code{coefficients};
+          the standard errors are stored in the same manner as their
+          corresponding \code{coefficients}
   }
 }
 \description{
@@ -181,9 +275,9 @@ p1 <- med_dec[med_dec[["id"]] == 2 & med_dec[["group"]] == "experienced", ]
 head(p1)
 
 
-##---------------------------------------------------------------
-##        Easiest: Fitting using car::Anova() and emmeans       -
-##---------------------------------------------------------------
+##----------------------------------------------
+##        Easiest: Fitting using emmeans       -
+##----------------------------------------------
 
 ## Because we use an ANOVA approach, we set orthogonal sum-to-zero contrasts
 op <- options(contrasts = c('contr.sum', 'contr.poly'))
@@ -191,14 +285,10 @@ op <- options(contrasts = c('contr.sum', 'contr.poly'))
 fit0 <- ddm(rt + response ~ classification*difficulty, data = p1)
 summary(fit0)
 
-## to get most out of it, we need extra packages:
-## for ANOVA table, we use package car:
-if (requireNamespace("car")) { ## requires package car
-car::Anova(fit0, type = "III")
-}
-
 ## for more tests, we use emmeans:
 if (requireNamespace("emmeans")) {
+# for ANOVA table:
+emmeans::joint_tests(fit0)
 # get conditional main effects of difficulty (for each level of classification):
 emmeans::joint_tests(fit0, by = "classification")
 

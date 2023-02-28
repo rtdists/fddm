@@ -19,9 +19,13 @@ devtools::check()
 --add hessian slot (with vcov)
 --documentation for ddm function with list of slots (and describe a little bit)
 --dfddm docs link to fitting function
-update vignettes (maybe write "how to get started beginner's guide to fitting the DDM")
-lingering issues:
-  - standard errors are all the same (model matrix input is 1's and -1's so the main diagonal of the Hessian is always the same)
+-- standard errors are all the same (model matrix input is 1's and -1's so the main diagonal of the Hessian is always the same)
+update vignettes (maybe write "how to get started beginner's guide to fitting the DDM") (do this after the rest of the package is 100% good)
+--docs for C++ object (within the doc for the R object)
+
+removed switching threshold from ddm() arguments- ok
+should we do something different for the initial values for fitting? - EZdiffusion for start values, but tricky to deal with multiple coefficients for a parameter (e.g. v)
+
 
 ###
 library("devtools")

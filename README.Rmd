@@ -61,7 +61,26 @@ onep[["resp"]] <- ifelse(onep[["response"]] == "blast", "upper", "lower")
 onep[["truth"]] <- ifelse(onep[["classification"]] == "blast", "upper", "lower")
 ```
 
-### Simple Fitting with `nlminb`
+### Easy Fitting with Built-in `ddm()`
+Because we use an ANOVA approach, we set orthogonal sum-to-zero contrasts
+```{r set-contrasts, eval=TRUE}
+op <- options(contrasts = c('contr.sum', 'contr.poly'))
+```
+
+Now we can use the `ddm()` function to fit the DDM to the data. Note that we are using formula notation to indicate the interaction between variables for the drift rate.
+
+```{r show-ddm-fit, eval=TRUE}
+fit0 <- ddm(rt + response ~ classification*difficulty, data = onep)
+summary(fit0)
+```
+
+We can reset the contrasts.
+
+```{r reset-contrasts, eval=TRUE}
+options(op) # reset contrasts
+```
+
+### Alternative Fitting Method with `nlminb`
 For fitting, we need a simple likelihood function; here we will use a straightforward log of sum of densities of the study responses and associated response times. This log-likelihood function will fit the standard parameters in the DDM, but it will fit two versions of the drift rate *v*: one for when the correct response is `"blast"` (*v<sub>u</sub>*), and another for when the correct response is `"non-blast"` (*v<sub>l</sub>*). A detailed explanation of the log-likelihood function is provided in the Example Vignette (`vignette("example", package = "fddm")`). Note that this likelihood function returns the negative log-likelihood as we can simply minimize this function to get the maximum likelihood estimate.
 
 ```{r simp-ll, eval=TRUE}
@@ -89,23 +108,4 @@ fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun,
               lower = c(-Inf, -Inf, .01,                 0, 0,   0),
               upper = c( Inf,  Inf, Inf, min(onep[["rt"]]), 1, Inf))
 fit
-```
-
-### Fitting with `ddm()`
-Because we use an ANOVA approach, we set orthogonal sum-to-zero contrasts
-```{r set-contrasts, eval=TRUE}
-op <- options(contrasts = c('contr.sum', 'contr.poly'))
-```
-
-Now we can use the `ddm()` function to fit the DDM to the data. Note that we are using formula notation to indicate the interaction between variables for the drift rate.
-
-```{r show-ddm-fit, eval=TRUE}
-fit0 <- ddm(rt + response ~ classification*difficulty, data = onep)
-summary(fit0)
-```
-
-We can reset the contrasts.
-
-```{r reset-contrasts, eval=TRUE}
-options(op) # reset contrasts
 ```

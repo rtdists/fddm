@@ -131,11 +131,105 @@
 #'           the optimization process (e.g., the name of the algorithm used,
 #'           the final value of the objective function, the number of
 #'           evaluations of the gradient function, etc.)
-#'     \item \code{compiled_model} C++ object that contains the compiled model
 #'     \item \code{model} the data used in the model (might need to check this)
 #'     \item \code{response} the response data used in the model
 #'     \item \code{mmatrix} a named list whose elements are the model matrices
 #'           for each of the estimated parameters
+#'     \item \code{compiled_model} C++ object that contains the compiled model
+#'           (see list below for more details)
+#'   }
+#'   The C++ object accessible via the \code{compiled_model} component of the
+#'   above R object of class \code{ddm} contains the following components:
+#'   \itemize{
+#'     \item \code{rt} a numeric vector of the response time data used in the
+#'           model
+#'     \item \code{response} an integer vector of the response data used in the
+#'           model (coded such that \code{1} corresponds to the "lower" boundary
+#'           and \code{2} corresponds to the "upper" boundary)
+#'     \item \code{err_tol} the error tolerance used in the calculations for
+#'           fitting the DDM
+#'     \item \code{coefficients} a numeric vector containing the current set of
+#'           coefficients for the formulas provided to the \code{ddm()} function
+#'           call; the coefficients correspond to the DDM parameters in the
+#'           following order: \code{v}, \code{a}, \code{t0}, \code{w}, \code{sv}
+#'     \item \code{likelihood} a double containing the log-likelihood for the
+#'           current set of \code{coefficients} (note this can be changed by
+#'           calling the function \code{calculate_loglik()} below)
+#'     \item \code{modmat_v} a numeric matrix containing the model matrix for
+#'           \code{v}, the drift rate, determined by the formula input to the
+#'           argument \code{drift} in the \code{ddm()} function call
+#'     \item \code{modmat_a} a numeric matrix containing the model matrix for
+#'           \code{a}, the boundary separation, determined by the formula input
+#'           to the argument \code{boundary} in the \code{ddm()} function call
+#'     \item \code{modmat_t0} a numeric matrix containing the model matrix for
+#'           \code{t0}, the non-decision time, determined by the formula input
+#'           to the argument \code{ndt} in the \code{ddm()} function call
+#'     \item \code{modmat_w} a numeric matrix containing the model matrix for
+#'           \code{w}, the inital bias, determined by the formula input to the
+#'           argument \code{bias} in the \code{ddm()} function call
+#'     \item \code{modmat_sv} a numeric matrix containing the model matrix for
+#'           \code{sv}, the inter-trial variability in the drift rate,
+#'           determined by the formula input to the argument \code{sv} in the
+#'           \code{ddm()} function call
+#'     \item \code{hess_v} a numeric matrix containing the Hessian for \code{v},
+#'           the drift rate, whose dimensions are determined by the formula
+#'           input to the argument \code{drift} in the \code{ddm()} function
+#'           call
+#'     \item \code{hess_a} a numeric matrix containing the Hessian for \code{a},
+#'           the boundary separation, whose dimensions are determined by the
+#'           formula input to the argument \code{drift} in the \code{ddm()}
+#'           function call
+#'     \item \code{hess_t0} a numeric matrix containing the Hessian for
+#'           \code{t0}, the non-decision time, whose dimensions are determined
+#'           by the formula input to the argument \code{drift} in the
+#'           \code{ddm()} function call
+#'     \item \code{hess_w} a numeric matrix containing the Hessian for \code{w},
+#'           the initial bias, whose dimensions are determined by the formula
+#'           input to the argument \code{drift} in the \code{ddm()} function
+#'           call
+#'     \item \code{hess_sv} a numeric matrix containing the Hessian for
+#'           \code{sv}, the inter-trial variability in the drift rate, whose
+#'           dimensions are determined by the formula input to the argument
+#'           \code{drift} in the \code{ddm()} function call
+#'     \item \code{vcov_v} a numeric matrix containing the variance-covariance
+#'           matrix for \code{v}, the drift rate, whose dimensions are
+#'           determined by the formula input to the argument \code{drift} in the
+#'           \code{ddm()} function call
+#'     \item \code{vcov_a} a numeric matrix containing the variance-covariance
+#'           matrix for \code{a}, the boundary separation, whose dimensions are
+#'           determined by the formula input to the argument \code{boundary} in
+#'           the \code{ddm()} function call
+#'     \item \code{vcov_t0} a numeric matrix containing the variance-covariance
+#'           matrix for \code{t0}, the non-decision time, whose dimensions are
+#'           determined by the formula input to the argument \code{ndt} in the
+#'           \code{ddm()} function call
+#'     \item \code{vcov_w} a numeric matrix containing the variance-covariance
+#'           matrix for \code{w}, the inital bias, whose dimensions are
+#'           determined by the formula input to the argument \code{bias} in the
+#'           \code{ddm()} function call
+#'     \item \code{vcov_sv} a numeric matrix containing the variance-covariance
+#'           matrix for \code{v}, the inter-trial variability in the drift rate,
+#'           whose dimensions are determined by the formula input to the
+#'           argument \code{sv} in the \code{ddm()} function call
+#'     \item \code{calculate_loglik} calculates and returns a double containing
+#'           the negated log-likelihood (note that this will overwrite the
+#'           \code{likelihood} component of the C++ object)
+#'     \item \code{calculate_gradient} calculates and returns a numeric vector
+#'           of the negated gradients for the provided coefficient values; the
+#'           gradients are stored in the same manner as their corresponding
+#'           \code{coefficents} (note that this will overwrite the
+#'           \code{likelihood}) component of the C++ object)
+#'     \item \code{calculate_hessians} calculates and returns a named list of
+#'           the negated Hessians for each model parameter for the provided
+#'           coefficient values (note that this will overwrite the
+#'           \code{likelihood} component of the C++ object)
+#'     \item \code{calculate_vcov} calculates and returns a named list of the
+#'           variance-covariance matrices for each model parameter for the
+#'           stored \code{coefficients}
+#'     \item \code{calculate_standard_error} calculates and returns a numeric
+#'           vector of the standard errors of the stored \code{coefficients};
+#'           the standard errors are stored in the same manner as their
+#'           corresponding \code{coefficients}
 #'   }
 #'
 #' @importFrom stats .getXlevels make.link model.frame model.matrix nlminb terms
@@ -145,7 +239,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
                 data,
                 optim = "nlminb",
                 args_optim = list(),
-                args_ddm = list(err_tol = 1e-6),
+                args_ddm = list(err_tol = 1e-6), # update docs
                 use_gradient = TRUE,
                 compiled_model = TRUE, model = TRUE,
                 mmatrix = TRUE, response = TRUE,
@@ -334,30 +428,14 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   coef_list <- vector("list", length(all_ddm_formulas))
   names(coef_list) <- names(all_ddm_formulas)
 
-  ## calculate Hessian and variance-covariance matrix
-  f$calculate_hessians(all_coef)
-  hess_temp <- list(
-    drift = f$hess_v,
-    boundary = f$hess_a,
-    ndt = f$hess_t0,
-    bias = f$hess_w,
-    sv = f$hess_sv)
-  f$calculate_vcov()
-  vcov_temp <- list(
-    drift = f$vcov_v,
-    boundary = f$vcov_a,
-    ndt = f$vcov_t0,
-    bias = f$vcov_w,
-    sv = f$vcov_sv)
-
   ## prepare output object
   rval <- list(
     coefficients = opt$coefficients,
     dpar = names(formula_mm),
     fixed_dpar = all_ddm_constants,
     loglik = opt$loglik,
-    hessians = hess_temp[names(all_ddm_formulas)],
-    vcov = vcov_temp[names(all_ddm_formulas)],
+    hessians = f$calculate_hessians(all_coef)[names(all_ddm_formulas)],
+    vcov = f$calculate_vcov()[names(all_ddm_formulas)],
     nobs = nrow(response_df),
     npar = length(init_vals),
     df.residual = nrow(response_df) - length(init_vals)
