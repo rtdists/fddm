@@ -387,6 +387,46 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
                 call. = FALSE)
         ncols[[par_name]] <- ncol(all_mm[[i]])
       }
+      #browser()
+      if (par_name == "drift") {
+        lm_mrt <- lm(rt ~ 0 + all_mm[[i]])
+        #coef(lm_mrt)
+        response_vec_num <- as.numeric(response_vec) - 1
+        lm_acc <- lm(response_vec_num ~ 0 + all_mm[[i]])
+        #coef(lm_acc)
+        # tapply(data$response, INDEX = list(data$classification, data$difficulty), 
+        #        FUN = function(x) mean(x == "blast"))
+        var_rt <- var(rt)
+        marg_par <- vector("numeric", ncols[[par_name]])
+        new_start <- vector("numeric", ncols[[par_name]])
+        for (j in seq_len(ncols[[par_name]])) {
+          tmp_mm <- all_mm[[i]][ all_mm[[i]][,j] != 0, , drop = FALSE ]
+          tmp_mrt <- sum(apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean) * coef(lm_mrt)[seq_len(j)])
+          tmp_acc <- min(max(sum(apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean) * coef(lm_acc)[seq_len(j)]), 0), 1)
+          
+          # coef(lm_mrt)[seq_len(j)]
+          # apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean)
+          # ccc <- cumsum(apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean) * coef(lm_mrt)[seq_len(j)])
+          # ccc[2] - ccc[1]
+          # diff(rev(ccc * apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean)*-1))
+          
+          marg_par[j] <- ezddm(
+            propCorrect = tmp_acc, 
+            rtCorrectVariance_seconds = var_rt, 
+            rtCorrectMean_seconds = tmp_mrt,
+            s = 1, nTrials = nrow(tmp_mm)
+          )[["v"]]
+          
+          if (j == 1) {
+            new_start[j] <- marg_par[j]
+          } else {
+            new_start[j] <- diff(rev(-1*apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean) * marg_par[seq_len(j)]))
+          }
+          
+          
+        }
+        browser()
+      }
       # get initial values and bounds for estimation
       if ("(Intercept)" == colnames(all_mm[[i]])[1]) {
         init_vals <- c(init_vals, inits[[par_name]],
