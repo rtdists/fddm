@@ -348,16 +348,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
 
   #-------------------- Check Estimability of Model Matrices ------------------#
   # also get initial values and bounds for optimization
-  min_rt <- min(rt)
-  inits <- list(
-    "drift" = 0.0,
-    "boundary" = 1.0,
-    "ndt" = 0.9 * min_rt,
-    "bias" = 0.5,
-    "sv" = 0.0,
-    "zero" = 0.0
-  )
-  l_bds <- list(
+  l_bds <- c(
     "drift" = -Inf,
     "boundary" = 0.0,
     "ndt" = 0.0,
@@ -365,80 +356,76 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
     "sv" = 0.0,
     "diff" = -Inf
   )
-  u_bds <- list(
+  u_bds <- c(
     "drift" = Inf,
     "boundary" = Inf,
-    "ndt" = min_rt,
+    "ndt" = min(rt),
     "bias" = 1.0,
     "sv" = Inf,
     "diff" = Inf
   )
-
-  ncols <- lapply(all_mm, FUN = ncol)
-  init_vals <- numeric()
-  lower_bds <- numeric()
-  upper_bds <- numeric()
+  ez_parnames <- c(
+    "drift" = "v",
+    "boundary" = "a",
+    "ndt" = "Ter"
+  )
+  # browser()
+  ncols <- unlist(lapply(all_mm, FUN = ncol))
+  ncoeffs <- sum(ncols[names(mm_formulas)])
+  init_vals <- numeric(ncoeffs)
+  lower_bds <- numeric(ncoeffs)
+  upper_bds <- numeric(ncoeffs)
   for (i in seq_along(all_mm)) {
-    par_name <- names(all_mm[i])[1]
-    if (ncols[[par_name]] >= 1 && nrow(all_mm[[i]]) > 1) {
+    parname <- names(all_mm[i])
+    if (ncols[i] >= 1 && nrow(all_mm[[i]]) > 1) {
       # check estimability
       rank_warn <- FALSE
-      # par_rank <- qr(all_mm[[i]])[["rank"]]
       while (qr(all_mm[[i]])[["rank"]] < ncol(all_mm[[i]])) {
         all_mm[[i]] <- all_mm[[i]][, seq_len(qr(all_mm[[i]])[["rank"]]),
                                    drop = FALSE]
         rank_warn <- TRUE
       }
       if (rank_warn) {
-        warning("model matrix for ", par_name, " was rank deficient; ",
-                ncols[[par_name]] - ncol(all_mm[[i]]),
-                " column(s) dropped from right side.",
-                call. = FALSE)
-        ncols[[par_name]] <- ncol(all_mm[[i]])
+        warning("model matrix for ", parname, " was rank deficient; ",
+                ncols[i] - ncol(all_mm[[i]]),
+                " column(s) dropped from right side.", call. = FALSE)
+        ncols[i] <- ncol(all_mm[[i]])
       }
-      if (par_name == "drift") {
-        lm_mrt <- lm(rt ~ 0 + all_mm[[i]])
-        response_vec_num <- as.numeric(response_vec) - 1
-        lm_acc <- lm(response_vec_num ~ 0 + all_mm[[i]])
-        var_rt <- var(rt)
-        marg_par <- vector("numeric", ncols[[par_name]])
-        new_start <- vector("numeric", ncols[[par_name]])
-        for (j in seq_len(ncols[[par_name]])) {
-          tmp_mm <- all_mm[[i]][ all_mm[[i]][,j] != 0, , drop = FALSE ]
-          weights <- apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean)
+      # get initial values using EZ-Diffusion (Wagenmakers et al. 2007)
+      # get bounds for estimation based on model matrix: intercept vs difference
+      lm_mrt <- lm(rt ~ 0 + all_mm[[i]])
+      lm_acc <- lm((as.numeric(response_vec) - 1) ~ 0 + all_mm[[i]])
+      var_rt <- var(rt)
+      tmp_iv <- numeric(ncols[i])
+      iv_idx <- sum(ncols[seq_len(i - 1)])
+      for (j in seq_len(ncols[i])) {
+        tmp_mm <- all_mm[[i]][all_mm[[i]][, j] != 0, , drop = FALSE]
+        weights <- apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean)
+        if (weights[j] == 0) { # the coefficient is definitely a difference
+          tmp_iv[j] <- 0
+          lower_bds[iv_idx + j] <- l_bds[["diff"]]
+          upper_bds[iv_idx + j] <- u_bds[["diff"]]
+        } else { # the coefficient may be an intercept or a difference
           tmp_mrt <- sum(weights * coef(lm_mrt)[seq_len(j)])
           tmp_acc <- min(max(sum(weights * coef(lm_acc)[seq_len(j)]), 0), 1)
-
-          marg_par[j] <- ezddm(
+          marg_par_j <- ezddm(
             propCorrect = tmp_acc,
             rtCorrectVariance_seconds = var_rt,
             rtCorrectMean_seconds = tmp_mrt,
             s = 1, nTrials = nrow(tmp_mm)
-          )[["v"]]
-
-          if (j == 1) {
-            new_start[j] <- marg_par[j] / weights[j]
-          } else {
-            new_start[j] <- (marg_par[j] -
-                             sum(weights[-j] * new_start[seq_len(j-1)])) /
-                            weights[j]
+          )[[ez_parnames[[parname]]]]
+          tmp_iv[j] <- (marg_par_j - sum(weights[-j] * tmp_iv[seq_len(j-1)])) /
+                       weights[j]
+          if (weights[j] == 1 && all(weights[-j] == 0)) { # coef is intercept
+            lower_bds[iv_idx + j] <- l_bds[[parname]]
+            upper_bds[iv_idx + j] <- u_bds[[parname]]
+          } else { # the coefficient is a difference
+            lower_bds[iv_idx + j] <- l_bds[["diff"]]
+            upper_bds[iv_idx + j] <- u_bds[["diff"]]
           }
         }
-        print(new_start)
       }
-      # get initial values and bounds for estimation
-      if ("(Intercept)" == colnames(all_mm[[i]])[1]) {
-        init_vals <- c(init_vals, inits[[par_name]],
-                      rep(inits[["zero"]], ncols[[par_name]] - 1))
-        lower_bds <- c(lower_bds, l_bds[[par_name]],
-                      rep(l_bds[["diff"]], ncols[[par_name]] - 1))
-        upper_bds <- c(upper_bds, u_bds[[par_name]],
-                      rep(u_bds[["diff"]], ncols[[par_name]] - 1))
-      } else {
-        init_vals <- c(init_vals, rep(inits[[par_name]], ncols[[par_name]]))
-        lower_bds <- c(lower_bds, rep(l_bds[[par_name]], ncols[[par_name]]))
-        upper_bds <- c(upper_bds, rep(u_bds[[par_name]], ncols[[par_name]]))
-      }
+      init_vals[(iv_idx + 1):(iv_idx + j)] <- tmp_iv
     }
   }
   formula_mm <- all_mm[par_is_formula]
