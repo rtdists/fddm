@@ -424,7 +424,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
                             weights[j]
           }
         }
-        # browser()
+        print(new_start)
       }
       # get initial values and bounds for estimation
       if ("(Intercept)" == colnames(all_mm[[i]])[1]) {
