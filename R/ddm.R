@@ -45,13 +45,13 @@
 #'   contrasts (\code{\link{contr.treatment}}), the intercept corresponds to the
 #'   first factor level and the additional coefficients correspond to the
 #'   difference from the intercept (i.e., first factor level). When using
-#'   \code{contr.sum} the intercept correspond to the grand mean and the
+#'   \code{contr.sum} the intercept corresponds to the grand mean and the
 #'   additional coefficients correspond to the differences from the grand mean.
-#'   \item code{~ 0 + condition} estimates no intercept but one coefficient per
+#'   \item \code{~ 0 + condition} estimates no intercept but one coefficient per
 #'   factor level. This specification can also be used to get one coefficient
 #'   per cell for a multi-factorial design, e.g., \code{~ 0 +
 #'   condition1:condition2}.
-#'   \item code{~ 0 + condition1 + condition1:condition2} estimates one
+#'   \item \code{~ 0 + condition1 + condition1:condition2} estimates one
 #'   "intercept" per level of \code{condition1} factor (which is not called
 #'   intercept) plus k - 1 difference parameters from the condition-specific
 #'   intercept for the k-levels of \code{condition2}. The interpretation of the
@@ -222,14 +222,23 @@
 #'     \item \code{calculate_hessians} calculates and returns a named list of
 #'           the negated Hessians for each model parameter for the provided
 #'           coefficient values (note that this will overwrite the
-#'           \code{likelihood} component of the C++ object)
+#'           \code{likelihood}, \code{hess_v}, \code{hess_a}, \code{hess_t0},
+#'           \code{hess_w}, and \code{hess_sv} components of the C++ object)
 #'     \item \code{calculate_vcov} calculates and returns a named list of the
 #'           variance-covariance matrices for each model parameter for the
-#'           stored \code{coefficients}
+#'           stored \code{coefficients} (note that this will overwrite the
+#'           \code{likelihood}, \code{hess_v}, \code{hess_a}, \code{hess_t0},
+#'           \code{hess_w}, \code{hess_sv}, \code{vcov_v}, \code{vcov_a},
+#'           \code{vcov_t0}, \code{vcov_w}, and \code{vcov_sv} components of the
+#'           C++ object)
 #'     \item \code{calculate_standard_error} calculates and returns a numeric
 #'           vector of the standard errors of the stored \code{coefficients};
 #'           the standard errors are stored in the same manner as their
-#'           corresponding \code{coefficients}
+#'           corresponding \code{coefficients} (note that this will overwrite
+#'           the \code{likelihood}, \code{hess_v}, \code{hess_a},
+#'           \code{hess_t0}, \code{hess_w}, \code{hess_sv}, \code{vcov_v},
+#'           \code{vcov_a}, \code{vcov_t0}, \code{vcov_w}, and \code{vcov_sv}
+#'           components of the C++ object)
 #'   }
 #'
 #' @importFrom stats .getXlevels make.link model.frame model.matrix nlminb terms
@@ -387,45 +396,35 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
                 call. = FALSE)
         ncols[[par_name]] <- ncol(all_mm[[i]])
       }
-      #browser()
       if (par_name == "drift") {
         lm_mrt <- lm(rt ~ 0 + all_mm[[i]])
-        #coef(lm_mrt)
         response_vec_num <- as.numeric(response_vec) - 1
         lm_acc <- lm(response_vec_num ~ 0 + all_mm[[i]])
-        #coef(lm_acc)
-        # tapply(data$response, INDEX = list(data$classification, data$difficulty), 
-        #        FUN = function(x) mean(x == "blast"))
         var_rt <- var(rt)
         marg_par <- vector("numeric", ncols[[par_name]])
         new_start <- vector("numeric", ncols[[par_name]])
         for (j in seq_len(ncols[[par_name]])) {
           tmp_mm <- all_mm[[i]][ all_mm[[i]][,j] != 0, , drop = FALSE ]
-          tmp_mrt <- sum(apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean) * coef(lm_mrt)[seq_len(j)])
-          tmp_acc <- min(max(sum(apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean) * coef(lm_acc)[seq_len(j)]), 0), 1)
-          
-          # coef(lm_mrt)[seq_len(j)]
-          # apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean)
-          # ccc <- cumsum(apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean) * coef(lm_mrt)[seq_len(j)])
-          # ccc[2] - ccc[1]
-          # diff(rev(ccc * apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean)*-1))
-          
+          weights <- apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean)
+          tmp_mrt <- sum(weights * coef(lm_mrt)[seq_len(j)])
+          tmp_acc <- min(max(sum(weights * coef(lm_acc)[seq_len(j)]), 0), 1)
+
           marg_par[j] <- ezddm(
-            propCorrect = tmp_acc, 
-            rtCorrectVariance_seconds = var_rt, 
+            propCorrect = tmp_acc,
+            rtCorrectVariance_seconds = var_rt,
             rtCorrectMean_seconds = tmp_mrt,
             s = 1, nTrials = nrow(tmp_mm)
           )[["v"]]
-          
+
           if (j == 1) {
-            new_start[j] <- marg_par[j]
+            new_start[j] <- marg_par[j] / weights[j]
           } else {
-            new_start[j] <- diff(rev(-1*apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean) * marg_par[seq_len(j)]))
+            new_start[j] <- (marg_par[j] -
+                             sum(weights[-j] * new_start[seq_len(j-1)])) /
+                            weights[j]
           }
-          
-          
         }
-        browser()
+        # browser()
       }
       # get initial values and bounds for estimation
       if ("(Intercept)" == colnames(all_mm[[i]])[1]) {
