@@ -18,13 +18,53 @@
 #' @param data,na.action,subset arguments controlling formula processing via
 #'   \code{\link{model.frame}}.
 #' @param optim character string or fitting function indicating which numerical
-#'   optimisation method should be used. The default \code{"nlminb"} uses the
+#'   optimization method should be used. The default \code{"nlminb"} uses the
 #'   corresponding function.
 #' @param args_optim additional control arguments passed to \code{control}
-#'   argument of optimisation function specified in \code{optim}.
-#' @param args_ddm additional arguments passed to density function.
+#'   argument of optimization function specified in \code{optim}.
+#' @param args_optim named list of additional arguments for the optimization
+#'   function. The available options are:
+#'   \itemize{
+#'     \item \code{init} vector containing the initial values to be used in the
+#'           optimization for each coefficient. Note that the number and type of
+#'           coefficients used (i.e., intercept or difference) is determined by
+#'           the model matrices, which are in turn determined by the formulas
+#'           assigned to each DDM parameter (see the Details section for an
+#'           overview of formulas and coefficients). For an example, run the
+#'           \code{ddm()} function with parameter set to its default value, and
+#'           view the initial value vector via the slot
+#'           \code{$optim_info$args_optim$init}. By default for intercept
+#'           coefficients, the initial values for the drift rate (v), boundary
+#'           separation (a), and non-decision time (t0) will be generated using
+#'           EZ-Diffusion (Wagenmakers et al. 2007); bias (w) is initialized to
+#'           \code{0.5}; inter-trial variability in the drift rate (sv) is
+#'           initialized to \code{0.0}. Difference coefficients are intitialized
+#'           to \code{0.0}.
+#'     \item \code{lo_bds} vector containing the lower bounds to be used in the
+#'           optimization for each coefficient. The same consideration of
+#'           coefficient types occurs here as it does with \code{init}. The
+#'           defaults for intercept coefficients are: drift rate
+#'           \code{v > -Inf}, boundary separation \code{a > 0}, non-decision
+#'           time \code{t0 > 0}, bias \code{w > 0}, inter-trial variability in
+#'           the drift rate \code{sv} \eqn{ \le 0}. All difference coefficients
+#'           have a lower bound of \code{-Inf}.
+#'     \item \code{up_bds} vector containing the upper bounds to be used in the
+#'           optimization for each coefficient. The same consideration of
+#'           coefficient types occurs here as it does with \code{init}. The
+#'           defaults for intercept coefficients are: drift rate
+#'           \code{v < Inf}, boundary separation \code{a < Inf}, non-decision
+#'           time \code{t0 < Inf}, bias \code{w < 1}, inter-trial variability in
+#'           the drift rate \code{sv < Inf}. All difference coefficients have a
+#'           upper bound of \code{Inf}.
+#'     \item \code{control} additional control arguments passed to
+#'           \code{control} argument of optimization function specified in
+#'           \code{optim}
+#'   }
+#' @param args_ddm named list of additional arguments passed to density function
+#'   calculation. Currently, the only option for this is \code{err_tol}, the
+#'   desired error tolerance used in the density function calculation.
 #' @param use_gradient logical. Should gradient be used during numerical
-#'   optimisation? Default is \code{TRUE}.
+#'   optimization? Default is \code{TRUE}.
 #' @param compiled_model,model,mmatrix,response logicals. If \code{TRUE} the
 #'   corresponding components of the fit (the compiled model object, the model
 #'   frame, the model matrix, the response matrix) are returned.
@@ -34,48 +74,49 @@
 #' @details \code{ddm} uses \code{\link{model.matrix}} for transforming the
 #'   symbolic description of the regression model underlying each parameter into
 #'   estimated coefficients. The following provides a few examples:
+#'   \itemize{
+#'     \item \code{~ 1} estimates a single coefficient, named \code{(Intercept)}
+#'     \item \code{~ condition} estimates the intercept plus k - 1 coefficients
+#'           for a factor with k levels (e.g., intercept plus one coefficient if
+#'           condition has two levels). The interpretation of the coefficients
+#'           depend on the factor contrasts employed, which are usually based on
+#'           the contrasts specified in \code{options("contrasts")}. For the
+#'           default \code{treatment} contrasts (\code{\link{contr.treatment}}),
+#'           the intercept corresponds to the first factor level and the
+#'           additional coefficients correspond to the difference from the
+#'           intercept (i.e., first factor level). When using \code{contr.sum}
+#'           the intercept corresponds to the grand mean and the additional
+#'           coefficients correspond to the differences from the grand mean.
+#'     \item \code{~ 0 + condition} estimates no intercept but one coefficient
+#'           per factor level. This specification can also be used to get one
+#'           coefficient per cell for a multi-factorial design, e.g.,
+#'           \code{~ 0 + condition1:condition2}.
+#'     \item \code{~ 0 + condition1 + condition1:condition2} estimates one
+#'           "intercept" per level of \code{condition1} factor (which is not
+#'           called intercept) plus k - 1 difference parameters from the
+#'           condition-specific intercept for the k-levels of \code{condition2}.
+#'           The interpretation of the difference parameters again depends on
+#'           the contrasts used (e.g., treatment vs. sum-to-zero contrasts, see
+#'           examples). This formula specification can often make sense for the
+#'           drift rate when \code{condition1} is the factor (such as item type)
+#'           mapped to upper and lower response boundary of the DDM and
+#'           \code{condition2} is another factor by which we want the drift rate
+#'           to differ. This essentially gives one overall drift rate per
+#'           response boundary plus the differences from this overall one (note
+#'           again that with treatment contrasts this overall drift rate is the
+#'           first factor level of \code{condition2}).
+#'   }
 #'
-#' \itemize{
-#'   \item \code{~ 1} estimates a single coefficient, named \code{(Intercept)}
-#'   \item \code{~ condition} estimates the intercept plus k - 1 coefficients
-#'   for a factor with k levels (e.g., intercept plus one coefficient if
-#'   condition has two levels). The interpretation of the coefficients depend on
-#'   the factor contrasts employed, which are usually based on the contrasts
-#'   specified in \code{options("contrasts")}. For the default \code{treatment}
-#'   contrasts (\code{\link{contr.treatment}}), the intercept corresponds to the
-#'   first factor level and the additional coefficients correspond to the
-#'   difference from the intercept (i.e., first factor level). When using
-#'   \code{contr.sum} the intercept corresponds to the grand mean and the
-#'   additional coefficients correspond to the differences from the grand mean.
-#'   \item \code{~ 0 + condition} estimates no intercept but one coefficient per
-#'   factor level. This specification can also be used to get one coefficient
-#'   per cell for a multi-factorial design, e.g., \code{~ 0 +
-#'   condition1:condition2}.
-#'   \item \code{~ 0 + condition1 + condition1:condition2} estimates one
-#'   "intercept" per level of \code{condition1} factor (which is not called
-#'   intercept) plus k - 1 difference parameters from the condition-specific
-#'   intercept for the k-levels of \code{condition2}. The interpretation of the
-#'   difference parameters again depends on the contrasts used (e.g., treatment
-#'   vs. sum-to-zero contrasts, see examples). This formula specification can
-#'   often make sense for the drift rate when \code{condition1} is the factor
-#'   (such as item type) mapped to upper and lower response boundary of the DDM
-#'   and \code{condition2} is another factor by which we want the drift rate to
-#'   differ. This essentially gives one overall drift rate per response boundary
-#'   plus the differences from this overall one (note again that with treatment
-#'   contrasts this overall drift rate is the first factor level of
-#'   \code{condition2}).
-#' }
+#'   To get meaningful results it is necessary to estimate separate drift rates
+#'   for the different condition/item-types that are mapped onto the upper and
+#'   lower boundary of the diffusion model.
 #'
-#' To get meaningful results it is necessary to estimate separate drift rates
-#' for the different condition/item-types that are mapped onto the upper and
-#' lower boundary of the diffusion model.
-#'
-#' If a non-default fitting function is used, it needs to minimise the negative
-#' log-likelihood, accept the following arguments, \code{init, objective,
-#' gradient, lower, upper, control} , and return a list with the following
-#' arguments \code{coefficients, loglik, converged, optim} (where
-#' \code{converged} is boolean and \code{optim} can be an arbitrary list with
-#' additional information).
+#'   If a non-default fitting function is used, it needs to minimize the
+#'   negative log-likelihood, accept the following arguments,
+#'   \code{init, objective, gradient, lower, upper, control} , and return a list
+#'   with the following arguments \code{coefficients, loglik, converged, optim}
+#'   (where \code{converged} is boolean and \code{optim} can be an arbitrary
+#'   list with additional information).
 #'
 #' @example examples/examples.ddm.R
 #'
@@ -247,8 +288,11 @@
 ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
                 data,
                 optim = "nlminb",
-                args_optim = list(),
-                args_ddm = list(err_tol = 1e-6), # update docs
+                args_optim = list(init = NULL,
+                                  lo_bds = NULL,
+                                  up_bds = NULL,
+                                  control = list()),
+                args_ddm = list(err_tol = 1e-6),
                 use_gradient = TRUE,
                 compiled_model = TRUE, model = TRUE,
                 mmatrix = TRUE, response = TRUE,
@@ -347,7 +391,39 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   links <- lapply(all_links[names(all_ddm_formulas)], make.link)
 
   #-------------------- Check Estimability of Model Matrices ------------------#
-  # also get initial values and bounds for optimization
+  ncols <- unlist(lapply(all_mm, FUN = ncol))
+  for (i in seq_along(all_mm)) {
+    parname <- names(all_mm[i])
+    if (ncols[i] >= 1 && nrow(all_mm[[i]]) > 1) {
+      # check estimability
+      rank_warn <- FALSE
+      while (qr(all_mm[[i]])[["rank"]] < ncol(all_mm[[i]])) {
+        all_mm[[i]] <- all_mm[[i]][, seq_len(qr(all_mm[[i]])[["rank"]]),
+                                   drop = FALSE]
+        rank_warn <- TRUE
+      }
+      if (rank_warn) {
+        warning("model matrix for ", parname, " was rank deficient; ",
+                ncols[i] - ncol(all_mm[[i]]),
+                " column(s) dropped from right side.", call. = FALSE)
+        ncols[i] <- ncol(all_mm[[i]])
+      }
+    }
+  }
+
+  #-------------------- Get Initial Values and Bounds for Estimation ----------#
+  ncoeffs <- sum(ncols[names(mm_formulas)])
+  init_vals <- numeric(ncoeffs)
+  lower_bds <- numeric(ncoeffs)
+  upper_bds <- numeric(ncoeffs)
+  init_pars <- c(
+    "drift" = 0.0,
+    "boundary" = 1.0,
+    "ndt" = 0.3,
+    "bias" = 0.5,
+    "sv" = 0.0,
+    "diff" = 0.0
+  )
   l_bds <- c(
     "drift" = -Inf,
     "boundary" = 0.0,
@@ -369,65 +445,207 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
     "boundary" = "a",
     "ndt" = "Ter"
   )
-  # browser()
-  ncols <- unlist(lapply(all_mm, FUN = ncol))
-  ncoeffs <- sum(ncols[names(mm_formulas)])
-  init_vals <- numeric(ncoeffs)
-  lower_bds <- numeric(ncoeffs)
-  upper_bds <- numeric(ncoeffs)
-  for (i in seq_along(all_mm)) {
-    parname <- names(all_mm[i])
-    if (ncols[i] >= 1 && nrow(all_mm[[i]]) > 1) {
-      # check estimability
-      rank_warn <- FALSE
-      while (qr(all_mm[[i]])[["rank"]] < ncol(all_mm[[i]])) {
-        all_mm[[i]] <- all_mm[[i]][, seq_len(qr(all_mm[[i]])[["rank"]]),
-                                   drop = FALSE]
-        rank_warn <- TRUE
-      }
-      if (rank_warn) {
-        warning("model matrix for ", parname, " was rank deficient; ",
-                ncols[i] - ncol(all_mm[[i]]),
-                " column(s) dropped from right side.", call. = FALSE)
-        ncols[i] <- ncol(all_mm[[i]])
-      }
-      # get initial values using EZ-Diffusion (Wagenmakers et al. 2007)
-      # get bounds for estimation based on model matrix: intercept vs difference
-      lm_mrt <- lm(rt ~ 0 + all_mm[[i]])
-      lm_acc <- lm((as.numeric(response_vec) - 1) ~ 0 + all_mm[[i]])
-      var_rt <- var(rt)
-      tmp_iv <- numeric(ncols[i])
-      iv_idx <- sum(ncols[seq_len(i - 1)])
-      for (j in seq_len(ncols[i])) {
-        tmp_mm <- all_mm[[i]][all_mm[[i]][, j] != 0, , drop = FALSE]
-        weights <- apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean)
-        if (weights[j] == 0) { # the coefficient is definitely a difference
-          tmp_iv[j] <- 0
-          lower_bds[iv_idx + j] <- l_bds[["diff"]]
-          upper_bds[iv_idx + j] <- u_bds[["diff"]]
-        } else { # the coefficient may be an intercept or a difference
-          tmp_mrt <- sum(weights * coef(lm_mrt)[seq_len(j)])
-          tmp_acc <- min(max(sum(weights * coef(lm_acc)[seq_len(j)]), 0), 1)
-          marg_par_j <- ezddm(
-            propCorrect = tmp_acc,
-            rtCorrectVariance_seconds = var_rt,
-            rtCorrectMean_seconds = tmp_mrt,
-            s = 1, nTrials = nrow(tmp_mm)
-          )[[ez_parnames[[parname]]]]
-          tmp_iv[j] <- (marg_par_j - sum(weights[-j] * tmp_iv[seq_len(j-1)])) /
-                       weights[j]
-          if (weights[j] == 1 && all(weights[-j] == 0)) { # coef is intercept
-            lower_bds[iv_idx + j] <- l_bds[[parname]]
-            upper_bds[iv_idx + j] <- u_bds[[parname]]
-          } else { # the coefficient is a difference
-            lower_bds[iv_idx + j] <- l_bds[["diff"]]
-            upper_bds[iv_idx + j] <- u_bds[["diff"]]
+
+  # case 1: user did not supply init or bds; need to generate init and bds
+  # case 2: user supplied init, but not bds; need to generate bds, and check inits are within bds
+  # case 3: user did not supply init, but supplied bds; need to generate inits and check within bds
+  # case 4: user supplied init and bds; need to check inits are within bds
+
+  user_inits <- FALSE
+  user_bounds <- FALSE
+  # check if user supplied initial values
+  if (!is.null(args_optim[["init"]])) {
+    if (length(args_optim[["init"]]) != ncoeffs) {
+      stop("ddm error: number of initial values (",
+            length(args_optim[["init"]]),
+          ") does not match the number of coefficients (", ncoeffs,
+          ") determined by the formulas input to the ddm() function call.")
+    }
+    user_inits <- TRUE
+  }
+  # check if user supplied lower & upper bounds
+  if (!is.null(args_optim[["lo_bds"]]) && !is.null(args_optim[["lo_bds"]])) {
+    if (length(args_optim[["lo_bds"]]) != ncoeffs) {
+      stop("ddm error: number of lower bounds (",
+            length(args_optim[["lo_bds"]]),
+          ") does not match the number of coefficients (", ncoeffs,
+          ") determined by the formulas input to the ddm() function call.")
+    }
+    if (length(args_optim[["up_bds"]]) != ncoeffs) {
+      stop("ddm error: number of upper bounds (",
+            length(args_optim[["up_bds"]]),
+          ") does not match the number of coefficients (", ncoeffs,
+          ") determined by the formulas input to the ddm() function call.")
+    }
+    user_bounds <- TRUE
+  }
+  if (user_inits && user_bounds) {
+    if (all(args_optim[["lo_bds"]] <= args_optim[["init"]]) &&
+        all(args_optim[["up_bds"]] >= args_optim[["init"]])) {
+      # all initial values are within bounds
+      init_vals <- args_optim[["init"]]
+      lower_bds <- args_optim[["lo_bds"]]
+      upper_bds <- args_optim[["up_bds"]]
+    } else { # user supplied inits and bounds do not match up, generate new
+      user_inits <- FALSE
+      user_bounds <- FALSE
+      warning("ddm warning: the supplied initial values are outside of the ",
+              "supplied bounds; new initial values and bounds will be ",
+              "generated.")
+    }
+  } # sorted into 4 cases: needing or not needing to gen inits and/or bounds
+
+  # (if needed) generate initial values and bounds,
+  # and check against user supplied initial values and/or bounds
+  # strategy: fill init_vals, lower_bds, upper_bds with the generated values
+  # as default; then overwrite if the user supplied valid values
+
+  if (!user_inits || !user_bounds) {
+    for (i in seq_along(all_mm)) {
+      parname <- names(all_mm[i])
+      if (ncols[i] >= 1 && nrow(all_mm[[i]]) > 1) {
+        idx <- sum(ncols[seq_len(i - 1)])
+        if (parname %in% names(ez_parnames)) { # drift, boundary, ndt
+          # get initial values using EZ-Diffusion (Wagenmakers et al. 2007)
+          lm_mrt <- lm(rt ~ 0 + all_mm[[i]])
+          lm_acc <- lm((as.numeric(response_vec) - 1) ~ 0 + all_mm[[i]])
+          var_rt <- var(rt)
+          tmp_iv <- numeric(ncols[i])
+          idx <- sum(ncols[seq_len(i - 1)])
+          for (j in seq_len(ncols[i])) {
+            tmp_mm <- all_mm[[i]][all_mm[[i]][, j] != 0, , drop = FALSE]
+            weights <- apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean)
+            lower_bds[idx + j] <- l_bds[["diff"]] # set bounds as dif
+            upper_bds[idx + j] <- u_bds[["diff"]] # set bounds as dif
+            if (weights[j] == 0) { # coef is a dif with zero weight
+              if (user_inits) { # user supplied init always ok
+                init_vals[idx + j] <- args_optim[["init"]][idx + j]
+              } else {
+                init_vals[idx + j] <- init_pars[["diff"]]
+              }
+              if (user_bounds) { # check user supplied bounds against gen init
+                if (init_vals[idx + j] >= args_optim[["lo_bds"]][idx + j] &&
+                    init_vals[idx + j] <= args_optim[["up_bds"]][idx + j]) {
+                  lower_bds[idx + j] <- args_optim[["lo_bds"]][idx + j]
+                  upper_bds[idx + j] <- args_optim[["up_bds"]][idx + j]
+                } else {
+                  warning("ddm warning: the generated initial value at index ",
+                          idx + j, " is outside of the supplied bounds; new ",
+                          "bounds will be generated for this index.")
+                }
+              }
+            } else { # coef could be an int or a diff with nonzero weight
+              tmp_mrt <- sum(weights * coef(lm_mrt)[seq_len(j)])
+              tmp_acc <- min(max(sum(weights * coef(lm_acc)[seq_len(j)]), 0), 1)
+              marg_par_j <- ezddm(
+                propCorrect = tmp_acc,
+                rtCorrectVariance_seconds = var_rt,
+                rtCorrectMean_seconds = tmp_mrt,
+                s = 1, nTrials = nrow(tmp_mm)
+              )[[ez_parnames[[parname]]]]
+              tmp_iv[j] <- (marg_par_j - sum(weights[-j] * tmp_iv[seq_len(j-1)])
+                            ) / weights[j]
+              if (weights[j] == 1 && all(weights[-j] == 0)) { # coef is an int
+                lower_bds[idx + j] <- l_bds[[parname]] # set bounds as int
+                upper_bds[idx + j] <- u_bds[[parname]] # set bounds as int
+                if (user_inits) { # check user supplied init against gen bounds
+                  if (args_optim[["init"]][idx + j] >= lower_bds[idx + j] &&
+                      args_optim[["init"]][idx + j] <= upper_bds[idx + j]) {
+                    tmp_iv[j] <- args_optim[["init"]][idx + j]
+                  } else {
+                    warning("ddm warning: the supplied initial value at index ",
+                            idx + j, " is outside of the generated bounds; a ",
+                            "new initial value will be generated for this ",
+                            "index.")
+                  }
+                }
+                if (user_bounds) { # check user supplied bounds against gen init
+                  if (tmp_iv[j] >= args_optim[["lo_bds"]][idx + j] &&
+                      tmp_iv[j] <= args_optim[["up_bds"]][idx + j]) {
+                    lower_bds[idx + j] <- args_optim[["lo_bds"]][idx + j]
+                    upper_bds[idx + j] <- args_optim[["up_bds"]][idx + j]
+                  } else {
+                    warning("ddm warning: the generated initial value at ",
+                            "index ", idx + j, " is outside of the supplied ",
+                            "bounds; new bounds will be generated for this ",
+                            "index.")
+                  }
+                }
+              } else { # coef is a dif with nonzero weight
+                if (user_inits) { # user supplied init always ok
+                  tmp_iv[j] <- args_optim[["init"]][idx + j]
+                }
+                if (user_bounds) { # check user supplied bounds against gen init
+                  if (tmp_iv[j] >= args_optim[["lo_bds"]][idx + j] &&
+                      tmp_iv[j] <= args_optim[["up_bds"]][idx + j]) {
+                    lower_bds[idx + j] <- args_optim[["lo_bds"]][idx + j]
+                    upper_bds[idx + j] <- args_optim[["up_bds"]][idx + j]
+                  } else {
+                    warning("ddm warning: the generated initial value at ",
+                            "index ", idx + j, " is outside of the supplied ",
+                            "bounds; new bounds will be generated for this ",
+                            "index.")
+                  }
+                }
+              }
+            }
+          }
+          init_vals[(idx + 1):(idx + j)] <- tmp_iv
+        } else { # bias, sv
+          for (j in seq_len(ncols[i])) {
+            tmp_mm <- all_mm[[i]][all_mm[[i]][, j] != 0, , drop = FALSE]
+            weights <- apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean)
+            if (weights[j] == 1 && all(weights[-j] == 0)) { # coef is an int
+              init_vals[idx + j] <- init_pars[[parname]]
+              lower_bds[idx + j] <- l_bds[[parname]]
+              upper_bds[idx + j] <- u_bds[[parname]]
+              if (user_inits) { # check user supplied init against gen bounds
+                if (args_optim[["init"]][idx + j] >= lower_bds[idx + j] &&
+                    args_optim[["init"]][idx + j] <= upper_bds[idx + j]) {
+                  init_vals[idx + j] <- args_optim[["init"]][idx + j]
+                } else {
+                  warning("ddm warning: the supplied initial value at index ",
+                          idx + j, " is outside of the generated bounds; a ",
+                          "new initial value will be generated for this index.")
+                }
+              }
+              if (user_bounds) { # check user supplied bounds against gen init
+                if (init_vals[idx + j] >= args_optim[["lo_bds"]][idx + j] &&
+                    init_vals[idx + j] <= args_optim[["up_bds"]][idx + j]) {
+                  lower_bds[idx + j] <- args_optim[["lo_bds"]][idx + j]
+                  upper_bds[idx + j] <- args_optim[["up_bds"]][idx + j]
+                } else {
+                  warning("ddm warning: the generated initial value at index ",
+                          idx + j, " is outside of the supplied bounds; new ",
+                          "bounds will be generated for this index.")
+                }
+              }
+            } else { # coef is a dif
+              lower_bds[idx + j] <- l_bds[["diff"]]
+              upper_bds[idx + j] <- u_bds[["diff"]]
+              if (user_inits) { # user supplied init always ok
+                init_vals[idx + j] <- args_optim[["init"]][idx + j]
+              } else {
+                init_vals[idx + j] <- init_pars[["diff"]]
+              }
+              if (user_bounds) { # check user supplied bounds against gen init
+                if (init_vals[idx + j] >= args_optim[["lo_bds"]][idx + j] &&
+                    init_vals[idx + j] <= args_optim[["up_bds"]][idx + j]) {
+                  lower_bds[idx + j] <- args_optim[["lo_bds"]][idx + j]
+                  upper_bds[idx + j] <- args_optim[["up_bds"]][idx + j]
+                } else {
+                  warning("ddm warning: the generated initial value at index ",
+                          idx + j, " is outside of the supplied bounds; new ",
+                          "bounds will be generated for this index.")
+                }
+              }
+            }
           }
         }
       }
-      init_vals[(iv_idx + 1):(iv_idx + j)] <- tmp_iv
     }
   }
+
   formula_mm <- all_mm[par_is_formula]
 
   #-------------------- Create fddm_fit Object --------------------------------#
@@ -435,12 +653,13 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
 
   #-------------------- Run Optimization --------------------------------------#
   fit_fun <- if (optim == "nlminb") fit_nlminb else optim
+  # browser()
   opt <- fit_fun(
     init = init_vals,
     objective = f$calculate_loglik,
     gradient = if (use_gradient) f$calculate_gradient else NULL,
     lower = lower_bds, upper = upper_bds,
-    control = args_optim)
+    control = args_optim[["control"]])
 
   #-------------------- Prepare Output ----------------------------------------#
   ## prepare coefficient list:
@@ -477,6 +696,9 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   rval$args_ddm <- args_ddm
   rval$link <- links
   rval$converged <- opt$converged
+  args_optim[["init"]] <- init_vals
+  args_optim[["lo_bds"]] <- lower_bds
+  args_optim[["up_bds"]] <- upper_bds
   rval$optim_info <- list(
     optim = optim,
     args_optim = args_optim,
