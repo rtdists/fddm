@@ -38,7 +38,7 @@
 #'           separation (a), and non-decision time (t0) will be generated using
 #'           EZ-Diffusion (Wagenmakers et al. 2007); bias (w) is initialized to
 #'           \code{0.5}; inter-trial variability in the drift rate (sv) is
-#'           initialized to \code{0.0}. Difference coefficients are intitialized
+#'           initialized to \code{0.0}. Difference coefficients are initialized
 #'           to \code{0.0}.
 #'     \item \code{lo_bds} vector containing the lower bounds to be used in the
 #'           optimization for each coefficient. The same consideration of
