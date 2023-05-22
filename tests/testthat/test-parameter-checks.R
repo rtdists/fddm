@@ -3,7 +3,7 @@ context("Testing the parameter checks for consistency")
 
 ### Input checking
 test_that("Input checking", {
-  
+
   # rt (dfddm and pfddm have different behavior for t -> +Inf)
   expect_equal(
     dfddm(rt = c(0, -1, Inf, -Inf), response = 1, a = 1, v = -1, t0 = 0,
@@ -44,7 +44,7 @@ test_that("Input checking", {
                  sv = 0, sigma = 1, err_tol = 1e-6, log = FALSE)),
     0
   ))
-  
+
   # response
   expect_warning(expect_equal(
     dfddm(rt = 1, response = c(3, -1, Inf, -Inf), a = 1, v = -1, t0 = 0,
@@ -86,7 +86,7 @@ test_that("Input checking", {
                  sv = 0, sigma = 1, err_tol = 1e-6, log = FALSE)),
     0
   ))
-  
+
   # a
   expect_true(all(c(
     is.nan(dfddm(rt = 1, response = 1, a = c(-0.4, 0, NaN, -Inf), v = -1,
@@ -112,7 +112,7 @@ test_that("Input checking", {
                  sv = 0, sigma = 1, err_tol = 1e-6, log = FALSE)),
     0
   ))
-  
+
   # v
   expect_true(all(c(
     is.nan(dfddm(rt = 1, response = 1, a = 1, v = NaN, t0 = 0,
@@ -135,7 +135,7 @@ test_that("Input checking", {
                  sv = 0, sigma = 1, err_tol = 1e-6, log = FALSE)),
     0
   ))
-  
+
   # t0
   expect_true(all(c(
     is.nan(dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = c(-0.25, NaN, -Inf),
@@ -158,7 +158,7 @@ test_that("Input checking", {
                  sv = 0, sigma = 1, err_tol = 1e-6, log = FALSE)),
     0
   ))
-  
+
   # w
   expect_true(all(c(
     is.nan(dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = 0,
@@ -172,7 +172,7 @@ test_that("Input checking", {
                  sv = 0, sigma = 1, err_tol = 1e-6, log = FALSE)),
     0
   ))
-  
+
   # sv
   expect_true(all(c(
     is.nan(dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = 0, w = 0.5,
@@ -196,7 +196,7 @@ test_that("Input checking", {
                  sv = numeric(), sigma = 1, err_tol = 1e-6, log = FALSE)),
     0
   ))
-  
+
   # sigma
   expect_true(all(c(
     is.nan(dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = 0, w = 0.5, sv = 0,
@@ -210,7 +210,7 @@ test_that("Input checking", {
                  sv = 0, sigma = numeric(), err_tol = 1e-6, log = FALSE)),
     0
   ))
-  
+
   # err_tol
   expect_error(
     dfddm(rt = 1, response = 1, a = 1, v = -1, t0 = 0, w = 0.5, sv = 0,
