@@ -27,18 +27,18 @@ non-positve, then its density will evaluate to \eqn{0} if log = FALSE and
 or "upper" threshold. This model parameter can either be a singular value
 or a vector. The value(s) in 'response' can be of the following data
 types:
-  \itemize{
-    \item integers or doubles (\eqn{1}
-      \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "lower", \eqn{2}
-      \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper");
-    \item factors (the first level gets mapped to "lower", and the second
-      level gets mapped to "upper"; any additional levels are ignored).
-    \item strings (only the first character is checked, "L"
-      \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "lower" or "U"
-      \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper", case insensitive);
-    \item logicals (FALSE \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "lower",
-      TRUE \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper");
-  }}
+\itemize{
+\item integers or doubles (\eqn{1}
+\ifelse{html}{\out{&#8594;}}{\eqn{\to}} "lower", \eqn{2}
+\ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper");
+\item factors (the first level gets mapped to "lower", and the second
+level gets mapped to "upper"; any additional levels are ignored).
+\item strings (only the first character is checked, "L"
+\ifelse{html}{\out{&#8594;}}{\eqn{\to}} "lower" or "U"
+\ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper", case insensitive);
+\item logicals (FALSE \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "lower",
+TRUE \ifelse{html}{\out{&#8594;}}{\eqn{\to}} "upper");
+}}
 
 \item{v}{Drift rate. Average slope of the information accumulation process.
 The drift gives information about the speed and direction of the
@@ -96,8 +96,8 @@ Default is \eqn{1e-6}.}
 }
 \value{
 A vector containing the distribution of the DDM with precision
-  \code{err_tol} whose length matches that of the longest input parameter
-  (usually \code{rt}).
+\code{err_tol} whose length matches that of the longest input parameter
+(usually \code{rt}).
 }
 \description{
 Density function for the Ratcliff diffusion decision model (DDM) with
@@ -177,17 +177,17 @@ pfddm(rt = c(1.2, 0.9, 1.1, 1.4, 0.8, 1.3), response = resp_log,
 }
 \references{
 Navarro, D. J., & Fuss, I. G. (2009). Fast and accurate
-  calculations for first-passage times in Wiener diffusion models. Journal
-  of Mathematical Psychology, 53(4), 222-230.
+calculations for first-passage times in Wiener diffusion models. Journal
+of Mathematical Psychology, 53(4), 222-230.
 
-  Gondan, M., Blurton, S. P., & Kesselmeier, M. (2014). Even faster and even
-  more accurate first-passage time densities and distributions for the
-  Wiener diffusion model. Journal of Mathematical Psychology, 60, 20-22.
+Gondan, M., Blurton, S. P., & Kesselmeier, M. (2014). Even faster and even
+more accurate first-passage time densities and distributions for the
+Wiener diffusion model. Journal of Mathematical Psychology, 60, 20-22.
 
-  Blurton, S. P., Kesselmeier, M., & Gondan, M. (2017). The first-passage
-  time distribution for the diffusion model with variable drift. Journal of
-  Mathematical Psychology, 76, 7-12.
+Blurton, S. P., Kesselmeier, M., & Gondan, M. (2017). The first-passage
+time distribution for the diffusion model with variable drift. Journal of
+Mathematical Psychology, 76, 7-12.
 
-  Ratcliff, R. (1978). A theory of memory retrieval. Psychological review,
-  85(2), 59.
+Ratcliff, R. (1978). A theory of memory retrieval. Psychological review,
+85(2), 59.
 }

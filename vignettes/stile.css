@@ -219,7 +219,13 @@ h4 {
   font-size: 105%;
 }
 
-h5, h6 {
+h5 {
+  margin-bottom: 0%;
+  padding-bottom: 0%;
+  font-size: 110%;
+}
+
+h6 {
   border-bottom: 1px solid #ccc;
   font-size: 105%;
 }

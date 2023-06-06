@@ -1,5 +1,5 @@
 ---
-title: "Mathematical Description of Methods"
+title: "Mathematical Description of Methods in `dfddm`"
 author: "Kendal Foster and Henrik Singmann"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 bibliography: references.bib
@@ -8,7 +8,7 @@ output:
     css: stile.css
     toc: false
 vignette: >
-  %\VignetteIndexEntry{Mathematical Description of Methods}
+  %\VignetteIndexEntry{Mathematical Description of Methods in `dfddm`}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -45,9 +45,9 @@ MathJax.Hub.Config({
 
 
 
-Function `dfddm` evaluates the density function (or probability density function, PDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full PDF, which contains an infinite sum. An empirical validation of the implemented methods is provided in the [Validity Vignette](validity.html). Timing benchmarks for the present methods and comparison with existing methods are provided in the [Benchmark Vignette](benchmark.html). Two examples of using `dfddm` for parameter estimation are provided in the [Example Vignette](example.html).
+Function [dfddm()] evaluates the density function (or probability density function, PDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full PDF, which contains an infinite sum. An empirical validation of the implemented methods is provided in the [Validity Vignette](validity.html). Timing benchmarks for the present methods and comparison with existing methods are provided in the [Benchmark Vignette](benchmark.html). Examples of using [dfddm()] for parameter estimation are provided in the [Example Vignette](example.html).
 
-Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ (threshold separation), $v \in (-\infty, \infty)$ (drift rate), $t_0 \in [0, \infty)$ (non-decision time/response time constant), $w \in (0, 1)$ (relative starting point), $sv \in (0, \infty)$ (inter-trial-variability of drift), and $\sigma \in (0, \infty)$ (diffusion coefficient of the underlying Wiener Process). Please note that for only this vignette, we will refer to the inter-trial variability of drift as $\eta$ instead of $sv$ to make the notation in the equations less confusing.
+Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ (threshold separation), $v \in (-\infty, \infty)$ (drift rate), $t_0 \in [0, \infty)$ (non-decision time/response time constant), $w \in (0, 1)$ (relative starting point), $sv \in (0, \infty)$ (inter-trial-variability of drift), and $\sigma \in (0, \infty)$ (diffusion coefficient of the underlying Wiener Process). Please note that for this vignette, we will refer to the inter-trial variability of drift as $\eta$ instead of $sv$ to make the notation in the equations less confusing.
 <br><br>
 
 
@@ -57,13 +57,13 @@ Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ 
 # Mathematical Background {#background}
 <hr class="sec1">
 
-There are several different methods for approximating the PDF of the DDM, and there are three optional parameters in `dfddm` that can be used to indicate which method should be in the function call: `scale`, `n_terms_small`, and `summation_small`. For each method we describe, we include the parameter settings for the function call to `dfddm` so that it uses the desired method. As these parameters are optional, leaving them blank results in the [default implementation](#default-implementation) that is indicated later in this vignette. For general purpose use, we recommend ignoring these optional parameters so that the default settings are used as this will be the fastest and most stable algorithm. Note that precedence for the optional parameters is first given to checking if the [default implementation](#default-implementation) is selected. If not, precedence is then given to the `scale` parameter value; for example, `scale = "large"` will ignore the `summation_small` input value.
+There are several different methods for approximating the PDF of the DDM, and there are three optional control parameters in [dfddm()] that can be used to indicate which method should be used in the function call: `switch_mech`, `n_terms_small`, and `summation_small`. For each method we describe, we include the parameter settings for the function call to [dfddm()] so that it uses the desired method. As these parameters are optional, leaving them blank results in the [default implementation](#default-implementation) that is indicated later in this vignette. For general purpose use, we recommend ignoring these optional parameters so that the default settings are used as this will be the fastest and most stable algorithm. Note that precedence for the optional parameters is first given to checking if the [default implementation](#default-implementation) is selected. If not, precedence is then given to the `switch_mech` parameter value; for example, `switch_mech = "large"` will ignore the `summation_small` input value.
 
 Note that there are actually two probability density functions of the DDM: the PDF with respect to the upper boundary, and the PDF with respect to the lower boundary. Following the precedent set by the literature, we use the general terminology "PDF" or "density function" to mean the probability density function with respect to the lower boundary. Should the probability density function with respect to the upper boundary be required, it may be calculated using the simple transformation $f_\text{upper}(t ~|~ v, \eta, a, w) = f_\text{lower}(t ~|~ -v, \eta, a, 1-w)$.
 
-Since the DDM is widely used in parameter estimation usually involving numerical optimization, significant effort has been put into making the evaluation of its density as fast as possible. However, the density function for the DDM is notorious for containing an unavoidable infinite sum; hence, the literature has produced a few different methods of approximating the density. This vignette details the various methods used in the literature to approximate the infinite sum in the density function for the DDM.
+Since the DDM is widely used in parameter estimation usually involving numerical optimization, significant effort has been put into making the evaluation of its density as fast as possible. However, the density function for the DDM is notorious for containing an unavoidable infinite sum; hence, the literature has produced a few different methods of approximating the density by truncating the infinite sum. This vignette details the various methods used in the literature to approximate the infinite sum in the density function for the DDM.
 
-The author of the seminal book where the density function originates, @feller1968introduction explains the derivation from first principles. In this derivation there is a step that requires taking a limit, and @feller1968introduction provides two different &ndash; but equivalent &ndash; limiting processes that yield two different &ndash; but equal &ndash; forms of the density function. Each of these forms contains an infinite sum, and they are known individually as the large-time approximation and the small-time approximation because the former is on average faster when calculating the density for large response times and the latter is on average faster when calculating the density for small response times.
+The author of the seminal book where the density function originates, @feller1968introduction explains the derivation from first principles. In this derivation there is a step that requires taking a limit, and @feller1968introduction provides two different &ndash; but equivalent &ndash; limiting processes that yield two different &ndash; but equal &ndash; forms of the density function. Each of these forms contains an infinite sum, and they are known individually as the large-time approximation and the small-time approximation because the former is on average faster when calculating the density for large response times and the latter is on average faster when calculating the density for small response times. The improved speed is due to the ease at which the infinite sums can be adequately approximated with a finite truncation. In other words, the efficiency of each approximation is dictated by the number of terms required in the truncated sum to achieve the pre-specified precision; fewer required terms translates to fewer computations and thus generally faster computation time.
 
 When the drift rate is held constant (i.e. $\eta = 0$), the density function for the DDM is often written in a factorized form [@navarro2009fast]:
 \begin{equation}
@@ -110,7 +110,7 @@ Immediately of note is that the infinite summation for each time scale is the sa
 # The Density Function Approximations {#dens}
 <hr class="sec1">
 
-The main issue of these families of density functions is that they all contain an infinite sum that must be approximated. Since there is no closed form analytical solution to this infinite sum, we instead calculate only a partial sum by truncating the sequence of terms after a certain point. We cannot actually calculate the true value of the density function, but we can mathematically prove that we can get arbitrarily close to the true value; the proof of this fact is provided in the paper accompanying the `fddm` package. The nature of this truncation has been the topic of many papers in the literature, but the underlying idea supporting all of the methods is the same: the user specifies an allowable error tolerance, and the algorithm calculates terms of the infinite sum until the result is within the allowed error tolerance of the true value.
+The main issue of these families of density functions is that they all contain an infinite sum that must be approximated. Since there is no closed form analytical solution to this infinite sum, we instead calculate only a partial sum by truncating the sequence of terms after a certain point. We cannot actually calculate the true value of the density function, but we can mathematically prove that we can get arbitrarily close to the true value; the proof of this fact is provided in the paper accompanying the `fddm` package. The nature of this truncation has been the topic of many papers in the literature, but the underlying idea supporting all of the methods is the same: the user specifies an allowable error tolerance, and the algorithm calculates terms of the infinite sum so that the truncated result is within the allowed error tolerance of the true value.
 
 The methods in the literature pre-calculate the number of terms required for the infinite sum to converge within the allowed error tolerance, and this number of terms is referred to as $k_\ell$ and $k_s$ for the large-time and small-time infinite sums, respectively. @navarro2009fast include a method for calculating $k_c$, the number of required terms for the infinite sum when combining the density functions of the two time scales. In addition to these existing methods, we add a novel method that does not perform this pre-calculation, and we also provide two new combinations of the large-time and small-time density functions. Note that in each method that pre-calculates the number of terms, the response time $t$ is scaled inversely by $a^2$, that is $t' := \tfrac{t}{a^2}$. Also note that for the rest of this vignette, the ceiling function will be denoted by $\lceil \cdot \rceil$.
 
@@ -118,6 +118,7 @@ The methods in the literature pre-calculate the number of terms required for the
 
 
 <div class="indent2">
+
 ## Large-Time {#dens-lt}
 
 The large-time density functions, Equations <span class="math inline eqref">\(\eqref{eq:con-l}\)</span> and <span class="math inline eqref">\(\eqref{eq:var-l}\)</span>, have an infinite sum that runs for all of the positive integers. For a given error tolerance $\epsilon$, @navarro2009fast provide an expression for $k_\ell$, the number of terms required for the large-time infinite sum to be within $\epsilon$ of the true value of the density function. Thus the infinite sum becomes finite:
@@ -132,7 +133,8 @@ It remains to find the value of $k_\ell^\text{Nav}$ that ensures the truncated s
 \end{equation}
 
 <p class="method">
-This method is often viewed as the most inefficient of the available options in the literature; however, this method proves to be extremely efficient in particular areas of the parameter space (typically for large $t'$). To implement this method in `dfddm`, the user must set the parameter `switch_mech = "large"` in the function call; in this case, the other parameters are ignored.
+
+This method is often viewed as the most inefficient of the available options in the literature; however, this method proves to be extremely efficient in particular areas of the parameter space (typically for large $t'$). To implement this method in [dfddm()] (and completely excluding the small-time methods), the user must set the parameter `switch_mech = "large"` in the function call; in this case, the other parameters are ignored.
 </p>
 
 
@@ -145,11 +147,12 @@ The small-time approximations, Equations <span class="math inline eqref">\(\eqre
   \sum_{j = -\left\lfloor\frac{k_s}{2}\right\rfloor}^{\left\lfloor\frac{k_s}{2}\right\rfloor} (w + 2j) \exp{ \left( -\frac{a^2}{2t} \left( w + 2j \right)^2 \right)}. \nonumber
 \end{equation}
 
-To choose the small-time methods when using `dfddm`, set the optional parameter `scale = "small"` in the function call. You can also set the optional parameter `summation_small = "2017"` or `summation_small = "2014"`, but it is recommended to ignore this parameter so it retains its default value of "2017" that evaluates slightly faster than its counterpart. This parameter controls the style of summation used in the small-time approximation, and more details on the differences between these two styles can be found in the paper accompanying `fddm`. The final parameter, `n_terms_small`, will be discussed in the following three subsections.
+To choose the small-time methods when using [dfddm()] (and completely excluding the large-time method), set the optional parameter `switch_mech = "small"` in the function call. You can also set the optional control parameter `summation_small = "2017"` or `summation_small = "2014"`, but it is recommended to ignore this parameter so it retains its default value of "2017" that evaluates slightly faster than its counterpart. This parameter controls the style of summation used in the small-time approximation, and more details on the differences between these two styles can be found in the paper accompanying `fddm`. The final control parameter, `n_terms_small`, will be discussed in the following three subsections.
 
 
 
 <div class="indent3">
+
 ### Navarro & Fuss {#dens-st-nav}
 
 Similarly to their large-time solution, @navarro2009fast provide an expression for $k_s$ given an error tolerance $\epsilon$. They follow a similar idea to their large-time derivation by bounding the error of the truncation with integrals then back-calculating the number of terms required to keep the error less than $\epsilon$. The resulting approximation yields:
@@ -159,6 +162,7 @@ Similarly to their large-time solution, @navarro2009fast provide an expression f
 \end{equation}
 
 <p class="method">
+
 To use this method, set `switch_mech = "small"` and `n_terms_small = "Navarro"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 
@@ -176,16 +180,18 @@ After @navarro2009fast published their paper, @gondan2014even introduced another
 \end{equation}
 
 <p class="method">
+
 To use this method, set `switch_mech = "small"` and `n_terms_small = "Gondan"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 
 
 ### Stop When Small Enough (SWSE) {#dens-st-swse}
 
-If we consider the terms of the infinite sum as the sequence defined above, the series alternates in sign $(+, -, +, \dots)$; moreover, the series eventually decreases monotonically (in absolute value) due to the exponential term. Combining and exploiting these two mathematical properties has been the cornerstone of the previous approximations, but we will instead truncate the sum using a method suggested by @gondan2014even. This method does not pre-calculate the number of terms required to achieve the given error tolerance. Instead, the general idea of this method is to take full advantage of the alternating and decreasing nature of the terms in the infinite sum by applying a handy theorem (commonly known as the alternating series test) to place an upper bound on the truncation error after including so many terms. It has been proven that this upper bound is in fact the absolute value of the next term in the sequence, thus we can truncate the infinite sum once one of its terms is less than the desired error tolerance, $\epsilon$. Hence we do not consider the number of terms in the sum, rather just that the terms in the summation will eventually be small enough. The validity of this method is proven in the paper that accompanies the `fddm` package.
+If we consider the terms of the infinite sum as the sequence defined above, the series alternates in sign $(+, -, +, \dots)$; moreover, the series eventually decreases monotonically (in absolute value) due to the exponential term. Combining and exploiting these two mathematical properties has been the cornerstone of the previous approximations, but we will instead truncate the sum using a method suggested by @gondan2014even. This method does not pre-calculate the number of terms required to achieve the given error tolerance. Instead, the general idea of this method is to take full advantage of the alternating and decreasing nature of the terms in the infinite sum by applying a handy theorem (commonly known as the alternating series test) to place an upper bound on the truncation error after including so many terms. It has been proven that this upper bound is in fact the absolute value of the next term in the sequence, thus we can truncate the infinite sum once one of its terms (in absolute value) is less than the desired error tolerance, $\epsilon$. Hence we do not consider the number of terms in the sum, rather just that the terms in the summation will eventually be small enough. The validity of this method is proven in the paper that accompanies the `fddm` package.
 
 <p class="method">
-To use this method, set `swich_mech = "terms_large"` and `n_terms_small = "SWSE"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
+
+To use this method, set `swich_mech = "small"` and `n_terms_small = "SWSE"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 </div>
 
@@ -193,48 +199,68 @@ To use this method, set `swich_mech = "terms_large"` and `n_terms_small = "SWSE"
 
 ## Combining Large-Time and Small-Time {#dens-ct}
 
-A sensible next approach to approximating the density of the DDM is to use some combination of the large-time and small-time density functions. As their names suggest, each density function approximation has a section of the parameter space where it outperforms the other one. Essentially these methods involve calculating the number of terms required for both the large-time and small-time density functions, then using whichever approximation requires fewer terms. The goal is to use each approximation where it is efficient and avoid the areas of the parameter space where the approximations perform poorly.
+A sensible next approach to approximating the density of the DDM is to use some combination of the large-time and small-time density functions. As their names suggest, each density function approximation has a section of the parameter space where it outperforms the other one. Essentially, these methods involve calculating the number of terms required for both the large-time and small-time density functions, then using whichever approximation requires fewer terms. The goal is to use each approximation where it is efficient and avoid the areas of the parameter space where the approximations perform poorly. The main control parameter used to indicate this preference is `switch_mech`.
 
-To use this method of evaluating the PDF, set the optional parameter `scale = "both"` in the function call. These methods include similar options to the small-time approximations from the previous section, and thus it is possible to set the optional parameters in a similar fashion to above. The value of `summation_small` triggers the same effect as above since it only affects the small-time approximation to the PDF; we recommend ignoring this parameter so it assumes its default value of "2017" that evaluates slightly faster than its counterpart. The final parameter, `n_terms_small`, will be discussed in the following three subsections. As there is only one option for the large-time approximation, there are no optional parameters to set for this part of the combined time scale approximation.
+Fundamentally, each combined time scale method uses either the large-time or small-time approximation for each calculation of the density function. As there is only one option for the large-time approximation, there are no optional control parameters to set for this part of the combined time scale approximation. In contrast, there are multiple options for the small-time part of the combined time scale approximation. However, the effect of the control parameter `summation_small` is consistent throughout the small-time methods; we recommend leaving it to its default value of "2017" for the best performance. The remaining subsections of this vignette detail how to set the rest of the control parameters in the function call to use a particular set of methods for calculating the combined time scale density function.
 
 
 
 <div class="indent3">
+
 ### Navarro Small & Navarro Large {#dens-ct-nav}
 
-@navarro2009fast initially suggested an algorithm wherein both $k_s^\text{Nav}$ and $k_l^\text{Nav}$ were calculated, and whichever one has a smaller value was used. However, one issue with their original method arises when the user inputs a vector of response times. They calculate the maximum value of $k_s^\text{Nav}$ for all of the input response times and then compare that to the maximum value of $k_l^\text{Nav}$ for all of the input response times. They end up with one $k_c^\text{Nav}$ for all of the input response times, and this one value can be higher than normal for a response time due to the maximization of the approximation over all of the response times. This over-accuracy is not necessarily a bad thing, but it does mean that it is possible to get different densities for the same input response time depending on the other response times that have been input. To correct for this, we simply do not maximize $k_s^\text{Nav}$ or $k_l^\text{Nav}$ over all of the input response times and instead calculate one value of $k_c^\text{Nav}$ for each input response time. For more details, see the "Implementation" section in the paper accompanying `fddm`.
+@navarro2009fast initially suggested an algorithm wherein both $k_s^\text{Nav}$ and $k_l^\text{Nav}$ were calculated, and the preferred method was whichever one had the smaller value of $k$. However, one issue with their original algorithm arises when the user inputs a vector of response times. They calculate the maximum value of $k_s^\text{Nav}$ for _all_ of the input response times and then compare that to the maximum value of $k_l^\text{Nav}$ for _all_ of the input response times. They end up with one $k_c^\text{Nav}$ for _all_ of the input response times, and this one value can be larger than necessary for most of the input response times due to the maximization of $k_c^\text{Nav}$ over _all_ of the response times. This over-accuracy is not necessarily a bad thing, but it does mean that it is possible to get different densities for the same input response time depending on the other response times that have been input. To correct for this, we simply do not maximize $k_s^\text{Nav}$ or $k_l^\text{Nav}$ over all of the input response times and instead calculate one value of $k_c^\text{Nav}$ for _each_ input response time. For more details, see the "Implementation" section in the paper accompanying `fddm`.
 \begin{equation} \label{eq:kc-Nav}
   k_c^\text{Nav} \left( t', w, \epsilon \right) = \min \left\{ k_s^{\text{Nav}}, k_l^{\text{Nav}} \right\}.
 \tag{B.1}
 \end{equation}
 
 <p class="method">
+
 To use this method, set `switch_mech = "terms"` and `n_terms_small = "Navarro"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 
 
 ### Gondan Small & Navarro Large {#dens-ct-gon}
 
-This combination of methods has not been explored in the literature before, but it works very similarly to the combination above. The only difference is that we use the @gondan2014even approximation for the small-time instead of the one provided by @navarro2009fast. Since $k_s^\text{Gon} \leq k_s^\text{Nav}$.
+This combination of methods has not been explored in the literature before, but it works very similarly to the Navarro-Navarro combination above. The only difference is that we use the @gondan2014even approximation for the small-time instead of the one provided by @navarro2009fast. Since $k_s^\text{Gon} \leq k_s^\text{Nav}$, this method should never be less efficient than the previous combined time scale method.
 \begin{equation} \label{eq:kc-Gon}
   k_c^{\text{Gon}} \left( t', w, \epsilon \right) = \min \left\{ k_s^{\text{Gon}}, k_l^{\text{Nav}} \right\}.
 \tag{B.2}
 \end{equation}
 
 <p class="method">
+
 To use this method, set `switch_mech = "terms"` and `n_terms_small = "Gondan"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
 
 
-<a id="default-implementation"></a>
-
 ### Stop When Small Enough (SWSE) Small & Navarro Large {#dens-ct-swse}
 
-This method uses the SWSE approximation to the small-time density function in conjunction with the Navarro large-time approximation to achieve consistent performance across the parameter space. Since the SWSE approximation to the small-time density function does not explicitly calculate $k_s$, we only calculate $k_\ell^{\text{Nav}}$ and compare it to the new optional parameter `max_terms_large`. If $k_\ell^{\text{Nav}}$ $\le$ `max_terms_large`, then the Navarro large-time approximation is used. On the other hand, if $k_\ell^{\text{Nav}}$ $>$ `max_terms_large`, then the SWSE small-time approximation is used. The user can set the optional parameter `max_terms_large` to any non-negative integer to alter the behavior of this method; the default value for this parameter is $1$. Again, the validity of this method is proven in the paper that accompanies the `fddm` package. Note that in the `fddm` paper, the parameter `max_terms_large` is labelled $\delta$.
+The SWSE approximation to the small-time density function differs from the Navarro or Gondan approximations in that it does not pre-calculate $k_s$, the number of terms in the infinite sum that are required to achieve the desired precision; instead, the infinite sum is truncated when the individual terms of the sum become "small enough." This method of truncating the infinite sum poses a problem of how to incorporate this method with the Navarro large-time approximation that relies on pre-calculating $k_\ell^{\text{Nav}}$. We will introduce two heuristics for determining when to use the small-time approximation or the large-time approximation. Both heuristics will use a fourth parameter called `switch_thresh`, but each heuristic will use the new parameter in a slightly different way. The validity of these two methods is proven in the paper that accompanies the `fddm` package. Note that in this paper, the parameter `max_terms_large` is labelled $\delta$.
+
+<div class="indent3">
+
+##### First Heuristic: Large-Time Efficiency
+
+The first heuristic compares `switch_thresh` to $k_\ell^{\text{Nav}}$; in this case, `switch_thresh` is treated as the proxy for the required number of terms for approximating the truncated small-time infinite sum. If $k_\ell^{\text{Nav}}$ $\le$ `switch_thresh`, then the Navarro large-time approximation is used. On the other hand, if $k_\ell^{\text{Nav}}$ $>$ `switch_thresh`, then the SWSE small-time approximation is used. This method essentially checks the efficiency of the large-time approximation relative to `switch_thresh`. The user can alter the behavior of this method by setting the optional parameter `switch_thresh` to any non-negative integer; the default value for this parameter when using this method is $1$.
 
 <p class="method">
-Since this is the default implementation, all three of the optional parameters (`switch_mech`, `n_terms_small`, and `summation_small`) can be ignored. For completeness, set `switch_mech = "terms_large"` and `n_terms_small = "SWSE"` in the function call. The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance. This method uses a fourth optional parameter, `switch_thresh`, and we recommend ignoring this parameter so that it retains its default value.
+
+To use this method, set `switch_mech = "terms_large"`. The user may wish to specify a particular threshold (measured in the required number of terms for the truncated sum) for switching between the small-time and large-time approximations by setting the parameter `switch_thresh` (i.e., `switch_thresh = 1`). The parameter `summation_small` should be ignored so that it retains its default value to obtain the best performance.
 </p>
+
+<a id="default-implementation"></a>
+
+##### Second Heuristic: Effective Response Time
+
+The second heuristic avoids all comparison with $k_\ell^{\text{Nav}}$ as it simply considers the effective response time, $t' := \tfrac{t}{a^2}$, to be the indicator of a small or large response time. $t'$ is compared to a new parameter `switch_thresh` so that if $t'$ $>$ `switch_thresh`, then the Navarro large-time approximation is used; otherwise, the SWSE small-time approximation is used. The user can alter the behavior of this method by setting the optional parameter `switch_thresh` to any non-negative real number; the default value for this parameter when using this method is $0.8$.
+
+<p class="method">
+
+Since this is the default implementation, all four of the optional parameters (`switch_mech`, `switch_thresh`, `n_terms_small`, and `summation_small`) can be ignored. The user may wish to specify a particular threshold (measured in seconds) for switching between the small-time and large-time approximations by setting the parameter `switch_thresh` (i.e., `switch_thresh = 0.8`). We recommend ignoring the parameter `summation_small` so that it retains its default value and achieves optimal performance. Note that the parameter `n_terms_small` is ignored because the only option is "SWSE".
+</p>
+</div>
 </div>
 
 </div>

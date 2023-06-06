@@ -18,4 +18,3 @@ loadModule("fddm_fit", TRUE)
   if (requireNamespace("emmeans", quietly = TRUE))
     emmeans::.emm_register("ddm", pkgname)
 }
-

@@ -1,8 +1,8 @@
 #' Methods for ddm objects
-#' 
+#'
 #' Implemented S3 methods for objects of class \code{ddm} as returned by
 #' function \code{\link{ddm}()}.
-#' 
+#'
 #' @param object,x object of class \code{ddm}
 #' @param formula see \code{\link{model.frame}}
 #' @param dpar which distributional parameter or DDM parameter to focus on. In
@@ -13,11 +13,11 @@
 #'   \code{\link{print.default}}.
 #' @param data,trms,xlev,grid arguments needed for \pkg{emmeans} support.
 #' @param ... further arguments passed to or from other methods.
-#' 
+#'
 #' @details The methods should fail with an informative error if a
 #'   distributional parameter is selected in \code{dpar} that is fixed and not
 #'   estimated.
-#' 
+#'
 #' @name ddm-methods
 NULL
 

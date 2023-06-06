@@ -57,7 +57,7 @@ emm_basis.ddm(
 
 \item{dpar}{which distributional parameter or DDM parameter to focus on. In
 addition to the five DDM parameters \code{c("drift", "boundary", "ndt",
-"bias", "sv")}, some methods accept \code{"full"} which returns information
+  "bias", "sv")}, some methods accept \code{"full"} which returns information
 for all estimated parameters.}
 
 \item{formula}{see \code{\link{model.frame}}}
@@ -70,6 +70,6 @@ function \code{\link{ddm}()}.
 }
 \details{
 The methods should fail with an informative error if a
-  distributional parameter is selected in \code{dpar} that is fixed and not
-  estimated.
+distributional parameter is selected in \code{dpar} that is fixed and not
+estimated.
 }

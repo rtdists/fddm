@@ -12,7 +12,7 @@ ddm(
   sv = 0,
   data,
   optim = "nlminb",
-  args_optim = list(),
+  args_optim = list(init = NULL, lo_bds = NULL, up_bds = NULL, control = list()),
   args_ddm = list(err_tol = 1e-06),
   use_gradient = TRUE,
   compiled_model = TRUE,
@@ -41,16 +41,54 @@ rate (sv)}
 \code{\link{model.frame}}.}
 
 \item{optim}{character string or fitting function indicating which numerical
-optimisation method should be used. The default \code{"nlminb"} uses the
+optimization method should be used. The default \code{"nlminb"} uses the
 corresponding function.}
 
-\item{args_optim}{additional control arguments passed to \code{control}
-argument of optimisation function specified in \code{optim}.}
+\item{args_optim}{named list of additional arguments for the optimization
+function. The available options are:
+\itemize{
+\item \code{init} vector containing the initial values to be used in the
+optimization for each coefficient. Note that the number and type of
+coefficients used (i.e., intercept or difference) is determined by
+the model matrices, which are in turn determined by the formulas
+assigned to each DDM parameter (see the Details section for an
+overview of formulas and coefficients). For an example, run the
+\code{ddm()} function with parameter set to its default value, and
+view the initial value vector via the slot
+\code{$optim_info$args_optim$init}. By default for intercept
+coefficients, the initial values for the drift rate (v), boundary
+separation (a), and non-decision time (t0) will be generated using
+EZ-Diffusion (Wagenmakers et al. 2007); bias (w) is initialized to
+\code{0.5}; inter-trial variability in the drift rate (sv) is
+initialized to \code{0.0}. Difference coefficients are initialized
+to \code{0.0}.
+\item \code{lo_bds} vector containing the lower bounds to be used in the
+optimization for each coefficient. The same consideration of
+coefficient types occurs here as it does with \code{init}. The
+defaults for intercept coefficients are: drift rate
+\code{v > -Inf}, boundary separation \code{a > 0}, non-decision
+time \code{t0 > 0}, bias \code{w > 0}, inter-trial variability in
+the drift rate \code{sv} \eqn{ \le 0}. All difference coefficients
+have a lower bound of \code{-Inf}.
+\item \code{up_bds} vector containing the upper bounds to be used in the
+optimization for each coefficient. The same consideration of
+coefficient types occurs here as it does with \code{init}. The
+defaults for intercept coefficients are: drift rate
+\code{v < Inf}, boundary separation \code{a < Inf}, non-decision
+time \code{t0 < Inf}, bias \code{w < 1}, inter-trial variability in
+the drift rate \code{sv < Inf}. All difference coefficients have a
+upper bound of \code{Inf}.
+\item \code{control} additional control arguments passed to
+\code{control} argument of optimization function specified in
+\code{optim}
+}}
 
-\item{args_ddm}{additional arguments passed to density function.}
+\item{args_ddm}{named list of additional arguments passed to density function
+calculation. Currently, the only option for this is \code{err_tol}, the
+desired error tolerance used in the density function calculation.}
 
 \item{use_gradient}{logical. Should gradient be used during numerical
-optimisation? Default is \code{TRUE}.}
+optimization? Default is \code{TRUE}.}
 
 \item{compiled_model, model, mmatrix, response}{logicals. If \code{TRUE} the
 corresponding components of the fit (the compiled model object, the model
@@ -61,210 +99,220 @@ frame, the model matrix, the response matrix) are returned.}
 }
 \value{
 Object of class \code{ddm} (i.e., a list with components as listed
-  below) for which a number of common methods such as \code{print},
-  \code{coef}, and \code{logLik} are implemented, see
-  \code{\link{ddm-methods}}.
-  \itemize{
-    \item \code{coefficients} a named list whose elements are the values of
-          the estimated model parameters
-    \item \code{dpar} a character vector containing the names of the
-          estimated model parameters
-    \item \code{fixed_dpar} a named list whose elements are the values of the
-          fixed model parameters
-    \item \code{loglik} the value of the log-likelihood function at the
-          optimized parameter values
-    \item \code{hessians} a named list whose elements are the individual
-          Hessians for each of the model parameters
-    \item \code{vcov} a named list whose elements are the individual
-          variance-covariance matrices for each of the model parameters
-    \item \code{nobs} the number of observations in the data used for fitting
-    \item \code{npar} the number of parameters used to fit the model (i.e.,
-          the estimated model parameters plus any hyperparameters)
-    \item \code{df.residual} the residual degrees of freedom (the number of
-          observations - the number of parameters)
-    \item \code{call} the original function call to \code{ddm}
-    \item \code{formula} the formulas used in the model (\code{1} indicates
-          that the model parameter was estimated with a single coefficient;
-          \code{0} indicates that the model parameter was fixed)
-    \item \code{dpar_formulas} a named list whose elements are the formulas
-          for the model parameters (\code{1} indicates that the model
-          parameter was estimated with a single coefficient; \code{0}
-          indicates that the model parameter was fixed)
-    \item \code{na.action} na.action
-    \item \code{terms} a named list whose elements are , and whose last
-          element is named \code{full} and shows the breakdown of the model
-          with all model parameters
-    \item \code{levels} a named list whose elements are the levels associated
-          with any parameters that are factors (the elements are \code{NULL}
-          if the parameter is not a factor), and whose last element is named
-          \code{FULL} and shows all of the levels used in the model
-    \item \code{contrasts} a named list whose elements are the type of
-          contrasts used in the model
-    \item \code{args_ddm} a named list whose elements are the optional
-          arguments used in the calculation of the DDM log-likelihood
-          function
-    \item \code{link} a named list whose elements show information about the
-          link function used for each model parameter (currently the only
-          link function is the identity function)
-    \item \code{converged} a logical indicating whether the optimization
-          converged (\code{TRUE}) or not (\code{FALSE})
-    \item \code{optim_info} a named list whose elements are information about
-          the optimization process (e.g., the name of the algorithm used,
-          the final value of the objective function, the number of
-          evaluations of the gradient function, etc.)
-    \item \code{model} the data used in the model (might need to check this)
-    \item \code{response} the response data used in the model
-    \item \code{mmatrix} a named list whose elements are the model matrices
-          for each of the estimated parameters
-    \item \code{compiled_model} C++ object that contains the compiled model
-          (see list below for more details)
-  }
-  The C++ object accessible via the \code{compiled_model} component of the
-  above R object of class \code{ddm} contains the following components:
-  \itemize{
-    \item \code{rt} a numeric vector of the response time data used in the
-          model
-    \item \code{response} an integer vector of the response data used in the
-          model (coded such that \code{1} corresponds to the "lower" boundary
-          and \code{2} corresponds to the "upper" boundary)
-    \item \code{err_tol} the error tolerance used in the calculations for
-          fitting the DDM
-    \item \code{coefficients} a numeric vector containing the current set of
-          coefficients for the formulas provided to the \code{ddm()} function
-          call; the coefficients correspond to the DDM parameters in the
-          following order: \code{v}, \code{a}, \code{t0}, \code{w}, \code{sv}
-    \item \code{likelihood} a double containing the log-likelihood for the
-          current set of \code{coefficients} (note this can be changed by
-          calling the function \code{calculate_loglik()} below)
-    \item \code{modmat_v} a numeric matrix containing the model matrix for
-          \code{v}, the drift rate, determined by the formula input to the
-          argument \code{drift} in the \code{ddm()} function call
-    \item \code{modmat_a} a numeric matrix containing the model matrix for
-          \code{a}, the boundary separation, determined by the formula input
-          to the argument \code{boundary} in the \code{ddm()} function call
-    \item \code{modmat_t0} a numeric matrix containing the model matrix for
-          \code{t0}, the non-decision time, determined by the formula input
-          to the argument \code{ndt} in the \code{ddm()} function call
-    \item \code{modmat_w} a numeric matrix containing the model matrix for
-          \code{w}, the inital bias, determined by the formula input to the
-          argument \code{bias} in the \code{ddm()} function call
-    \item \code{modmat_sv} a numeric matrix containing the model matrix for
-          \code{sv}, the inter-trial variability in the drift rate,
-          determined by the formula input to the argument \code{sv} in the
-          \code{ddm()} function call
-    \item \code{hess_v} a numeric matrix containing the Hessian for \code{v},
-          the drift rate, whose dimensions are determined by the formula
-          input to the argument \code{drift} in the \code{ddm()} function
-          call
-    \item \code{hess_a} a numeric matrix containing the Hessian for \code{a},
-          the boundary separation, whose dimensions are determined by the
-          formula input to the argument \code{drift} in the \code{ddm()}
-          function call
-    \item \code{hess_t0} a numeric matrix containing the Hessian for
-          \code{t0}, the non-decision time, whose dimensions are determined
-          by the formula input to the argument \code{drift} in the
-          \code{ddm()} function call
-    \item \code{hess_w} a numeric matrix containing the Hessian for \code{w},
-          the initial bias, whose dimensions are determined by the formula
-          input to the argument \code{drift} in the \code{ddm()} function
-          call
-    \item \code{hess_sv} a numeric matrix containing the Hessian for
-          \code{sv}, the inter-trial variability in the drift rate, whose
-          dimensions are determined by the formula input to the argument
-          \code{drift} in the \code{ddm()} function call
-    \item \code{vcov_v} a numeric matrix containing the variance-covariance
-          matrix for \code{v}, the drift rate, whose dimensions are
-          determined by the formula input to the argument \code{drift} in the
-          \code{ddm()} function call
-    \item \code{vcov_a} a numeric matrix containing the variance-covariance
-          matrix for \code{a}, the boundary separation, whose dimensions are
-          determined by the formula input to the argument \code{boundary} in
-          the \code{ddm()} function call
-    \item \code{vcov_t0} a numeric matrix containing the variance-covariance
-          matrix for \code{t0}, the non-decision time, whose dimensions are
-          determined by the formula input to the argument \code{ndt} in the
-          \code{ddm()} function call
-    \item \code{vcov_w} a numeric matrix containing the variance-covariance
-          matrix for \code{w}, the inital bias, whose dimensions are
-          determined by the formula input to the argument \code{bias} in the
-          \code{ddm()} function call
-    \item \code{vcov_sv} a numeric matrix containing the variance-covariance
-          matrix for \code{v}, the inter-trial variability in the drift rate,
-          whose dimensions are determined by the formula input to the
-          argument \code{sv} in the \code{ddm()} function call
-    \item \code{calculate_loglik} calculates and returns a double containing
-          the negated log-likelihood (note that this will overwrite the
-          \code{likelihood} component of the C++ object)
-    \item \code{calculate_gradient} calculates and returns a numeric vector
-          of the negated gradients for the provided coefficient values; the
-          gradients are stored in the same manner as their corresponding
-          \code{coefficents} (note that this will overwrite the
-          \code{likelihood}) component of the C++ object)
-    \item \code{calculate_hessians} calculates and returns a named list of
-          the negated Hessians for each model parameter for the provided
-          coefficient values (note that this will overwrite the
-          \code{likelihood} component of the C++ object)
-    \item \code{calculate_vcov} calculates and returns a named list of the
-          variance-covariance matrices for each model parameter for the
-          stored \code{coefficients}
-    \item \code{calculate_standard_error} calculates and returns a numeric
-          vector of the standard errors of the stored \code{coefficients};
-          the standard errors are stored in the same manner as their
-          corresponding \code{coefficients}
-  }
+below) for which a number of common methods such as \code{print},
+\code{coef}, and \code{logLik} are implemented, see
+\code{\link{ddm-methods}}.
+\itemize{
+\item \code{coefficients} a named list whose elements are the values of
+the estimated model parameters
+\item \code{dpar} a character vector containing the names of the
+estimated model parameters
+\item \code{fixed_dpar} a named list whose elements are the values of the
+fixed model parameters
+\item \code{loglik} the value of the log-likelihood function at the
+optimized parameter values
+\item \code{hessians} a named list whose elements are the individual
+Hessians for each of the model parameters
+\item \code{vcov} a named list whose elements are the individual
+variance-covariance matrices for each of the model parameters
+\item \code{nobs} the number of observations in the data used for fitting
+\item \code{npar} the number of parameters used to fit the model (i.e.,
+the estimated model parameters plus any hyperparameters)
+\item \code{df.residual} the residual degrees of freedom (the number of
+observations - the number of parameters)
+\item \code{call} the original function call to \code{ddm}
+\item \code{formula} the formulas used in the model (\code{1} indicates
+that the model parameter was estimated with a single coefficient;
+\code{0} indicates that the model parameter was fixed)
+\item \code{dpar_formulas} a named list whose elements are the formulas
+for the model parameters (\code{1} indicates that the model
+parameter was estimated with a single coefficient; \code{0}
+indicates that the model parameter was fixed)
+\item \code{na.action} na.action
+\item \code{terms} a named list whose elements are , and whose last
+element is named \code{full} and shows the breakdown of the model
+with all model parameters
+\item \code{levels} a named list whose elements are the levels associated
+with any parameters that are factors (the elements are \code{NULL}
+if the parameter is not a factor), and whose last element is named
+\code{FULL} and shows all of the levels used in the model
+\item \code{contrasts} a named list whose elements are the type of
+contrasts used in the model
+\item \code{args_ddm} a named list whose elements are the optional
+arguments used in the calculation of the DDM log-likelihood
+function
+\item \code{link} a named list whose elements show information about the
+link function used for each model parameter (currently the only
+link function is the identity function)
+\item \code{converged} a logical indicating whether the optimization
+converged (\code{TRUE}) or not (\code{FALSE})
+\item \code{optim_info} a named list whose elements are information about
+the optimization process (e.g., the name of the algorithm used,
+the final value of the objective function, the number of
+evaluations of the gradient function, etc.)
+\item \code{model} the data used in the model (might need to check this)
+\item \code{response} the response data used in the model
+\item \code{mmatrix} a named list whose elements are the model matrices
+for each of the estimated parameters
+\item \code{compiled_model} C++ object that contains the compiled model
+(see list below for more details)
+}
+The C++ object accessible via the \code{compiled_model} component of the
+above R object of class \code{ddm} contains the following components:
+\itemize{
+\item \code{rt} a numeric vector of the response time data used in the
+model
+\item \code{response} an integer vector of the response data used in the
+model (coded such that \code{1} corresponds to the "lower" boundary
+and \code{2} corresponds to the "upper" boundary)
+\item \code{err_tol} the error tolerance used in the calculations for
+fitting the DDM
+\item \code{coefficients} a numeric vector containing the current set of
+coefficients for the formulas provided to the \code{ddm()} function
+call; the coefficients correspond to the DDM parameters in the
+following order: \code{v}, \code{a}, \code{t0}, \code{w}, \code{sv}
+\item \code{likelihood} a double containing the log-likelihood for the
+current set of \code{coefficients} (note this can be changed by
+calling the function \code{calculate_loglik()} below)
+\item \code{modmat_v} a numeric matrix containing the model matrix for
+\code{v}, the drift rate, determined by the formula input to the
+argument \code{drift} in the \code{ddm()} function call
+\item \code{modmat_a} a numeric matrix containing the model matrix for
+\code{a}, the boundary separation, determined by the formula input
+to the argument \code{boundary} in the \code{ddm()} function call
+\item \code{modmat_t0} a numeric matrix containing the model matrix for
+\code{t0}, the non-decision time, determined by the formula input
+to the argument \code{ndt} in the \code{ddm()} function call
+\item \code{modmat_w} a numeric matrix containing the model matrix for
+\code{w}, the inital bias, determined by the formula input to the
+argument \code{bias} in the \code{ddm()} function call
+\item \code{modmat_sv} a numeric matrix containing the model matrix for
+\code{sv}, the inter-trial variability in the drift rate,
+determined by the formula input to the argument \code{sv} in the
+\code{ddm()} function call
+\item \code{hess_v} a numeric matrix containing the Hessian for \code{v},
+the drift rate, whose dimensions are determined by the formula
+input to the argument \code{drift} in the \code{ddm()} function
+call
+\item \code{hess_a} a numeric matrix containing the Hessian for \code{a},
+the boundary separation, whose dimensions are determined by the
+formula input to the argument \code{drift} in the \code{ddm()}
+function call
+\item \code{hess_t0} a numeric matrix containing the Hessian for
+\code{t0}, the non-decision time, whose dimensions are determined
+by the formula input to the argument \code{drift} in the
+\code{ddm()} function call
+\item \code{hess_w} a numeric matrix containing the Hessian for \code{w},
+the initial bias, whose dimensions are determined by the formula
+input to the argument \code{drift} in the \code{ddm()} function
+call
+\item \code{hess_sv} a numeric matrix containing the Hessian for
+\code{sv}, the inter-trial variability in the drift rate, whose
+dimensions are determined by the formula input to the argument
+\code{drift} in the \code{ddm()} function call
+\item \code{vcov_v} a numeric matrix containing the variance-covariance
+matrix for \code{v}, the drift rate, whose dimensions are
+determined by the formula input to the argument \code{drift} in the
+\code{ddm()} function call
+\item \code{vcov_a} a numeric matrix containing the variance-covariance
+matrix for \code{a}, the boundary separation, whose dimensions are
+determined by the formula input to the argument \code{boundary} in
+the \code{ddm()} function call
+\item \code{vcov_t0} a numeric matrix containing the variance-covariance
+matrix for \code{t0}, the non-decision time, whose dimensions are
+determined by the formula input to the argument \code{ndt} in the
+\code{ddm()} function call
+\item \code{vcov_w} a numeric matrix containing the variance-covariance
+matrix for \code{w}, the inital bias, whose dimensions are
+determined by the formula input to the argument \code{bias} in the
+\code{ddm()} function call
+\item \code{vcov_sv} a numeric matrix containing the variance-covariance
+matrix for \code{v}, the inter-trial variability in the drift rate,
+whose dimensions are determined by the formula input to the
+argument \code{sv} in the \code{ddm()} function call
+\item \code{calculate_loglik} calculates and returns a double containing
+the negated log-likelihood (note that this will overwrite the
+\code{likelihood} component of the C++ object)
+\item \code{calculate_gradient} calculates and returns a numeric vector
+of the negated gradients for the provided coefficient values; the
+gradients are stored in the same manner as their corresponding
+\code{coefficents} (note that this will overwrite the
+\code{likelihood}) component of the C++ object)
+\item \code{calculate_hessians} calculates and returns a named list of
+the negated Hessians for each model parameter for the provided
+coefficient values (note that this will overwrite the
+\code{likelihood}, \code{hess_v}, \code{hess_a}, \code{hess_t0},
+\code{hess_w}, and \code{hess_sv} components of the C++ object)
+\item \code{calculate_vcov} calculates and returns a named list of the
+variance-covariance matrices for each model parameter for the
+stored \code{coefficients} (note that this will overwrite the
+\code{likelihood}, \code{hess_v}, \code{hess_a}, \code{hess_t0},
+\code{hess_w}, \code{hess_sv}, \code{vcov_v}, \code{vcov_a},
+\code{vcov_t0}, \code{vcov_w}, and \code{vcov_sv} components of the
+C++ object)
+\item \code{calculate_standard_error} calculates and returns a numeric
+vector of the standard errors of the stored \code{coefficients};
+the standard errors are stored in the same manner as their
+corresponding \code{coefficients} (note that this will overwrite
+the \code{likelihood}, \code{hess_v}, \code{hess_a},
+\code{hess_t0}, \code{hess_w}, \code{hess_sv}, \code{vcov_v},
+\code{vcov_a}, \code{vcov_t0}, \code{vcov_w}, and \code{vcov_sv}
+components of the C++ object)
+}
 }
 \description{
 Fit the 5-parameter DDM (Diffusion Decision Model) via maximum likelihood
 estimation. The model for each DDM parameter can be specified symbolically
-using R's formulas interface. With the exception of the drift rate (which is
+using R's formula interface. With the exception of the drift rate (which is
 always estimated) all parameters can be either fixed or estimates.
 }
 \details{
 \code{ddm} uses \code{\link{model.matrix}} for transforming the
-  symbolic description of the regression model underlying each parameter into
-  estimated coefficients. The following provides a few examples:
-
+symbolic description of the regression model underlying each parameter into
+estimated coefficients. The following provides a few examples:
 \itemize{
-  \item \code{~ 1} estimates a single coefficient, named \code{(Intercept)}
-  \item \code{~ condition} estimates the intercept plus k - 1 coefficients
-  for a factor with k levels (e.g., intercept plus one coefficient if
-  condition has two levels). The interpretation of the coefficients depend on
-  the factor contrasts employed, which are usually based on the contrasts
-  specified in \code{options("contrasts")}. For the default \code{treatment}
-  contrasts (\code{\link{contr.treatment}}), the intercept corresponds to the
-  first factor level and the additional coefficients correspond to the
-  difference from the intercept (i.e., first factor level). When using
-  \code{contr.sum} the intercept correspond to the grand mean and the
-  additional coefficients correspond to the differences from the grand mean.
-  \item code{~ 0 + condition} estimates no intercept but one coefficient per
-  factor level. This specification can also be used to get one coefficient
-  per cell for a multi-factorial design, e.g., \code{~ 0 +
-  condition1:condition2}.
-  \item code{~ 0 + condition1 + condition1:condition2} estimates one
-  "intercept" per level of \code{condition1} factor (which is not called
-  intercept) plus k - 1 difference parameters from the condition-specific
-  intercept for the k-levels of \code{condition2}. The interpretation of the
-  difference parameters again depends on the contrasts used (e.g., treatment
-  vs. sum-to-zero contrasts, see examples). This formula specification can
-  often make sense for the drift rate when \code{condition1} is the factor
-  (such as item type) mapped to upper and lower response boundary of the DDM
-  and \code{condition2} is another factor by which we want the drift rate to
-  differ. This essentially gives one overall drift rate per response boundary
-  plus the differences from this overall one (note again that with treatment
-  contrasts this overall drift rate is the first factor level of
-  \code{condition2}).
+\item \code{~ 1} estimates a single coefficient, named \code{(Intercept)}
+\item \code{~ condition} estimates the intercept plus k - 1 coefficients
+for a factor with k levels (e.g., intercept plus one coefficient if
+condition has two levels). The interpretation of the coefficients
+depend on the factor contrasts employed, which are usually based on
+the contrasts specified in \code{options("contrasts")}. For the
+default \code{treatment} contrasts (\code{\link{contr.treatment}}),
+the intercept corresponds to the first factor level and the
+additional coefficients correspond to the difference from the
+intercept (i.e., first factor level). When using \code{contr.sum}
+the intercept corresponds to the grand mean and the additional
+coefficients correspond to the differences from the grand mean.
+\item \code{~ 0 + condition} estimates no intercept but one coefficient
+per factor level. This specification can also be used to get one
+coefficient per cell for a multi-factorial design, e.g.,
+\code{~ 0 + condition1:condition2}.
+\item \code{~ 0 + condition1 + condition1:condition2} estimates one
+"intercept" per level of \code{condition1} factor (which is not
+called intercept) plus k - 1 difference parameters from the
+condition-specific intercept for the k-levels of \code{condition2}.
+The interpretation of the difference parameters again depends on
+the contrasts used (e.g., treatment vs. sum-to-zero contrasts, see
+examples). This formula specification can often make sense for the
+drift rate when \code{condition1} is the factor (such as item type)
+mapped to upper and lower response boundary of the DDM and
+\code{condition2} is another factor by which we want the drift rate
+to differ. This essentially gives one overall drift rate per
+response boundary plus the differences from this overall one (note
+again that with treatment contrasts this overall drift rate is the
+first factor level of \code{condition2}).
 }
 
 To get meaningful results it is necessary to estimate separate drift rates
 for the different condition/item-types that are mapped onto the upper and
 lower boundary of the diffusion model.
 
-If a non-default fitting function is used, it needs to minimise the negative
-log-likelihood, accept the following arguments, \code{init, objective,
-gradient, lower, upper, control} , and return a list with the following
-arguments \code{coefficients, loglik, converged, optim} (where
-\code{converged} is boolean and \code{optim} can be an arbitrary list with
-additional information).
+If a non-default fitting function is used, it needs to minimize the
+negative log-likelihood, accept the following arguments,
+\code{init, objective, gradient, lower, upper, control} , and return a list
+with the following arguments \code{coefficients, loglik, converged, optim}
+(where \code{converged} is boolean and \code{optim} can be an arbitrary
+list with additional information).
 }
 \examples{
 # prepare data
@@ -310,7 +358,6 @@ options(op) # reset contrasts
 ## one drift rate per classification by difficulty design cell
 fit1 <- ddm(rt + response ~ 0 + classification:difficulty, data = p1)
 summary(fit1)
-fit1
 
 ## set default contrasts (just in case contrasts have been changed)
 op <- options(contrasts = c('contr.treatment', 'contr.poly'))
@@ -319,7 +366,8 @@ op <- options(contrasts = c('contr.treatment', 'contr.poly'))
 ## plus one further coefficient per classification condition corresponding to
 ## difference from "intercept" (hard - easy)
 fit1b <- ddm(rt + response ~ 0 + classification + classification:difficulty,
-             data = p1)
+             data = p1, args_optim = list(control = list(iter.max = 1000,
+                                                         eval.max = 1000)))
 summary(fit1b)
 options(op) # reset contrasts
 
@@ -352,7 +400,7 @@ c(coef(fit1c)[1] + coef(fit1c)[3], coef(fit1c)[2] + coef(fit1c)[4],
 # we can estimate a model that freely estimates response bias
 # (instead of fixing it at 0.5)
 fit2 <- ddm(rt + response ~ 0 + classification:difficulty, bias = ~1, data = p1)
-fit2
+summary(fit2)
 ## Note: estimating bias only makes sense in situations like here where the
 ## response boundaries do not correspond to correct/incorrect but to the
 ## actual responses participants gave (here: blast vs. non-blast classification)
@@ -369,7 +417,7 @@ if (requireNamespace("lmtest")) { ## requires package lmtest
 # variable, such as block number
 fit3 <- ddm(rt + response ~ 0 + classification:difficulty,
             boundary = ~ block, data = p1)
-fit3
+summary(fit3)
 
 ## does making boundary depend on block leads to a significant increase in model
 ## fit?
@@ -377,4 +425,54 @@ if (requireNamespace("lmtest")) { ## requires package lmtest
   lmtest::lrtest(fit1, fit3)
   ## does not look like it (p = 0.198)
 }
+
+
+##----------------------------------------------------------------
+##              Fitting with optimization arguments              -
+##----------------------------------------------------------------
+## example of how to use your own initial values and bounds for the optimization
+## of the coefficients (determined by the model matrices/formulas)
+options(op) # reset contrasts
+
+# this uses the default generated initial values and bounds
+fitex0 <- ddm(rt + response ~ 0 + classification:difficulty, data = p1)
+
+# we can see the number of coefficients (and thus the number of initial values
+# and bounds) required if we wish to use our own
+fitex0$optim_info$args_optim$init
+fitex0$optim_info$args_optim$lo_bds
+fitex0$optim_info$args_optim$up_bds
+# -1.9270279  2.5408864 -1.9270279  0.3181987  1.7907438  0.1264035
+# -Inf        -Inf      -Inf        -Inf       0          0
+# Inf         Inf       Inf         Inf        Inf        0.461
+# the first four coefficients are for the drift rate (given by the formula we
+# provided), and the last two are for the boundary separation and non-decision
+# time, respectively (note that the default is to estimate these two model
+# parameters with a single coefficient).
+
+# to use our own initial values, we can include them in the `args_optim` list,
+# but note that they must be within the generated bounds
+fitex1 <- ddm(rt + response ~ 0 + classification:difficulty, data = p1,
+              args_optim = list(init = c(-1.5, 1, -1, 1, 1.5, 0.3)))
+
+# to use our own bounds, we again can include them in the `args_optim` list,
+# but note that they must contain the generated initial values
+fitex2 <- ddm(rt + response ~ 0 + classification:difficulty, data = p1,
+              args_optim = list(lo_bds = c(-20, -20, -20, -20, 0, 0),
+                                up_bds = c(20, 20, 20, 20, 10, 0.5)))
+
+# to use both our own initial values and bounds, we include them in the
+# `args_optim` list, and the bounds must contain the initial values
+fitex3 <- ddm(rt + response ~ 0 + classification:difficulty, data = p1,
+              args_optim = list(init = c(-1.5, 1, -1, 1, 1.5, 0.3),
+                                lo_bds = c(-20, -20, -20, -20, 0, 0),
+                                up_bds = c(20, 20, 20, 20, 10, 0.5)))
+
+# the only other option in the `args_optim` list is the control parameters
+# directly used by the optimization function (e.g., the maximum number of
+# iterations); here we'll set the maximum number of iterations and function
+# evaluations
+fitex4 <- ddm(rt + response ~ 0 + classification:difficulty, data = p1,
+              args_optim = list(control = list(iter.max = 1000,
+                                               eval.max = 1000)))
 }

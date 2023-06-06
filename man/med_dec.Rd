@@ -7,22 +7,22 @@
 \format{
 A data frame with 11000 rows and 9 variables:
 \describe{
-  \item{id}{identification number of the participant}
-  \item{group}{expertise of participant; "experienced", "inexperienced", or "novice". The first two levels refer to different type of medical professional (i.e., experts).}
-  \item{block}{block number}
-  \item{trial}{index of trial for each participant}
-  \item{classification}{true classification of the pictured cell; i.e. the correct response}
-  \item{difficulty}{adjudged difficulty of the task for the particular image}
-  \item{response}{response given by the participant; either "blast" or "non-blast"}
-  \item{rt}{the response time associated with the response, in seconds}
-  \item{stimulus}{the image file used for the specific trial}
+\item{id}{identification number of the participant}
+\item{group}{expertise of participant; "experienced", "inexperienced", or "novice". The first two levels refer to different type of medical professional (i.e., experts).}
+\item{block}{block number}
+\item{trial}{index of trial for each participant}
+\item{classification}{true classification of the pictured cell; i.e. the correct response}
+\item{difficulty}{adjudged difficulty of the task for the particular image}
+\item{response}{response given by the participant; either "blast" or "non-blast"}
+\item{rt}{the response time associated with the response, in seconds}
+\item{stimulus}{the image file used for the specific trial}
 }
 }
 \source{
 Trueblood, J.S., Holmes, W.R., Seegmiller, A.C. et al. The impact of
-  speed and bias on the cognitive processes of experts and novices in medical
-  image decision-making. Cogn. Research 3, 28 (2018).
-  https://doi.org/10.1186/s41235-018-0119-2
+speed and bias on the cognitive processes of experts and novices in medical
+image decision-making. Cogn. Research 3, 28 (2018).
+https://doi.org/10.1186/s41235-018-0119-2
 }
 \usage{
 data(med_dec)
@@ -59,9 +59,9 @@ non-blast images, and hard non-blast images, fully randomized.
 
 There were three manipulations across blocks: accuracy, speed, and bias. In
 the accuracy blocks, participants were instructed to respond as accurately as
-possible and were given 5 s to respond. [...] If they responded after the
-deadline, they received the message "Too Slow!" The 5-s [...] response
-windows for the accuracy [...] [condition was] based on the response time
+possible and were given 5 s to respond. \link{...} If they responded after the
+deadline, they received the message "Too Slow!" The 5-s \link{...} response
+windows for the accuracy \link{...} \link{condition was} based on the response time
 data from the three expert raters. The 0.975 quantile of the expert raters'
 response times was 4.96 s; thus, we set the accuracy response window to 5 s.
 
@@ -71,7 +71,7 @@ speed, and bias). The order of the last three blocks was identical to the
 order of the first three blocks."
 
 Note that this dataset contains some negative response times that indicate a
-missing response (i.e., the response value for that trial is `NA`). Take care
+missing response (i.e., the response value for that trial is \code{NA}). Take care
 in removing these values before using this dataset. See our Validity vignette
 for an example of use in an optimization setting.
 }
