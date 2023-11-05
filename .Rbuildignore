@@ -4,6 +4,7 @@
 ^examples$
 ^\.travis\.yml$
 ^README\.Rmd$
+^README\.html$
 ^docs$
 ^.*\.ini$
 ^.*/.*\.ini$
@@ -11,6 +12,8 @@
 ^doc$
 ^Meta$
 ^\.github$
+^\.lib$
+^\.vscode$
 ^zedonked$
 ^paper_analysis$
 ^unused_stuff$

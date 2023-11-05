@@ -39,7 +39,6 @@ op <- options(width = 100, digits = 4)
   <li><a href="#ddm">Fitting with `ddm()`</a>
   <ul>
     <li><a href="#ddm-one">Simple Fitting Routine</a></li>
-    <li><a href="#ddm-all">Fitting the Entire Dataset</a></li>
   </ul></li>
   <li><a href="#dfddm">Fitting Manually with `dfddm()`</a>
   <ul>
@@ -121,109 +120,8 @@ options(opc) # reset contrasts
 
 
 
-## Fitting the Entire Dataset {#ddm-all}
-Here is an example of when things go wrong. I've inserted a `browser()` into the ddm file right before making the fddm fit object (line 652). 
-
-```{r ex1}
-devtools::load_all(recompile = TRUE)
-library("fddm")
-data(med_dec, package = "fddm")
-
-med_dec <- med_dec[which(med_dec[["rt"]] >= 0), ]
-nov_data1 <- med_dec[med_dec[["id"]] == "1" & med_dec[["group"]] == "novice", ]
-
-opc <- options(contrasts = c("contr.sum", "contr.poly"))
-
-fit1 <- ddm(rt + response ~ classification*difficulty, data = nov_data1)
-
-# run after inside browser()
-f <- new(fddm_fit, rt, response_vec, all_mm, args_ddm[["err_tol"]])
-```
-
-From here, the log-likelihood doesn't evaluate properly because one of the response times (the 123rd) is less than the EZ-diffusion calculation for `t0`. The EZ-diffusion calculation is done around line 540 in the ddm R file.
-
-```{r ex2}
-f$calculate_loglik(init_vals) # 1e6
-
-f$rt[123] # 0.426
-init_vals[6] # 0.487403
-```
-
-That's all.
-
-```{r partition-data, eval=TRUE}
-
-```
-
-We use the same contrasts as before.
-
-```{r set-contrasts, eval=TRUE}
-opc <- options(contrasts = c("contr.sum", "contr.poly"))
-```
-
-Using the same protocol as when fitting a single individual's data, we perform the three fits. Note that the drift rate is modeled using the grand mean (labeled "Intercept") with the additional coefficients corresponding to the differences from the grand mean, according to their classification ("blast" or "non-blast") and difficulty ("easy" or "hard"). Also, the boundary separation and non-decision time are estimated by a single coefficient each, and the initial bias and inter-trial variability in the drift rate are held fixed at 0.5 and 0, respectively.
-
-```{r multi-ddm-fit, eval=TRUE}
-
-```
-
-The output of the fits is structured the same as it was when only fitting a single individual's data. The raw output here may not be easily digested, so we will make a simple plot of the fitting data in the next section.
-
-We can reset the contrasts after fitting.
-
-```{r reset-contrasts, eval=TRUE}
-options(opc) # reset contrasts
-```
-
-
-
-### Rudimentary Analysis {#ddm-all-ana}
-To show any differences arising from medical experience, we will plot the drift rate parameters from each experience group.
-
-```{r plot, eval=TRUE}
-library("reshape2")
-library("ggplot2")
-
-fitp <- data.frame(fit[, c(1, 4, 5)]) # make a copy to manipulate for plotting
-colnames(fitp)[-1] <- c("vu", "vl")
-
-for (i in 1:length(unique(fitp[["ID"]]))) {
-  first <- substr(fitp[["ID"]][i], 1, 1)
-  if (first == "n") {
-    fitp[["ID"]][i] <- "novice"
-  } else if (first == "i") {
-    fitp[["ID"]][i] <- "inexperienced"
-  } else {
-    fitp[["ID"]][i] <- "experienced"
-  }
-}
-
-fitp <- melt(fitp, id.vars = "ID", measure.vars = c("vu", "vl"),
-             variable.name = "vuvl", value.name = "estimate")
-
-ggplot(fitp, aes(x = factor(ID, levels = c("novice", "inexperienced", "experienced")),
-                 y = estimate,
-                 color = factor(vuvl, levels = c("vu", "vl")))) +
-  geom_point(alpha = 0.4, size = 4) +
-  labs(title = "Parameter Estimates for vu and vl",
-       x = "Experience Level", y = "Parameter Estimate",
-       color = "Drift Rate") +
-  theme_bw() +
-  theme(panel.border = element_blank(),
-        plot.title = element_text(size = 23),
-        plot.subtitle = element_text(size = 16),
-        axis.text.x = element_text(size = 16),
-        axis.text.y = element_text(size = 16),
-        axis.title.x = element_text(size = 20,
-                                    margin = margin(10, 5, 5, 5, "pt")),
-        axis.title.y = element_text(size = 20),
-        legend.title = element_text(size = 20),
-        legend.text = element_text(size = 16))
-```
-
-Before we begin analysis of this plot, note that the drift rate corresponding to the upper threshold should always be positive, and the drift rate corresponding to the lower threshold should always be negative. Since there are a few fitted values that switch this convention, the novice participants show evidence of consistently responding incorrectly to the stimulus. In contrast, both the inexperienced and experienced participants show a clean division of drift rates around zero.
-
-In addition, we notice that the more experienced participants tend to have higher fitted drift rates in absolute value. A more extreme drift rate means that the participant receives and processes information more efficiently than a more mild drift rate. The overall pattern is that the novices are on average the worst at receiving information, the experienced professionals are the best, and the inexperienced professionals are somewhere in the middle. This pattern indicates that experienced professionals are indeed better at their job than untrained undergraduate students!
+### Rudimentary Analysis {#ddm-ana}
+emmeans ANOVA
 
 
 

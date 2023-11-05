@@ -9,11 +9,34 @@ devtools::install()
 devtools::check()
 
 
+##### R CMD Check Warnings/Notes #####
+
+### Warnings
+#- ‘qpdf’ is needed for checks on size reduction of PDFs
+#---> I looked this up, and we can safely ignore this
+
+### Notes
+#- Specified C++11: please drop specification unless essential
+#---> it's essential for Rcpp to work properly
+
+#- installed size is 15.0Mb
+    # sub-directories of 1Mb or more:
+    #   doc    1.3Mb
+    #   libs  12.7Mb
+#---> dunno what we can do about that
+
+#- Namespace in Imports field not imported from: ‘RcppEigen’
+    # All declared Imports should be used.
+#---> it's ok; we use RcppEigen to do matrix multiplication, but it's an
+      # operator (*) instead of a function() so it looks like we don't use it
+#-------------------------------------
+
 ### TODO ###
-# rerun benchmark vignette and verify the comments on the plots
-# fill out example vignette
+# fill out example vignette (simple analysis of individual fit)
 
 ### Maybe Later ###
+# rerun benchmark vignette and verify the comments on the plots
+# example vignette- add fitting entire dataset with ddm() and some simple analysis
 # write vignette "how to get started beginner's guide to fitting the DDM"
 # there is also the possibility of adding more link functions (instead of just the identity)
 

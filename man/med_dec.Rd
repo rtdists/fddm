@@ -59,9 +59,9 @@ non-blast images, and hard non-blast images, fully randomized.
 
 There were three manipulations across blocks: accuracy, speed, and bias. In
 the accuracy blocks, participants were instructed to respond as accurately as
-possible and were given 5 s to respond. \link{...} If they responded after the
-deadline, they received the message "Too Slow!" The 5-s \link{...} response
-windows for the accuracy \link{...} \link{condition was} based on the response time
+possible and were given 5 s to respond. [...] If they responded after the
+deadline, they received the message "Too Slow!" The 5-s [...] response
+windows for the accuracy [...] [condition was] based on the response time
 data from the three expert raters. The 0.975 quantile of the expert raters'
 response times was 4.96 s; thus, we set the accuracy response window to 5 s.
 

@@ -23,7 +23,9 @@ fit5 <- ddm(rt + response ~ 0 + classification:difficulty,
 
 fit6 <- ddm(rt + response ~ 0 + classification:difficulty,
             boundary = ~ difficulty, ndt = ~ difficulty,
-            bias = ~ 1, sv = ~1, data = p1)
+            bias = ~ 1, sv = ~1, data = p1,
+            args_optim = list(control = list(eval.max = 600,
+                                             iter.max = 600)))
 
 test_that("ddm objects exist", {
   expect_s3_class(fit0, "ddm")
@@ -32,6 +34,7 @@ test_that("ddm objects exist", {
   expect_s3_class(fit3, "ddm")
   expect_s3_class(fit4, "ddm")
   expect_s3_class(fit5, "ddm")
+  expect_s3_class(fit6, "ddm")
 })
 
 test_that("printing shows coefficients", {
@@ -42,7 +45,7 @@ test_that("printing shows coefficients", {
                 regexp = "drift coefficients (identity link):", fixed = TRUE)
 
   expect_output(print(fit1),
-                regexp = "DDM with 3 estimated and 2 fixed distributional parameters.\nFixed: bias = 0.5, sv = 0",
+                regexp = "DDM fit with 3 estimated and 2 fixed distributional parameters.\nFixed: bias = 0.5, sv = 0",
                 fixed = TRUE)
   expect_output(print(fit1),
                 regexp = "boundary coefficients (identity link):", fixed = TRUE)
@@ -50,7 +53,7 @@ test_that("printing shows coefficients", {
                 regexp = "ndt coefficients (identity link):", fixed = TRUE)
 
   expect_output(print(fit2),
-                regexp = "DDM with 4 estimated and 1 fixed distributional parameters.\nFixed: sv = 0",
+                regexp = "DDM fit with 4 estimated and 1 fixed distributional parameters.\nFixed: sv = 0",
                 fixed = TRUE)
   expect_output(print(fit2),
                 regexp = "bias coefficients (identity link):", fixed = TRUE)
@@ -58,7 +61,7 @@ test_that("printing shows coefficients", {
                 regexp = "ndt coefficients (identity link):", fixed = TRUE)
 
   expect_output(print(fit6),
-                regexp = "DDM with 5 estimated and 0 fixed distributional parameters.",
+                regexp = "DDM fit with 5 estimated and 0 fixed distributional parameters.",
                 fixed = TRUE)
   expect_output(print(fit6),
                 regexp = "ndt coefficients (identity link):", fixed = TRUE)

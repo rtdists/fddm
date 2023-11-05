@@ -283,6 +283,7 @@
 #'   }
 #'
 #' @importFrom stats .getXlevels make.link model.frame model.matrix nlminb terms
+#' @importFrom stats lm var coef
 #' @importFrom methods new
 #' @export
 ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
@@ -363,24 +364,48 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   mm_formulas <- all_ddm_formulas[par_is_formula]
   mm_formulas[["drift"]] <- drift
 
-  #-------------------- Create Model Matrices ---------------------------------#
-  formula_mm <- vector("list", length(full_formula)[2])
-  names(formula_mm) <- names(all_ddm_pars)
+  #-------------------- Create and Check Estimability of Model Matrices -------#
+  # Create model matrices for all parameters (with formulas and constants)
+  all_mm <- vector("list", length(full_formula)[2])
+  names(all_mm) <- names(all_ddm_pars)
   rterms <- vector("list", length(full_formula)[2])
   names(rterms) <- names(all_ddm_pars)
-  for (i in seq_along(formula_mm)) {
+  for (i in seq_along(all_mm)) {
     rterms[[i]] <- terms(full_formula, lhs = 0, rhs = i)
-    formula_mm[[i]] <- model.matrix(
+    all_mm[[i]] <- model.matrix(
       object = rterms[[i]],
       data = mf,
       contrasts.arg = contrasts
     )
   }
-  all_mm <- formula_mm
+
+  # Place constants for the constant model matrices
   all_mm[!par_is_formula] <- lapply(all_ddm_constants,
                     FUN = function(x) matrix(x, nrow = 1, ncol = 1))
 
-  ### link function (currently only uses identity, so no argument yet)
+  # Extract the model matrices for the parameters to be fitted (with formulas)
+  formula_mm <- all_mm[par_is_formula] # for convenience, really
+
+  # Check estimability of model matrices for parameters to be fitted (formulas)
+  ncols <- unlist(lapply(formula_mm, FUN = ncol))
+  for (i in seq_along(formula_mm)) {
+    parname <- names(formula_mm[i])
+    rank_warn <- FALSE
+    while (qr(formula_mm[[i]])[["rank"]] < ncol(formula_mm[[i]])) {
+      formula_mm[[i]] <- formula_mm[[i]][,
+                          seq_len(qr(formula_mm[[i]])[["rank"]]), drop = FALSE]
+      rank_warn <- TRUE
+    }
+    if (rank_warn) {
+      warning("model matrix for ", parname, " was rank deficient; ",
+              ncols[i] - ncol(formula_mm[[i]]),
+              " column(s) dropped from right side.", call. = FALSE)
+      ncols[i] <- ncol(formula_mm[[i]])
+    }
+  }
+  all_mm[par_is_formula] <- formula_mm # save any changes
+
+  #-------------------- Link Function (only uses identity right now) ----------#
   all_links <- list(
     drift = "identity",
     boundary = "identity",
@@ -389,27 +414,6 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
     sv = "identity"
   )
   links <- lapply(all_links[names(all_ddm_formulas)], make.link)
-
-  #-------------------- Check Estimability of Model Matrices ------------------#
-  ncols <- unlist(lapply(all_mm, FUN = ncol))
-  for (i in seq_along(all_mm)) {
-    parname <- names(all_mm[i])
-    if (ncols[i] >= 1 && nrow(all_mm[[i]]) > 1) {
-      # check estimability
-      rank_warn <- FALSE
-      while (qr(all_mm[[i]])[["rank"]] < ncol(all_mm[[i]])) {
-        all_mm[[i]] <- all_mm[[i]][, seq_len(qr(all_mm[[i]])[["rank"]]),
-                                   drop = FALSE]
-        rank_warn <- TRUE
-      }
-      if (rank_warn) {
-        warning("model matrix for ", parname, " was rank deficient; ",
-                ncols[i] - ncol(all_mm[[i]]),
-                " column(s) dropped from right side.", call. = FALSE)
-        ncols[i] <- ncol(all_mm[[i]])
-      }
-    }
-  }
 
   #-------------------- Get Initial Values and Bounds for Estimation ----------#
   ncoeffs <- sum(ncols[names(mm_formulas)])
@@ -500,144 +504,149 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   # strategy: fill init_vals, lower_bds, upper_bds with the generated values
   # as default; then overwrite if the user supplied valid values
 
-  if (!user_inits || !user_bounds) {
-    for (i in seq_along(all_mm)) {
-      parname <- names(all_mm[i])
-      if (ncols[i] >= 1 && nrow(all_mm[[i]]) > 1) {
-        idx <- sum(ncols[seq_len(i - 1)])
-        if (parname %in% names(ez_parnames)) { # drift, boundary, ndt
-          # get initial values using EZ-Diffusion (Wagenmakers et al. 2007)
-          lm_mrt <- lm(rt ~ 0 + all_mm[[i]])
-          lm_acc <- lm((as.numeric(response_vec) - 1) ~ 0 + all_mm[[i]])
-          var_rt <- var(rt)
-          tmp_iv <- numeric(ncols[i])
-          idx <- sum(ncols[seq_len(i - 1)])
-          for (j in seq_len(ncols[i])) {
-            tmp_mm <- all_mm[[i]][all_mm[[i]][, j] != 0, , drop = FALSE]
-            weights <- apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean)
-            lower_bds[idx + j] <- l_bds[["diff"]] # set bounds as dif
-            upper_bds[idx + j] <- u_bds[["diff"]] # set bounds as dif
-            if (weights[j] == 0) { # coef is a dif with zero weight
-              if (user_inits) { # user supplied init always ok
-                init_vals[idx + j] <- args_optim[["init"]][idx + j]
-              } else {
-                init_vals[idx + j] <- init_pars[["diff"]]
-              }
-              if (user_bounds) { # check user supplied bounds against gen init
-                if (init_vals[idx + j] >= args_optim[["lo_bds"]][idx + j] &&
-                    init_vals[idx + j] <= args_optim[["up_bds"]][idx + j]) {
-                  lower_bds[idx + j] <- args_optim[["lo_bds"]][idx + j]
-                  upper_bds[idx + j] <- args_optim[["up_bds"]][idx + j]
-                } else {
-                  warning("ddm warning: the generated initial value at index ",
-                          idx + j, " is outside of the supplied bounds; new ",
-                          "bounds will be generated for this index.")
-                }
-              }
-            } else { # coef could be an int or a diff with nonzero weight
-              tmp_mrt <- sum(weights * coef(lm_mrt)[seq_len(j)])
-              tmp_acc <- min(max(sum(weights * coef(lm_acc)[seq_len(j)]), 0), 1)
-              marg_par_j <- ezddm(
-                propCorrect = tmp_acc,
-                rtCorrectVariance_seconds = var_rt,
-                rtCorrectMean_seconds = tmp_mrt,
-                s = 1, nTrials = nrow(tmp_mm)
-              )[[ez_parnames[[parname]]]]
-              tmp_iv[j] <- (marg_par_j - sum(weights[-j] * tmp_iv[seq_len(j-1)])
-                            ) / weights[j]
-              if (weights[j] == 1 && all(weights[-j] == 0)) { # coef is an int
-                lower_bds[idx + j] <- l_bds[[parname]] # set bounds as int
-                upper_bds[idx + j] <- u_bds[[parname]] # set bounds as int
-                if (user_inits) { # check user supplied init against gen bounds
-                  if (args_optim[["init"]][idx + j] >= lower_bds[idx + j] &&
-                      args_optim[["init"]][idx + j] <= upper_bds[idx + j]) {
-                    tmp_iv[j] <- args_optim[["init"]][idx + j]
-                  } else {
-                    warning("ddm warning: the supplied initial value at index ",
-                            idx + j, " is outside of the generated bounds; a ",
-                            "new initial value will be generated for this ",
-                            "index.")
-                  }
-                }
-                if (user_bounds) { # check user supplied bounds against gen init
-                  if (tmp_iv[j] >= args_optim[["lo_bds"]][idx + j] &&
-                      tmp_iv[j] <= args_optim[["up_bds"]][idx + j]) {
-                    lower_bds[idx + j] <- args_optim[["lo_bds"]][idx + j]
-                    upper_bds[idx + j] <- args_optim[["up_bds"]][idx + j]
-                  } else {
-                    warning("ddm warning: the generated initial value at ",
-                            "index ", idx + j, " is outside of the supplied ",
-                            "bounds; new bounds will be generated for this ",
-                            "index.")
-                  }
-                }
-              } else { # coef is a dif with nonzero weight
-                if (user_inits) { # user supplied init always ok
-                  tmp_iv[j] <- args_optim[["init"]][idx + j]
-                }
-                if (user_bounds) { # check user supplied bounds against gen init
-                  if (tmp_iv[j] >= args_optim[["lo_bds"]][idx + j] &&
-                      tmp_iv[j] <= args_optim[["up_bds"]][idx + j]) {
-                    lower_bds[idx + j] <- args_optim[["lo_bds"]][idx + j]
-                    upper_bds[idx + j] <- args_optim[["up_bds"]][idx + j]
-                  } else {
-                    warning("ddm warning: the generated initial value at ",
-                            "index ", idx + j, " is outside of the supplied ",
-                            "bounds; new bounds will be generated for this ",
-                            "index.")
-                  }
-                }
-              }
+  if (!user_inits || !user_bounds) { # at least one of inits/bds need to be gen
+    for (i in seq_along(formula_mm)) { # only doing this for not fixed params
+      parname <- names(formula_mm[i])
+      idx <- sum(ncols[seq_len(i - 1)])
+      if (parname %in% names(ez_parnames)) { # drift, boundary, ndt
+        tmp_iv <- numeric(ncols[i])
+        for (j in seq_len(ncols[i])) {
+          tmp_mm <- formula_mm[[i]][formula_mm[[i]][, j] != 0, , drop = FALSE]
+          weights <- apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean)
+          lower_bds[idx + j] <- l_bds[["diff"]] # set bounds as dif
+          upper_bds[idx + j] <- u_bds[["diff"]] # set bounds as dif
+          if (weights[j] == 0) { # coef is a dif with zero weight
+            if (user_inits) { # user supplied init always ok
+              init_vals[idx + j] <- args_optim[["init"]][idx + j]
+            } else {
+              init_vals[idx + j] <- init_pars[["diff"]]
             }
-          }
-          init_vals[(idx + 1):(idx + j)] <- tmp_iv
-        } else { # bias, sv
-          for (j in seq_len(ncols[i])) {
-            tmp_mm <- all_mm[[i]][all_mm[[i]][, j] != 0, , drop = FALSE]
-            weights <- apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean)
+            if (user_bounds) { # check user supplied bounds against gen init
+              if (init_vals[idx + j] >= args_optim[["lo_bds"]][idx + j] &&
+                  init_vals[idx + j] <= args_optim[["up_bds"]][idx + j]) {
+                lower_bds[idx + j] <- args_optim[["lo_bds"]][idx + j]
+                upper_bds[idx + j] <- args_optim[["up_bds"]][idx + j]
+              } else {
+                warning("ddm warning: the generated initial value at index ",
+                        idx + j, " is outside of the supplied bounds; new ",
+                        "bounds will be generated for this index.")
+              }
+            } # else bounds already filled in for a dif
+          } else { # coef could be an int or a diff with nonzero weight
+            # get initial values using EZ-Diffusion (Wagenmakers et al. 2007)
+            lm_mrt <- lm(rt ~ 0 + formula_mm[[i]])
+            lm_acc <- lm((as.numeric(response_vec) - 1) ~ 0 + formula_mm[[i]])
+            var_rt <- var(rt)
+            tmp_mrt <- sum(weights * coef(lm_mrt)[seq_len(j)])
+            tmp_acc <- min(max(sum(weights * coef(lm_acc)[seq_len(j)]), 0), 1)
+            marg_par_j <- ezddm(
+              propCorrect = tmp_acc,
+              rtCorrectVariance_seconds = var_rt,
+              rtCorrectMean_seconds = tmp_mrt,
+              s = 1, nTrials = nrow(tmp_mm)
+            )[[ez_parnames[[parname]]]]
+            tmp_iv[j] <- (marg_par_j - sum(weights[-j] * tmp_iv[seq_len(j-1)])
+                          ) / weights[j]
             if (weights[j] == 1 && all(weights[-j] == 0)) { # coef is an int
-              init_vals[idx + j] <- init_pars[[parname]]
-              lower_bds[idx + j] <- l_bds[[parname]]
-              upper_bds[idx + j] <- u_bds[[parname]]
+              lower_bds[idx + j] <- l_bds[[parname]] # set bounds as int
+              upper_bds[idx + j] <- u_bds[[parname]] # set bounds as int
               if (user_inits) { # check user supplied init against gen bounds
                 if (args_optim[["init"]][idx + j] >= lower_bds[idx + j] &&
                     args_optim[["init"]][idx + j] <= upper_bds[idx + j]) {
-                  init_vals[idx + j] <- args_optim[["init"]][idx + j]
+                  tmp_iv[j] <- args_optim[["init"]][idx + j]
                 } else {
                   warning("ddm warning: the supplied initial value at index ",
                           idx + j, " is outside of the generated bounds; a ",
-                          "new initial value will be generated for this index.")
+                          "new initial value will be generated for this ",
+                          "index.")
+                }
+              } else {
+                if (parname == "ndt") { # check for ezddm weirdness
+                  if (tmp_iv[j] < 0) {
+                    tmp_iv[j] <- 0.01 * u_bds[["ndt"]] # make init t0 > 0
+                  } else if (tmp_iv[j] >= u_bds[["ndt"]]) {
+                    tmp_iv[j] <- 0.99 * u_bds[["ndt"]] # make init t0 < min(rt)
+                  }
                 }
               }
               if (user_bounds) { # check user supplied bounds against gen init
-                if (init_vals[idx + j] >= args_optim[["lo_bds"]][idx + j] &&
-                    init_vals[idx + j] <= args_optim[["up_bds"]][idx + j]) {
+                if (tmp_iv[j] >= args_optim[["lo_bds"]][idx + j] &&
+                    tmp_iv[j] <= args_optim[["up_bds"]][idx + j]) {
                   lower_bds[idx + j] <- args_optim[["lo_bds"]][idx + j]
                   upper_bds[idx + j] <- args_optim[["up_bds"]][idx + j]
                 } else {
-                  warning("ddm warning: the generated initial value at index ",
-                          idx + j, " is outside of the supplied bounds; new ",
-                          "bounds will be generated for this index.")
+                  warning("ddm warning: the generated initial value at ",
+                          "index ", idx + j, " is outside of the supplied ",
+                          "bounds; new bounds will be generated for this ",
+                          "index.")
                 }
               }
-            } else { # coef is a dif
-              lower_bds[idx + j] <- l_bds[["diff"]]
-              upper_bds[idx + j] <- u_bds[["diff"]]
+            } else { # coef is a dif with nonzero weight
               if (user_inits) { # user supplied init always ok
+                tmp_iv[j] <- args_optim[["init"]][idx + j]
+              }
+              if (user_bounds) { # check user supplied bounds against gen init
+                if (tmp_iv[j] >= args_optim[["lo_bds"]][idx + j] &&
+                    tmp_iv[j] <= args_optim[["up_bds"]][idx + j]) {
+                  lower_bds[idx + j] <- args_optim[["lo_bds"]][idx + j]
+                  upper_bds[idx + j] <- args_optim[["up_bds"]][idx + j]
+                } else {
+                  warning("ddm warning: the generated initial value at ",
+                          "index ", idx + j, " is outside of the supplied ",
+                          "bounds; new bounds will be generated for this ",
+                          "index.")
+                }
+              } # else bounds already filled in for dif
+            }
+          }
+        }
+        init_vals[(idx + 1):(idx + j)] <- tmp_iv
+      } else { # bias, sv
+        for (j in seq_len(ncols[i])) {
+          tmp_mm <- formula_mm[[i]][formula_mm[[i]][, j] != 0, , drop = FALSE]
+          weights <- apply(tmp_mm[, seq_len(j), drop = FALSE], 2, mean)
+          if (weights[j] == 1 && all(weights[-j] == 0)) { # coef is an int
+            init_vals[idx + j] <- init_pars[[parname]]
+            lower_bds[idx + j] <- l_bds[[parname]]
+            upper_bds[idx + j] <- u_bds[[parname]]
+            if (user_inits) { # check user supplied init against gen bounds
+              if (args_optim[["init"]][idx + j] >= lower_bds[idx + j] &&
+                  args_optim[["init"]][idx + j] <= upper_bds[idx + j]) {
                 init_vals[idx + j] <- args_optim[["init"]][idx + j]
               } else {
-                init_vals[idx + j] <- init_pars[["diff"]]
+                warning("ddm warning: the supplied initial value at index ",
+                        idx + j, " is outside of the generated bounds; a ",
+                        "new initial value will be generated for this index.")
               }
-              if (user_bounds) { # check user supplied bounds against gen init
-                if (init_vals[idx + j] >= args_optim[["lo_bds"]][idx + j] &&
-                    init_vals[idx + j] <= args_optim[["up_bds"]][idx + j]) {
-                  lower_bds[idx + j] <- args_optim[["lo_bds"]][idx + j]
-                  upper_bds[idx + j] <- args_optim[["up_bds"]][idx + j]
-                } else {
-                  warning("ddm warning: the generated initial value at index ",
-                          idx + j, " is outside of the supplied bounds; new ",
-                          "bounds will be generated for this index.")
-                }
+            }
+            if (user_bounds) { # check user supplied bounds against gen init
+              if (init_vals[idx + j] >= args_optim[["lo_bds"]][idx + j] &&
+                  init_vals[idx + j] <= args_optim[["up_bds"]][idx + j]) {
+                lower_bds[idx + j] <- args_optim[["lo_bds"]][idx + j]
+                upper_bds[idx + j] <- args_optim[["up_bds"]][idx + j]
+              } else {
+                warning("ddm warning: the generated initial value at index ",
+                        idx + j, " is outside of the supplied bounds; new ",
+                        "bounds will be generated for this index.")
+              }
+            }
+          } else { # coef is a dif
+            lower_bds[idx + j] <- l_bds[["diff"]]
+            upper_bds[idx + j] <- u_bds[["diff"]]
+            if (user_inits) { # user supplied init always ok
+              init_vals[idx + j] <- args_optim[["init"]][idx + j]
+            } else {
+              init_vals[idx + j] <- init_pars[["diff"]]
+            }
+            if (user_bounds) { # check user supplied bounds against gen init
+              if (init_vals[idx + j] >= args_optim[["lo_bds"]][idx + j] &&
+                  init_vals[idx + j] <= args_optim[["up_bds"]][idx + j]) {
+                lower_bds[idx + j] <- args_optim[["lo_bds"]][idx + j]
+                upper_bds[idx + j] <- args_optim[["up_bds"]][idx + j]
+              } else {
+                warning("ddm warning: the generated initial value at index ",
+                        idx + j, " is outside of the supplied bounds; new ",
+                        "bounds will be generated for this index.")
               }
             }
           }
@@ -646,10 +655,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
     }
   }
 
-  formula_mm <- all_mm[par_is_formula]
-
   #-------------------- Create fddm_fit Object --------------------------------#
-  browser()
   f <- new(fddm_fit, rt, response_vec, all_mm, args_ddm[["err_tol"]])
 
   #-------------------- Run Optimization --------------------------------------#

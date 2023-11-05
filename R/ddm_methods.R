@@ -235,6 +235,7 @@ update.ddm <- function(object, ...) {
 
 #' @rdname ddm-methods
 #' @importFrom stats delete.response model.frame
+#' @importFrom graphics frame
 recover_data.ddm <- function(object, data, ...) {
   fcall = object$call
   #browser()
