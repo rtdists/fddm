@@ -18,6 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 [![Travis build status](https://travis-ci.org/rtdists/fddm.svg?branch=master)](https://travis-ci.org/rtdists/fddm)
 [![R build status](https://github.com/rtdists/fddm/workflows/R-CMD-check/badge.svg)](https://github.com/rtdists/fddm/actions)
+[![R-CMD-check](https://github.com/rtdists/fddm/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/rtdists/fddm/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 `fddm` provides the function `dfddm()`, which evaluates the density function (or probability density function, PDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full PDF, which contains an infinite sum.

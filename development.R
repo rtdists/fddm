@@ -32,7 +32,6 @@ devtools::check()
 #-------------------------------------
 
 ### TODO ###
-# fill out example vignette (simple analysis of individual fit)
 
 ### Maybe Later ###
 # rerun benchmark vignette and verify the comments on the plots
@@ -72,7 +71,7 @@ usethis::use_build_ignore("docs/")
 
 usethis::use_travis()
 usethis::use_readme_rmd()
-usethis::use_github_action_check_standard()
+usethis::use_github_action("check-standard")
 
 use_vignette("Validity")
 devtools::build_vignettes()
