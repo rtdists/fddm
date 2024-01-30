@@ -54,7 +54,7 @@ op <- options(width = 100, digits = 4)
 
 
 
-Function [ddm()] fits the 5-parameter Ratcliff diffusion decision model (DDM) via maximum likelihood estimation. The model for each DDM parameter can be specified symbolically using R's formula interface. With the exception of the drift rate (which is always estimated) all parameters can be either fixed or estimated. As maximum likelihood estimation is based on evaluating the probability density function (PDF), other vignettes in the `fddm` package address the properties of the function [dfddm()] that used to evaluate the PDF. An overview of the mathematical details of the different PDF approximations is provided in the [Math Vignette](math.html). An empirical validation of the implemented PDF methods is provided in the [Validity Vignette](validity.html). Timing benchmarks for the present PDF methods and comparison with existing methods are provided in the [Benchmark Vignette](benchmark.html).
+Function [ddm()] fits the 5-parameter Ratcliff diffusion decision model (DDM) via maximum likelihood estimation. The model for each DDM parameter can be specified symbolically using R's formula interface. With the exception of the drift rate (which is always estimated) all parameters can be either fixed or estimated. As maximum likelihood estimation is based on evaluating the probability density function (PDF), other vignettes in the `fddm` package address the properties of the function [dfddm()] that are used to evaluate the PDF. An overview of the mathematical details of the different PDF approximations is provided in the [Math Vignette](math.html). An empirical validation of the implemented PDF methods is provided in the [Validity Vignette](validity.html). Timing benchmarks for the present PDF methods and comparison with existing methods are provided in the [Benchmark Vignette](benchmark.html).
 
 Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ (threshold separation), $v \in (-\infty, \infty)$ (drift rate), $t_0 \in [0, \infty)$ (non-decision time/response time constant), $w \in (0, 1)$ (relative starting point), $sv \in (0, \infty)$ (inter-trial-variability of drift), and $\sigma \in (0, \infty)$ (diffusion coefficient of the underlying Wiener Process).
 <br><br>
@@ -66,11 +66,11 @@ Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ 
 # Introduction {#intro}
 <hr class="sec1">
 
-This vignette contains two examples of how to use `fddm` in fitting the DDM to real-world data. First, we will demonstrate the use of the [ddm()] function, which allows the user to fit the DDM to the user-supplied data by indicating which model parameters should be estimated via R's formula interface. Second, we will show an alternate method of fitting the DDM that constructs a likelihood function that is manually supplied to an optimization routine.
+This vignette contains examples of two different ways to use `fddm` in fitting the DDM to user-supplied real-world data. First, we will demonstrate the use of the [ddm()] function; we suggest this as the preferred method for most use cases. The [ddm()] function allows the user to specify which model parameters they want to be estimated and which model parameters they want to remain fixed. Should the user desire more minute control over the fitting procedure, we will show a second method of fitting the DDM that utilizes the exposed likelihood function, [dfddm()]. This method uses the [dfddm()] function to construct a log-likelihood function that will be supplied to an optimization routine to estimate each model parameter. The examples that we provide are meant for illustrative purposes, and as such, we will provide a sample analysis for each example.
 
 We will load the [`fddm::med_dec`] dataset that is included in the `fddm` package, and we will use this dataset to fit the Ratcliff DDM in both fitting procedures. This dataset contains the accuracy condition reported in @trueblood_impact_2018, which investigates medical decision making among medical professionals (pathologists) and novices (i.e., undergraduate students). The task of participants was to judge whether pictures of blood cells show cancerous cells (i.e., blast cells) or non-cancerous cells (i.e., non-blast cells). The dataset contains 200 decisions per participant, based on pictures of 100 true cancerous cells and pictures of 100 true non-cancerous cells.
 
-For both fitting procedures, we will begin with a simple example of fitting only a single individual from the dataset; then, we will progress to a more involved fitting procedure that includes DDM parameter estimation for all of the individuals in the study. After running this more involved optimization, we provide a rudimentary analysis of the fitted parameter estimates that groups the parameter estimates by the expertise of the study's participants. We load the `fddm` package, read the data, and remove any invalid responses from the data.
+Before doing any fitting, we must first load the `fddm` package, read the data, and clean the data by removing any invalid responses from the data (i.e., have negative or non-numeric response times).
 
 ```{r load-pkg-data, eval=TRUE}
 library("fddm")
@@ -78,12 +78,14 @@ data(med_dec, package = "fddm")
 med_dec <- med_dec[which(med_dec[["rt"]] >= 0), ]
 ```
 
-As we will be demonstrating simple fitting procedures involving only one participant from the [`fddm::med_dec`] dataset, we subset the data to select the individual whose data we will use for these fitting procedures.
+As we will be demonstrating simple fitting procedures involving only one participant from the [`fddm::med_dec`] dataset, we subset the data to select the individual whose data will be used for these fitting procedures.
 
 ```{r prep-simp-data, eval=TRUE}
 onep <- med_dec[med_dec[["id"]] == "2" & med_dec[["group"]] == "experienced", ]
 str(onep)
 ```
+
+We can see the structure of the data for this participant contains some identifying information (e.g., the ID number and experience level), the enumerated and paired responses and response times, and some information about the stimuli shown to the participant (e.g., the correct classification of the stimulus and the difficulty of correctly identifying the stimulus). We will leverage this extra information about the stimuli in our example fitting procedures.
 
 
 
@@ -92,25 +94,32 @@ str(onep)
 # Fitting with `ddm()` {#ddm}
 <hr class="sec1">
 
-The [ddm()] function fits the 5-parameter DDM to the user-supplied data via maximum likelihood estimation (MLE). Each DDM parameter can be modeled using R's formula interface; the model parameters can either be fixed or estimated, except for the drift rate which is always estimated.
+The [ddm()] function fits the 5-parameter DDM to the user-supplied data via maximum likelihood estimation (MLE). Using R's formula interface, the user can specify which model parameters should be estimated and which should remain fixed; however, the drift rate is always estimated. For the model parameters that the user wishes to be estimated, R's formula interface allows each parameter to be fit with a single coefficient (i.e., `~ 1`) or with multiple coefficients (e.g., `~ condition1*condition2`). Should the user desire a model parameter to be fixed, this can be done by writing the model parameter equal to a scalar (e.g., `ndt = 0.39`). See the documentation for the [ddm()] function for more details regarding the formula notation. Since this example is simple, we only use formula notation for the drift rate and leave the other parameters to their default settings.
 
 
 
 ## Simple Fitting Routine {#ddm-one}
-First we will show a quick fitting using only one participant from the [`fddm::med_dec`] dataset. Because we use an ANOVA approach in this example, we set orthogonal sum-to-zero contrasts. This means that the "Intercept" coefficient will correspond to the grand mean, and the other coefficients will correspond to the differences from the grand mean.
+First we will show a quick fitting using only one participant from the [`fddm::med_dec`] dataset. Because we use an ANOVA approach in the analysis of this example, we set orthogonal sum-to-zero contrasts. This means that the "Intercept" coefficient will correspond to the grand mean, and the other coefficients will correspond to the differences from the grand mean.
 
 ```{r set-contrasts, eval=TRUE}
 opc <- options(contrasts = c("contr.sum", "contr.poly"))
 ```
 
-Now we can use the [ddm()] function to fit the DDM to the data. The first argument of the [ddm()] function is the formula indicating how the drift rate should be modeled. As the dataset contains both the correct identification of the cell ("classification" column of the dataset; either "blast" or "non-blast") and the difficulty of the identification ("difficulty" column of the dataset; either "easy" or "hard"), we will incorporate this information into how we will frame the drift rate. In this case, we will model the drift rate using the grand mean (labeled "Intercept") with the additional coefficients corresponding to the differences from the grand mean, according to their classification ("blast" or "non-blast") and difficulty ("easy" or "hard"). By default, the boundary separation and non-decision time are estimated by a single coefficient each, and the initial bias and inter-trial variability in the drift rate are held fixed at 0.5 and 0, respectively.
+Now we can use the [ddm()] function to fit the DDM to the data. The first argument of the [ddm()] function is the formula indicating how the drift rate should be modeled. As the dataset contains both the correct identification of the cell ("classification" column of the dataset, with each row containing the text either "blast" or "non-blast") and the difficulty of the identification ("difficulty" column of the dataset, with each row containing the text either "easy" or "hard"), we will incorporate this information into how we will model the drift rate. In this case, we will model the drift rate using the grand mean (labeled "Intercept") with the additional coefficients corresponding to the differences from the grand mean, according to their classification ("blast" or "non-blast"), difficulty ("easy" or "hard"), and the interaction between classification and difficulty. The remaining arguments of the [ddm()] function contain the formulas (or scalars) for how the other model parameters should be modeled; by default, the boundary separation and non-decision time are estimated by a single coefficient each, and the initial bias and inter-trial variability in the drift rate are held fixed at 0.5 and 0, respectively. Following the model parameters, the remaining arguments are various optimization settings that we will leave as their default values for this example. Note that since we are using the default formulas and scalars for the model paramaters except the drift rate we are not required to explicitly write these formulas and scalars, but we do so in this example for illustrative purposes. We do, however, always need to include the `data` argument.
 
 ```{r show-ddm-fit, eval=TRUE}
-fit0 <- ddm(rt + response ~ classification*difficulty, data = onep)
+fit0 <- ddm(drift = rt + response ~ classification*difficulty,
+            boundary = ~ 1,
+            ndt = ~ 1,
+            bias = 0.5,
+            sv = 0,
+            data = onep)
 summary(fit0)
 ```
 
-This output first shows the input to the function call and which parameters are held fixed; this information is useful to verify that the formula inputs to the [ddm()] function call were as intended. For the model of the drift rate that we input, we can see the estimates and summary statistics for the grand mean and each other difference coefficient. Below this, we can see the simple estimates for the boundary separation and non-decision time (default behavior).
+This output first shows the input to the function call and which parameters are held fixed; this information is useful to verify that the formula inputs to the [ddm()] function call were interpreted as intended by the user. The next line confirms that our model held 2 parameters fixed (the inital bias and the inter-trial variability in the drift rate) and estimated the other three model parameters. For the model of the drift rate that we input, we can see the estimates and summary statistics for the grand mean (called "Intercept" here) and each difference coefficient (one for the "classification" condition, one for the "difficulty" condition, and one for the interaction between the "classification" and "difficulty" conditions). Below this, we can see the single-coefficient estimates for the boundary separation and non-decision time (default behavior).
+
+For each estimated coefficient, we get the estimate itself and the standard error of the estimate. For the boundary and non-decision time, we can see that the standard errors are pretty small relative to the estimates, so the estimates should be pretty accurate. For the drift rate coefficients, we get additional statistics about the significance of the coefficients- in this case, the grand mean and the differences from the grand mean. From this data, we can see that the effects of "classification", "difficulty", and their interaction all meet the common significance requirement P = .05.
 
 We can reset the contrasts after fitting.
 
@@ -121,7 +130,55 @@ options(opc) # reset contrasts
 
 
 ### Rudimentary Analysis {#ddm-ana}
-emmeans ANOVA
+For a quick analysis on the drift rate fits, we will do a two-way ANOVA because we are comparing the effect of two categorical variables (classification and density) on a quantitative continuous variable (drift rate). The two-way ANOVA will identify if the drift rate is significantly different among the various classifications and densities; this is a common practice for comparing the effects of categorical variables when two or more groups exist in the data. To be rigorous, we should check that: the data are independent both within groups and across groups; the data are approximately normally distributed, or there are enough observations per group so that we do not need to show normality; the variances across groups are equal; there are no significant outliers; and the data are evenly split among the groups. We will forgo these checks for the sake of brevity. Note that the interaction between classification and difficulty is significant, so this term is included in the model.
+
+```{r check-ANOVA, eval=FALSE, include=FALSE}
+# check variances of groups
+var(onep[["rt"]][onep[["classification"]] == "non-blast" &
+                 onep[["difficulty"]] == "easy"])
+var(onep[["rt"]][onep[["classification"]] == "blast" &
+                 onep[["difficulty"]] == "easy"])
+var(onep[["rt"]][onep[["classification"]] == "non-blast" &
+                 onep[["difficulty"]] == "hard"])
+var(onep[["rt"]][onep[["classification"]] == "blast" &
+                 onep[["difficulty"]] == "hard"])
+
+library("ggplot2")
+ggplot(onep) +
+  aes(x = classification, y = rt) +
+  geom_boxplot()
+
+ggplot(onep) +
+  aes(x = difficulty, y = rt) +
+  geom_boxplot()
+```
+
+We will use the `emmeans` package to do some simple post hoc comparisons across the groups that we modeled; this package has some useful functions to do ANOVA and related stuff. First, we'll produce an ANOVA-like table that displays the degrees of freedom, F-value, and P-value for each main effect (categorical variable) and their interaction. If we want to show just the conditional main effects, then we can run the second line of code to produce two separate tables with the same summary statistics.
+
+```{r ANOVA-table, eval=TRUE}
+emmeans::joint_tests(fit0)
+
+emmeans::joint_tests(fit0, by = "classification")
+```
+
+From these results, we can see that both of the categorical variables (classification and difficulty) and their interaction term have a significant effect on the drift rate, at the P = 0.05 level.
+
+If we want to see the mean drift rate for each combination of classification and difficulty, the titular `emmeans` function call will display a table for each classification that contains the standard summary statistics for each difficulty. The following code shows the mean drift rate for each condition in addition to the standard errors, degrees of freedom, and the 95% confidence intervals.
+
+```{r ANOVA-means, eval=TRUE}
+em1 <- emmeans::emmeans(fit0, "difficulty", by = "classification")
+em1
+```
+
+These means seem to be different; however, we need to formally compare them to be sure. To compare the means across the two difficulty groups ("easy" and "hard"), we can find the pairwise differences between the means (one difference for each classification). The first and second lines of code yield the same information, but the second line condenses the first line from two tables to one table. These tables include the differences between the means as well as the standard summary statistics: standard errors, degrees of freedom, T-statistic, and P-value.
+
+```{r ANOVA-pairs, eval=TRUE}
+pairs(em1)
+
+update(pairs(em1), by = NULL, adjust = "holm")
+```
+
+As we suspected, the differences between the means across the two difficulty groups ("easy" and "hard") are indeed significantly different (at the P = 0.05 level).
 
 
 
