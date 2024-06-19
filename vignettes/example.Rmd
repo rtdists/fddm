@@ -117,7 +117,7 @@ fit0 <- ddm(drift = rt + response ~ classification*difficulty,
 summary(fit0)
 ```
 
-This output first shows the input to the function call and which parameters are held fixed; this information is useful to verify that the formula inputs to the [ddm()] function call were interpreted as intended by the user. The next line confirms that our model held 2 parameters fixed (the inital bias and the inter-trial variability in the drift rate) and estimated the other three model parameters. For the model of the drift rate that we input, we can see the estimates and summary statistics for the grand mean (called "Intercept" here) and each difference coefficient (one for the "classification" condition, one for the "difficulty" condition, and one for the interaction between the "classification" and "difficulty" conditions). Below this, we can see the single-coefficient estimates for the boundary separation and non-decision time (default behavior).
+This output first shows the input to the function call and which parameters are held fixed; this information is useful to verify that the formula inputs to the [ddm()] function call were interpreted as intended by the user. The next line confirms that our model held two parameters fixed (the inital bias and the inter-trial variability in the drift rate) and estimated the other three model parameters. For the model of the drift rate that we input, we can see the estimates and summary statistics for the grand mean (called "Intercept" here) and each difference coefficient (one for the "classification" condition, one for the "difficulty" condition, and one for the interaction between the "classification" and "difficulty" conditions). Below this, we can see the single-coefficient estimates for the boundary separation and non-decision time (default behavior).
 
 For each estimated coefficient, we get the estimate itself and the standard error of the estimate. For the boundary and non-decision time, we can see that the standard errors are pretty small relative to the estimates, so the estimates should be pretty accurate. For the drift rate coefficients, we get additional statistics about the significance of the coefficients- in this case, the grand mean and the differences from the grand mean. From this data, we can see that the effects of "classification", "difficulty", and their interaction all meet the common significance requirement P = .05.
 
@@ -130,7 +130,7 @@ options(opc) # reset contrasts
 
 
 ### Rudimentary Analysis {#ddm-ana}
-For a quick analysis on the drift rate fits, we will do a two-way ANOVA because we are comparing the effect of two categorical variables (classification and density) on a quantitative continuous variable (drift rate). The two-way ANOVA will identify if the drift rate is significantly different among the various classifications and densities; this is a common practice for comparing the effects of categorical variables when two or more groups exist in the data. To be rigorous, we should check that: the data are independent both within groups and across groups; the data are approximately normally distributed, or there are enough observations per group so that we do not need to show normality; the variances across groups are equal; there are no significant outliers; and the data are evenly split among the groups. We will forgo these checks for the sake of brevity. Note that the interaction between classification and difficulty is significant, so this term is included in the model.
+For a quick analysis on the drift rate fits, we will do a two-way ANOVA because we are comparing the effect of two categorical variables (classification and density) on a quantitative continuous variable (drift rate). The two-way ANOVA will identify if the drift rate is significantly different among the various classifications and densities; this is a common practice for comparing the effects of categorical variables when two or more groups exist in the data. To be rigorous, we should check that: the data are independent both within groups and across groups; the data are approximately normally distributed, or there are enough observations per group so that we do not need to show normality; the variances across groups are equal; there are no significant outliers; and the data are evenly split among the groups. We will forgo formally verifying these checks for the sake of brevity. Note that the interaction between classification and difficulty is significant, so this term is included in the model.
 
 ```{r check-ANOVA, eval=FALSE, include=FALSE}
 # check variances of groups
@@ -273,9 +273,9 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      stringsAsFactors = FALSE)
 
     if (!is.null(id_idx)) { # relabel identification tags
-      for (i in 1:length(id_idx)) {
+      for (i in seq_along(id_idx)) {
         idi <- unique(data[,id_idx[i]])
-        for (j in 1:length(idi)) {
+        for (j in seq_along(idi)) {
           df[["id"]][data[,id_idx[i]] == idi[j]] <- paste(
             df[["id"]][data[,id_idx[i]] == idi[j]], idi[j], sep = " ")
         }
@@ -366,7 +366,7 @@ library("ggplot2")
 fitp <- data.frame(fit[, c(1, 4, 5)]) # make a copy to manipulate for plotting
 colnames(fitp)[-1] <- c("vu", "vl")
 
-for (i in 1:length(unique(fitp[["ID"]]))) {
+for (i in seq_along(unique(fitp[["ID"]]))) {
   first <- substr(fitp[["ID"]][i], 1, 1)
   if (first == "n") {
     fitp[["ID"]][i] <- "novice"

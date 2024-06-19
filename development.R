@@ -19,10 +19,10 @@ devtools::check()
 #- Specified C++11: please drop specification unless essential
 #---> it's essential for Rcpp to work properly
 
-#- installed size is 15.0Mb
+#- installed size is 15.8Mb
     # sub-directories of 1Mb or more:
-    #   doc    1.3Mb
-    #   libs  12.7Mb
+    #   doc    1.4Mb
+    #   libs  13.5Mb
 #---> dunno what we can do about that
 
 #- Namespace in Imports field not imported from: ‘RcppEigen’
