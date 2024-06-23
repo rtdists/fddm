@@ -16,7 +16,6 @@ knitr::opts_chunk$set(
 # fddm
 
 <!-- badges: start -->
-[![Travis build status](https://travis-ci.org/rtdists/fddm.svg?branch=master)](https://travis-ci.org/rtdists/fddm)
 [![R build status](https://github.com/rtdists/fddm/workflows/R-CMD-check/badge.svg)](https://github.com/rtdists/fddm/actions)
 [![R-CMD-check](https://github.com/rtdists/fddm/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/rtdists/fddm/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->

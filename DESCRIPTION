@@ -43,8 +43,7 @@ Suggests:
     numDeriv
 URL: https://github.com/rtdists/fddm
 BugReports: https://github.com/rtdists/fddm/issues
-SystemRequirements: C++11
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Roxygen: list(markdown = TRUE)
 Encoding: UTF-8
 VignetteBuilder: knitr

@@ -5,10 +5,9 @@
 
 <!-- badges: start -->
 
-[![Travis build
-status](https://travis-ci.org/rtdists/fddm.svg?branch=master)](https://travis-ci.org/rtdists/fddm)
 [![R build
 status](https://github.com/rtdists/fddm/workflows/R-CMD-check/badge.svg)](https://github.com/rtdists/fddm/actions)
+[![R-CMD-check](https://github.com/rtdists/fddm/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/rtdists/fddm/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 `fddm` provides the function `dfddm()`, which evaluates the density
@@ -89,18 +88,18 @@ str(onep)
 #>  $ stimulus      : Factor w/ 312 levels "blastEasy/AuerRod.jpg",..: 7 167 246 273 46 31 132 98 217 85 ...
 ```
 
-We further prepare the data by defining upper and lower responses and
-the correct response bounds.
-
-``` r
-onep[["resp"]] <- ifelse(onep[["response"]] == "blast", "upper", "lower")
-onep[["truth"]] <- ifelse(onep[["classification"]] == "blast", "upper", "lower")
-```
-
 ### Easy Fitting with Built-in `ddm()`
 
+The `ddm()` function fits the 5-parameter DDM to the user-supplied data
+via maximum likelihood estimation. Each DDM parameter can be modeled
+using R’s formula interface; the model parameters can either be fixed or
+estimated, except for the drift rate which is always estimated.
+
+We will demonstrate a simple example of how to fit the DDM to the `onep`
+dataset from the above code chunks.
+
 Because we use an ANOVA approach, we set orthogonal sum-to-zero
-contrasts
+contrasts.
 
 ``` r
 op <- options(contrasts = c('contr.sum', 'contr.poly'))
@@ -108,7 +107,11 @@ op <- options(contrasts = c('contr.sum', 'contr.poly'))
 
 Now we can use the `ddm()` function to fit the DDM to the data. Note
 that we are using formula notation to indicate the interaction between
-variables for the drift rate.
+variables for the drift rate. The first argument of the `ddm()` function
+is the formula indicating how the drift rate should be modeled. By
+default, the boundary separation and non-decision time are estimated,
+and the initial bias and inter-trial variability in the drift rate are
+held fixed.
 
 ``` r
 fit0 <- ddm(rt + response ~ classification*difficulty, data = onep)
@@ -138,16 +141,34 @@ summary(fit0)
 #> (Intercept)   0.3938      0.007
 ```
 
-We can reset the contrasts.
+This output first shows the input to the function call and which
+parameters are held fixed; this information is useful to verify that the
+formula inputs to the `ddm()` function call were correct. For the model
+of the drift rate that we input, we can see the estimates and summary
+statistics for each coefficient. Below this, we can see the simple
+estimates for the boundary separation and non-decision time (default
+behavior).
+
+We can reset the contrasts after fitting.
 
 ``` r
 options(op) # reset contrasts
 ```
 
-### Alternative Fitting Method with `nlminb`
+### Alternative Fitting Method with `nlminb()`
 
-**using ddm() is more convenient and faster **add intro sentence For
-fitting, we need a simple likelihood function; here we will use a
+Although we strongly recommend using the `ddm()` function for fitting
+the DDM to data because it is faster and more convenient, we will also
+show how to use the probability density function in a manual
+optimization setup. We further prepare the data by defining upper and
+lower responses and the correct response bounds.
+
+``` r
+onep[["resp"]] <- ifelse(onep[["response"]] == "blast", "upper", "lower")
+onep[["truth"]] <- ifelse(onep[["classification"]] == "blast", "upper", "lower")
+```
+
+For fitting, we need a simple likelihood function; here we will use a
 straightforward log of sum of densities of the study responses and
 associated response times. This log-likelihood function will fit the
 standard parameters in the DDM, but it will fit two versions of the
@@ -186,28 +207,28 @@ basically instantaneous using this setup.
 
 ``` r
 fit <- nlminb(c(0, 0, 1, 0, 0.5, 0), objective = ll_fun,
+              control = list(iter.max = 300, eval.max = 300),
               rt = onep[["rt"]], resp = onep[["resp"]], truth = onep[["truth"]],
               # limits:   vu,   vl,   a,                t0, w,  sv
               lower = c(-Inf, -Inf, .01,                 0, 0,   0),
               upper = c( Inf,  Inf, Inf, min(onep[["rt"]]), 1, Inf))
 fit
 #> $par
-#> [1]  1.308771e+00 -5.262772e-01  1.567463e+00  4.002167e-01  4.845589e-01
-#> [6]  4.788276e-10
+#> [1]  5.6813148 -2.1886625  2.7909164  0.3764463  0.4010114  2.2812999
 #> 
 #> $objective
-#> [1] 96.88019
+#> [1] 42.47181
 #> 
 #> $convergence
-#> [1] 1
+#> [1] 0
 #> 
 #> $iterations
-#> [1] 150
+#> [1] 242
 #> 
 #> $evaluations
 #> function gradient 
-#>      160     1067 
+#>      266     1723 
 #> 
 #> $message
-#> [1] "iteration limit reached without convergence (10)"
+#> [1] "relative convergence (4)"
 ```

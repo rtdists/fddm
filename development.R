@@ -2,11 +2,12 @@
 devtools::document()
 devtools::build_vignettes()
 devtools::build_manual()
-# knit README.Rmd
+# knit README.Rmd using code below:
+devtools::build_readme()
 devtools::build()
 devtools::install()
 # run R CMD check
-devtools::check()
+devtools::check(cran = TRUE)
 
 
 ##### R CMD Check Warnings/Notes #####
@@ -49,9 +50,8 @@ devtools::document()
 
 ###################
 # because Solaris and rtdists don't mix well
-rhub::validate_email("singmann@gmail.com")
-rhub::check_on_solaris(env_vars = c(`_R_CHECK_FORCE_SUGGESTS_` = "false"))
-rhub::check_for_cran(path = "../fddm_0.4-1.tar.gz",email = "singmann@gmail.com")
+rhub::rhub_doctor()
+rhub::rhub_check() 
 
 sqrt(.Machine$double.eps)
 
