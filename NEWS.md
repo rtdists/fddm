@@ -1,4 +1,4 @@
-# fddm v1.0-0 (Release date: 2022-12-25)
+# fddm v1.0-1 (Release date: 2024-06-26)
 
 ## New Features
 * added function `ddm()` which permits formula-based fitting of the DDM using the analytic gradient.

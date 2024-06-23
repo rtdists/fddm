@@ -5,8 +5,6 @@
 
 <!-- badges: start -->
 
-[![R build
-status](https://github.com/rtdists/fddm/workflows/R-CMD-check/badge.svg)](https://github.com/rtdists/fddm/actions)
 [![R-CMD-check](https://github.com/rtdists/fddm/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/rtdists/fddm/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
