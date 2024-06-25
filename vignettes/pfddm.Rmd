@@ -59,7 +59,7 @@ MathJax.Hub.Config({
 
 
 
-Function [pfddm()] evaluates the distribution function (or cumulative distribution function, CDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full CDF, which contains an infinite sum. This vignette provides an overview of the mathematical details of the different approximations implemented in [pfddm()] as well as another approximation that is not included in [pfddm()] for performance reasons. At the end of this vignette are timing benchmarks for the present approximation methods and comparison with existing approximation methods.
+Function `pfddm()` evaluates the distribution function (or cumulative distribution function, CDF) for the Ratcliff diffusion decision model (DDM) using different methods for approximating the full CDF, which contains an infinite sum. This vignette provides an overview of the mathematical details of the different approximations implemented in `pfddm()` as well as another approximation that is not included in `pfddm()` for performance reasons. At the end of this vignette are timing benchmarks for the present approximation methods and comparison with existing approximation methods.
 
 Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ (threshold separation), $v \in (-\infty, \infty)$ (drift rate), $t_0 \in [0, \infty)$ (non-decision time/response time constant), $w \in (0, 1)$ (relative starting point), $sv \in (0, \infty)$ (inter-trial-variability of drift), and $\sigma \in (0, \infty)$ (diffusion coefficient of the underlying Wiener Process). Please note that for this vignette, we will refer to the inter-trial variability of drift as $\eta$ instead of $sv$ to make the notation in the equations less confusing.
 <br><br>
@@ -71,11 +71,11 @@ Our implementation of the DDM has the following parameters: $a \in (0, \infty)$ 
 # Mathematical Background {#background}
 <hr class="sec1">
 
-There is one optional parameter in [pfddm()] that can be used to indicate which method should be used in the function call: `method`. For each approximation method we describe, we include the parameter settings for the function call to [pfddm()] so that it uses the desired method. As this parameter is optional, leaving it blank results in the [default method](#default-method) that is indicated later in this vignette. For general purpose use, we recommend ignoring this optional parameter so that the default settings are used as this will be the fastest and most stable algorithm for calculating the CDF.
+There is one optional parameter in `pfddm()` that can be used to indicate which method should be used in the function call: `method`. For each approximation method we describe, we include the parameter settings for the function call to `pfddm()` so that it uses the desired method. As this parameter is optional, leaving it blank results in the [default method](#default-method) that is indicated later in this vignette. For general purpose use, we recommend ignoring this optional parameter so that the default settings are used as this will be the fastest and most stable algorithm for calculating the CDF.
 
 Note that there are actually two cumulative distribution functions of the DDM: the CDF with respect to the upper boundary, and the CDF with respect to the lower boundary. Importantly, only the combined CDF of upper and lower boundary is a *proper* CDF in the sense that it reaches 1 at $t = \infty$. Following the precedent set by the literature, we use the general terminology "CDF" or "distribution function" to mean the *defective* cumulative distribution function with respect to the lower boundary (defective in the sense that it does not reach 1). Should the cumulative distribution function with respect to the upper boundary be required, it may be calculated using the simple transformation $F_\text{upper}(t ~|~ v, \eta, a, w) = F_\text{lower}(t ~|~ -v, \eta, a, 1-w)$.
 
-Since the CDF of the DDM is widely used in parameter estimation usually involving numerical optimization (e.g., $\chi^2$ and Kolmogorov-Smirnov stastics), significant effort has been put into making its evaluation as fast as possible. However, the options for calculating the CDF are limited; one can either approximate an infinite sum or numerically solve a partial differential equation (PDE). The [pfddm()] function uses the infinte sum method but not the PDE method; this vignette details these choices and demonstrates why the infinite sum method is preferable over the PDE method.
+Since the CDF of the DDM is widely used in parameter estimation usually involving numerical optimization (e.g., $\chi^2$ and Kolmogorov-Smirnov stastics), significant effort has been put into making its evaluation as fast as possible. However, the options for calculating the CDF are limited; one can either approximate an infinite sum or numerically solve a partial differential equation (PDE). The `pfddm()` function uses the infinte sum method but not the PDE method; this vignette details these choices and demonstrates why the infinite sum method is preferable over the PDE method.
 
 
 
@@ -84,7 +84,7 @@ Since the CDF of the DDM is widely used in parameter estimation usually involvin
 # The Distribution Function Approximations {#dist}
 <hr class="sec1">
 
-There are two main ways of calculating the CDF of the DDM: approximating the analytic form of CDF itself [@blurton2017first], and numerically solving a partial differential equation (PDE) whose solution is the CDF [@voss2008fast]. Like the probability density function (PDF) of the DDM, the analytic form of the CDF also contains an infinite sum (see the [Math Vignette](math.html) for more information on the PDF). We include the infinite sum method in [pfddm()] but not the PDE method, and these reasons will be discussed in the following sections.
+There are two main ways of calculating the CDF of the DDM: approximating the analytic form of CDF itself [@blurton2017first], and numerically solving a partial differential equation (PDE) whose solution is the CDF [@voss2008fast]. Like the probability density function (PDF) of the DDM, the analytic form of the CDF also contains an infinite sum (see the [Math Vignette](math.html) for more information on the PDF). We include the infinite sum method in `pfddm()` but not the PDE method, and these reasons will be discussed in the following sections.
 
 Both approximation methods inherently introduce error into the calculation (i.e., difference between the result of the approximated CDF and the "true" value of the CDF). Understanding this approximation error is important to minimizing the uncertainty in DDM parameter estimation (and other uses) that depend on calculating the CDF.
 
@@ -97,9 +97,9 @@ Both approximation methods inherently introduce error into the calculation (i.e.
 
 Similarly to the density function of the DDM, there is a large-time variant and a small-time variant of the CDF for a constant drift rate (i.e., $\eta = 0$) (see @blurton2012fast for details). There is no analytic large-time variant for $\eta > 0$ because the resulting integral is incalculable (see @tuerlinckx2004efficient for more details). However, @blurton2017first provide the small-time variant of the CDF for $\eta > 0$; this variant contains an infinite sum that must be approximated. @blurton2017first even provide two different forms of the small-time variant of the CDF: one that uses the standard normal CDF in each term of the infinite sum, and one that instead utilizes Mills ratio in each term of the infinite sum.
 
-Similarly to the small-time variant of the PDF, the small-time variant of the CDF contains an infinite sum whose terms alternate and decay to zero. Like in the SWSE method of [dfddm()], we can exploit these mathematical properties and bound the approximation error. In this case, the approximation error, $\epsilon$, is bounded above by the absolute value of the next term in the sum. For example, if the sum includes $k$ terms ($b_1 + b_2 + \dots + b_k$), then the approximation error is at most the absolute value of the $k+1$^th^ term ($\epsilon \leq \left\lvert b_{k+1} \right\rvert$). These mathematical properties allow us to explicitly pre-define and control the precision of the calculation before actually doing it.
+Similarly to the small-time variant of the PDF, the small-time variant of the CDF contains an infinite sum whose terms alternate and decay to zero. Like in the SWSE method of `dfddm()`, we can exploit these mathematical properties and bound the approximation error. In this case, the approximation error, $\epsilon$, is bounded above by the absolute value of the next term in the sum. For example, if the sum includes $k$ terms ($b_1 + b_2 + \dots + b_k$), then the approximation error is at most the absolute value of the $k+1$^th^ term ($\epsilon \leq \left\lvert b_{k+1} \right\rvert$). These mathematical properties allow us to explicitly pre-define and control the precision of the calculation before actually doing it.
 
-Moreover, in the [Benchmark Results below](#bechmarks), it is shown that this class of approximation methods is quite fast. The combination of directly controlled precision and fast calculation times are why [pfddm()] uses the infinite sum methods instead of the PDE method for approximating the CDF of the DDM.
+Moreover, in the [Benchmark Results below](#bechmarks), it is shown that this class of approximation methods is quite fast. The combination of directly controlled precision and fast calculation times are why `pfddm()` uses the infinite sum methods instead of the PDE method for approximating the CDF of the DDM.
 
 The following two subsections detail the two slightly different variations on the small-time CDF provided by @blurton2017first.
 
@@ -139,7 +139,7 @@ One important note is that the $\exp{\left( \frac{1}{2} \eta^2 r_j^2 \right)}$ e
 
 <p class="method">
 
-To use this method, set `method = "NCDF"` in the function call to [pfddm()]. We caution use of this approximation method, as the [default-method](#default-method) (using Mills ratio) is both faster and more stable.
+To use this method, set `method = "NCDF"` in the function call to `pfddm()`. We caution use of this approximation method, as the [default-method](#default-method) (using Mills ratio) is both faster and more stable.
 </p>
 </div>
 
@@ -183,7 +183,7 @@ Whereas this form does not have the issue of the exponential increasing to infin
 
 Fortunately, there exists a useful approximation to the Mills ratio for large arguments. @abramowitz1964handbook provide an asymptotic expansion for the complementary CDF of the standard normal distribution in Expression 26.2.13 in their book; dividing this asymptotic expansion by the PDF of the standard normal distribution yields the Mills ratio. This approximation was found in the `zeta` function in the `sn` package [@sn] for `R`, which in turn was recommended by @gondan2014even. The `zeta` function actually calculates the inverse Mills ratio, so we use the reciprocal of the approximation used in the `zeta` function.
 
-By combining the standard Mills ratio with this approximation, we can achieve a robust algorithm that can be used to consistently calculate the CDF. Moreover, this approximation method is quite fast, as demonstrated in the [Benchmark Results below](#ben-res). The speed and stability of this algorithm earns our recommendation and is the default method in [pfddm()].
+By combining the standard Mills ratio with this approximation, we can achieve a robust algorithm that can be used to consistently calculate the CDF. Moreover, this approximation method is quite fast, as demonstrated in the [Benchmark Results below](#ben-res). The speed and stability of this algorithm earns our recommendation and is the default method in `pfddm()`.
 
 <p class="method">
 To use this method, the user can ignore the optional parameter as this is the default method (internally, it sets `method = "Mills"` in the function call to `pfddm()`). This is the default method, and we recommend using it for the fastest and most stable algorithm for calculating the CDF of the DDM.
@@ -198,13 +198,13 @@ This section only provides a brief overview of the PDE method, highlighting how 
 
 Essentially, there exists a PDE whose solution is the CDF of the DDM; hence, solving the PDE allows one to calculate the CDF. The approximation error is controlled is via the step size in the numerical solution of the PDE. Compared to the infinite sum approach from [the previous section](#dist-inf), controlling the step size does not allow for directly bounding the approximation error. Whereas this method of controlling the approximation error may be suitable for some use cases, we suggest the infinite sum approach because it guarantees the precision of the result.
 
-In our testing with the implementation of the algorithm provided by @voss2008fast (using the function [rtdists::pdiffusion()] from the [`rtdists`](https://cran.r-project.org/package=rtdists) package), we found it to be inaccurate relative to the infinite sum method quite often. Increasing the `precision` parameter usually increased the accuracy of the PDE method (by reducing the step size in the numerical solver), but that resulted in very slow calculation times.
+In our testing with the implementation of the algorithm provided by @voss2008fast (using the function `rtdists::pdiffusion()` from the [`rtdists`](https://cran.r-project.org/package=rtdists) package), we found it to be inaccurate relative to the infinite sum method quite often. Increasing the `precision` parameter usually increased the accuracy of the PDE method (by reducing the step size in the numerical solver), but that resulted in very slow calculation times.
 
 It should be noted, however, that the method proposed by @voss2008fast is not only applicable to the case of inter-trial variability in the drift rate ($v$), but it can also be used in the cases of inter-trial variability in the starting point ($w$) and non-decision time ($t_0$).
 
 <p class="method">
 
-This method is unavailable in `fddm`. Instead, we recommend using the [default method](#default-method) (using Mills ratio) for calculating the CDF of the DDM by ignoring the optional parameter `method` in the function call to [pfddm()]. If the PDE method is desired, we recommend using the function [rtdists::pdiffusion()] from the [`rtdists`](https://cran.r-project.org/package=rtdists) package, as this function uses the PDE method to calculate the CDF.
+This method is unavailable in `fddm`. Instead, we recommend using the [default method](#default-method) (using Mills ratio) for calculating the CDF of the DDM by ignoring the optional parameter `method` in the function call to `pfddm()`. If the PDE method is desired, we recommend using the function `rtdists::pdiffusion()` from the [`rtdists`](https://cran.r-project.org/package=rtdists) package, as this function uses the PDE method to calculate the CDF.
 </p>
 </div>
 
@@ -215,7 +215,7 @@ This method is unavailable in `fddm`. Instead, we recommend using the [default m
 # Benchmarking the Distribution Function Approximations {#ben}
 <hr class="sec1">
 
-We want to determine the performance of the two methods available in [pfddm()] as well as comparing their performance to the implementations currently available in the literature: the `R` Code provided by @blurton2017first, and the [rtdists::pdiffusion()] function from the [`rtdists`](https://cran.r-project.org/package=rtdists) package. Note that we only test implementations that include inter-trial variability in the drift rate (i.e., `sv > 0` in [pfddm()]).
+We want to determine the performance of the two methods available in `pfddm()` as well as comparing their performance to the implementations currently available in the literature: the `R` Code provided by @blurton2017first, and the `rtdists::pdiffusion()` function from the [`rtdists`](https://cran.r-project.org/package=rtdists) package. Note that we only test implementations that include inter-trial variability in the drift rate (i.e., `sv > 0` in `pfddm()`).
 
 Testing each implementation across a wide parameter space (defined in [the code chunk below](#par-space)) will not only show the algorithms' overall viability for a practical set of parameters, but it will also allow for a more granular analysis of where each algorithm succeeds and struggles in the parameter space. To measure this viability, we will perform two benchmark tests: one where the response times are input as a vector to each function call, and one where the response times will be input individually to each function call.
 
@@ -234,7 +234,7 @@ err_tol <- 1e-6 # this is the setting from rtdists
 
 Note that each function call will assume that the response corresponds to the lower boundary of the DDM, and thus these benchmark tests only assess the performance of the "lower" distribution function. It is redundant to benchmark the "upper" distribution function because it is identical to the "lower" distribution function with the following mappings: $v \to -v$ and $w \to 1-w$; and these remapped values are already included in the parameter space (i.e., the values of $v$ are symmetric around $0$, and the values of $w$ are symmetric around $0.5$) .
 
-For each combination of parameters in the parameter space, we run the [microbenchmark::microbenchmark()] function from the package [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) 1000 times for each implementation and only save the median benchmark time of these 1000. We will refer to these medians as simply the "benchmark times" for the remainder of this vignette. Running the benchmark tests this many times for each set of parameters generates a sufficient amount of benchmark data so that the median of these times is unlikely to be an outlier, either faster or slower than a typical run time.
+For each combination of parameters in the parameter space, we run the `microbenchmark::microbenchmark()` function from the package [`microbenchmark`](https://cran.r-project.org/package=microbenchmark) 1000 times for each implementation and only save the median benchmark time of these 1000. We will refer to these medians as simply the "benchmark times" for the remainder of this vignette. Running the benchmark tests this many times for each set of parameters generates a sufficient amount of benchmark data so that the median of these times is unlikely to be an outlier, either faster or slower than a typical run time.
 
 First, we load the required packages.
 
@@ -372,7 +372,7 @@ ggplot(mbm_vec, aes(x = factor(FuncName, levels = Names_vec), y = time,
         legend.position = "none")
 ```
 
-Depending on your system, the results might differ from the ones shown here, but they should replicate the general pattern. The two implementations in [pfddm()] are both on average faster than the pure `R` code implementation and the implementation in [`rtdists`](https://cran.r-project.org/package=rtdists), but each implementation still has quite a long tail on its distribution of benchmark times. These inefficiencies will be explored in the next section, where we can isolate the response time inputs and determine in which parts of the parameter space these algorithms struggle. Of the two implementations in [pfddm()], the one utilizing the Mills ratio is on average faster than the one that just uses the standard normal CDF. Although the Mills ratio must calculate an additional standard normal PDF (i.e., the denominator of the Mills ratio), the useful approximation from @abramowitz1964handbook allows for a fast and accurate approximation to it.
+Depending on your system, the results might differ from the ones shown here, but they should replicate the general pattern. The two implementations in `pfddm()` are both on average faster than the pure `R` code implementation and the implementation in [`rtdists`](https://cran.r-project.org/package=rtdists), but each implementation still has quite a long tail on its distribution of benchmark times. These inefficiencies will be explored in the next section, where we can isolate the response time inputs and determine in which parts of the parameter space these algorithms struggle. Of the two implementations in `pfddm()`, the one utilizing the Mills ratio is on average faster than the one that just uses the standard normal CDF. Although the Mills ratio must calculate an additional standard normal PDF (i.e., the denominator of the Mills ratio), the useful approximation from @abramowitz1964handbook allows for a fast and accurate approximation to it.
 
 
 
@@ -509,7 +509,7 @@ ggplot(mbm_ind, aes(x = RT, y = time,
              labeller = my_labeller)
 ```
 
-This series of plots confirms that the inefficiencies of these algorithms occur when large response times are input, although the inefficiencies are not as dramatic as in [the density function benchmark results](benchmark.html#den-ana). As there is no analytic form for the large-time distribution function that includes inter-trial variability in the drift rate, we must make do with only the small-time distribution function or the PDE method. As we discussed [earlier in this vignette](#dist-inf), approximating the infinite sum in the small-time distribution function is preferable to using the PDE method because it allows us to directly control the approximation error. Moreover, the small-time implementations in [pfddm()] are on average faster than the implementation of the PDE method in [`rtdists`](https://cran.r-project.org/package=rtdists); they are also faster than the implementation in the pure `R` code from @blurton2017first.
+This series of plots confirms that the inefficiencies of these algorithms occur when large response times are input, although the inefficiencies are not as dramatic as in [the density function benchmark results](benchmark.html#den-ana). As there is no analytic form for the large-time distribution function that includes inter-trial variability in the drift rate, we must make do with only the small-time distribution function or the PDE method. As we discussed [earlier in this vignette](#dist-inf), approximating the infinite sum in the small-time distribution function is preferable to using the PDE method because it allows us to directly control the approximation error. Moreover, the small-time implementations in `pfddm()` are on average faster than the implementation of the PDE method in [`rtdists`](https://cran.r-project.org/package=rtdists); they are also faster than the implementation in the pure `R` code from @blurton2017first.
 
 </div>
 

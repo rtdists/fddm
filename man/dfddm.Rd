@@ -118,7 +118,7 @@ not less than \code{switch_thresh}. In this case, the default is
 more information.
 Note that if \code{switch_thresh}\eqn{ \le 0}, then the effective response
 time is always treated as "large"; contrarily, if \code{switch_thresh} =
-\ifelse{html}{\out{&#8734}}{\eqn{-\infty}} then the effective response
+\ifelse{html}{\out{&#8734;}}{\eqn{-\infty}} then the effective response
 time is always treated as "small". However, it is better to simply set
 \code{switch_mech = "large"} or \code{switch_mech = "small"} to always use
 the "large-time" or "small-time" variant, respectively.}

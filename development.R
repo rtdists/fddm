@@ -18,19 +18,11 @@ devtools::check(cran = TRUE)
 #---> I looked this up, and we can safely ignore this
 
 ### Notes
-#- Specified C++11: please drop specification unless essential
-#---> it's essential for Rcpp to work properly
-
 #- installed size is 15.8Mb
     # sub-directories of 1Mb or more:
     #   doc    1.4Mb
     #   libs  13.5Mb
-#---> dunno what we can do about that
-
-#- Namespace in Imports field not imported from: ‘RcppEigen’
-    # All declared Imports should be used.
-#---> it's ok; we use RcppEigen to do matrix multiplication, but it's an
-      # operator (*) instead of a function() so it looks like we don't use it
+#---> this is just for me, not a real issue
 #-------------------------------------
 
 ### TODO ###

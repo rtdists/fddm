@@ -6,6 +6,7 @@
 ## Other Changes
 * the order of the arguments `v` and `a` to functions `dfddm()`, `pfddm()`, and the PDF derivatives `d*_ddm()` were changed. Previously, it was `...ddm(..., a, v, ...)`, and now it is `...ddm(..., v, a, ...)`
 * character variables in med_dec transformed to factors.
+* updated example vignette by showing how to use the new `ddm()` function.
 
 # fddm v0.5-1 (Release date: 2022-3-15)
 
