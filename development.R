@@ -6,6 +6,7 @@ devtools::build_manual()
 devtools::build_readme()
 devtools::build()
 devtools::install()
+devtools::clean_dll()
 # run R CMD check
 devtools::check(cran = TRUE)
 
