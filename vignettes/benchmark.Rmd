@@ -1115,7 +1115,7 @@ fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
 
 ```{r fit-run-save, eval=FALSE, include=FALSE}
 save(fit, compress = "xz", compression_level = 9,
-     file = "inst/extdata/bm_fit.Rds")
+     file = "inst/extdata/dfddm_density/bm_fit.Rds")
 ```
 
 
@@ -1217,10 +1217,10 @@ ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
   geom_boxplot(width = 0.2, outlier.shape = NA,
                fill = "white", alpha = 0.4,
                aes(color = factor(Algorithm, levels = Names))) +
-  stat_summary(fun = mean, geom = "errorbar",
-               aes(ymax = after_stat(y), ymin = after_stat(y)),
-               width = .5, linetype = "dashed",
-               color = Color) +
+  # stat_summary(fun = mean, geom = "errorbar",
+  #              aes(ymax = after_stat(y), ymin = after_stat(y)),
+  #              width = .5, linetype = "dashed",
+  #              color = Color) +
   stat_summary(aes(y = Obj_diff, color = factor(Algorithm, levels = Names)),
                fun.data = obj_diff_label,
                fun.args = list(fit, "BmTime", 1.075, ma),
@@ -1228,7 +1228,7 @@ ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
                hjust = 0.5,
                vjust = 0.9) +
   scale_x_discrete(labels = c(
-    bquote(f[t] ~ SWSE[17]), bquote(f[t] ~ SWSE[14]),
+    # bquote(f[t] ~ SWSE[17]), bquote(f[t] ~ SWSE[14]),
     bquote(f[c] ~ SWSE[17]), bquote(f[c] ~ SWSE[14]),
     bquote(f[c] ~ Gon[17]), bquote(f[c] ~ Gon[14]),
     bquote(f[c] ~ Nav[17]), bquote(f[c] ~ Nav[14]),
