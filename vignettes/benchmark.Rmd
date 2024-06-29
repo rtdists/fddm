@@ -755,6 +755,7 @@ As in the [previous section](#den-gen), we have the `microbenchmark::microbenchm
 ```{r fit-fun}
 rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                    truth_idx = NULL, response_upper = NULL, err_tol = 1e-6,
+                   ctrl_list = list(eval.max = 1000, iter.max = 1000),
                    times = 100, unit = "ns") {
 
   # Format data for fitting
@@ -777,9 +778,9 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      stringsAsFactors = FALSE)
 
     if (!is.null(id_idx)) { # relabel identification tags
-      for (i in 1:length(id_idx)) {
+      for (i in seq_along(id_idx)) {
         idi <- unique(data[,id_idx[i]])
-        for (j in 1:length(idi)) {
+        for (j in seq_along(idi)) {
           df[["id"]][data[,id_idx[i]] == idi[j]] <- paste(
             df[["id"]][data[,id_idx[i]] == idi[j]], idi[j], sep = " ")
         }
@@ -848,7 +849,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf),
+                     control = ctrl_list)
       res[["Convergence"]][(i-1)*ni+0*ninit_vals+j] <- temp[["convergence"]]
       res[["Objective"]][(i-1)*ni+0*ninit_vals+j] <- temp[["objective"]]
       res[["Iterations"]][(i-1)*ni+0*ninit_vals+j] <- temp[["iterations"]]
@@ -858,7 +860,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf),
+                     control = ctrl_list)
       res[["Convergence"]][(i-1)*ni+1*ninit_vals+j] <- temp[["convergence"]]
       res[["Objective"]][(i-1)*ni+1*ninit_vals+j] <- temp[["objective"]]
       res[["Iterations"]][(i-1)*ni+1*ninit_vals+j] <- temp[["iterations"]]
@@ -867,7 +870,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf),
+                     control = ctrl_list)
       res[["Convergence"]][(i-1)*ni+2*ninit_vals+j] <- temp[["convergence"]]
       res[["Objective"]][(i-1)*ni+2*ninit_vals+j] <- temp[["objective"]]
       res[["Iterations"]][(i-1)*ni+2*ninit_vals+j] <- temp[["iterations"]]
@@ -877,7 +881,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf),
+                     control = ctrl_list)
       res[["Convergence"]][(i-1)*ni+3*ninit_vals+j] <- temp[["convergence"]]
       res[["Objective"]][(i-1)*ni+3*ninit_vals+j] <- temp[["objective"]]
       res[["Iterations"]][(i-1)*ni+3*ninit_vals+j] <- temp[["iterations"]]
@@ -887,7 +892,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf),
+                     control = ctrl_list)
       res[["Convergence"]][(i-1)*ni+4*ninit_vals+j] <- temp[["convergence"]]
       res[["Objective"]][(i-1)*ni+4*ninit_vals+j] <- temp[["objective"]]
       res[["Iterations"]][(i-1)*ni+4*ninit_vals+j] <- temp[["iterations"]]
@@ -897,7 +903,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf),
+                     control = ctrl_list)
       res[["Convergence"]][(i-1)*ni+5*ninit_vals+j] <- temp[["convergence"]]
       res[["Objective"]][(i-1)*ni+5*ninit_vals+j] <- temp[["objective"]]
       res[["Iterations"]][(i-1)*ni+5*ninit_vals+j] <- temp[["iterations"]]
@@ -907,7 +914,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf),
+                     control = ctrl_list)
       res[["Convergence"]][(i-1)*ni+6*ninit_vals+j] <- temp[["convergence"]]
       res[["Objective"]][(i-1)*ni+6*ninit_vals+j] <- temp[["objective"]]
       res[["Iterations"]][(i-1)*ni+6*ninit_vals+j] <- temp[["iterations"]]
@@ -917,7 +925,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf),
+                     control = ctrl_list)
       res[["Convergence"]][(i-1)*ni+7*ninit_vals+j] <- temp[["convergence"]]
       res[["Objective"]][(i-1)*ni+7*ninit_vals+j] <- temp[["objective"]]
       res[["Iterations"]][(i-1)*ni+7*ninit_vals+j] <- temp[["iterations"]]
@@ -927,7 +936,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf),
+                     control = ctrl_list)
       res[["Convergence"]][(i-1)*ni+8*ninit_vals+j] <- temp[["convergence"]]
       res[["Objective"]][(i-1)*ni+8*ninit_vals+j] <- temp[["objective"]]
       res[["Iterations"]][(i-1)*ni+8*ninit_vals+j] <- temp[["iterations"]]
@@ -937,7 +947,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf),
+                     control = ctrl_list)
       res[["Convergence"]][(i-1)*ni+9*ninit_vals+j] <- temp[["convergence"]]
       res[["Objective"]][(i-1)*ni+9*ninit_vals+j] <- temp[["objective"]]
       res[["Iterations"]][(i-1)*ni+9*ninit_vals+j] <- temp[["iterations"]]
@@ -947,7 +958,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf),
+                     control = ctrl_list)
       res[["Convergence"]][(i-1)*ni+10*ninit_vals+j] <- temp[["convergence"]]
       res[["Objective"]][(i-1)*ni+10*ninit_vals+j] <- temp[["objective"]]
       res[["Iterations"]][(i-1)*ni+10*ninit_vals+j] <- temp[["iterations"]]
@@ -957,7 +969,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf),
+                     control = ctrl_list)
       res[["Convergence"]][(i-1)*ni+11*ninit_vals+j] <- temp[["convergence"]]
       res[["Objective"]][(i-1)*ni+11*ninit_vals+j] <- temp[["objective"]]
       res[["Iterations"]][(i-1)*ni+11*ninit_vals+j] <- temp[["iterations"]]
@@ -967,7 +980,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf),
+                     control = ctrl_list)
       res[["Convergence"]][(i-1)*ni+12*ninit_vals+j] <- temp[["convergence"]]
       res[["Objective"]][(i-1)*ni+12*ninit_vals+j] <- temp[["objective"]]
       res[["Iterations"]][(i-1)*ni+12*ninit_vals+j] <- temp[["iterations"]]
@@ -977,7 +991,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf),
+                     control = ctrl_list)
       res[["Convergence"]][(i-1)*ni+13*ninit_vals+j] <- temp[["convergence"]]
       res[["Objective"]][(i-1)*ni+13*ninit_vals+j] <- temp[["objective"]]
       res[["Iterations"]][(i-1)*ni+13*ninit_vals+j] <- temp[["iterations"]]
@@ -987,7 +1002,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      rt = rti, resp = respi, truth = truthi, err_tol = err_tol,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf),
+                     control = ctrl_list)
       res[["Convergence"]][(i-1)*ni+14*ninit_vals+j] <- temp[["convergence"]]
       res[["Objective"]][(i-1)*ni+14*ninit_vals+j] <- temp[["objective"]]
       res[["Iterations"]][(i-1)*ni+14*ninit_vals+j] <- temp[["iterations"]]
@@ -997,7 +1013,8 @@ rt_fit <- function(data, id_idx = NULL, rt_idx = NULL, response_idx = NULL,
                      rt = rti, resp = respi, truth = truthi,
                      # limits:   vu,   vl,   a,      t0, w,  sv
                      lower = c(-Inf, -Inf, .01,       0, 0,   0),
-                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf))
+                     upper = c( Inf,  Inf, Inf, min_rti, 1, Inf),
+                     control = ctrl_list)
       res[["Convergence"]][(i-1)*ni+15*ninit_vals+j] <- temp[["convergence"]]
       res[["Objective"]][(i-1)*ni+15*ninit_vals+j] <- temp[["objective"]]
       res[["Iterations"]][(i-1)*ni+15*ninit_vals+j] <- temp[["iterations"]]
@@ -1110,6 +1127,7 @@ data(med_dec, package = "fddm")
 med_dec <- med_dec[which(med_dec[["rt"]] >= 0), ]
 fit <- rt_fit(med_dec, id_idx = c(2,1), rt_idx = 8, response_idx = 7,
               truth_idx = 5, response_upper = "blast", err_tol = 1e-6,
+              ctrl_list = list(eval.max = 10000, iter.max = 10000),
               times = 5, unit = "ns")
 ```
 
@@ -1217,10 +1235,10 @@ ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
   geom_boxplot(width = 0.2, outlier.shape = NA,
                fill = "white", alpha = 0.4,
                aes(color = factor(Algorithm, levels = Names))) +
-  # stat_summary(fun = mean, geom = "errorbar",
-  #              aes(ymax = after_stat(y), ymin = after_stat(y)),
-  #              width = .5, linetype = "dashed",
-  #              color = Color) +
+  stat_summary(fun = mean, geom = "errorbar",
+               aes(ymax = after_stat(y), ymin = after_stat(y)),
+               width = .5, linetype = "dashed",
+               color = Color) +
   stat_summary(aes(y = Obj_diff, color = factor(Algorithm, levels = Names)),
                fun.data = obj_diff_label,
                fun.args = list(fit, "BmTime", 1.075, ma),
@@ -1228,7 +1246,7 @@ ggplot(fit_mbm, aes(x = factor(Algorithm, levels = Names),
                hjust = 0.5,
                vjust = 0.9) +
   scale_x_discrete(labels = c(
-    # bquote(f[t] ~ SWSE[17]), bquote(f[t] ~ SWSE[14]),
+    bquote(f[t] ~ SWSE[17]), bquote(f[t] ~ SWSE[14]),
     bquote(f[c] ~ SWSE[17]), bquote(f[c] ~ SWSE[14]),
     bquote(f[c] ~ Gon[17]), bquote(f[c] ~ Gon[14]),
     bquote(f[c] ~ Nav[17]), bquote(f[c] ~ Nav[14]),
