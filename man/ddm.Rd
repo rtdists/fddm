@@ -129,9 +129,9 @@ for the model parameters (\code{1} indicates that the model
 parameter was estimated with a single coefficient; \code{0}
 indicates that the model parameter was fixed)
 \item \code{na.action} na.action
-\item \code{terms} a named list whose elements are , and whose last
-element is named \code{full} and shows the breakdown of the model
-with all model parameters
+\item \code{terms} a named list whose elements are the model parameters,
+except the last element is named \code{full} and shows the
+breakdown of the model with all model parameters
 \item \code{levels} a named list whose elements are the levels associated
 with any parameters that are factors (the elements are \code{NULL}
 if the parameter is not a factor), and whose last element is named
