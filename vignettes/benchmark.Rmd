@@ -343,31 +343,11 @@ bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
                            times = 100, unit = "ns")
 ```
 
-```{r bm-run-and-save, eval=FALSE, include=FALSE}
-# Define parameter space
-RT <- seq(0.1, 2, by = 0.1)
-A <- seq(0.5, 3.5, by = 0.5)
-V <- c(-5, -2, 0, 2, 5)
-t0 <- 1e-4 # must be nonzero for RWiener
-W <- seq(0.3, 0.7, by = 0.1)
-# SV <- c(0, 1, 2, 3.5) # didn't include in benchmarks because it adds a lot of runtime and isn't important
-err_tol <- 1e-6 # this is the setting from rtdists
-
-# Run benchmark tests
-bm_vec <- rt_benchmark_vec(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
-                           W = W, err_tol = err_tol,
-                           times = 100, unit = "ns")
+```{r bm-save, eval=FALSE, include=FALSE}
 save(bm_vec, compress = "xz", compression_level = 9,
-     file = "inst/extdata/bm_vec_0-2.Rds")
-# load(system.file("extdata", "dfddm_density", "bm_vec_0-2.Rds",
-#                  package = "fddm", mustWork = TRUE))
-bm_ind <- rt_benchmark_ind(RT = RT, resp = "lower", V = V, A = A, t0 = t0,
-                           W = W, err_tol = err_tol,
-                           times = 100, unit = "ns")
+     file = "inst/extdata/dfddm_density/bm_vec_0-2.Rds")
 save(bm_ind, compress = "xz", compression_level = 9,
-     file = "inst/extdata/bm_ind_0-2.Rds")
-# load(system.file("extdata", "dfddm_density", "bm_ind_0-2.Rds",
-#                  package = "fddm", mustWork = TRUE))
+     file = "inst/extdata/dfddm_density/bm_ind_0-2_new.Rds")
 ```
 
 
@@ -484,10 +464,10 @@ ggplot(mbm_meq, aes(x = RTAA, y = time,
                     color = factor(FuncName, levels = Names_meq),
                     fill = factor(FuncName, levels = Names_meq))) +
   stat_summary(fun.min = min, fun.max = max,
-               geom = "ribbon", color = NA, alpha = 0.1) +
+               geom = "ribbon", color = NA, alpha = 0.2) +
   stat_summary(fun.min = function(z) { quantile(z, 0.1) },
                fun.max = function(z) { quantile(z, 0.9) },
-               geom = "ribbon", color = NA, alpha = 0.2) +
+               geom = "ribbon", color = NA, alpha = 0.3) +
   stat_summary(fun = mean, geom = "line") +
   scale_x_log10(breaks = c(0.001, 0.1, 10, 1000),
                 labels = as.character(c(0.001, 0.1, 10, 1000))) +
