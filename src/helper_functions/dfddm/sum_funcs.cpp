@@ -165,7 +165,7 @@ double large_sum_Nav(const double& t, const double& a, const double& w,
   double gamma = -PI_CONST*PI_CONST * t / (2 * a*a);
   double sum = 0.0;
   for (int j = 1; j <= kl; j++) {
-    sum += j * sin(j * w * PI_CONST) * exp(gamma * j*j);
+    sum += sin(j * w * PI_CONST) * exp(gamma * j*j) * j;
   }
   return (sum > 0) ? sum : 0; // if result is negative, return 0 instead
 }

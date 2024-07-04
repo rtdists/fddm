@@ -220,8 +220,8 @@ double large_sum(const double& taa, const double& w, const int& kl)
 { // note: taa = t / (a*a)
   double gamma = -0.5 * PI_CONST*PI_CONST * taa;
   double sum = 0.0;
-  for (unsigned long long int j = 1; j <= kl; j++) {
-    sum += j * sin(j * w * PI_CONST) * exp(gamma * j*j);
+  for (int j = 1; j <= kl; j++) {
+    sum += sin(j * w * PI_CONST) * exp(gamma * j*j) * j;
   }
   return (sum > 0) ? sum : 0; // if result is negative, return 0 instead
 }
@@ -231,8 +231,8 @@ double large_sum_dat(const double& taa, const double& w, const int& kl)
 { // note: taa = t / (a*a)
   double gamma = -0.5 * PI2 * taa;
   double sum = 0.0;
-  for (unsigned long long int j = 1; j <= kl; j++) {
-    sum += j*j*j * sin(j * w * PI_CONST) * exp(gamma * j*j);
+  for (int j = 1; j <= kl; j++) {
+    sum += sin(j * w * PI_CONST) * exp(gamma * j*j) * j*j*j;
   }
   return sum;
 }
@@ -242,8 +242,8 @@ double large_sum_dw(const double& taa, const double& w, const int& kl)
 { // note: taa = t / (a*a)
   double gamma = -0.5 * PI2 * taa;
   double sum = 0.0;
-  for (unsigned long long int j = 1; j <= kl; j++) {
-    sum += j*j * cos(j * w * PI_CONST) * exp(gamma * j*j);
+  for (int j = 1; j <= kl; j++) {
+    sum += cos(j * w * PI_CONST) * exp(gamma * j*j) * j*j;
   }
   return sum;
 }
@@ -253,8 +253,8 @@ double large_sum_dat2(const double& taa, const double& w, const int& kl)
 { // note: taa = t / (a*a)
   double gamma = -0.5 * PI2 * taa;
   double sum = 0.0;
-  for (unsigned long long int j = 1; j <= kl; j++) {
-    sum += j*j*j*j*j * sin(j * w * PI_CONST) * exp(gamma * j*j);
+  for (int j = 1; j <= kl; j++) {
+    sum += sin(j * w * PI_CONST) * exp(gamma * j*j) * j*j*j*j*j;
   }
   return sum;
 }
