@@ -61,7 +61,7 @@ print.ddm <- function(x, digits = max(3, getOption("digits") - 3), ...)
   }
 
   if (!x$converged) {
-    warning("optimisation algorithm indicates that model did not converge.\n",
+    warning("Optimisation algorithm indicates that model did not converge.\n",
             "Proceed with caution!\n", call. = FALSE)
   }
 
