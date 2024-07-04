@@ -11,7 +11,7 @@ fddm_fit::fddm_fit(const vector<double>& rt_vector,
                    const vector<MatrixXd>& model_matrices,
                    const double& error_tolerance)
   {
-  rt = check_rt(rt_vector, Nrt); // also sets Nrt
+  rt = check_rt(rt_vector, Nrt, min_rt); // also sets Nrt and min_rt
   response = convert_responses(response_vector, Nrt);
   likelihood.resize(Nrt);
   v.resize(Nrt);
@@ -31,6 +31,8 @@ fddm_fit::fddm_fit(const vector<double>& rt_vector,
 // Log-likelihood Function (negated)
 double fddm_fit::calc_loglik(const VectorXd& temp_coefs)
 {
+  // Reset likelihood flag (for invalid parameters)
+  lik_flag = 0;
   // Store the input parameters for later checking (in gradient)
   coefs = temp_coefs;
 
@@ -61,10 +63,11 @@ double fddm_fit::calc_loglik(const VectorXd& temp_coefs)
   } // else it's constant and was handled in the constructor
 
   // Check parameters
-  if (invalid_parameters(v, a, t0, w, sv, Nrt, form_len)) {
+  if (invalid_parameters(v, a, t0, w, sv, Nrt, min_rt, form_len)) {
     for (int i = 0; i < Nrt; i++) {
       likelihood[i] = rt0;
     }
+    lik_flag = 1;
     return rt0;
   }
 
@@ -82,6 +85,7 @@ double fddm_fit::calc_loglik(const VectorXd& temp_coefs)
       ll -= log(likelihood[i]); // faster than doing exp(loglik)
     } else {
       likelihood[i] = rt0;
+      lik_flag = 1;
       return rt0;
     }
   }
@@ -96,10 +100,13 @@ VectorXd fddm_fit::calc_gradient(const VectorXd& temp_coefs)
   if (temp_coefs != coefs) { // if not, must recalculate likelihood
     double not_used = calc_loglik(temp_coefs); // stored in `likelihood`
   } // if they match, can reuse the likelihood
-  
+
   // calculate (negative) gradient and (-)sum over all data
   // note that d/dx(log(f(x))) = d/dx(f(x)) / f(x) (why dividing by likelihood)
   VectorXd gradient = VectorXd::Zero(Ncoefs);
+  if (lik_flag) { // check if likelihood is rt0 (i.e., a model parameter is invalid)
+    return gradient; // or rt0 something like that
+  }
   int grad_idx;
   double t, temp_grad;
   for (int i = 0; i < Nrt; i++) {
@@ -172,7 +179,8 @@ VectorXd fddm_fit::calc_gradient(const VectorXd& temp_coefs)
     } else {
       likelihood[i] = rt0;
       for (int j = 0; j < Ncoefs; j++) {
-        gradient[j] = std::numeric_limits<double>::quiet_NaN();
+        // gradient[j] = std::numeric_limits<double>::quiet_NaN();
+        gradient[j] = 0.0; // 0? rt0? I don't know what to put here
       }
       break;
     }

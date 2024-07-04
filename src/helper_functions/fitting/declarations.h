@@ -62,7 +62,7 @@ static const double SQRT_2_1_PI = SQRT_2 * O_PI;
 
 //--------------------------- Function Declarations --------------------------//
 // Parameter and Input Checks
-vector<double> check_rt(const vector<double>& rt, int& Nrt);
+vector<double> check_rt(const vector<double>& rt, int& Nrt, double& min_rt);
 vector<double> convert_responses(const SEXP& response, const int& Nrt);
 void unpack_and_check_mod_mats(const vector<MatrixXd>& model_matrices,
                                MatrixXd& mm_v, MatrixXd& mm_a, MatrixXd& mm_t0,
@@ -74,7 +74,7 @@ double check_err_tol(const double& err_tol);
 bool invalid_parameters(const VectorXd& v, const VectorXd& a,
                         const VectorXd& t0, const VectorXd& w,
                         const VectorXd& sv, const int& Nrt,
-                        const vector<int>& form_len);
+                        const double& min_rt, const vector<int>& form_len);
 
 // PDF (likelihood)
 double pdf(const double& t, const double& v, const double& a, const double& w,

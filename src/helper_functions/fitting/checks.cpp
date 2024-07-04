@@ -4,8 +4,9 @@
 
 
 
-vector<double> check_rt(const vector<double>& rt, int& Nrt) {
+vector<double> check_rt(const vector<double>& rt, int& Nrt, double& min_rt) {
   Nrt = rt.size();
+  min_rt = *std::min_element(rt.begin(), rt.end());
   vector<int> bad_idx;
   int bad_par = 0;
 
@@ -31,8 +32,7 @@ vector<double> check_rt(const vector<double>& rt, int& Nrt) {
 }
 
 
-vector<double> convert_responses(const SEXP& response, const int& Nrt)
-{
+vector<double> convert_responses(const SEXP& response, const int& Nrt) {
   vector<double> converted_responses;
   vector<int> bad_idx;
   int bad_par = 0;
@@ -287,7 +287,7 @@ double check_err_tol(const double& err_tol) {
 bool invalid_parameters(const VectorXd& v, const VectorXd& a,
                         const VectorXd& t0, const VectorXd& w,
                         const VectorXd& sv, const int& Nrt,
-                        const vector<int>& form_len)
+                        const double& min_rt, const vector<int>& form_len)
 {
   // note: NaN, NA evaluate to FALSE and then get negated
   // if a parameter is constant, it was checked during construction
@@ -308,7 +308,7 @@ bool invalid_parameters(const VectorXd& v, const VectorXd& a,
   }
   if (form_len[2] > 0) {
     for (int i = 0; i < Nrt; i++) {
-      if (!(t0[i] >= 0) || !isfinite(t0[i])) {
+      if (!(t0[i] >= 0) || !(t0[i] < min_rt) || !isfinite(t0[i])) {
         return 1;
       }
     }
