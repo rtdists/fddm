@@ -180,7 +180,7 @@ VectorXd fddm_fit::calc_gradient(const VectorXd& temp_coefs)
       likelihood[i] = rt0;
       for (int j = 0; j < Ncoefs; j++) {
         // gradient[j] = std::numeric_limits<double>::quiet_NaN();
-        gradient[j] = 0.0; // 0? rt0? I don't know what to put here
+        gradient[j] = 1000.0; // 0? rt0? I don't know what to put here
       }
       break;
     }
