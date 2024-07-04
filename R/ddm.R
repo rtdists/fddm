@@ -423,7 +423,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   init_pars <- c(
     "drift" = 0.0,
     "boundary" = 1.0,
-    "ndt" = 0.3,
+    "ndt" = 0.5 * min(rt),
     "bias" = 0.5,
     "sv" = 0.0,
     "diff" = 0.0
@@ -439,7 +439,7 @@ ddm <- function(drift, boundary = ~ 1, ndt = ~ 1, bias = 0.5, sv = 0,
   u_bds <- c(
     "drift" = Inf,
     "boundary" = Inf,
-    "ndt" = min(rt),
+    "ndt" = Inf, # dynamic bound = min(rt) is handled inside C++ checks
     "bias" = 1.0,
     "sv" = Inf,
     "diff" = Inf
