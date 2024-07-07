@@ -74,7 +74,8 @@ double check_err_tol(const double& err_tol);
 bool invalid_parameters(const VectorXd& v, const VectorXd& a,
                         const VectorXd& t0, const VectorXd& w,
                         const VectorXd& sv, const int& Nrt,
-                        const double& min_rt, const vector<int>& form_len);
+                        const double& min_rt, const vector<int>& form_len,
+                        vector<int>& par_flag);
 
 // PDF (likelihood)
 double pdf(const double& t, const double& v, const double& a, const double& w,

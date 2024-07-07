@@ -35,7 +35,7 @@ class fddm_fit {
     int Nrt {};
     double min_rt {};
     double rt0 {1e6};
-    bool lik_flag {0};
+    vector<int> par_flag {0, 0, 0, 0, 0};
     vector<int> form_len {0, 0, 0, 0, 0}; // length of each parameter's formula
     int Ncoefs {0};
     VectorXd v {};

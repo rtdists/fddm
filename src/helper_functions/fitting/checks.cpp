@@ -287,7 +287,8 @@ double check_err_tol(const double& err_tol) {
 bool invalid_parameters(const VectorXd& v, const VectorXd& a,
                         const VectorXd& t0, const VectorXd& w,
                         const VectorXd& sv, const int& Nrt,
-                        const double& min_rt, const vector<int>& form_len)
+                        const double& min_rt, const vector<int>& form_len,
+                        vector<int>& par_flag)
 {
   // note: NaN, NA evaluate to FALSE and then get negated
   // if a parameter is constant, it was checked during construction
@@ -295,38 +296,50 @@ bool invalid_parameters(const VectorXd& v, const VectorXd& a,
   if (form_len[0] > 0) {
     for (int i = 0; i < Nrt; i++) {
       if (!isfinite(v[i])) {
-        return 1;
+        par_flag[0] = (v[i] > 0) ? 2 : 1;
       }
     }
   }
   if (form_len[1] > 0) {
     for (int i = 0; i < Nrt; i++) {
-      if (!(a[i] > 0) || !isfinite(a[i])) {
-        return 1;
+      if (a[i] <= 0) {
+        par_flag[1] = 1;
+      } else if (!isfinite(a[i])) {
+        par_flag[1] = 2;
       }
     }
   }
   if (form_len[2] > 0) {
     for (int i = 0; i < Nrt; i++) {
-      if (!(t0[i] >= 0) || !(t0[i] < min_rt) || !isfinite(t0[i])) {
-        return 1;
+      if (t0[i] < 0) {
+        par_flag[2] = 1;
+      } else if (t0[i] >= min_rt) {
+        par_flag[2] = 2;
       }
     }
   }
   if (form_len[3] > 0) {
     for (int i = 0; i < Nrt; i++) {
-      if (!(w[i] > 0) || !(w[i] < 1)) {
-        return 1;
+      if (w[i] <= 0) {
+        par_flag[3] = 1;
+      } else if (w[i] >= 1) {
+        par_flag[3] = 2;
       }
     }
   }
   if (form_len[4] > 0) {
     for (int i = 0; i < Nrt; i++) {
-      if (!(sv[i] >= 0) || !isfinite(sv[i])) {
-        return 1;
+      if (sv[i] < 0) {
+        par_flag[4] = 1;
+      } else if (!isfinite(sv[i])) {
+        par_flag[4] = 2;
       }
     }
   }
 
-  return 0;
+  if (std::accumulate(par_flag.begin(), par_flag.end(), 0) > 0) {
+    return 1;
+  } else {
+    return 0;
+  }
 }

@@ -31,8 +31,8 @@ fddm_fit::fddm_fit(const vector<double>& rt_vector,
 // Log-likelihood Function (negated)
 double fddm_fit::calc_loglik(const VectorXd& temp_coefs)
 {
-  // Reset likelihood flag (for invalid parameters)
-  lik_flag = 0;
+  // Reset flags for invalid parameters
+  std::fill(par_flag.begin(), par_flag.end(), 0);
   // Store the input parameters for later checking (in gradient)
   coefs = temp_coefs;
 
@@ -63,11 +63,10 @@ double fddm_fit::calc_loglik(const VectorXd& temp_coefs)
   } // else it's constant and was handled in the constructor
 
   // Check parameters
-  if (invalid_parameters(v, a, t0, w, sv, Nrt, min_rt, form_len)) {
+  if (invalid_parameters(v, a, t0, w, sv, Nrt, min_rt, form_len, par_flag)) {
     for (int i = 0; i < Nrt; i++) {
       likelihood[i] = rt0;
     }
-    lik_flag = 1;
     return rt0;
   }
 
@@ -85,7 +84,6 @@ double fddm_fit::calc_loglik(const VectorXd& temp_coefs)
       ll -= log(likelihood[i]); // faster than doing exp(loglik)
     } else {
       likelihood[i] = rt0;
-      lik_flag = 1;
       return rt0;
     }
   }
@@ -104,85 +102,76 @@ VectorXd fddm_fit::calc_gradient(const VectorXd& temp_coefs)
   // calculate (negative) gradient and (-)sum over all data
   // note that d/dx(log(f(x))) = d/dx(f(x)) / f(x) (why dividing by likelihood)
   VectorXd gradient = VectorXd::Zero(Ncoefs);
-  if (lik_flag) { // check if likelihood is rt0 (i.e., a model parameter is invalid)
+  int grad_idx = 0;
+  // check if model parameters are invalid
+  if (std::accumulate(par_flag.begin(), par_flag.end(), 0) > 0) {
+    for (int i = 0; i < 5; i++) {
+      if (par_flag[i] > 0) {
+        for (int j = grad_idx; j < (grad_idx + form_len[i]); j++) {
+          gradient[j] = (par_flag[i] > 1) ? 1 : -1;
+        }
+      }
+      grad_idx += form_len[i];
+    }
     return gradient; // or rt0 something like that
   }
-  int grad_idx;
+
   double t, temp_grad;
   for (int i = 0; i < Nrt; i++) {
     grad_idx = 0;
     t = rt[i] - t0[i];
-    if (t > 0 && isfinite(t)) { // maybe don't have to check b/c same in lik calc?
-      if (response[i] == 1) { // response is "lower"
-        if (form_len[0] > 0) {
-          temp_grad = dv(t, v[i], a[i], w[i], sv[i], err_tol)
-                      / likelihood[i];
-          gradient.segment(grad_idx, form_len[0]) -= temp_grad * mm_v.row(i);
-          grad_idx += form_len[0];
-        }
-        if (form_len[1] > 0) {
-          temp_grad = da(t, v[i], a[i], w[i], sv[i], err_tol)
-                      / likelihood[i];
-          gradient.segment(grad_idx, form_len[1]) -= temp_grad * mm_a.row(i);
-          grad_idx += form_len[1];
-        }
-        if (form_len[2] > 0) {
-          temp_grad = dt0(t, v[i], a[i], w[i], sv[i], err_tol)
-                      / likelihood[i];
-          gradient.segment(grad_idx, form_len[2]) -= temp_grad * mm_t0.row(i);
-          grad_idx += form_len[2];
-        }
-        if (form_len[3] > 0) {
-          temp_grad = dw(t, v[i], a[i], w[i], sv[i], err_tol)
-                      / likelihood[i];
-          gradient.segment(grad_idx, form_len[3]) -= temp_grad * mm_w.row(i);
-          grad_idx += form_len[3];
-        }
-        if (form_len[4] > 0) {
-          temp_grad = dsv(t, v[i], a[i], w[i], sv[i], err_tol)
-                      / likelihood[i];
-          gradient.segment(grad_idx, form_len[4]) -= temp_grad * mm_sv.row(i);
-          grad_idx += form_len[4];
-        }
-      } else { // response is "upper" so use alternate parameters
-        if (form_len[0] > 0) { // chain rule negates derivative
-          temp_grad = dv(t, -v[i], a[i], 1-w[i], sv[i], err_tol)
-                      / likelihood[i];
-          gradient.segment(grad_idx, form_len[0]) += temp_grad * mm_v.row(i);
-          grad_idx += form_len[0];
-        }
-        if (form_len[1] > 0) {
-          temp_grad = da(t, -v[i], a[i], 1-w[i], sv[i], err_tol)
-                      / likelihood[i];
-          gradient.segment(grad_idx, form_len[1]) -= temp_grad * mm_a.row(i);
-          grad_idx += form_len[1];
-        }
-        if (form_len[2] > 0) {
-          temp_grad = dt0(t, -v[i], a[i], 1-w[i], sv[i], err_tol)
-                      / likelihood[i];
-          gradient.segment(grad_idx, form_len[2]) -= temp_grad * mm_t0.row(i);
-          grad_idx += form_len[2];
-        }
-        if (form_len[3] > 0) { // chain rule negates derivative
-          temp_grad = dw(t, -v[i], a[i], 1-w[i], sv[i], err_tol)
-                      / likelihood[i];
-          gradient.segment(grad_idx, form_len[3]) += temp_grad * mm_w.row(i);
-          grad_idx += form_len[3];
-        }
-        if (form_len[4] > 0) {
-          temp_grad = dsv(t, -v[i], a[i], 1-w[i], sv[i], err_tol)
-                      / likelihood[i];
-          gradient.segment(grad_idx, form_len[4]) -= temp_grad * mm_sv.row(i);
-          grad_idx += form_len[4];
-        }
+    if (response[i] == 1) { // response is "lower"
+      if (form_len[0] > 0) {
+        temp_grad = dv(t, v[i], a[i], w[i], sv[i], err_tol) / likelihood[i];
+        gradient.segment(grad_idx, form_len[0]) -= temp_grad * mm_v.row(i);
+        grad_idx += form_len[0];
       }
-    } else {
-      likelihood[i] = rt0;
-      for (int j = 0; j < Ncoefs; j++) {
-        // gradient[j] = std::numeric_limits<double>::quiet_NaN();
-        gradient[j] = 1000.0; // 0? rt0? I don't know what to put here
+      if (form_len[1] > 0) {
+        temp_grad = da(t, v[i], a[i], w[i], sv[i], err_tol) / likelihood[i];
+        gradient.segment(grad_idx, form_len[1]) -= temp_grad * mm_a.row(i);
+        grad_idx += form_len[1];
       }
-      break;
+      if (form_len[2] > 0) {
+        temp_grad = dt0(t, v[i], a[i], w[i], sv[i], err_tol) / likelihood[i];
+        gradient.segment(grad_idx, form_len[2]) -= temp_grad * mm_t0.row(i);
+        grad_idx += form_len[2];
+      }
+      if (form_len[3] > 0) {
+        temp_grad = dw(t, v[i], a[i], w[i], sv[i], err_tol) / likelihood[i];
+        gradient.segment(grad_idx, form_len[3]) -= temp_grad * mm_w.row(i);
+        grad_idx += form_len[3];
+      }
+      if (form_len[4] > 0) {
+        temp_grad = dsv(t, v[i], a[i], w[i], sv[i], err_tol) / likelihood[i];
+        gradient.segment(grad_idx, form_len[4]) -= temp_grad * mm_sv.row(i);
+        grad_idx += form_len[4];
+      }
+    } else { // response is "upper" so use alternate parameters
+      if (form_len[0] > 0) { // chain rule negates derivative
+        temp_grad = dv(t, -v[i], a[i], 1-w[i], sv[i], err_tol) / likelihood[i];
+        gradient.segment(grad_idx, form_len[0]) += temp_grad * mm_v.row(i);
+        grad_idx += form_len[0];
+      }
+      if (form_len[1] > 0) {
+        temp_grad = da(t, -v[i], a[i], 1-w[i], sv[i], err_tol) / likelihood[i];
+        gradient.segment(grad_idx, form_len[1]) -= temp_grad * mm_a.row(i);
+        grad_idx += form_len[1];
+      }
+      if (form_len[2] > 0) {
+        temp_grad = dt0(t, -v[i], a[i], 1-w[i], sv[i], err_tol) / likelihood[i];
+        gradient.segment(grad_idx, form_len[2]) -= temp_grad * mm_t0.row(i);
+        grad_idx += form_len[2];
+      }
+      if (form_len[3] > 0) { // chain rule negates derivative
+        temp_grad = dw(t, -v[i], a[i], 1-w[i], sv[i], err_tol) / likelihood[i];
+        gradient.segment(grad_idx, form_len[3]) += temp_grad * mm_w.row(i);
+        grad_idx += form_len[3];
+      }
+      if (form_len[4] > 0) {
+        temp_grad = dsv(t, -v[i], a[i], 1-w[i], sv[i], err_tol) / likelihood[i];
+        gradient.segment(grad_idx, form_len[4]) -= temp_grad * mm_sv.row(i);
+        grad_idx += form_len[4];
+      }
     }
   }
   return gradient;
