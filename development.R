@@ -26,6 +26,8 @@ devtools::check(cran = TRUE)
 #-------------------------------------
 
 ### TODO ###
+# properly implement link functions
+# clean up/refactor code (rename dfddm folder and maybe make all code more compact)
 
 ### Maybe Later ###
 # rerun benchmark vignette and verify the comments on the plots

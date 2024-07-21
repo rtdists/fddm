@@ -34,9 +34,12 @@ class fddm_fit {
     // variables (internal use only)
     int Nrt {};
     double min_rt {};
-    double rt0 {1e6};
+    double rt0 {1e10};
+    double grad0 {1e3}; // maybe delete this?
     vector<int> par_flag {0, 0, 0, 0, 0};
     vector<int> form_len {0, 0, 0, 0, 0}; // length of each parameter's formula
+    vector<LinkFunc> links {link_identity, link_log, link_probit, link_probit, link_log};
+    vector<LinkFunc> links_inv {link_inv_identity, link_inv_log, link_inv_probit, link_inv_probit, link_inv_log};
     int Ncoefs {0};
     VectorXd v {};
     VectorXd a {};
@@ -48,7 +51,9 @@ class fddm_fit {
     fddm_fit(const vector<double>& rt_vector,
              const SEXP& response_vector,
              const vector<MatrixXd>& model_matrices,
-             const double& error_tolerance);
+             const double& error_tolerance,
+             const vector<string>& link_funcs,
+             const string& optim);
 
     // methods
     double calc_loglik(const VectorXd& temp_params);
@@ -66,6 +71,8 @@ class fddm_fit {
 // 2. response (associated responses)
 // 3. list of model matrices (in order: v, a, t0, w, sv)
 // 4. [optional] error_tolerance (for likelihood calculation)
+// 5. [optional] list of link functions for the model parameters
+// 6. [optional] string name of the optimizer to be used
 //
 //
 // Note on model matrices:

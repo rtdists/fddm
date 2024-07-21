@@ -17,6 +17,7 @@ using std::sqrt;
 using std::max;
 using std::isfinite;
 using std::isnan;
+using std::isnormal;
 using std::string;
 using std::to_string;
 using Rcpp::List;
@@ -60,6 +61,20 @@ static const double SQRT_2_1_PI = SQRT_2 * O_PI;
 
 
 
+//--------------------------- Link Functions ---------------------------------//
+typedef VectorXd (*LinkFunc)(const VectorXd&);
+VectorXd link_identity(const VectorXd& coeffs);
+VectorXd link_inv_identity(const VectorXd& coeffs);
+VectorXd link_log(const VectorXd& coeffs);
+VectorXd link_inv_log(const VectorXd& coeffs);
+VectorXd link_probit(const VectorXd& coeffs);
+VectorXd link_inv_probit(const VectorXd& coeffs);
+VectorXd link_logit(const VectorXd& coeffs);
+VectorXd link_inv_logit(const VectorXd& coeffs);
+//----------------------------------------------------------------------------//
+
+
+
 //--------------------------- Function Declarations --------------------------//
 // Parameter and Input Checks
 vector<double> check_rt(const vector<double>& rt, int& Nrt, double& min_rt);
@@ -71,9 +86,12 @@ void unpack_and_check_mod_mats(const vector<MatrixXd>& model_matrices,
                                VectorXd& w, VectorXd& sv,
                                vector<int>& form_len, const int& Nrt);
 double check_err_tol(const double& err_tol);
-bool invalid_parameters(const VectorXd& v, const VectorXd& a,
-                        const VectorXd& t0, const VectorXd& w,
-                        const VectorXd& sv, const int& Nrt,
+void determine_link_funcs(const vector<string>& link_funcs,
+                          vector<LinkFunc>& links, vector<LinkFunc>& links_inv);
+void determine_optim_method(const string& optim, double& rt0, double grad0);
+bool invalid_parameters(VectorXd& v, VectorXd& a,
+                        VectorXd& t0, VectorXd& w,
+                        VectorXd& sv, const int& Nrt,
                         const double& min_rt, const vector<int>& form_len,
                         vector<int>& par_flag);
 

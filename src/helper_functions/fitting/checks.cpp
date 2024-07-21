@@ -284,27 +284,76 @@ double check_err_tol(const double& err_tol) {
 }
 
 
-bool invalid_parameters(const VectorXd& v, const VectorXd& a,
-                        const VectorXd& t0, const VectorXd& w,
-                        const VectorXd& sv, const int& Nrt,
+void determine_link_funcs(const vector<string>& link_funcs,
+                          vector<LinkFunc>& links,
+                          vector<LinkFunc>& links_inv) {
+  for (int i = 0; i < 5; i++) {
+    if (link_funcs[i] == "identity") {
+      links[i] = &link_identity;
+      links_inv[i] = &link_inv_identity;
+    } else if (link_funcs[i] == "log") {
+      links[i] = &link_log;
+      links_inv[i] = &link_inv_log;
+    } else if (link_funcs[i] == "probit") {
+      links[i] = &link_probit;
+      links_inv[i] = &link_inv_probit;
+    } else if (link_funcs[i] == "logit") {
+      links[i] = &link_logit;
+      links_inv[i] = &link_inv_logit;
+    }
+  }
+}
+
+
+void determine_optim_method(const string& optim, double& rt0, double grad0) {
+  if (optim == "nlminb") {
+    rt0 = 1e10;
+    grad0 = 1e3;
+  } else if (optim == "optim") {
+    rt0 = 1e10;
+    grad0 = std::numeric_limits<double>::quiet_NaN();
+    // grad0 = 1e3;
+  }
+}
+
+
+bool invalid_parameters(VectorXd& v, VectorXd& a,
+                        VectorXd& t0, VectorXd& w,
+                        VectorXd& sv, const int& Nrt,
                         const double& min_rt, const vector<int>& form_len,
-                        vector<int>& par_flag)
-{
+                        vector<int>& par_flag) {
   // note: NaN, NA evaluate to FALSE and then get negated
   // if a parameter is constant, it was checked during construction
 
   if (form_len[0] > 0) {
     for (int i = 0; i < Nrt; i++) {
       if (!isfinite(v[i])) {
-        par_flag[0] = (v[i] > 0) ? 2 : 1;
+        if (par_flag[0] > 0) {
+          Rcpp::Rcout << "v[" << i << "] = " << v[i] << std::endl;
+        }
+        if (v[i] > 0) {
+          // v[i] = 100;
+          par_flag[0] = 2;
+        } else {
+          // v[i] = -100;
+          par_flag[0] = 1;
+        }
       }
     }
   }
   if (form_len[1] > 0) {
     for (int i = 0; i < Nrt; i++) {
       if (a[i] <= 0) {
+        if (par_flag[1] != 1) {
+          Rcpp::Rcout << "a[" << i << "] = " << a[i] << std::endl;
+        }
+        // a[i] = 0.1;
         par_flag[1] = 1;
       } else if (!isfinite(a[i])) {
+        if (par_flag[1] != 2) {
+          Rcpp::Rcout << "a[" << i << "] = " << a[i] << std::endl;
+        }
+        // a[i] = 100;
         par_flag[1] = 2;
       }
     }
@@ -312,8 +361,16 @@ bool invalid_parameters(const VectorXd& v, const VectorXd& a,
   if (form_len[2] > 0) {
     for (int i = 0; i < Nrt; i++) {
       if (t0[i] < 0) {
+        if (par_flag[2] != 1) {
+          Rcpp::Rcout << "t0[" << i << "] = " << t0[i] << std::endl;
+        }
+        // t0[i] = 0.05 * min_rt;
         par_flag[2] = 1;
       } else if (t0[i] >= min_rt) {
+        if (par_flag[2] != 2) {
+          Rcpp::Rcout << "t0[" << i << "] = " << t0[i] << " >= " << min_rt << std::endl;
+        }
+        // t0[i] = 0.9 * min_rt;
         par_flag[2] = 2;
       }
     }
@@ -321,8 +378,16 @@ bool invalid_parameters(const VectorXd& v, const VectorXd& a,
   if (form_len[3] > 0) {
     for (int i = 0; i < Nrt; i++) {
       if (w[i] <= 0) {
+        if (par_flag[3] != 1) {
+          Rcpp::Rcout << "w[" << i << "] = " << w[i] << std::endl;
+        }
+        // w[i] = 0.1;
         par_flag[3] = 1;
       } else if (w[i] >= 1) {
+        if (par_flag[3] != 2) {
+          Rcpp::Rcout << "w[" << i << "] = " << w[i] << std::endl;
+        }
+        // w[i] = 0.9;
         par_flag[3] = 2;
       }
     }
@@ -330,8 +395,16 @@ bool invalid_parameters(const VectorXd& v, const VectorXd& a,
   if (form_len[4] > 0) {
     for (int i = 0; i < Nrt; i++) {
       if (sv[i] < 0) {
+        if (par_flag[4] != 1) {
+          Rcpp::Rcout << "sv[" << i << "] = " << sv[i] << std::endl;
+        }
+        // sv[i] = 0.0;
         par_flag[4] = 1;
       } else if (!isfinite(sv[i])) {
+        if (par_flag[4] != 2) {
+          Rcpp::Rcout << "sv[" << i << "] = " << sv[i] << std::endl;
+        }
+        // sv[i] = 100;
         par_flag[4] = 2;
       }
     }

@@ -4,6 +4,34 @@
 #include "partial_decs.h"
 
 
+// Link Functions
+VectorXd link_identity(const VectorXd& coeffs) {
+  return coeffs;
+}
+VectorXd link_inv_identity(const VectorXd& coeffs) {
+  return coeffs;
+}
+VectorXd link_log(const VectorXd& coeffs) {
+  return coeffs;
+}
+VectorXd link_inv_log(const VectorXd& coeffs) {
+  return coeffs;
+}
+VectorXd link_probit(const VectorXd& coeffs) {
+  return coeffs;
+}
+VectorXd link_inv_probit(const VectorXd& coeffs) {
+  return coeffs;
+}
+VectorXd link_logit(const VectorXd& coeffs) {
+  return coeffs;
+}
+VectorXd link_inv_logit(const VectorXd& coeffs) {
+  return coeffs;
+}
+
+
+// PDF Derivative Function
 vector<double> partial_pdf(const ParFunc& parf,
                            const NumericVector& rt,
                            const SEXP& response,

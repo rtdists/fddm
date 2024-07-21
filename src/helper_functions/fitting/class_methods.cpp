@@ -9,7 +9,9 @@
 fddm_fit::fddm_fit(const vector<double>& rt_vector,
                    const SEXP& response_vector,
                    const vector<MatrixXd>& model_matrices,
-                   const double& error_tolerance)
+                   const double& error_tolerance,
+                   const vector<string>& link_funcs,
+                   const string& optim)
   {
   rt = check_rt(rt_vector, Nrt, min_rt); // also sets Nrt and min_rt
   response = convert_responses(response_vector, Nrt);
@@ -22,6 +24,8 @@ fddm_fit::fddm_fit(const vector<double>& rt_vector,
   unpack_and_check_mod_mats(model_matrices, mm_v, mm_a, mm_t0, mm_w, mm_sv,
                             v, a, t0, w, sv, form_len, Nrt);
   err_tol = check_err_tol(error_tolerance);
+  determine_link_funcs(link_funcs, links, links_inv);
+  determine_optim_method(optim, rt0, grad0);
   // Resize coefs
   for (int i = 0; i < 5; i++) { Ncoefs += form_len[i]; }
   coefs.resize(Ncoefs);
@@ -30,7 +34,7 @@ fddm_fit::fddm_fit(const vector<double>& rt_vector,
 
 // Log-likelihood Function (negated)
 double fddm_fit::calc_loglik(const VectorXd& temp_coefs)
-{
+{ // assumes that the temp_coefs are in the already transformed space
   // Reset flags for invalid parameters
   std::fill(par_flag.begin(), par_flag.end(), 0);
   // Store the input parameters for later checking (in gradient)
@@ -38,35 +42,31 @@ double fddm_fit::calc_loglik(const VectorXd& temp_coefs)
 
   // Split input parameter vector and multiply with model matrix
   int coef_idx = 0;
-  if (form_len[0] > 0) { // check if v has a model matrix (i.e., is a formula)
-    v = mm_v * coefs.segment(coef_idx, form_len[0]);
+
+  // check if each parameter has a model matrix (i.e., is a formula)
+  // else it's constant and was handled in the constructor
+  if (form_len[0] > 0) {
+    v = mm_v * links_inv[0](coefs.segment(coef_idx, form_len[0]));
     coef_idx += form_len[0];
-  } // else it's constant and was handled in the constructor
-
-  if (form_len[1] > 0) { // check if a has a model matrix (i.e., is a formula)
-    a = mm_a * coefs.segment(coef_idx, form_len[1]);
+  }
+  if (form_len[1] > 0) {
+    a = mm_a * links_inv[1](coefs.segment(coef_idx, form_len[1]));
     coef_idx += form_len[1];
-  } // else it's constant and was handled in the constructor
-
-  if (form_len[2] > 0) { // check if t0 has a model matrix (i.e., is a formula)
-    t0 = mm_t0 * coefs.segment(coef_idx, form_len[2]);
+  }
+  if (form_len[2] > 0) {
+    t0 = mm_t0 * links_inv[2](coefs.segment(coef_idx, form_len[2]));
     coef_idx += form_len[2];
-  } // else it's constant and was handled in the constructor
-
-  if (form_len[3] > 0) { // check if w has a model matrix (i.e., is a formula)
-    w = mm_w * coefs.segment(coef_idx, form_len[3]);
+  }
+  if (form_len[3] > 0) {
+    w = mm_w * links_inv[3](coefs.segment(coef_idx, form_len[3]));
     coef_idx += form_len[3];
-  } // else it's constant and was handled in the constructor
-
-  if (form_len[4] > 0) { // check if sv has a model matrix (i.e., is a formula)
-    sv = mm_sv * coefs.segment(coef_idx, form_len[4]);
-  } // else it's constant and was handled in the constructor
+  }
+  if (form_len[4] > 0) {
+    sv = mm_sv * links_inv[4](coefs.segment(coef_idx, form_len[4]));
+  }
 
   // Check parameters
   if (invalid_parameters(v, a, t0, w, sv, Nrt, min_rt, form_len, par_flag)) {
-    for (int i = 0; i < Nrt; i++) {
-      likelihood[i] = rt0;
-    }
     return rt0;
   }
 
@@ -75,17 +75,16 @@ double fddm_fit::calc_loglik(const VectorXd& temp_coefs)
   double t;
   for (int i = 0; i < Nrt; i++) {
     t = rt[i] - t0[i];
-    if (t > 0 && isfinite(t)) {
-      if (response[i] == 1) { // response is "lower"
-        likelihood[i] = pdf(t, v[i], a[i], w[i], sv[i], err_tol);
-      } else { // response is "upper" so use alternate parameters
-        likelihood[i] = pdf(t, -v[i], a[i], 1-w[i], sv[i], err_tol);
-      }
-      ll -= log(likelihood[i]); // faster than doing exp(loglik)
-    } else {
-      likelihood[i] = rt0;
+    if (response[i] == 1) { // response is "lower"
+      likelihood[i] = pdf(t, v[i], a[i], w[i], sv[i], err_tol);
+    } else { // response is "upper" so use alternate parameters
+      likelihood[i] = pdf(t, -v[i], a[i], 1-w[i], sv[i], err_tol);
+    }
+    if (!isnormal(likelihood[i])) { // not {NaN, NA, Inf, -Inf, 0}
+      Rcpp::Rcout << "likelihood[" << i << "] = " << likelihood[i] << std::endl;
       return rt0;
     }
+    ll -= log(likelihood[i]); // faster than doing exp(loglik)
   }
   return ll;
 }
@@ -108,12 +107,12 @@ VectorXd fddm_fit::calc_gradient(const VectorXd& temp_coefs)
     for (int i = 0; i < 5; i++) {
       if (par_flag[i] > 0) {
         for (int j = grad_idx; j < (grad_idx + form_len[i]); j++) {
-          gradient[j] = (par_flag[i] > 1) ? 1 : -1;
+          gradient[j] = (par_flag[i] > 1) ? grad0 : -grad0;
         }
       }
       grad_idx += form_len[i];
     }
-    return gradient; // or rt0 something like that
+    return gradient;
   }
 
   double t, temp_grad;
@@ -174,6 +173,23 @@ VectorXd fddm_fit::calc_gradient(const VectorXd& temp_coefs)
       }
     }
   }
+  // if (std::accumulate(par_flag.begin(), par_flag.end(), 0) > 0) {
+  //   grad_idx = 0;
+  //   for (int i = 0; i < 5; i++) {
+  //     if (par_flag[i] == 2) {
+  //       // make gradient positive
+  //       for (int j = grad_idx; j < (grad_idx + form_len[i]); j++) {
+  //         gradient[j] = std::abs(gradient[j]);
+  //       }
+  //     } else if (par_flag[i] == 1) {
+  //       // make gradient negative
+  //       for (int j = grad_idx; j < (grad_idx + form_len[i]); j++) {
+  //         gradient[j] = -1 * std::abs(gradient[j]);
+  //       }
+  //     }
+  //     grad_idx += form_len[i];
+  //   }
+  // }
   return gradient;
 }
 
