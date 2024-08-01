@@ -321,7 +321,7 @@ bool invalid_parameters(VectorXd& v, VectorXd& a,
                         VectorXd& t0, VectorXd& w,
                         VectorXd& sv, const int& Nrt,
                         const double& min_rt, const vector<int>& form_len,
-                        vector<int>& par_flag) {
+                        vector<int>& par_flag, const vector<double>& rt) {
   // note: NaN, NA evaluate to FALSE and then get negated
   // if a parameter is constant, it was checked during construction
 
@@ -366,9 +366,9 @@ bool invalid_parameters(VectorXd& v, VectorXd& a,
         }
         // t0[i] = 0.05 * min_rt;
         par_flag[2] = 1;
-      } else if (t0[i] >= min_rt) {
+      } else if (t0[i] >= rt[i]) {
         if (par_flag[2] != 2) {
-          Rcpp::Rcout << "t0[" << i << "] = " << t0[i] << " >= " << min_rt << std::endl;
+          Rcpp::Rcout << "t0[" << i << "] = " << t0[i] << " >= " << rt[i] << std::endl;
         }
         // t0[i] = 0.9 * min_rt;
         par_flag[2] = 2;

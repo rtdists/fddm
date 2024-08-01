@@ -93,7 +93,7 @@ bool invalid_parameters(VectorXd& v, VectorXd& a,
                         VectorXd& t0, VectorXd& w,
                         VectorXd& sv, const int& Nrt,
                         const double& min_rt, const vector<int>& form_len,
-                        vector<int>& par_flag);
+                        vector<int>& par_flag, const vector<double>& rt);
 
 // PDF (likelihood)
 double pdf(const double& t, const double& v, const double& a, const double& w,

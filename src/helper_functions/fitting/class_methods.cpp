@@ -66,7 +66,7 @@ double fddm_fit::calc_loglik(const VectorXd& temp_coefs)
   }
 
   // Check parameters
-  if (invalid_parameters(v, a, t0, w, sv, Nrt, min_rt, form_len, par_flag)) {
+  if (invalid_parameters(v, a, t0, w, sv, Nrt, min_rt, form_len, par_flag, rt)) {
     return rt0;
   }
 
